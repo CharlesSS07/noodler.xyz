@@ -31,9 +31,9 @@ export interface NodeBluePrintModel {
 
 	documentation: string;
 
-	input_sockets: { [socket_key: SocketID]: InputSocketModel<never>[] };
+	input_sockets: { [socket_key: SocketID]: InputSocketModel<never> };
 	input_socket_order: SocketID[];
-	output_sockets: { [socket_key: SocketID]: OutputSocketModel[] };
+	output_sockets: { [socket_key: SocketID]: OutputSocketModel };
 	output_socket_order: SocketID[];
 	// 1. we can have multiple sockets with the same label
 	// 2. sockets that are deleted in the config are still stored in the instance, but not displayed

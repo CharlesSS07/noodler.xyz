@@ -8,7 +8,8 @@
 		BackgroundVariant,
 		MiniMap,
 		type Node,
-		type Edge
+		type Edge,
+		type ColorMode
 	} from '@xyflow/svelte';
 	import '@xyflow/svelte/dist/style.css';
 
@@ -455,6 +456,8 @@
 	};
 
 	let selectedNodeNID = $state('official_node_image_cropper');
+
+	let colorMode: ColorMode = $state('dark');
 </script>
 
 <input type="text" bind:value={selectedNodeNID} />
@@ -483,10 +486,11 @@ Here's what you can do on the Noodle Board:
 * Be creative. Think different**ly**! ✨`
 	},
 	position: { x: 0, y: 100 }
+
 })}>Note</button>
 
 <div style="height: 100vh;">
-	<SvelteFlow bind:nodes bind:edges {nodeTypes} fitView>
+	<SvelteFlow bind:nodes bind:edges {nodeTypes} {colorMode} fitView>
 		<Controls />
 		<Background variant={BackgroundVariant.Dots} />
 		<MiniMap />

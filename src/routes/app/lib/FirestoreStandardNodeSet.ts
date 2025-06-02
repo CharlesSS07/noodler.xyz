@@ -904,7 +904,7 @@ outputs.set('text', filledText);
   `);
 }
 
-async function googleDriveWedjats() {
+async function googleDriveNodes() {
 	const googleDrive = await nodeBluePrintController.initOfficialNodeBluePrint(
 		'get_file_from_google_drive'
 	);
@@ -1307,20 +1307,19 @@ async function rank3Nodes() {
 export async function generateStandardNodeSuite() {
 	const opBuilders = [
 		simpleImageModificationNodes(),
-		timeRelatedNodes(),
-		worldStateDataNodes(),
-		huggingfaceNodes(),
-		aiDemoNodes(),
+		// timeRelatedNodes(),
+		// worldStateDataNodes(),
+		// huggingfaceNodes(),
+		// aiDemoNodes(),
 		promptDesignNodes(),
-		googleDriveWedjats(),
+		googleDriveNodes(),
 		fileLoadingNodes(),
-		dropboxNodes(),
+		// dropboxNodes(),
 		jimpNodes(),
 		jsonNodes(),
 		htmlNodes(),
-		fileNodes(),
-		rank3Nodes(),
-		htmlNodes()
+		// fileNodes(),
+		// rank3Nodes()
 		// buildAllChatGPTNodes()
 	];
 	await Promise.all(opBuilders);
