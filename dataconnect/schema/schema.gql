@@ -1,0 +1,71 @@
+type InputSocket @table {
+	id: UUID!
+	nodeId: UUID!
+	disabled: Boolean!
+	label: String!
+	documentation: String!
+	datatype: String!
+}
+
+type OutputSocket @table {
+	id: UUID!
+	label: String!
+	documentation: String!
+	datatype: String!
+}
+
+type JSNodeType @table {
+	id: UUID!
+	predecessorNodeId: UUID
+	title: String!
+	authorUid: String!
+	createdAt: Timestamp!
+	userSuppliedCodeSnippet: String
+	trustLevel: TrustLevel!
+	externalDocumentation: String
+	internalDocumentation: String
+}
+
+enum TrustLevel {
+	OFFICIAL # Officially supported and maintained nodes
+	TRUSTED # Nodes from trusted sources, thoroughly reviewed
+	UNOFFICIAL_COMMUNITY # Community-created nodes, variable quality
+	UNTRUSTED # Nodes from unverified sources, use with caution
+	MARKED_AS_MALICIOUS # Nodes flagged as potentially malicious
+	MALICIOUS # Nodes known to be malicious, avoid using
+	EXPERIMENTAL # Nodes still in development, may be unstable
+	DEPRECATED # Nodes no longer supported or maintained
+}
+
+type Project @table {
+	id: UUID!
+	title: String!
+	description: String
+	createdAt: Timestamp!
+	createdBy: String!
+	publicViewing: Boolean!
+}
+
+type User @table {
+	id: UUID!
+	username: String!
+	email: String
+	bio: String
+	profilePicture: String
+	createdAt: Timestamp!
+	isCompany: Boolean
+}
+
+type UserProject @table {
+	userId: UUID!
+	projectId: UUID!
+	permissionLevel: PermissionLevel!
+}
+
+enum PermissionLevel {
+	OWNER
+	ADMIN
+	COMMENTER
+	VIEWER
+	REMOVED
+}

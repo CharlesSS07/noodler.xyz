@@ -1,0 +1,12 @@
+specVersion: 'v1'
+serviceId: 'chuck-65c6e-service'
+location: 'us-central1'
+schema:
+  source: './schema'
+  datasource:
+    postgresql:
+      database: 'chuck-65c6e-database'
+      cloudSql:
+        instanceId: 'chuck-65c6e-instance'
+      # schemaValidation: "COMPATIBLE"
+connectorDirs: ['./connector']
