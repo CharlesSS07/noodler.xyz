@@ -18,37 +18,42 @@
 	import { onValue, ref, update, child, remove, off } from 'firebase/database';
 	import { onMount } from 'svelte';
 
-	let nodes = $state.raw<Node[]>([
-		{
-			id: 'default_note',
-			type: 'note',
-			data: {
-				text: 'hello'
-			},
-			position: { x: 0, y: 100 }
-		}
-	]);
+	let nodes = $state.raw<Node[]>([]);
 
 	let edges = $state.raw<Edge[]>([]);
 
-	// Firebase reference - reactive to project_key changes
+	// Firebase references - reactive to project_key changes
 	let nodesRef = $derived(ref(rtdb, `fridge/${project_key}/nodes`));
 	let edgesRef = $derived(ref(rtdb, `fridge/${project_key}/edges`));
 
 	// Track if we're currently syncing to prevent infinite loops
-	let isSyncing = false;
-	let firebaseUnsubscribe: (() => void) | null = null;
+	let isSyncingNodes = false;
+	let isSyncingEdges = false;
+	let firebaseNodesUnsubscribe: (() => void) | null = null;
+	let firebaseEdgesUnsubscribe: (() => void) | null = null;
 
-	// Map to track previous node states for change detection
+	// Maps to track previous states for change detection
 	let previousNodes = new Map<string, Node>();
+	let previousEdges = new Map<string, Edge>();
 
-	// Helper function to deep compare nodes (simplified version)
+	// Helper function to deep compare nodes
 	function nodesEqual(node1: Node, node2: Node): boolean {
 		if (!node1 || !node2) return false;
 		try {
 			return JSON.stringify(node1) === JSON.stringify(node2);
 		} catch (e) {
 			console.warn('Error comparing nodes:', e);
+			return false;
+		}
+	}
+
+	// Helper function to deep compare edges
+	function edgesEqual(edge1: Edge, edge2: Edge): boolean {
+		if (!edge1 || !edge2) return false;
+		try {
+			return JSON.stringify(edge1) === JSON.stringify(edge2);
+		} catch (e) {
+			console.warn('Error comparing edges:', e);
 			return false;
 		}
 	}
@@ -76,9 +81,32 @@
 		}
 	}
 
-	// Sync local changes to Firebase
-	async function syncToFirebase(localNodes: Node[]) {
-		if (isSyncing || !nodesRef) return;
+	// Helper function to convert Firebase data to Edge array
+	function firebaseDataToEdges(snapshot: any): Edge[] {
+		try {
+			if (!snapshot || !snapshot.exists()) return [];
+
+			const data = snapshot.val();
+			if (!data || typeof data !== 'object') return [];
+
+			return Object.entries(data)
+					.map(([id, edgeData]: [string, any]) => {
+						if (!edgeData || typeof edgeData !== 'object') return null;
+						return {
+							id,
+							...edgeData
+						};
+					})
+					.filter(Boolean) as Edge[];
+		} catch (error) {
+			console.error('Error converting Firebase data to edges:', error);
+			return [];
+		}
+	}
+
+	// Sync local node changes to Firebase
+	async function syncNodesToFirebase(localNodes: Node[]) {
+		if (isSyncingNodes || !nodesRef) return;
 
 		try {
 			const currentNodeMap = new Map(localNodes.map(node => [node.id, node]));
@@ -124,17 +152,65 @@
 		}
 	}
 
-	// Set up Firebase listener
-	function setupFirebaseListener() {
-		if (firebaseUnsubscribe) {
-			firebaseUnsubscribe();
+	// Sync local edge changes to Firebase
+	async function syncEdgesToFirebase(localEdges: Edge[]) {
+		if (isSyncingEdges || !edgesRef) return;
+
+		try {
+			const currentEdgeMap = new Map(localEdges.map(edge => [edge.id, edge]));
+			const updates: Record<string, any> = {};
+			const edgesToRemove: string[] = [];
+
+			// Check for new or changed edges
+			for (const [id, edge] of currentEdgeMap) {
+				if (!edge || !edge.id) continue;
+
+				const previousEdge = previousEdges.get(id);
+
+				if (!previousEdge || !edgesEqual(edge, previousEdge)) {
+					const { id: edgeId, ...edgeWithoutId } = edge;
+					updates[id] = edgeWithoutId;
+				}
+			}
+
+			// Check for removed edges
+			for (const [id] of previousEdges) {
+				if (!currentEdgeMap.has(id)) {
+					edgesToRemove.push(id);
+				}
+			}
+
+			// Apply updates to Firebase
+			if (Object.keys(updates).length > 0) {
+				await update(edgesRef, updates);
+			}
+
+			// Remove deleted edges
+			for (const edgeId of edgesToRemove) {
+				if (edgeId) {
+					await remove(child(edgesRef, edgeId));
+				}
+			}
+
+			// Update our tracking map
+			previousEdges = new Map(currentEdgeMap);
+
+		} catch (error) {
+			console.error('Error syncing edges to Firebase:', error);
+		}
+	}
+
+	// Set up Firebase listener for nodes
+	function setupFirebaseNodesListener() {
+		if (firebaseNodesUnsubscribe) {
+			firebaseNodesUnsubscribe();
 		}
 
 		const listener = (snapshot: any) => {
-			if (isSyncing) return;
+			if (isSyncingNodes) return;
 
 			try {
-				isSyncing = true;
+				isSyncingNodes = true;
 
 				const firebaseNodes = firebaseDataToNodes(snapshot);
 
@@ -173,55 +249,135 @@
 				console.error('Error syncing from Firebase:', error);
 			} finally {
 				setTimeout(() => {
-					isSyncing = false;
+					isSyncingNodes = false;
 				}, 50);
 			}
 		};
 
 		const errorHandler = (error: any) => {
-			console.error('Firebase listener error:', error);
+			console.error('Firebase nodes listener error:', error);
 		};
 
 		onValue(nodesRef, listener, errorHandler);
 
-		firebaseUnsubscribe = () => {
+		firebaseNodesUnsubscribe = () => {
 			if (nodesRef) {
 				off(nodesRef, 'value', listener);
 			}
 		};
 	}
 
+	// Set up Firebase listener for edges
+	function setupFirebaseEdgesListener() {
+		if (firebaseEdgesUnsubscribe) {
+			firebaseEdgesUnsubscribe();
+		}
+
+		const listener = (snapshot: any) => {
+			if (isSyncingEdges) return;
+
+			try {
+				isSyncingEdges = true;
+
+				const firebaseEdges = firebaseDataToEdges(snapshot);
+
+				// Direct assignment with $state.raw
+				const localEdgeMap = new Map(edges.map(edge => [edge.id, edge]));
+				const firebaseEdgeMap = new Map(firebaseEdges.map(edge => [edge.id, edge]));
+
+				// Start with existing local edges
+				const updatedEdges = [...edges];
+
+				// Update existing edges or add new ones from Firebase
+				for (const [id, firebaseEdge] of firebaseEdgeMap) {
+					const localEdgeIndex = updatedEdges.findIndex(edge => edge.id === id);
+
+					if (localEdgeIndex >= 0) {
+						// Update existing edge if different
+						if (!edgesEqual(updatedEdges[localEdgeIndex], firebaseEdge)) {
+							updatedEdges[localEdgeIndex] = firebaseEdge;
+						}
+					} else {
+						// Add new edge from Firebase
+						updatedEdges.push(firebaseEdge);
+					}
+				}
+
+				// Remove edges that no longer exist in Firebase
+				const finalEdges = updatedEdges.filter(edge => firebaseEdgeMap.has(edge.id));
+
+				// Update our tracking map
+				previousEdges = new Map(finalEdges.map(edge => [edge.id, edge]));
+
+				// Direct assignment to trigger reactivity
+				edges = finalEdges;
+
+			} catch (error) {
+				console.error('Error syncing edges from Firebase:', error);
+			} finally {
+				setTimeout(() => {
+					isSyncingEdges = false;
+				}, 50);
+			}
+		};
+
+		const errorHandler = (error: any) => {
+			console.error('Firebase edges listener error:', error);
+		};
+
+		onValue(edgesRef, listener, errorHandler);
+
+		firebaseEdgesUnsubscribe = () => {
+			if (edgesRef) {
+				off(edgesRef, 'value', listener);
+			}
+		};
+	}
+
 	// Watch for changes to nodes and sync to Firebase
-	// Using $effect to watch the nodes state
 	$effect(() => {
-		// This effect runs whenever nodes changes
 		if (nodes && nodes.length >= 0) {
-			// Debounce the sync operation
 			const timeoutId = setTimeout(() => {
-				syncToFirebase(nodes);
+				syncNodesToFirebase(nodes);
 			}, 100);
 
 			return () => clearTimeout(timeoutId);
 		}
 	});
 
-	// Watch for project_key changes and set up Firebase listener
+	// Watch for changes to edges and sync to Firebase
+	$effect(() => {
+		if (edges && edges.length >= 0) {
+			const timeoutId = setTimeout(() => {
+				syncEdgesToFirebase(edges);
+			}, 100);
+
+			return () => clearTimeout(timeoutId);
+		}
+	});
+
+	// Watch for project_key changes and set up Firebase listeners
 	$effect(() => {
 		if (project_key && project_key !== 'project_key_not_assigned') {
-			console.log('Setting up Firebase listener for project:', project_key);
-			setupFirebaseListener();
+			console.log('Setting up Firebase listeners for project:', project_key);
+			setupFirebaseNodesListener();
+			setupFirebaseEdgesListener();
 		}
 
 		// Cleanup function
 		return () => {
-			if (firebaseUnsubscribe) {
-				firebaseUnsubscribe();
-				firebaseUnsubscribe = null;
+			if (firebaseNodesUnsubscribe) {
+				firebaseNodesUnsubscribe();
+				firebaseNodesUnsubscribe = null;
+			}
+			if (firebaseEdgesUnsubscribe) {
+				firebaseEdgesUnsubscribe();
+				firebaseEdgesUnsubscribe = null;
 			}
 		};
 	});
 
-	// Helper functions for manual operations
+	// Helper functions for manual node operations
 	export function addNode(node: Omit<Node, 'id'>): void {
 		try {
 			const newNode: Node = {
@@ -257,6 +413,42 @@
 		}
 	}
 
+	// Helper functions for manual edge operations
+	export function addEdge(edge: Omit<Edge, 'id'>): void {
+		try {
+			const newEdge: Edge = {
+				id: crypto.randomUUID(),
+				...edge
+			};
+
+			edges = [...edges, newEdge];
+		} catch (error) {
+			console.error('Error adding edge:', error);
+		}
+	}
+
+	export function updateEdge(edgeId: string, updates: Partial<Edge>): void {
+		if (!edgeId || !updates) return;
+
+		try {
+			edges = edges.map(edge =>
+					edge && edge.id === edgeId ? { ...edge, ...updates } : edge
+			);
+		} catch (error) {
+			console.error('Error updating edge:', error);
+		}
+	}
+
+	export function deleteEdge(edgeId: string): void {
+		if (!edgeId) return;
+
+		try {
+			edges = edges.filter(edge => edge && edge.id !== edgeId);
+		} catch (error) {
+			console.error('Error deleting edge:', error);
+		}
+	}
+
 	const nodeTypes = {
 		note: NoteNode,
 		node: StemNode // a node which takes on the properties stored by the server
@@ -267,13 +459,31 @@
 
 <input type="text" bind:value={selectedNodeNID} />
 <button onclick={() => addNode({
+	type: 'node',
 	data: {
 		nid: selectedNodeNID,
 		project_key: project_key
 	},
-	type: 'node',
 	position: { x: 0, y: 0 },
 })}>Add Node</button>
+
+<button onclick={() => addNode({
+	type: 'note',
+	data: {
+		markdown: `# Welcome to the Noodle Board! 🍜
+
+---
+
+Here's what you can do on the Noodle Board:
+
+* Describe your project to get better AI assistance (comments help! 💡).
+* This is a **procedural flow language** (Functional Paradigm). Take the output of one function and **pipe it into another** ➡️.
+* Login to your service 🔑, noodle the credentials into their API Node, then access data using the sockets. *Iterate*! 🔄
+* Build & test your **own** nodes 🛠️ and deploy them to your **own** API for autoscaling! 🚀
+* Be creative. Think different**ly**! ✨`
+	},
+	position: { x: 0, y: 100 }
+})}>Note</button>
 
 <div style="height: 100vh;">
 	<SvelteFlow bind:nodes bind:edges {nodeTypes} fitView>

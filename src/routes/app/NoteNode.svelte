@@ -1,10 +1,25 @@
-<script lang="ts">
-	import NodeWrapper from './NodeWrapper.svelte';
-	import { marked } from 'marked';
+<script module lang="ts">
+	import { type Node } from '@xyflow/svelte';
 
-	let markdown =
-		'# Your Note\n\nEdit this **markdown**...\n\n- Item 1\n- Item 2\n\n> Quote example';
-	let isEditing = false;
+	export type NoteNodeType = Node<
+			{
+				markdown: string;
+			},
+			'node-dna'
+	>;
+</script>
+
+<script lang="ts">
+	import { marked } from 'marked';
+	import {type NodeProps, useSvelteFlow} from "@xyflow/svelte";
+	import { untrack } from 'svelte';
+	import TallTextArea from "../../components/TallTextArea.svelte";
+
+
+	let { id, data }: NodeProps<NoteNodeType> = $props();
+	const { updateNodeData } = useSvelteFlow();
+
+	let isEditing = $state(false);
 
 	// Configure marked for better styling
 	marked.setOptions({
@@ -13,14 +28,19 @@
 	});
 
 	function parseMarkdown(text: string): string {
-		return marked(text);
+		// updateNodeData(id, {
+		// 	markdown: text
+		// });
+		return marked(text, {async: false});
 	}
 
 	function handleClick() {
+		console.log('handleClick')
 		isEditing = true;
 	}
 
 	function handleBlur() {
+		console.log('handleBlur')
 		isEditing = false;
 	}
 
@@ -32,19 +52,15 @@
 	}
 </script>
 
-<!--<NodeWrapper label="Note">-->
 <div class="sticky-note" on:click={handleClick} on:keydown={handleKeydown}>
 	{#if isEditing}
-		<textarea
-			bind:value={markdown}
+		<TallTextArea
+			bind:textContent={data.markdown}
 			on:blur={handleBlur}
-			class="markdown-editor"
-			placeholder="Write your markdown note..."
-			autofocus
-		></textarea>
+		></TallTextArea>
 	{:else}
 		<div class="markdown-preview">
-			{@html parseMarkdown(markdown)}
+			{@html parseMarkdown(data.markdown)}
 		</div>
 	{/if}
 </div>
@@ -55,6 +71,7 @@
 	.sticky-note {
 		width: 250px;
 		min-height: 200px;
+		height: fit-content;
 		background: linear-gradient(135deg, #fff59d 0%, #fff176 100%);
 		border: 1px solid #f9a825;
 		border-radius: 4px;
@@ -91,6 +108,7 @@
 	.markdown-editor {
 		width: 100%;
 		min-height: 168px;
+		height: fit-content;
 		background: transparent;
 		border: none;
 		outline: none;
@@ -99,6 +117,9 @@
 		font-size: 14px;
 		line-height: 1.5;
 		color: #333;
+		overflow: auto; /* Optional: Add scrollbars if content exceeds max-height */
+		white-space: pre-wrap; /* Preserve line breaks and wrap text */
+		word-wrap: break-word; /* Break long words to fit within the container */
 	}
 
 	.markdown-preview {
