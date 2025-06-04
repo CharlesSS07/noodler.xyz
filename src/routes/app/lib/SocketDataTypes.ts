@@ -88,9 +88,9 @@ export class NumberSocketParamsBuilder extends GenericSocketParamsBuilder<
 			throw new Error(`value must be increment of ${this.params.step}`);
 	}
 
-	build(): NumberSocketParams {
-		return this.params;
-	}
+	// build(): NumberSocketParams {
+	// 	return this.params;
+	// }
 }
 
 export interface StringSocketParams extends InputSocketParams {
@@ -167,9 +167,9 @@ export class StringSocketParamsBuilder extends GenericSocketParamsBuilder<
 			);
 	}
 
-	build(): StringSocketParams {
-		return this.params;
-	}
+	// build(): StringSocketParams {
+	// 	return {...this.params};
+	// }
 }
 
 export interface JIMPSocketParams extends InputSocketParams {

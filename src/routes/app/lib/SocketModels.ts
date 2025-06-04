@@ -6,6 +6,7 @@ interface SocketModel {
 	 * Disabled sockets should not be computed or used in computation.
 	 */
 	disabled?: boolean | undefined;
+	required?: boolean | undefined;
 
 	label: string;
 	documentation: string;

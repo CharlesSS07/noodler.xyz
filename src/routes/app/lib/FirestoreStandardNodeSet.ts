@@ -22,14 +22,14 @@ async function simpleImageModificationNodes() {
 	await imageLoader.newInputSocket('img', {
 		label: 'Upload Image',
 		documentation: 'Image uploaded from file.',
-		type: 'File',
+		type: 'file',
 		params: new JIMPImageSocketParamsBuilder().build()
 	});
 
 	await imageLoader.newOutputSocket('img', {
 		label: 'Image',
 		documentation: 'The image you viewed.',
-		type: 'JIMP'
+		type: 'image/jimp'
 	});
 
 	await imageLoader.setCode(`
@@ -65,14 +65,14 @@ async function simpleImageModificationNodes() {
 	await imageViewer.newInputSocket('img', {
 		label: 'Image',
 		documentation: 'Image to view.',
-		type: 'Image',
+		type: 'image/jimp',
 		params: new JIMPImageSocketParamsBuilder().build()
 	});
 
 	await imageViewer.newOutputSocket('img', {
 		label: 'Image',
 		documentation: 'The image you viewed.',
-		type: 'Image'
+		type: 'image/jimp'
 	});
 
 	await imageViewer.setCode(`
@@ -119,14 +119,14 @@ async function simpleImageModificationNodes() {
 	await grayscale.newInputSocket('img', {
 		label: 'Color Image',
 		documentation: 'Color image to greyscale.',
-		type: 'JIMP',
+		type: 'image/jimp',
 		params: new JIMPImageSocketParamsBuilder().build()
 	});
 
 	await grayscale.newOutputSocket('img', {
 		label: 'Greyscale Image',
 		documentation: 'Greyscale version of input image.',
-		type: 'JIMP'
+		type: 'image/jimp'
 	});
 
 	await grayscale.setCode(`
@@ -142,32 +142,32 @@ outputs.set('img', img);
 	await hsv.newInputSocket('img', {
 		label: 'Input Image',
 		documentation: 'Any image.',
-		type: 'JIMP',
+		type: 'image/jimp',
 		params: new JIMPImageSocketParamsBuilder().build()
 	});
 	await hsv.newInputSocket('hue', {
 		label: 'Hue Shift',
 		documentation: 'Amount to shift hue by.',
-		type: 'Number',
+		type: 'number',
 		params: new NumberSocketParamsBuilder(0).setMin(0).setMax(360).setStep(0.1).build()
 	});
 	await hsv.newInputSocket('saturation', {
 		label: 'Saturation Shift',
 		documentation: 'Amount to shift saturation by.',
-		type: 'Number',
+		type: 'number',
 		params: new NumberSocketParamsBuilder(0).setMin(0).setMax(100).setStep(0.1).build()
 	});
 	await hsv.newInputSocket('value', {
 		label: 'Value Shift',
 		documentation: 'Amount to shift brightness/darkness by.',
-		type: 'Number',
+		type: 'number',
 		params: new NumberSocketParamsBuilder(0).setMin(0).setMax(100).setStep(0.1).build()
 	});
 
 	await hsv.newOutputSocket('img', {
 		label: 'Output Image',
 		documentation: 'Shifted image.',
-		type: 'JIMP'
+		type: 'image/jimp'
 	});
 
 	await hsv.setCode(
@@ -196,14 +196,14 @@ async function fileLoadingNodes() {
 	await loadExcel.newInputSocket('xlsx_file', {
 		label: '.xlsx',
 		documentation: 'Excel File',
-		type: 'File',
+		type: 'file',
 		params: new JIMPImageSocketParamsBuilder().build()
 	});
 
 	await loadExcel.newOutputSocket('json', {
 		label: 'JSON dict',
 		documentation: 'Json dictionary of spreadsheet',
-		type: 'Json'
+		type: 'json'
 	});
 
 	await loadExcel.setCode("console.error('Not Implemented');");
@@ -217,7 +217,7 @@ async function dropboxNodes() {
 	await saveDropbox.newInputSocket('image_file', {
 		label: 'Image',
 		documentation: 'Image File',
-		type: 'JIMP',
+		type: 'image/jimp',
 		params: new JIMPImageSocketParamsBuilder().build()
 	});
 
@@ -230,7 +230,7 @@ async function dropboxNodes() {
 	await loadDropbox.newOutputSocket('image_file', {
 		label: 'Image',
 		documentation: 'Image File',
-		type: 'JIMP'
+		type: 'image/jimp'
 	});
 
 	await loadDropbox.setCode("console.error('Not Implemented');");
@@ -244,85 +244,85 @@ async function timeRelatedNodes() {
 	await dateTimeParser.newInputSocket('date_time', {
 		label: 'Date & Time',
 		documentation: 'Datetime to parse.',
-		type: 'String',
+		type: 'string',
 		params: new StringSocketParamsBuilder('Wednesday, September 7, 1998 02:45 PM').build()
 	});
 	await dateTimeParser.newInputSocket('locale', {
 		label: 'Locale (Time Zone)',
 		documentation: 'Time Zone (MST=Mountain Standard Time, etc.)',
-		type: 'String',
+		type: 'string',
 		params: new StringSocketParamsBuilder('MST').build()
 	});
 	await dateTimeParser.newInputSocket('lang', {
 		label: 'Language',
 		documentation: 'Language to use.',
-		type: 'String',
+		type: 'string',
 		params: new StringSocketParamsBuilder('en-US').build()
 	});
 	await dateTimeParser.newOutputSocket('hour_am_pm', {
 		label: 'Hour (AM/PM)',
 		documentation: 'Hour.',
-		type: 'Number'
+		type: 'number'
 		// config: { defaultValue: 0, min: 0, max: 12, step: 1 }
 	});
 	await dateTimeParser.newOutputSocket('hour_24', {
 		label: 'Hour (24)',
 		documentation: 'Hour.',
-		type: 'Number'
+		type: 'number'
 		// params: { defaultValue: 0, min: 0, max: 24, step: 1 }
 	});
 	await dateTimeParser.newOutputSocket('minute', {
 		label: 'Minute',
 		documentation: 'Minute.',
-		type: 'Number'
+		type: 'number'
 		// params: { defaultValue: 0, min: 0, max: 60, step: 1 }
 	});
 	await dateTimeParser.newOutputSocket('second', {
 		label: 'Second',
 		documentation: 'Second.',
-		type: 'Number'
+		type: 'number'
 		// params: { defaultValue: 0, min: 0, max: 60, step: 1 }
 	});
 	await dateTimeParser.newOutputSocket('day_of_week_name', {
 		label: 'Day of Week (name)',
 		documentation: 'Day of Week (named).',
-		type: 'String'
+		type: 'string'
 		// params: { defaultValue: "May-day!" }
 	});
 	await dateTimeParser.newOutputSocket('day_of_month', {
 		label: 'Day of Month',
 		documentation: 'Day of Month.',
-		type: 'Number'
+		type: 'number'
 		// params: { defaultValue: 0, min: 0, max: 31, step: 1 }
 	});
 	await dateTimeParser.newOutputSocket('day_of_year', {
 		label: 'Day of Year',
 		documentation: 'Day of Year.',
-		type: 'Number'
+		type: 'number'
 		// params: { defaultValue: 0, min: 0, max: 365, step: 1 }
 	});
 	await dateTimeParser.newOutputSocket('month', {
 		label: 'Month (0-12)',
 		documentation: 'Month index.',
-		type: 'Number'
+		type: 'number'
 		// params: { defaultValue: 0, min: 0, max: 12, step: 1 }
 	});
 	await dateTimeParser.newOutputSocket('month_name', {
 		label: 'Month (January-December)',
 		documentation: 'Month by name.',
-		type: 'String'
+		type: 'string'
 		// params: { defaultValue: 'Movember' }
 	});
 	await dateTimeParser.newOutputSocket('year', {
 		label: 'Year (AD)',
 		documentation: 'Year after death.',
-		type: 'Number'
+		type: 'number'
 		// params: { defaultValue: 0, min: 0, max: null, step: 1 }
 	});
 	await dateTimeParser.newOutputSocket('second_in_epoch', {
 		label: 'Second in Epoch',
 		documentation: 'Seconds since start of epoch (1970).',
-		type: 'Number'
+		type: 'number'
 		// params: { defaultValue: 0, min: 0, max: null, step: 1 }
 	});
 
@@ -381,85 +381,85 @@ outputs.set('second_in_epoch', epochSeconds);
 	await dateTimeConstructor.newOutputSocket('date_time', {
 		label: 'Date & Time',
 		documentation: 'Datetime to parse.',
-		type: 'String'
+		type: 'string'
 	});
 
 	await dateTimeConstructor.newInputSocket('locale', {
 		label: 'Locale',
 		documentation: 'Time Zone/Time Zone',
-		type: 'String',
+		type: 'string',
 		params: new StringSocketParamsBuilder('en/us').build()
 	});
 	await dateTimeConstructor.newInputSocket('lang', {
 		label: 'Language',
 		documentation: 'Language to use.',
-		type: 'String',
+		type: 'string',
 		params: new StringSocketParamsBuilder('en-US').build()
 	});
 	await dateTimeConstructor.newInputSocket('hour_am_pm', {
 		label: 'Hour (AM/PM)',
 		documentation: 'Hour.',
-		type: 'Number',
+		type: 'number',
 		params: new NumberSocketParamsBuilder(0).setMin(0).setMax(12).setStep(1).build()
 	});
 	await dateTimeConstructor.newInputSocket('hour_24', {
 		label: 'Hour (24)',
 		documentation: 'Hour.',
-		type: 'Number',
+		type: 'number',
 		params: new NumberSocketParamsBuilder(0).setMin(0).setMax(24).setStep(1).build()
 	});
 	await dateTimeConstructor.newInputSocket('minute', {
 		label: 'Minute',
 		documentation: 'Minute.',
-		type: 'Number',
+		type: 'number',
 		params: new NumberSocketParamsBuilder(0).setMin(0).setMax(60).setStep(1).build()
 	});
 	await dateTimeConstructor.newInputSocket('second', {
 		label: 'Second',
 		documentation: 'Second.',
-		type: 'Number',
+		type: 'number',
 		params: new NumberSocketParamsBuilder(0).setMin(0).setMax(60).setStep(1).build()
 	});
 	await dateTimeConstructor.newInputSocket('day_of_week_name', {
 		label: 'Day of Week (name)',
 		documentation: 'Day of Week (named).',
-		type: 'String',
+		type: 'string',
 		params: new StringSocketParamsBuilder('May-day').build()
 	});
 	await dateTimeConstructor.newInputSocket('day_of_month_name', {
 		label: 'Day of Month',
 		documentation: 'Day of Month.',
-		type: 'Number',
+		type: 'number',
 		params: new NumberSocketParamsBuilder(0).setMin(0).setMax(31).setStep(1).build()
 	});
 	await dateTimeConstructor.newInputSocket('day_of_year', {
 		label: 'Day of Year',
 		documentation: 'Day of Year.',
-		type: 'Number',
+		type: 'number',
 		params: new NumberSocketParamsBuilder(0).setMin(0).setMax(365).setStep(1).build()
 	});
 	await dateTimeConstructor.newInputSocket('month', {
 		label: 'Month (0-12)',
 		documentation: 'Month index.',
-		type: 'Number',
+		type: 'number',
 		params: new NumberSocketParamsBuilder(0).setMin(0).setMax(12).setStep(1).build()
 	});
 	await dateTimeConstructor.newInputSocket('month_name', {
 		label: 'Month (January-December)',
 		documentation: 'Month by name.',
-		type: 'String',
+		type: 'string',
 		params: new StringSocketParamsBuilder('Movember').build()
 	});
 	await dateTimeConstructor.newInputSocket('year', {
 		label: 'Year (AD)',
 		documentation: 'Year after death.',
-		type: 'Number',
+		type: 'number',
 		params: new NumberSocketParamsBuilder(0).setMin(0).noMax().setStep(1).build()
 	});
 	await dateTimeConstructor.newInputSocket('second_in_epoch', {
 		label: 'Second in Epoch',
 		documentation: 'Seconds since start of epoch (1970).',
-		type: 'Number',
+		type: 'number',
 		params: new NumberSocketParamsBuilder(0).setMin(0).noMax().setStep(1).build()
 	});
 
@@ -492,7 +492,7 @@ async function worldStateDataNodes() {
 	await weather.newInputSocket('lat', {
 		label: 'GPS Latitude',
 		documentation: 'Latitude',
-		type: 'Number',
+		type: 'number',
 		params: new NumberSocketParamsBuilder(40.758701)
 			.setMin(-90)
 			.setMax(90)
@@ -502,7 +502,7 @@ async function worldStateDataNodes() {
 	await weather.newInputSocket('long', {
 		label: 'GPS Longitude',
 		documentation: 'Longitude',
-		type: 'Number',
+		type: 'number',
 		params: new NumberSocketParamsBuilder(-111.876183)
 			.setMin(-180)
 			.setMax(180)
@@ -513,37 +513,37 @@ async function worldStateDataNodes() {
 	await weather.newOutputSocket('precipitation', {
 		label: 'Precipitation',
 		documentation: 'How much it rains',
-		type: 'Number'
+		type: 'number'
 	});
 
 	await weather.newOutputSocket('predipication_variance', {
 		label: 'Precipitation Uncertainty',
 		documentation: 'How much it rains when this says it will rain.',
-		type: 'Number'
+		type: 'number'
 	});
 
 	await weather.newOutputSocket('temp_f', {
 		label: 'Temperature (F)',
 		documentation: 'In farenheight',
-		type: 'Number'
+		type: 'number'
 	});
 
 	await weather.newOutputSocket('temp_c', {
 		label: 'Temperature (C)',
 		documentation: 'In celcius',
-		type: 'Number'
+		type: 'number'
 	});
 
 	await weather.newOutputSocket('wind_speed_mph', {
 		label: 'Wind Speed (mph)',
 		documentation: 'Wind speed in miles per hour',
-		type: 'Number'
+		type: 'number'
 	});
 
 	await weather.newOutputSocket('wind_speed_kmph', {
 		label: 'Wind Speed (km/h)',
 		documentation: 'Wind speed in kilometers per hour',
-		type: 'Number'
+		type: 'number'
 	});
 
 	await weather.newOutputSocket('anomolous_rating', {
@@ -551,7 +551,7 @@ async function worldStateDataNodes() {
 		documentation:
 			'How anomalous is the weather in this location on this day given known history? ' +
 			'Is today significatnly different?',
-		type: 'Number'
+		type: 'number'
 	});
 
 	await weather.setCode(`
@@ -578,20 +578,20 @@ async function huggingfaceNodes() {
 	await llm.newInputSocket('model_id', {
 		label: 'Model ID',
 		documentation: 'Initial prompt (used to instruct model on task).',
-		type: 'String',
+		type: 'string',
 		params: new StringSocketParamsBuilder('HuggingFaceH4/zephyr-7b-alpha').build()
 	});
 
 	await llm.newInputSocket('prompt', {
 		label: 'Prompt',
 		documentation: 'Initial prompt (used to instruct model on task). This is the text to complete.',
-		type: 'String',
+		type: 'string',
 		params: new StringSocketParamsBuilder('The quick brown fox jumped over the la').build()
 	});
 	await llm.newInputSocket('temp', {
 		label: 'Temperature',
 		documentation: 'Creativity level of the mode.',
-		type: 'Number',
+		type: 'number',
 		params: new NumberSocketParamsBuilder(0).setMin(0).setMax(1).setStep(0.01).build()
 	});
 	// missing many
@@ -599,13 +599,13 @@ async function huggingfaceNodes() {
 	await llm.newOutputSocket('output_text', {
 		label: 'Completed Text',
 		documentation: 'LLM output with prompt',
-		type: 'Number'
+		type: 'number'
 	});
 
 	await llm.newOutputSocket('output_text_no_prompt', {
 		label: 'Completed Text without Prompt',
 		documentation: 'LLM output without prompt',
-		type: 'Number'
+		type: 'number'
 	});
 
 	await llm.setCode(`
@@ -653,14 +653,14 @@ outputs.set('output_text_no_prompt', output.generated_text);
 		label: 'Model ID',
 		documentation:
 			'Model to generate from (serch text-to-image models category on huggingface.com).',
-		type: 'String',
+		type: 'string',
 		params: new StringSocketParamsBuilder('black-forest-labs/FLUX.1-dev').build()
 	});
 
 	await text_to_image.newInputSocket('prompt', {
 		label: 'Text Prompt',
 		documentation: 'Initial prompt (used to instruct model on task). This is the text to complete.',
-		type: 'String',
+		type: 'string',
 		params: new StringSocketParamsBuilder(
 			'shrek riding a motor cycle over an exploding galaxy, being chased by a dragon (the wedjat eye is the eye of horus from egyptian mythology) make the galaxy look like the wedjat eye. there should be no ground, just space with the exploding galaxy in the background'
 		).build()
@@ -668,7 +668,7 @@ outputs.set('output_text_no_prompt', output.generated_text);
 	await text_to_image.newInputSocket('temp', {
 		label: 'Temperature',
 		documentation: 'Creativity level of the model.',
-		type: 'Number',
+		type: 'number',
 		params: new NumberSocketParamsBuilder(0).setMin(0).setMax(1).setStep(0.01).build()
 	});
 	// missing many
@@ -676,7 +676,7 @@ outputs.set('output_text_no_prompt', output.generated_text);
 	await text_to_image.newOutputSocket('image', {
 		label: 'Generated Image',
 		documentation: 'Image generated from the input specifications.',
-		type: 'Image'
+		type: 'image/jimp'
 	});
 
 	await text_to_image.setCode(`
@@ -703,14 +703,14 @@ async function aiDemoNodes() {
 	await colorize.newInputSocket('img', {
 		label: 'Greyscale Image',
 		documentation: 'Greyscale image to colorize.',
-		type: 'JIMP',
+		type: 'image/jimp',
 		params: new JIMPImageSocketParamsBuilder().build()
 	});
 
 	await colorize.newOutputSocket('img', {
 		label: 'Color Image',
 		documentation: 'Color version of input image.',
-		type: 'JIMP'
+		type: 'image/jimp'
 	});
 
 	await colorize.setCode(`
@@ -725,14 +725,14 @@ async function aiDemoNodes() {
 	await superResolution.newInputSocket('img', {
 		label: 'Low-res Image',
 		documentation: 'Image to enhance.',
-		type: 'JIMP',
+		type: 'image/jimp',
 		params: new JIMPImageSocketParamsBuilder().build()
 	});
 
 	await superResolution.newOutputSocket('super_res_img', {
 		label: 'High-res Image',
 		documentation: 'Enhanced image.',
-		type: 'JIMP'
+		type: 'image/jimp'
 	});
 
 	await superResolution.setCode(`
@@ -759,26 +759,26 @@ const output = await upscaler(url);
 	await objectBackgroundSeperation.newInputSocket('img', {
 		label: 'Image',
 		documentation: 'Image to enhance.',
-		type: 'JIMP',
+		type: 'image/jimp',
 		params: new JIMPImageSocketParamsBuilder().build()
 	});
 
 	await objectBackgroundSeperation.newOutputSocket('foreground_img', {
 		label: 'Foreground Image',
 		documentation: 'Alpha-ed out background.',
-		type: 'JIMP'
+		type: 'image/jimp'
 	});
 
 	await objectBackgroundSeperation.newOutputSocket('background_img', {
 		label: 'Background Infilled Image',
 		documentation: 'Infilled image with no foreground.',
-		type: 'JIMP'
+		type: 'image/jimp'
 	});
 
 	await objectBackgroundSeperation.newOutputSocket('mask', {
 		label: 'Mask',
 		documentation: 'Black for background, white for foreground.',
-		type: 'JIMP'
+		type: 'image/jimp'
 	});
 
 	await objectBackgroundSeperation.setCode(`
@@ -795,32 +795,32 @@ async function promptDesignNodes() {
 	await joinText.newInputSocket('text1', {
 		label: 'Text',
 		documentation: 'String of text.',
-		type: 'String',
+		type: 'string',
 		params: new StringSocketParamsBuilder('').asSentence().build()
 	});
 	await joinText.newInputSocket('text2', {
 		label: 'Text',
 		documentation: 'String of text.',
-		type: 'String',
+		type: 'string',
 		params: new StringSocketParamsBuilder('').asSentence().build()
 	});
 	await joinText.newInputSocket('text3', {
 		label: 'Text',
 		documentation: 'String of text.',
-		type: 'String',
+		type: 'string',
 		params: new StringSocketParamsBuilder('').asSentence().build()
 	});
 	await joinText.newInputSocket('text4', {
 		label: 'Text',
 		documentation: 'String of text.',
-		type: 'String',
+		type: 'string',
 		params: new StringSocketParamsBuilder('').asSentence().build()
 	});
 
 	await joinText.newOutputSocket('text', {
 		label: 'Joined Text',
 		documentation: 'Text. Joined.',
-		type: 'String'
+		type: 'string'
 	});
 
 	await joinText.setCode(
@@ -834,14 +834,14 @@ async function promptDesignNodes() {
 	await paragraphInput.newInputSocket('paragraph', {
 		label: 'Text',
 		documentation: 'String of text.',
-		type: 'String',
+		type: 'string',
 		params: new StringSocketParamsBuilder('').asParagraph().build()
 	});
 
 	await paragraphInput.newOutputSocket('paragraph', {
 		label: 'Text',
 		documentation: 'String of text.',
-		type: 'String'
+		type: 'string'
 	});
 
 	await paragraphInput.setCode("outputs.set('paragraph', inputs.paragraph);");
@@ -853,14 +853,14 @@ async function promptDesignNodes() {
 	await sentenceInput.newInputSocket('sentence', {
 		label: 'Text',
 		documentation: 'String of text.',
-		type: 'String',
+		type: 'string',
 		params: new StringSocketParamsBuilder('').asSentence().build()
 	});
 
 	await sentenceInput.newOutputSocket('sentence', {
 		label: 'Text',
 		documentation: 'String of text.',
-		type: 'String'
+		type: 'string'
 	});
 
 	await sentenceInput.setCode("outputs.set('sentence', inputs.sentence);");
@@ -873,20 +873,20 @@ async function promptDesignNodes() {
 	await fillinTextTemplate.newInputSocket('template', {
 		label: 'Template',
 		documentation: "Use <variable-name> to fill in variables defined in 'Fill-Ins'.",
-		type: 'String',
+		type: 'string',
 		params: new StringSocketParamsBuilder('').asParagraph().build()
 	});
 	await fillinTextTemplate.newInputSocket('fillins', {
 		label: 'Fill-Ins',
 		documentation: 'Variables to fill in.',
-		type: 'Object',
+		type: 'unknown',
 		params: new GenericSocketParamsBuilder('{}').build()
 	});
 
 	await fillinTextTemplate.newOutputSocket('text', {
 		label: 'Filled-in template',
 		documentation: "Template filled in with values in 'Fill-Ins'.",
-		type: 'String'
+		type: 'string'
 	});
 
 	await fillinTextTemplate.setCode(`
@@ -916,21 +916,21 @@ async function googleDriveNodes() {
 	await googleDrive.newInputSocket('account', {
 		label: 'Google Account',
 		documentation: 'Google account to get the file from.',
-		type: 'String',
+		type: 'string',
 		params: new StringSocketParamsBuilder('').asPassword().build()
 	});
 
 	await googleDrive.newInputSocket('file_selector', {
 		label: 'File Selector',
 		documentation: 'File to retrieve.',
-		type: 'String',
+		type: 'string',
 		params: new StringSocketParamsBuilder('').asSentence().build()
 	});
 
 	await googleDrive.newOutputSocket('file', {
 		label: 'File',
 		documentation: 'The retrieved file.',
-		type: 'String'
+		type: 'string'
 	});
 
 	await googleDrive.setCode(`
@@ -947,42 +947,42 @@ outputs.set('img', inputs.img);
 	await sendEmail.newInputSocket('account', {
 		label: 'From Google Account',
 		documentation: 'Google account to get the file from.',
-		type: 'String',
+		type: 'string',
 		params: new StringSocketParamsBuilder('').asPassword().build()
 	});
 
 	await sendEmail.newInputSocket('to', {
 		label: 'To',
 		documentation: 'Google account to get the file from.',
-		type: 'String',
+		type: 'string',
 		params: new StringSocketParamsBuilder('').asSentence().build()
 	});
 
 	await sendEmail.newInputSocket('cc', {
 		label: 'CC',
 		documentation: 'Google account to get the file from.',
-		type: 'String',
+		type: 'string',
 		params: new StringSocketParamsBuilder('').asSentence().build()
 	});
 
 	await sendEmail.newInputSocket('bcc', {
 		label: 'BCC',
 		documentation: 'Google account to get the file from.',
-		type: 'String',
+		type: 'string',
 		params: new StringSocketParamsBuilder('').asSentence().build()
 	});
 
 	await sendEmail.newInputSocket('subject', {
 		label: 'Subject',
 		documentation: 'Google account to get the file from.',
-		type: 'String',
+		type: 'string',
 		params: new StringSocketParamsBuilder('').asSentence().build()
 	});
 
 	await sendEmail.newInputSocket('body', {
 		label: 'Email Body',
 		documentation: 'File to retrieve.',
-		type: 'String',
+		type: 'string',
 		params: new StringSocketParamsBuilder('').asParagraph().build()
 	});
 
@@ -1008,21 +1008,21 @@ async function jimpNodes() {
 	await newBlankImage.newInputSocket('height', {
 		label: 'Height',
 		documentation: 'Height of the image.',
-		type: 'Number',
+		type: 'number',
 		params: new NumberSocketParamsBuilder(1024).setMin(0).build()
 	});
 
 	await newBlankImage.newInputSocket('width', {
 		label: 'Width',
 		documentation: 'Width of the image.',
-		type: 'Number',
+		type: 'number',
 		params: new NumberSocketParamsBuilder(1024).setMin(0).build()
 	});
 
 	await newBlankImage.newOutputSocket('image', {
 		label: 'Image (JIMP)',
 		documentation: 'The new images.',
-		type: 'JIMP'
+		type: 'image/jimp'
 	});
 
 	await newBlankImage.setCode(
@@ -1036,28 +1036,28 @@ async function jimpNodes() {
 	await resize.newInputSocket('image', {
 		label: 'Image (JIMP)',
 		documentation: 'The high-res images.',
-		type: 'Image',
+		type: 'image/jimp',
 		params: new JIMPImageSocketParamsBuilder().build()
 	});
 
 	await resize.newInputSocket('width', {
 		label: 'Width',
 		documentation: 'Width of the image.',
-		type: 'Number',
+		type: 'number',
 		params: new NumberSocketParamsBuilder(1024).setMin(0).setStep(1).build()
 	});
 
 	await resize.newInputSocket('height', {
 		label: 'Height',
 		documentation: 'Height of the image.',
-		type: 'Number',
+		type: 'number',
 		params: new NumberSocketParamsBuilder(1024).setMin(0).setStep(1).build()
 	});
 
 	await resize.newOutputSocket('image', {
 		label: 'Image (JIMP)',
 		documentation: 'The resized images.',
-		type: 'Image'
+		type: 'image/jimp'
 	});
 
 	await resize.setCode(
@@ -1079,14 +1079,14 @@ async function jsonNodes() {
 	await jsonEditorAndViewer.newInputSocket('jsonObject', {
 		label: 'JSON',
 		documentation: 'JSON text to parse.',
-		type: 'Object',
+		type: 'unknown',
 		params: new GenericSocketParamsBuilder('{}').build()
 	});
 
 	await jsonEditorAndViewer.newOutputSocket('jsonObject', {
 		label: 'Object',
 		documentation: 'The parsed JSON object.',
-		type: 'Object'
+		type: 'unknown'
 	});
 
 	await jsonEditorAndViewer.setCode(
@@ -1104,14 +1104,14 @@ async function jsonNodes() {
 	await jsonToString.newInputSocket('jsonObject', {
 		label: 'Object',
 		documentation: 'Object to stringify into JSON.',
-		type: 'Object',
+		type: 'unknown',
 		params: new GenericSocketParamsBuilder('{}').build()
 	});
 
 	await jsonToString.newOutputSocket('jsonString', {
 		label: 'Text',
 		documentation: 'The string JSON.',
-		type: 'String'
+		type: 'string'
 	});
 
 	await jsonToString.setCode("outputs.set('jsonString', JSON.stringify(inputs.jsonObject));");
@@ -1142,28 +1142,28 @@ async function htmlNodes() {
 		documentation: 'Object to stringify into JSON.',
 		// type: "ENUM",
 		// params: new ENUMSocketConfig(Array.from(new Set(Array.from(document.querySelectorAll("*"), el => el.tagName.toLowerCase()))))
-		type: 'String',
+		type: 'string',
 		params: new StringSocketParamsBuilder('').asSentence().build()
 	});
 
 	await htmlElement.newInputSocket('innerHTML', {
 		label: 'Inner HTML',
 		documentation: 'Inner html of this element.',
-		type: 'String',
+		type: 'string',
 		params: new StringSocketParamsBuilder('').asParagraph().build()
 	});
 
 	await htmlElement.newInputSocket('attributes', {
 		label: 'Attributes',
 		documentation: 'Object to specify attributes.',
-		type: 'Object',
+		type: 'unknown',
 		params: new GenericSocketParamsBuilder('{}').build()
 	});
 
 	await htmlElement.newOutputSocket('html', {
 		label: 'HTML',
 		documentation: 'The html.',
-		type: 'String'
+		type: 'string'
 	});
 
 	await htmlElement.setCode(
@@ -1202,7 +1202,7 @@ outputs.set('html', d);
 	await fetchURL.newOutputSocket('text', {
 		label: 'Fetched Content',
 		documentation: 'The plain text fetched from the URL.',
-		type: 'String'
+		type: 'string'
 	});
 
 	await fetchURL.setCode(`
@@ -1226,7 +1226,7 @@ async function fileNodes() {
 	await loadCSV.newOutputSocket('text', {
 		label: 'CSV Content',
 		documentation: 'Raw text content from the CSV file.',
-		type: 'String'
+		type: 'string'
 	});
 
 	await loadCSV.setCode(`
@@ -1250,7 +1250,7 @@ async function fileNodes() {
 	await loadTSV.newOutputSocket('text', {
 		label: 'TSV Content',
 		documentation: 'Raw text content from the TSV file.',
-		type: 'String'
+		type: 'string'
 	});
 
 	await loadTSV.setCode(`
@@ -1273,7 +1273,7 @@ async function rank3Nodes() {
 
 	await imageCropper.newInputSocket('crop', {
 		label: 'Crop Area',
-		type: 'Object',
+		type: 'unknown',
 		documentation: 'Object with {x, y, width, height}',
 		params: new CropParamSocketParamsBuilder().build()
 	});
@@ -1281,7 +1281,7 @@ async function rank3Nodes() {
 	await imageCropper.newOutputSocket('img', {
 		label: 'Cropped Image',
 		documentation: 'Image after cropping.',
-		type: 'JIMP'
+		type: 'image/jimp'
 	});
 
 	await imageCropper.setCode(`

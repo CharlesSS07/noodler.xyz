@@ -4,6 +4,7 @@
 	import FlowGraph from './FlowGraph.svelte';
 	import { goto } from '$app/navigation';
 	import { auth } from '../../firebase';
+	import './nodes.css';
 
 	import { FirebaseRTDBProjectCollection } from './lib/FirebaseRTDBProjectController.js';
 	import type { ProjectCollectionInterface } from './lib/ProjectInterfaces.js';

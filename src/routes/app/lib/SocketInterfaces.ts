@@ -11,6 +11,8 @@ export interface SocketBluePrintControllerInterface {
 	hide(): void;
 	unhide(): void;
 	isHidden(): Promise<boolean>;
+	required(): void;
+	notRequired(): void;
 }
 
 export abstract class InputSocketBluePrintControllerInterface {

@@ -161,6 +161,12 @@
                 <FooterLink href="/about-me" class="text-gray-400 hover:text-red-500 transition-colors">About the Author</FooterLink>
                 <FooterLink href="/about-me/my-projects" class="text-gray-400 hover:text-green-500 transition-colors">My Projects</FooterLink>
             </FooterLinkGroup>
+            <FooterLinkGroup ulClass="flex flex-wrap justify-center gap-x-8 gap-y-4">
+                <FooterLink href="/contact" class="text-gray-400 hover:text-cyan-500 transition-colors">Contact</FooterLink>
+                <FooterLink href="/contact" class="text-gray-400 hover:text-fuchsia-500 transition-colors">Support / Help</FooterLink>
+                <FooterLink href="/contact" class="text-gray-400 hover:text-teal-500 transition-colors">Feedback!</FooterLink>
+                <FooterLink href="/contact" class="text-gray-400 hover:text-red-500 transition-colors">Report Bug</FooterLink>
+            </FooterLinkGroup>
         </div>
         <p class="text-center text-gray-500">
             © 2025 Noodler Technologies LLC. Flow your imagination.

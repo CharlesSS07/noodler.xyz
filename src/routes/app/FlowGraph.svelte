@@ -1,4 +1,6 @@
 <script lang="ts">
+	import HTMLRendererNode from "./nodes/html/HTMLRendererNode.svelte";
+
 	let { project_key = 'project_key_not_assigned' } = $props<{ project_key?: string }>();
 
 	import {
@@ -9,15 +11,18 @@
 		MiniMap,
 		type Node,
 		type Edge,
-		type ColorMode
+		type ColorMode, useNodeConnections
 	} from '@xyflow/svelte';
 	import '@xyflow/svelte/dist/style.css';
 
-	import NoteNode from './NoteNode.svelte';
+	import NoteNode from './nodes/NoteNode.svelte';
 	import { rtdb } from '../../firebase';
 	import StemNode from './StemNode.svelte';
 	import { onValue, ref, update, child, remove, off } from 'firebase/database';
-	import { onMount } from 'svelte';
+	import TextTemplateFillinNode from "./nodes/text/TextTemplateFillinNode.svelte";
+	import ImageNode from "./nodes/images/ImageNode.svelte";
+	import TextEditorNode from "./nodes/text/TextEditorNode.svelte";
+	import RawTextEditor from "./nodes/text/RawTextEditor.svelte";
 
 	let nodes = $state.raw<Node[]>([]);
 
@@ -452,12 +457,20 @@
 
 	const nodeTypes = {
 		note: NoteNode,
-		node: StemNode // a node which takes on the properties stored by the server
+		node: StemNode, // a node which takes on the properties stored by the server
+		image: ImageNode,
+		html: HTMLRendererNode,
+		textTemplate: TextTemplateFillinNode,
+		textEditor: TextEditorNode,
+		textEditorRaw: RawTextEditor
 	};
 
 	let selectedNodeNID = $state('official_node_image_cropper');
 
-	let colorMode: ColorMode = $state('dark');
+	let colorMode: ColorMode = $state('light');
+
+	const connections = useNodeConnections();
+
 </script>
 
 <input type="text" bind:value={selectedNodeNID} />
@@ -465,10 +478,49 @@
 	type: 'node',
 	data: {
 		nid: selectedNodeNID,
-		project_key: project_key
+		socketValues: {}
 	},
 	position: { x: 0, y: 0 },
-})}>Add Node</button>
+})}>Add Node</button> |
+
+<button onclick={() => addNode({
+	type: 'image',
+	data: {
+
+	},
+	position: { x: 0, y: 0 },
+})}>Add Image</button> |
+
+<button onclick={() => addNode({
+	type: 'html',
+	data: {
+	},
+	position: { x: 0, y: 0 },
+})}>Add HTML Renderer</button> |
+
+<button onclick={() => addNode({
+	type: 'textEditor',
+	data: {
+		markdown: ''
+	},
+	position: { x: 0, y: 0 },
+})}>Add Md TextEditor</button> |
+
+<button onclick={() => addNode({
+	type: 'textTemplate',
+	data: {
+		markdown: ''
+	},
+	position: { x: 0, y: 0 },
+})}>Add Text Template</button> |
+
+<button onclick={() => addNode({
+	type: 'textEditorRaw',
+	data: {
+		text: ''
+	},
+	position: { x: 0, y: 0 },
+})}>Add Raw TextEditor</button> |
 
 <button onclick={() => addNode({
 	type: 'note',
@@ -487,7 +539,7 @@ Here's what you can do on the Noodle Board:
 	},
 	position: { x: 0, y: 100 }
 
-})}>Note</button>
+})}>Note</button> |
 
 <div style="height: 100vh;">
 	<SvelteFlow bind:nodes bind:edges {nodeTypes} {colorMode} fitView>

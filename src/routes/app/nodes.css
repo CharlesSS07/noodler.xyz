@@ -1,0 +1,354 @@
+/* ==========================================================================
+   NODE CONTAINER STYLES
+   ========================================================================== */
+
+/* Base node container - defines size constraints and prevents text selection */
+.node-container {
+    min-width: 200px;
+    max-width: 350px;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+/* Selected state - adds scaling and blue glow effect when node is selected */
+.node-container.selected {
+    transform: scale(1.02);
+    filter: drop-shadow(0 4px 12px rgba(59, 130, 246, 0.3));
+}
+
+/* Executing state - adds pulsing animation when node is running */
+.node-container.executing {
+    animation: pulse 2s infinite;
+}
+
+/* Success state - adds green border to indicate successful execution */
+.node-container.success .node-card {
+    border-color: #10b981;
+    box-shadow: 0 0 0 1px #10b981;
+}
+
+/* Error state - adds red border to indicate failed execution */
+.node-container.error .node-card {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 1px #ef4444;
+}
+
+/* Loading state - reduces opacity to indicate loading */
+.loading {
+    opacity: 0.7;
+}
+
+
+/* ==========================================================================
+   NODE CARD STYLES
+   ========================================================================== */
+
+/* Main node card - white background with subtle shadow and border */
+.node-card {
+    border: 1px solid #d1d5db;
+    background: #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+}
+
+/* Loading card - dashed border to indicate loading state */
+.loading-card {
+    border: 1px dashed #9ca3af !important;
+}
+
+
+/* ==========================================================================
+   NODE HEADER STYLES
+   ========================================================================== */
+
+/* Header section - contains title and controls with light background */
+.node-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid #e5e7eb;
+    cursor: pointer;
+}
+
+/* Header content layout - spreads title and actions across header */
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+/* Title section - contains node title and takes up remaining space */
+.title-section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+}
+
+/* Node title styling - main heading text */
+.node-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #000000; /* Note: This appears to be a light blue, might need adjustment for light theme */
+    margin: 0;
+    line-height: 1.2;
+}
+
+/* Header actions - contains status indicators and info buttons */
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Status indicator container - holds execution status icons */
+.status-indicator {
+    display: flex;
+    align-items: center;
+}
+
+/* Info icon - help cursor and color transitions */
+.info-icon {
+    color: #6b7280;
+    cursor: help;
+    transition: color 0.2s ease;
+}
+
+.info-icon:hover {
+    color: #374151;
+}
+
+
+/* ==========================================================================
+   EXECUTION INFO STYLES
+   ========================================================================== */
+
+/* Execution info bar - shows timing and errors below header */
+.execution-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid #e5e7eb;
+    font-size: 11px;
+}
+
+/* Execution time display - green color for successful timing */
+.execution-time {
+    color: #10b981;
+    font-weight: 500;
+}
+
+/* Error message display - red color for error text, right-aligned */
+.error-message {
+    color: #ef4444;
+    font-weight: 500;
+    flex: 1;
+    text-align: right;
+    cursor: help;
+}
+
+
+/* ==========================================================================
+   NODE BODY AND CONTENT STYLES
+   ========================================================================== */
+
+/* Node body - container for main content, no padding */
+.node-body {
+    padding: 0;
+}
+
+/* Node content - vertical layout for socket sections */
+.node-content {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Socket section - container for groups of sockets with padding */
+.sockets-section {
+    padding: 8px 0;
+}
+
+
+/* ==========================================================================
+   LOADING STATE STYLES
+   ========================================================================== */
+
+/* Loading content - centered spinner and text */
+.loading-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 24px;
+    color: #6b7280;
+    font-size: 12px;
+}
+
+
+/* ==========================================================================
+   SOCKET CONTAINER STYLES
+   ========================================================================== */
+
+/* Base socket container - flexible layout with hover effects */
+.socket-container {
+    display: flex;
+    align-items: center;
+    padding: 4px 8px;
+    margin: 2px 0;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    position: relative;
+    min-height: 24px;
+}
+
+/* Socket hover state - subtle background highlight */
+.socket-container:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Target socket alignment - left-aligned for input sockets */
+.socket-container.target {
+    justify-content: flex-start;
+    padding-left: 16px;
+}
+
+/* Source socket alignment - right-aligned for output sockets */
+.socket-container.source {
+    justify-content: flex-end;
+    padding-right: 16px;
+}
+
+/* Connected socket state - darker background when socket has connection */
+.socket-container.connected {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Disabled socket state - reduced opacity and no interaction */
+.socket-container.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+/* Required socket indicator - red left border for mandatory inputs */
+.socket-container.required {
+    border-left: 2px solid #e74c3c;
+}
+
+
+/* ==========================================================================
+   SOCKET CONTENT STYLES
+   ========================================================================== */
+
+/* Socket content wrapper - prevents pointer events on text */
+.socket-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    pointer-events: none;
+}
+
+/* Input socket content - left-aligned text */
+.input-content {
+    align-items: flex-start;
+    text-align: left;
+}
+
+/* Output socket content - right-aligned text */
+.output-content {
+    align-items: flex-end;
+    text-align: right;
+}
+
+/* Socket label - main text for socket name */
+.socket-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #000000; /* Note: White text might need adjustment for light theme */
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+/* Required socket label - bold text for mandatory sockets */
+.socket-label.required {
+    font-weight: 600;
+}
+
+/* Required indicator - red asterisk for required fields */
+.required-indicator {
+    color: #e74c3c;
+    margin-left: 2px;
+}
+
+/* Socket type label - small uppercase text showing data type */
+.socket-type {
+    font-size: 10px;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    opacity: 0.8;
+    line-height: 1;
+}
+
+
+/* ==========================================================================
+   SOCKET HANDLE STYLES
+   ========================================================================== */
+
+/* Socket handle - circular connection point with hover effects */
+.socket-handle {
+    width: 12px !important;
+    height: 12px !important;
+    border: 2px solid;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Socket handle hover - enlarges and enhances shadow */
+.socket-handle:hover {
+    transform: translate(-6px, -6px) scale(1.2);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+
+/* ==========================================================================
+   CONNECTION INDICATORS
+   ========================================================================== */
+
+/* Connection indicator dot - small green dot showing active connections */
+.socket-container.connected::before {
+    content: '';
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background-color: #2ecc71;
+    border-radius: 50%;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+/* Target socket connection indicator - positioned on left */
+.socket-container.target.connected::before {
+    left: 2px;
+}
+
+/* Source socket connection indicator - positioned on right */
+.socket-container.source.connected::before {
+    right: 2px;
+}
+
+
+/* ==========================================================================
+   ANIMATIONS
+   ========================================================================== */
+
+/* Pulse animation - subtle scaling effect for executing nodes */
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.01);
+    }
+}
