@@ -24,9 +24,7 @@
 	import TextEditorNode from "./nodes/text/TextEditorNode.svelte";
 	import RawTextEditor from "./nodes/text/RawTextEditor.svelte";
 	import {onMount} from "svelte";
-	import type {ProjectControllerInterface} from "./lib/ProjectInterfaces";
-	import {FirebaseRTDBProjectController} from "./lib/FirebaseRTDBProjectController";
-	import {goto} from "$app/navigation";
+	import Logo from "../../components/Logo.svelte";
 
 	let nodes = $state.raw<Node[]>([]);
 
@@ -474,7 +472,7 @@
 					addNode({
 						type: 'note',
 						data: {
-							markdown: `# Welcome to the Noodler!
+							markdown: `# Welcome to noodler.xyz!
 A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
 
 * Pan around by clicking and dragging on the canvas.
@@ -503,7 +501,8 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
 	type: 'node',
 	data: {
 		nid: selectedNodeNID,
-		socketValues: {}
+		input: {},
+		output: {}
 	},
 	position: { x: 0, y: 0 },
 })}>Add Node</button> |
@@ -511,7 +510,8 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
 <button onclick={() => addNode({
 	type: 'image',
 	data: {
-
+		input: {},
+		output: {}
 	},
 	position: { x: 0, y: 0 },
 })}>Add Image</button> |
@@ -519,6 +519,8 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
 <button onclick={() => addNode({
 	type: 'html',
 	data: {
+		input: {},
+		output: {}
 	},
 	position: { x: 0, y: 0 },
 })}>Add HTML Renderer</button> |
@@ -576,6 +578,7 @@ Here's what you can do on the Noodle Board:
 
 <div style="height: 100vh;">
 	<SvelteFlow bind:nodes bind:edges {nodeTypes} {colorMode} fitView>
+		<Logo></Logo>
 		<Controls />
 		<Background variant={BackgroundVariant.Dots} />
 		<MiniMap />

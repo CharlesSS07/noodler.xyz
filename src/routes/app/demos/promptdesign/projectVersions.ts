@@ -179,7 +179,7 @@ Integrate the following key features/benefits seamlessly:`,
         type: 'node',
         data: {
             nid: 'official_node_join_text',
-            input: {text: ''},
+            input: {text1: '', text2: '', text3: '', text4: ''},
             currentText: ``,
             output: {text: ''}
         },
@@ -412,371 +412,7 @@ export const edgesVersion0 = [
     },
 ];
 
-export const nodesVersion1 = [
-    {
-        "id": "product_name",
-        "type": "textEditorRaw",
-        "data": {
-            "input": {
-                "text": ""
-            },
-            "currentText": "noodler.xyz",
-            "output": {
-                "text": "noodler.xyz"
-            }
-        },
-        "position": {
-            "x": 762,
-            "y": 218
-        },
-        "width": 200,
-        "height": 50,
-        "targetPosition": "left",
-        "sourcePosition": "right",
-        "$H": 514,
-        "x": 762,
-        "y": 218,
-        "measured": {
-            "width": 200,
-            "height": 50
-        }
-    },
-    {
-        "id": "target_audience",
-        "type": "textEditorRaw",
-        "data": {
-            "input": {
-                "text": ""
-            },
-            "currentText": "Artists, Gen AI Ops, and AI Engineers",
-            "output": {
-                "text": "Artists, Gen AI Ops, and AI Engineers"
-            }
-        },
-        "position": {
-            "x": 712,
-            "y": 404
-        },
-        "width": 250,
-        "height": 50,
-        "targetPosition": "left",
-        "sourcePosition": "right",
-        "$H": 516,
-        "x": 712,
-        "y": 404,
-        "measured": {
-            "width": 250,
-            "height": 50
-        }
-    },
-    {
-        "id": "campaign_goal",
-        "type": "textEditorRaw",
-        "data": {
-            "input": {
-                "text": ""
-            },
-            "currentText": "Entertain, demonstrate product potential, build connections",
-            "output": {
-                "text": "Entertain, demonstrate product potential, build connections"
-            }
-        },
-        "position": {
-            "x": 662,
-            "y": 524
-        },
-        "width": 300,
-        "height": 50,
-        "targetPosition": "left",
-        "sourcePosition": "right",
-        "$H": 518,
-        "x": 662,
-        "y": 524,
-        "measured": {
-            "width": 300,
-            "height": 50
-        }
-    },
-    {
-        "id": "key_features",
-        "type": "textEditorRaw",
-        "data": {
-            "input": {
-                "text": ""
-            },
-            "currentText": "Flow-designer, no-code, no setup, plug-n-play interface, explainable, extendable",
-            "output": {
-                "text": "Flow-designer, no-code, no setup, plug-n-play interface, explainable, extendable"
-            }
-        },
-        "position": {
-            "x": 12,
-            "y": 644
-        },
-        "width": 400,
-        "height": 50,
-        "targetPosition": "left",
-        "sourcePosition": "right",
-        "$H": 520,
-        "x": 12,
-        "y": 644,
-        "measured": {
-            "width": 400,
-            "height": 50
-        }
-    },
-    {
-        "id": "call_to_action",
-        "type": "textEditorRaw",
-        "data": {
-            "input": {
-                "text": ""
-            },
-            "currentText": "build with me, democratize AI design, create art, visualize your code",
-            "output": {
-                "text": "build with me, democratize AI design, create art, visualize your code"
-            }
-        },
-        "position": {
-            "x": 612,
-            "y": 984
-        },
-        "width": 350,
-        "height": 50,
-        "targetPosition": "left",
-        "sourcePosition": "right",
-        "$H": 522,
-        "x": 612,
-        "y": 984,
-        "measured": {
-            "width": 350,
-            "height": 50
-        }
-    },
-    {
-        "id": "tone_and_style",
-        "type": "textEditorRaw",
-        "data": {
-            "input": {
-                "text": ""
-            },
-            "currentText": "engaging, informative, slightly humorous",
-            "output": {
-                "text": "engaging, informative, slightly humorous"
-            }
-        },
-        "position": {
-            "x": 132,
-            "y": 884
-        },
-        "width": 280,
-        "height": 50,
-        "targetPosition": "left",
-        "sourcePosition": "right",
-        "$H": 524,
-        "x": 132,
-        "y": 884,
-        "measured": {
-            "width": 280,
-            "height": 50
-        }
-    },
-    {
-        "id": "word_count_range",
-        "type": "textEditorRaw",
-        "data": {
-            "input": {
-                "text": ""
-            },
-            "currentText": "250-300 words",
-            "output": {
-                "text": "250-300 words"
-            }
-        },
-        "position": {
-            "x": 232,
-            "y": 764
-        },
-        "width": 180,
-        "height": 50,
-        "targetPosition": "left",
-        "sourcePosition": "right",
-        "$H": 526,
-        "x": 232,
-        "y": 764,
-        "measured": {
-            "width": 180,
-            "height": 50
-        }
-    },
-    {
-        "id": "output_format",
-        "type": "textEditorRaw",
-        "data": {
-            "input": {
-                "text": ""
-            },
-            "currentText": "linkedin connection request",
-            "output": {
-                "text": "linkedin connection request"
-            }
-        },
-        "position": {
-            "x": 712,
-            "y": 54
-        },
-        "width": 250,
-        "height": 50,
-        "targetPosition": "left",
-        "sourcePosition": "right",
-        "$H": 528,
-        "x": 712,
-        "y": 54,
-        "measured": {
-            "width": 250,
-            "height": 50
-        }
-    },
-    {
-        "id": "role_instruction",
-        "type": "textEditorRaw",
-        "data": {
-            "input": {
-                "text": ""
-            },
-            "currentText": "You are an expert marketing content creator specializing in persuasive and engaging copy. Your task is to craft compelling content for a specific product launch.",
-            "output": {
-                "text": "You are an expert marketing content creator specializing in persuasive and engaging copy. Your task is to craft compelling content for a specific product launch."
-            }
-        },
-        "position": {
-            "x": 1062,
-            "y": 332
-        },
-        "width": 500,
-        "height": 80,
-        "targetPosition": "left",
-        "sourcePosition": "right",
-        "$H": 530,
-        "x": 1062,
-        "y": 332,
-        "measured": {
-            "width": 500,
-            "height": 80
-        }
-    },
-    {
-        "id": "context_instruction",
-        "type": "textTemplate",
-        "data": {
-            "input": {
-                "text": ""
-            },
-            "template": "We are launching a new product called \"@product_name\". The primary goal of this campaign is to @campaign_goal. Our target audience is: @target_audience.",
-            "output": {
-                "text": "We are launching a new product called \"@product_name\". The primary goal of this campaign is to @campaign_goal. Our target audience is: @target_audience."
-            }
-        },
-        "position": {
-            "x": 1087,
-            "y": 482
-        },
-        "width": 400,
-        "height": 100,
-        "targetPosition": "left",
-        "sourcePosition": "right",
-        "$H": 532,
-        "x": 1087,
-        "y": 482,
-        "measured": {
-            "width": 400,
-            "height": 100
-        }
-    },
-    {
-        "id": "task_instruction",
-        "type": "textTemplate",
-        "data": {
-            "input": {
-                "text": ""
-            },
-            "template": "Your main objective is to write a detailed and persuasive @output_format that highlights the benefits of \"@product_name\".",
-            "output": {
-                "text": "Your main objective is to write a detailed and persuasive @output_format that highlights the benefits of \"@product_name\"."
-            }
-        },
-        "position": {
-            "x": 1095.3333333333333,
-            "y": 182
-        },
-        "width": 400,
-        "height": 80,
-        "targetPosition": "left",
-        "sourcePosition": "right",
-        "$H": 534,
-        "x": 1095.3333333333333,
-        "y": 182,
-        "measured": {
-            "width": 400,
-            "height": 80
-        }
-    },
-    {
-        "id": "constraints_instruction",
-        "type": "textTemplate",
-        "data": {
-            "input": {
-                "text": ""
-            },
-            "template": "Please adhere to the following guidelines:\nThe tone should be @tone_and_style.\nThe content should be approximately @word_count_range long.\nFocus on explaining *how* the product solves a problem for the target audience.\nIntegrate the following key features/benefits seamlessly:",
-            "output": {
-                "text": "Please adhere to the following guidelines:\nThe tone should be @tone_and_style.\nThe content should be approximately @word_count_range long.\nFocus on explaining *how* the product solves a problem for the target audience.\nIntegrate the following key features/benefits seamlessly:"
-            }
-        },
-        "position": {
-            "x": 512,
-            "y": 764
-        },
-        "width": 450,
-        "height": 150,
-        "targetPosition": "left",
-        "sourcePosition": "right",
-        "$H": 536,
-        "x": 512,
-        "y": 764,
-        "measured": {
-            "width": 450,
-            "height": 150
-        }
-    },
-    {
-        "id": "key_features_to_list",
-        "type": "textTransformLLM",
-        "data": {
-            "input": {
-                "text": ""
-            },
-            "currentText": "",
-            "output": {
-                "text": ""
-            }
-        },
-        "position": {
-            "x": 637,
-            "y": 644
-        },
-        "width": 200,
-        "height": 50,
-        "targetPosition": "left",
-        "sourcePosition": "right",
-        "$H": 538,
-        "x": 637,
-        "y": 644,
-        "measured": {
-            "width": 200,
-            "height": 50
-        }
-    },
+export const nodesVersion2 = [
     {
         "id": "constraints_instruction_join_text_key_features_to_list",
         "type": "node",
@@ -795,130 +431,23 @@ export const nodesVersion1 = [
             }
         },
         "position": {
-            "x": 1162,
-            "y": 652
+            "x": 1156,
+            "y": 860
         },
         "width": 200,
         "height": 50,
         "targetPosition": "left",
         "sourcePosition": "right",
-        "$H": 540,
+        "$H": 1095,
         "x": 1162,
         "y": 652,
         "measured": {
             "width": 200,
             "height": 50
-        }
+        },
+        "selected": false,
+        "dragging": false
     },
-    {
-        "id": "inclusion_instruction",
-        "type": "textTemplate",
-        "data": {
-            "input": {
-                "text": ""
-            },
-            "template": "- Ensure the call to action is prominent: '@call_to_action'.\n- Avoid jargon where possible, or explain it clearly if necessary.\n- Emphasize value proposition over just features.",
-            "output": {
-                "text": "- Ensure the call to action is prominent: '@call_to_action'.\n- Avoid jargon where possible, or explain it clearly if necessary.\n- Emphasize value proposition over just features."
-            }
-        },
-        "position": {
-            "x": 1112,
-            "y": 959
-        },
-        "width": 400,
-        "height": 100,
-        "targetPosition": "left",
-        "sourcePosition": "right",
-        "$H": 542,
-        "x": 1112,
-        "y": 959,
-        "measured": {
-            "width": 400,
-            "height": 100
-        }
-    },
-    {
-        "id": "format_specification",
-        "type": "textTemplate",
-        "data": {
-            "input": {
-                "text": ""
-            },
-            "template": "The output must be a well-structured @output_format with a catchy title, an engaging introduction, several body paragraphs, and a strong conclusion.",
-            "output": {
-                "text": "The output must be a well-structured @output_format with a catchy title, an engaging introduction, several body paragraphs, and a strong conclusion."
-            }
-        },
-        "position": {
-            "x": 1095.3333333333333,
-            "y": 12
-        },
-        "width": 400,
-        "height": 100,
-        "targetPosition": "left",
-        "sourcePosition": "right",
-        "$H": 544,
-        "x": 1095.3333333333333,
-        "y": 12,
-        "measured": {
-            "width": 400,
-            "height": 100
-        }
-    },
-    {
-        "id": "full_prompt",
-        "type": "textTemplate",
-        "data": {
-            "input": {
-                "text": ""
-            },
-            "template": "### Role:\n@role_instruction\n\n\n### Context:@context_instruction\n\n\n### Task:\n\n\n@task_instruction\n\n\n### Guidelines & Constraints:\n@constraints_instruction}\n\n@inclusion_instruction\n\n### Output Format:\n@format_specification\n\n\n### BEGIN CONTENT GENERATION ###\n",
-            "output": {
-                "text": "### Role:\n@role_instruction\n\n\n### Context:@context_instruction\n\n\n### Task:\n\n\n@task_instruction\n\n\n### Guidelines & Constraints:\n@constraints_instruction}\n\n@inclusion_instruction\n\n### Output Format:\n@format_specification\n\n\n### BEGIN CONTENT GENERATION ###\n"
-            }
-        },
-        "position": {
-            "x": 1662,
-            "y": 243
-        },
-        "width": 500,
-        "height": 300,
-        "targetPosition": "left",
-        "sourcePosition": "right",
-        "$H": 546,
-        "x": 1662,
-        "y": 243,
-        "measured": {
-            "width": 500,
-            "height": 300
-        }
-    },
-    {
-        "id": "note",
-        "type": "note",
-        "data": {
-            "markdown": "# Welcome to the Noodle Board! 🍜\n\n---\n\nHere's what you can do on the Noodle Board:\n\n* Describe your project to get better AI assistance (comments help! 💡).\n* This is a **procedural flow language** (Functional Paradigm). Take the output of one function and **pipe it into another** ➡️.\n* Login to your service 🔑, noodle the credentials into their API Node, then access data using the sockets. *Iterate*! 🔄\n* Build & test your **own** nodes 🛠️ and deploy them to your **own** API for autoscaling! 🚀\n* Be creative. Think different**ly**! ✨"
-        },
-        "position": {
-            "x": 37,
-            "y": 1004
-        },
-        "width": 350,
-        "height": 250,
-        "targetPosition": "left",
-        "sourcePosition": "right",
-        "$H": 548,
-        "x": 37,
-        "y": 1004,
-        "measured": {
-            "width": 350,
-            "height": 250
-        }
-    }
-];
-
-export const nodesVersion2 = [
     {
         "id": "product_name",
         "type": "textEditorRaw",
@@ -1310,41 +839,6 @@ export const nodesVersion2 = [
         "dragging": false
     },
     {
-        "id": "constraints_instruction_join_text_key_features_to_list",
-        "type": "node",
-        "data": {
-            "nid": "official_node_join_text",
-            "input": {
-                "text": "",
-                "text1": "",
-                "text2": "",
-                "text3": "",
-                "text4": ""
-            },
-            "currentText": "",
-            "output": {
-                "text": ""
-            }
-        },
-        "position": {
-            "x": 1156,
-            "y": 860
-        },
-        "width": 200,
-        "height": 50,
-        "targetPosition": "left",
-        "sourcePosition": "right",
-        "$H": 1095,
-        "x": 1162,
-        "y": 652,
-        "measured": {
-            "width": 200,
-            "height": 50
-        },
-        "selected": false,
-        "dragging": false
-    },
-    {
         "id": "inclusion_instruction",
         "type": "textTemplate",
         "data": {
@@ -1435,14 +929,68 @@ export const nodesVersion2 = [
         "dragging": false
     },
     {
+        "id": "full_prompt_viewer",
+        "type": "textEditor",
+        "data": {
+            "input": {
+                "text": ""
+            },
+            "currentText": "",
+            "output": {
+                "text": ""
+            }
+        },
+        "position": {
+            "x": 2800,
+            "y": 597
+        },
+        "width": 500,
+        "height": 300,
+        "targetPosition": "left",
+        "sourcePosition": "right",
+        "$H": 1101,
+        "x": 1662,
+        "y": 243,
+        "measured": {
+            "width": 500,
+            "height": 300
+        },
+        "selected": false,
+        "dragging": false
+    },
+    {
         "id": "note",
         "type": "note",
         "data": {
             "markdown": "# Noodler.xyz allows you to build with AI visually\n\nThe following is a prompt composition. It takes several variables (product_name, target_audience, campaign_goal, key_features, call_to_action, and more), and preprocesses these with templates and other LLM tools. It then compiles these into the final prompt, and sends this off to a Huggingface LLM. We then use another LLM to render an HTML webpage from this output."
         },
         "position": {
-            "x": 1772.888639858238,
+            "x": 2200,
             "y": 70.70263146508717
+        },
+        "width": 350,
+        "height": 250,
+        "targetPosition": "left",
+        "sourcePosition": "right",
+        "$H": 1103,
+        "x": 37,
+        "y": 1004,
+        "measured": {
+            "width": 350,
+            "height": 250
+        },
+        "selected": true,
+        "dragging": false
+    },
+    {
+        "id": "note2",
+        "type": "note",
+        "data": {
+            "markdown": "# This is the compiled prompt."
+        },
+        "position": {
+            "x": 2900,
+            "y": 360
         },
         "width": 350,
         "height": 250,
@@ -1461,6 +1009,14 @@ export const nodesVersion2 = [
 ];
 
 export const edgesVersion2 = [
+    {
+        "id": "a1",
+        "source": "full_prompt",
+        "sourceHandle": "output",
+        "target": "full_prompt_viewer",
+        "targetHandle": "input",
+        "style": "stroke:#D2D2D2; stroke-width:4;"
+    },
     {
         "id": "1",
         "source": "product_name",

@@ -22,14 +22,13 @@
     import "../../nodes.css";
     import ELK from 'elkjs/lib/elk.bundled.js';
     import { onMount } from "svelte";
-    import {nodesVersion0, nodesVersion1, nodesVersion2, edgesVersion2} from "./projectVersions";
+    import {edgesVersion2, nodesVersion0, nodesVersion2} from "./projectVersions";
     import Logo from "../../../../components/Logo.svelte";
-
-    const edgeStyle = 'stroke:#D2D2D2; stroke-width:4;';
+    import EmailSignup from "../../../../components/EmailSignup.svelte";
 
     let nodes = $state.raw<Node[]>(nodesVersion2);
 
-    let edges = $state.raw<Edge[]>(edgesVersion2);
+    let edges = $state.raw<Edge[]>([]);
 
     const nodeTypes = {
         note: NoteNode,
@@ -127,7 +126,7 @@
         // Let's rely on a slightly delayed layout after init.
         setTimeout(() => {
             handleFlowInit();
-        }, 200)
+        }, 200);
     });
 
 
@@ -139,6 +138,7 @@
         // can capture or that you can query from the DOM.
         // Since we've hardcoded dimensions in the `nodes` array for this example,
         // we can directly proceed with the layout.
+        edges = edgesVersion2;
         // onLayout('RIGHT');
     }
 
@@ -151,4 +151,7 @@
         <Background variant={BackgroundVariant.Dots}/>
         <MiniMap/>
     </SvelteFlow>
+    <div style="position: fixed;top: 0;left: 0;scale: 0.5">
+        <EmailSignup></EmailSignup>
+    </div>
 </div>

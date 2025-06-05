@@ -63,18 +63,21 @@
 
     // Process template with variables - this effect will update the output
     $effect(() => {
-        let result = data.template;
+        console.log(data, data.input)
+        if (data.input) {
+            let result = data.template;
 
-        // Replace each variable with its value from data.input
-        Object.entries(data.input).forEach(([key, value]) => {
-            const placeholder = `@${key}`;
-            // Ensure that if a variable is not provided, its placeholder remains or is replaced by empty string
-            result = result.replaceAll(placeholder, value || ''); // Replaced with empty string if value is falsy
-        });
+            // Replace each variable with its value from data.input
+            Object.entries(data.input).forEach(([key, value]) => {
+                const placeholder = `@${key}`;
+                // Ensure that if a variable is not provided, its placeholder remains or is replaced by empty string
+                result = result.replaceAll(placeholder, value || ''); // Replaced with empty string if value is falsy
+            });
 
-        // Only update if the output has actually changed
-        if (result !== data.output.text) {
-            updateNodeData(id, { output: { text: result } });
+            // Only update if the output has actually changed
+            if (result !== data.output.text) {
+                updateNodeData(id, {output: {text: result}});
+            }
         }
     });
 
@@ -207,18 +210,18 @@
         {/if}
     </div>
 
-    {#if templateVariables.length > 0}
-        <div class="bg-gray-100 border-t border-gray-300 rounded-b-lg p-2 text-xs">
-            <div class="text-gray-600 mb-1">Variables:</div>
-            <div class="flex flex-wrap gap-1">
-                {#each templateVariables() as variable}
-                    <span class="px-1 py-0.5 rounded text-xs {getTemplateVariable(variable) ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
-                        @{variable}
-                    </span>
-                {/each}
-            </div>
-        </div>
-    {/if}
+    <!--{#if templateVariables().length > 0}-->
+    <!--    <div class="bg-gray-100 border-t border-gray-300 rounded-b-lg p-2 text-xs">-->
+    <!--        <div class="text-gray-600 mb-1">Variables:</div>-->
+    <!--        <div class="flex flex-wrap gap-1">-->
+    <!--            {#each templateVariables() as variable}-->
+    <!--                <span class="px-1 py-0.5 rounded text-xs {getTemplateVariable(variable) ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">-->
+    <!--                    @{variable}-->
+    <!--                </span>-->
+    <!--            {/each}-->
+    <!--        </div>-->
+    <!--    </div>-->
+    <!--{/if}-->
 
     {#each templateVariables() as variable, index}
         <Handle

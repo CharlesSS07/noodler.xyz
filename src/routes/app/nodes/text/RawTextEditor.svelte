@@ -54,7 +54,7 @@
 
     // Whether to show input socket (only if input is empty and not connected)
     let showInputSocket = $derived(() => {
-        return (!data.input.text || data.input.text.trim() === '') && !hasInputConnection();
+        return (!data.input.text || data.input.text.trim() === '');
     });
 
     // Handle manual input
