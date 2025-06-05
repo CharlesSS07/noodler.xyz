@@ -1,316 +1,225 @@
-<!--Markdown text editor with input/output-->
-<!--When input is connected, shows rendered markdown (read-only)-->
-<!--When no input, allows editing markdown with click-to-edit functionality-->
-<!--Always outputs the current markdown text content-->
 <script module lang="ts">
-    import { type Node } from '@xyflow/svelte';
+    import type { Node } from '@xyflow/svelte';
 
-    export type MarkdownEditorNodeType = Node<
+    export type PlainTextNodeType = Node<
         {
-            inputText: string;
-            outputText: string;
+            input: { text: string };
+            currentText: string;
+            output: { text: string };
         },
-        'node-markdown-editor'
+        'node-plain-text'
     >;
 </script>
 
 <script lang="ts">
-    import { Handle, Position, type NodeProps } from '@xyflow/svelte';
-    import { marked } from 'marked';
-    import { getSocketDataTypeByName } from "../../lib/DataTypes";
+    import {
+        Handle,
+        Position,
+        useNodeConnections,
+        useSvelteFlow,
+        type NodeProps
+    } from '@xyflow/svelte';
 
-    let { id, data }: NodeProps<MarkdownEditorNodeType> = $props();
+    import { getSocketDataTypeByName } from '../../lib/DataTypes';
+    import { untrack } from 'svelte';
+    import { marked } from 'marked'; // Import marked
 
-    // State for markdown handling
-    let inputText: string = $state('');
-    let isEditing: boolean = $state(false);
-    let textareaRef: HTMLTextAreaElement;
+    let { id, data }: NodeProps<PlainTextNodeType> = $props();
 
-    // Initialize data.outputText if not set
-    if (!data.outputText) {
-        data.outputText = '# Hello World\n\nClick to edit this **markdown** content!\n\n- Item 1\n- Item 2\n- Item 3';
-    }
+    const { updateNodeData } = useSvelteFlow();
+    const connections = useNodeConnections();
+    let socketStyle = $state('');
 
-    // Socket styling
-    let inputSocketStyle = $state('');
-    let outputSocketStyle = $state('');
+    let isFocused = $state(false); // New state variable
 
-    getSocketDataTypeByName('text').then((datatype) => {
-        inputSocketStyle = datatype?.style || '';
-        outputSocketStyle = datatype?.style || '';
+    // Handle style loading
+    getSocketDataTypeByName('string').then((datatype) => {
+        socketStyle = datatype?.style || '';
     });
 
-    // Computed values
-    let hasInputText = $derived(inputText.trim() !== '');
-    let currentMarkdownText = $derived(hasInputText ? inputText : data.outputText || '');
-    let isReadOnly = $derived(hasInputText);
-    let renderedHtml = $derived.by(() => {
-        try {
-            return marked.parse(currentMarkdownText);
-        } catch (error) {
-            console.error('Markdown parsing error:', error);
-            return '<p>Error parsing markdown</p>';
-        }
-    });
+    // Whether the input socket is connected
+    let hasInputConnection = $derived(
+        () => connections.current.some((conn) => conn.target === id && conn.targetHandle === 'input')
+    );
 
-    // Handle input text changes (from connected nodes)
+    // Sync data.output.text depending on connection
     $effect(() => {
-        if (data.inputText && typeof data.inputText === 'string') {
-            inputText = data.inputText;
-            isEditing = false; // Exit edit mode when input is connected
+        if (hasInputConnection()) {
+            updateNodeData(id, {
+                output: { text: untrack(() => data.input.text) }
+            });
         } else {
-            inputText = '';
+            updateNodeData(id, {
+                output: { text: untrack(() => data.currentText) ?? '' }
+            });
         }
     });
 
-    // Always output the current text content
-    $effect(() => {
-        if (!hasInputText) {
-            // Only update output when we're in editor mode (not when input is connected)
-            data.outputText = data.outputText || '';
-        }
-    });
-
-    // Handle click to edit (only when not read-only)
-    function handleClick() {
-        if (!isReadOnly && !isEditing) {
-            isEditing = true;
-            // Focus textarea on next tick
-            setTimeout(() => {
-                if (textareaRef) {
-                    textareaRef.focus();
-                    textareaRef.setSelectionRange(textareaRef.value.length, textareaRef.value.length);
-                }
-            }, 0);
-        }
+    // Handle manual input
+    function handleManualInput(event: Event) {
+        const text = (event.target as HTMLTextAreaElement).value;
+        updateNodeData(id, {
+            currentText: text
+        });
     }
 
-    // Handle escape key
-    function handleKeydown(event: KeyboardEvent) {
-        if (event.key === 'Escape') {
-            event.preventDefault();
-            finishEditing();
-        }
-    }
-
-    // Handle blur (defocus)
-    function handleBlur() {
-        finishEditing();
-    }
-
-    // Finish editing and render markdown
-    function finishEditing() {
-        isEditing = false;
-    }
-
-    // Handle textarea input
-    function handleInput(event: Event) {
-        const target = event.target as HTMLTextAreaElement;
-        data.outputText = target.value;
-    }
-
-    // Auto-resize textarea
+    // Auto-resizing textarea
+    let textareaRef: HTMLTextAreaElement;
     function autoResize(textarea: HTMLTextAreaElement) {
         textarea.style.height = 'auto';
-        textarea.style.height = textarea.scrollHeight + 'px';
+        textarea.style.height = Math.max(40, textarea.scrollHeight) + 'px';
     }
-
-    // Resize textarea when editing starts
     $effect(() => {
-        if (isEditing && textareaRef) {
+        if (textareaRef) autoResize(textareaRef);
+    });
+
+    // Focus textarea when isFocused becomes true
+    $effect(() => {
+        if (isFocused && textareaRef) {
+            textareaRef.focus();
             autoResize(textareaRef);
         }
     });
 </script>
 
-<div class="w-full h-[200px] relative">
-    <!-- Markdown Editor/Renderer Display -->
-    <div class="w-full h-full border-2 border-gray-300 rounded-lg bg-white overflow-hidden">
-        {#if isEditing && !isReadOnly}
-            <!-- Edit Mode: Textarea -->
-            <textarea
+<div class="w-full h-fit relative">
+    <div
+            class="w-full border-2 border-gray-300 rounded-lg bg-white overflow-hidden"
+            tabindex="0"
+            onclick={() => {
+			if (!hasInputConnection()) {
+				isFocused = true;
+			}
+		}}
+            onfocus={() => {
+			if (!hasInputConnection()) {
+				isFocused = true;
+			}
+		}}
+    >
+        {#if isFocused && !hasInputConnection()}
+			<textarea
                     bind:this={textareaRef}
-                    value={data.outputText || ''}
-                    on:blur={handleBlur}
-                    on:keydown={handleKeydown}
-                    on:input={(e) => {
-                    handleInput(e);
-                    autoResize(e.target as HTMLTextAreaElement);
-                }}
-                    class="w-full h-full p-3 border-0 outline-none resize-none font-mono text-sm"
-                    placeholder="Enter your markdown here..."
-                    style="min-height: 100%;"
+                    value={data.currentText ?? ''}
+                    oninput={(e) => {
+					handleManualInput(e);
+					autoResize(e.target as HTMLTextAreaElement);
+				}}
+                    onblur={() => (isFocused = false)}
+                    class="w-full p-3 border-0 outline-none resize-none font-mono text-sm bg-white"
+                    placeholder="Enter plain text..."
             ></textarea>
         {:else}
-            <!-- Render Mode: Display rendered markdown -->
             <div
-                    class="w-full h-full overflow-auto p-3 cursor-pointer hover:bg-gray-50 transition-colors"
-                    class:cursor-default={isReadOnly}
-                    class:hover:bg-transparent={isReadOnly}
-                    on:click={handleClick}
-                    role="button"
-                    tabindex="0"
-                    on:keydown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        handleClick();
-                    }
-                }}
+                    class="w-full p-3 text-sm prose max-w-none"
+                    class:text-gray-700={hasInputConnection()}
+                    class:bg-gray-50={hasInputConnection()}
+                    class:bg-white={!hasInputConnection()}
+                    onclick={() => {
+					if (!hasInputConnection()) {
+						isFocused = true;
+					}
+				}}
+                    onkeypress={() => {
+					if (!hasInputConnection()) {
+						isFocused = true;
+					}
+				}}
             >
-                {#if currentMarkdownText.trim()}
-                    <!-- Render markdown content -->
-                    <div class="markdown-content">
-                        {@html renderedHtml}
-                    </div>
-                {:else}
-                    <!-- Empty state -->
-                    <div class="text-gray-400 text-center flex flex-col items-center justify-center h-full">
-                        <svg class="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                        <span class="text-sm">
-                            {isReadOnly ? 'No input content' : 'Click to edit markdown'}
-                        </span>
-                    </div>
-                {/if}
-            </div>
-        {/if}
-
-        <!-- Edit indicator -->
-        {#if isEditing}
-            <div class="absolute top-2 right-2 px-2 py-1 bg-blue-500 text-white text-xs rounded">
-                Editing (ESC to finish)
-            </div>
-        {/if}
-
-        <!-- Read-only indicator -->
-        {#if isReadOnly}
-            <div class="absolute top-2 right-2 px-2 py-1 bg-gray-500 text-white text-xs rounded">
-                Read-only
+                {@html marked.parse(hasInputConnection() ? data.input.text : data.currentText ?? '')}
             </div>
         {/if}
     </div>
 
-    <!-- Input handle for text -->
-    {#if !currentMarkdownText || currentMarkdownText===''}
-        <Handle
-                type="target"
-                position={Position.Left}
-                style="top:20%;{inputSocketStyle}"
-                id="input"
-                class="socket-handle"
-        />
-    {/if}
+    <Handle
+            type="target"
+            position={Position.Left}
+            style="top:50%;{socketStyle}"
+            id="input"
+            class="socket-handle"
+    />
 
-    <!-- Output handle for text -->
     <Handle
             type="source"
             position={Position.Right}
-            style="top:50%;{outputSocketStyle}"
+            style="top:50%;{socketStyle}"
             id="output"
             class="socket-handle"
     />
 </div>
 
 <style>
-    .markdown-content {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        line-height: 1.6;
-        color: #333;
+    .socket-handle {
+        width: 8px;
+        height: 8px;
     }
 
-    .markdown-content :global(h1) {
-        font-size: 1.5em;
-        font-weight: 600;
-        margin: 0.5em 0;
-        border-bottom: 1px solid #eee;
-        padding-bottom: 0.3em;
-    }
-
-    .markdown-content :global(h2) {
-        font-size: 1.3em;
-        font-weight: 600;
-        margin: 0.5em 0;
-    }
-
-    .markdown-content :global(h3) {
-        font-size: 1.1em;
-        font-weight: 600;
-        margin: 0.5em 0;
-    }
-
-    .markdown-content :global(p) {
-        margin: 0.5em 0;
-    }
-
-    .markdown-content ul ol {
-        margin: 0.5em 0;
-        padding-left: 1.5em;
-    }
-
-    .markdown-content :global(li) {
-        margin: 0.2em 0;
-    }
-
-    .markdown-content :global(code) {
-        background-color: #f5f5f5;
-        padding: 0.2em 0.4em;
-        border-radius: 3px;
-        font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-        font-size: 0.9em;
-    }
-
-    .markdown-content :global(pre) {
-        background-color: #f5f5f5;
-        padding: 1em;
-        border-radius: 5px;
-        overflow-x: auto;
-        margin: 0.5em 0;
-    }
-
-    .markdown-content :global(pre code) {
-        background: none;
-        padding: 0;
-    }
-
-    .markdown-content :global(blockquote) {
-        border-left: 4px solid #ddd;
-        margin: 0.5em 0;
-        padding-left: 1em;
-        color: #666;
-    }
-
-    .markdown-content :global(strong) {
-        font-weight: 600;
-    }
-
-    .markdown-content :global(em) {
+    textarea::placeholder {
+        color: #9ca3af;
         font-style: italic;
     }
 
-    .markdown-content :global(a) {
-        color: #0066cc;
-        text-decoration: none;
+    /* Basic prose styles for markdown rendering */
+    .prose :global(h1),
+    .prose :global(h2),
+    .prose :global(h3),
+    .prose :global(h4),
+    .prose :global(h5),
+    .prose :global(h6) {
+        font-weight: bold;
+        margin-top: 1em;
+        margin-bottom: 0.5em;
+        line-height: 1.25;
     }
 
-    .markdown-content :global(a:hover) {
+    .prose :global(h1) {
+        font-size: 1.5em;
+    }
+    .prose :global(h2) {
+        font-size: 1.25em;
+    }
+    .prose :global(h3) {
+        font-size: 1.1em;
+    }
+
+    .prose :global(p) {
+        margin-bottom: 1em;
+    }
+
+    .prose :global(ul),
+    .prose :global(ol) {
+        margin-left: 1.5em;
+        margin-bottom: 1em;
+    }
+
+    .prose :global(li) {
+        margin-bottom: 0.5em;
+    }
+
+    .prose :global(code) {
+        background-color: #f3f4f6; /* gray-100 */
+        padding: 0.2em 0.4em;
+        border-radius: 4px;
+        font-family: monospace;
+    }
+
+    .prose :global(pre) {
+        background-color: #f3f4f6; /* gray-100 */
+        padding: 1em;
+        border-radius: 6px;
+        overflow-x: auto;
+    }
+
+    .prose :global(blockquote) {
+        border-left: 4px solid #d1d5db; /* gray-300 */
+        padding-left: 1em;
+        color: #6b7280; /* gray-500 */
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    .prose :global(a) {
+        color: #2563eb; /* blue-600 */
         text-decoration: underline;
-    }
-
-    .markdown-content :global(table) {
-        border-collapse: collapse;
-        width: 100%;
-        margin: 0.5em 0;
-    }
-
-    .markdown-content th td {
-        border: 1px solid #ddd;
-        padding: 0.5em;
-        text-align: left;
-    }
-
-    .markdown-content :global(th) {
-        background-color: #f5f5f5;
-        font-weight: 600;
     }
 </style>

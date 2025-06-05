@@ -16,13 +16,17 @@
 	import '@xyflow/svelte/dist/style.css';
 
 	import NoteNode from './nodes/NoteNode.svelte';
-	import { rtdb } from '../../firebase';
+	import {auth, rtdb} from '../../firebase';
 	import StemNode from './StemNode.svelte';
 	import { onValue, ref, update, child, remove, off } from 'firebase/database';
 	import TextTemplateFillinNode from "./nodes/text/TextTemplateFillinNode.svelte";
 	import ImageNode from "./nodes/images/ImageNode.svelte";
 	import TextEditorNode from "./nodes/text/TextEditorNode.svelte";
 	import RawTextEditor from "./nodes/text/RawTextEditor.svelte";
+	import {onMount} from "svelte";
+	import type {ProjectControllerInterface} from "./lib/ProjectInterfaces";
+	import {FirebaseRTDBProjectController} from "./lib/FirebaseRTDBProjectController";
+	import {goto} from "$app/navigation";
 
 	let nodes = $state.raw<Node[]>([]);
 
@@ -384,10 +388,10 @@
 	});
 
 	// Helper functions for manual node operations
-	export function addNode(node: Omit<Node, 'id'>): void {
+	export function addNode(node: Omit<Node, 'id'>, id?: string): void {
 		try {
 			const newNode: Node = {
-				id: crypto.randomUUID(),
+				id: id || crypto.randomUUID(),
 				...node
 			};
 
@@ -433,28 +437,6 @@
 		}
 	}
 
-	export function updateEdge(edgeId: string, updates: Partial<Edge>): void {
-		if (!edgeId || !updates) return;
-
-		try {
-			edges = edges.map(edge =>
-					edge && edge.id === edgeId ? { ...edge, ...updates } : edge
-			);
-		} catch (error) {
-			console.error('Error updating edge:', error);
-		}
-	}
-
-	export function deleteEdge(edgeId: string): void {
-		if (!edgeId) return;
-
-		try {
-			edges = edges.filter(edge => edge && edge.id !== edgeId);
-		} catch (error) {
-			console.error('Error deleting edge:', error);
-		}
-	}
-
 	const nodeTypes = {
 		note: NoteNode,
 		node: StemNode, // a node which takes on the properties stored by the server
@@ -465,11 +447,54 @@
 		textEditorRaw: RawTextEditor
 	};
 
-	let selectedNodeNID = $state('official_node_image_cropper');
+	let selectedNodeNID = $state('official_node_fetch_url');
 
 	let colorMode: ColorMode = $state('light');
 
 	const connections = useNodeConnections();
+
+	async function executeSelectedNodes() {
+		// Step 1: Identify selected nodes
+		const selected: Node[] = nodes.filter(node => node.selected);
+		if (selected.length === 0) {
+			console.warn('No nodes selected for execution.');
+			return;
+		}
+
+
+	}
+
+	onMount(() => {
+
+		auth.authStateReady().then(() => {
+			console.log('Auth state ready');
+			setTimeout(() => {
+				const introNodeId = 'defaultIntroNodeId';
+				if (nodes.length == 0) {
+					addNode({
+						type: 'note',
+						data: {
+							markdown: `# Welcome to the Noodler!
+A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
+
+* Pan around by clicking and dragging on the canvas.
+* Scroll to zoom.
+* Add a node by clicking on one of the buttons above. Wire nodes together to create flow functionality.
+
+## TODO:
+1. Node search tool --> KNN over embeddings of node code, name, and descriptions. Also just plain old text comparison.
+2. More standard nodes
+3. Oauth integrations to cut costs
+4. NodeAI for developing new nodes
+5. FlowAI for developing flows`
+						},
+						position: {x: 0, y: 100}
+					}, introNodeId);
+				}
+			}, 500);
+		});
+	});
+
 
 </script>
 
@@ -501,7 +526,9 @@
 <button onclick={() => addNode({
 	type: 'textEditor',
 	data: {
-		markdown: ''
+		input: {text: ''},
+		currentText: '# markdown',
+		output: {text: ''}
 	},
 	position: { x: 0, y: 0 },
 })}>Add Md TextEditor</button> |
@@ -509,7 +536,9 @@
 <button onclick={() => addNode({
 	type: 'textTemplate',
 	data: {
-		markdown: ''
+		template: 'Hello @name. It is @degrees degrees F outside.',
+		input: {},
+		output: {text: ''},
 	},
 	position: { x: 0, y: 0 },
 })}>Add Text Template</button> |
@@ -517,7 +546,9 @@
 <button onclick={() => addNode({
 	type: 'textEditorRaw',
 	data: {
-		text: ''
+		input: {text: ''},
+		currentText: 'change me',
+		output: {text: ''}
 	},
 	position: { x: 0, y: 0 },
 })}>Add Raw TextEditor</button> |
@@ -540,6 +571,8 @@ Here's what you can do on the Noodle Board:
 	position: { x: 0, y: 100 }
 
 })}>Note</button> |
+
+<button onclick={() => executeSelectedNodes()}>Execute Selected Nodes</button>
 
 <div style="height: 100vh;">
 	<SvelteFlow bind:nodes bind:edges {nodeTypes} {colorMode} fitView>

@@ -1,1 +1,1 @@
-Comming soon. This will be where you can explore the noodle flows of other users.
+Coming soon. This will be where you can explore the noodle flows of other users.

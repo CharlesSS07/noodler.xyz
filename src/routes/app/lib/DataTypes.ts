@@ -2,6 +2,7 @@ export type SocketDataType = {
     name: string; // name is the unique identifier. there are no ids because then we could have overlapping names
     style: string;
     description: string;
+    type: string;
     childOfType?: string | undefined;
 }
 
@@ -10,15 +11,17 @@ function baseSocketStyle(color: string): string {
 }
 
 
-const DATATYPE_UNKNOWN = {
+export const DATATYPE_UNKNOWN = {
     name: 'unknown',
     style: baseSocketStyle('#FF00FF'), // magenta because that's like a missing asset in a video game
     description: 'Represents an unknown object. This could be anything. Introspect to find out.',
+    type: 'unknown'
 };
-const DATATYPE_UNREGISTERED = {
+export const DATATYPE_UNREGISTERED = {
     name: 'unregistered',
-    style: baseSocketStyle('#ff0000'), // magenta because that's like a missing asset in a video game
+    style: baseSocketStyle('#ff0000'),
     description: 'Represents an unknown object. This could be anything. Introspect to find out.',
+    type: 'unknown'
 };
 
 const standardDataTypes: SocketDataType[] = [
@@ -28,66 +31,67 @@ const standardDataTypes: SocketDataType[] = [
         name: 'number',
         style: baseSocketStyle('#e74c3c'),
         description: 'Holds a standard JavaScript number.',
+        type: 'number'
     },
     {
         name: 'string',
         style: baseSocketStyle('#3498db'),
         description: 'Holds a standard JavaScript string of text.',
+        type: 'string'
     },
     {
         name: 'text',
         style: baseSocketStyle('#3498db'),
         description: 'Holds a standard JavaScript string of text.',
+        type: 'string'
     },
     {
         name: 'boolean',
         style: baseSocketStyle('#9b59b6'),
         description: 'Holds a boolean value (true or false).',
+        type: 'boolean'
     },
     {
         name: 'object',
         style: baseSocketStyle('#f39c12'),
         description: 'Holds a standard JavaScript object.',
+        type: 'unknown'
     },
     {
         name: 'array',
         style: baseSocketStyle('#2ecc71'),
         description: 'Holds a standard JavaScript array.',
-    },
-    {
-        name: 'function',
-        style: baseSocketStyle('#e67e22'),
-        description: 'Represents a JavaScript function.',
+        type: 'unknown[]'
     },
     {
         name: 'any',
         style: baseSocketStyle('#95a5a6'),
         description: 'Can hold any type of data.',
-    },
-    {
-        name: 'void',
-        style: baseSocketStyle('#34495e'),
-        description: 'Represents the absence of any type value.',
+        type: 'unknown'
     },
     {
         name: 'json',
         style: baseSocketStyle('#1abc9c'),
         description: 'Holds data in JSON (JavaScript Object Notation) format.',
+        type: 'string'
     },
     {
         name: 'file',
         style: baseSocketStyle('#8e44ad'),
         description: 'Represents a file or file-like object.',
+        type: 'File'
     },
     {
         name: 'image/base64',
         style: baseSocketStyle('#6dff99'),
         description: 'Represents an image stored as a base64 string.',
+        type: 'string'
     },
     {
         name: 'image/jimp',
         style: baseSocketStyle('#00b900'),
         description: 'Represents an image stored as a JIMP (JS image processing library) object.',
+        type: 'JimpInstance'
     },
 ];
 

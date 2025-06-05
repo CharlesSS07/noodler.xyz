@@ -5,7 +5,7 @@
 
     export type HtmlRendererNodeType = Node<
         {
-            inputHtml: string;
+            input: {html: string};
         },
         'node-html-renderer'
     >;
@@ -89,8 +89,8 @@
 
     // Handle input HTML changes (from connected nodes)
     $effect(() => {
-        if (data.inputHtml && typeof data.inputHtml === 'string') {
-            inputHtml = data.inputHtml;
+        if (data.input.html && typeof data.input.html === 'string') {
+            inputHtml = data.input.html;
             updateIframeContent(inputHtml);
         } else {
             inputHtml = '';

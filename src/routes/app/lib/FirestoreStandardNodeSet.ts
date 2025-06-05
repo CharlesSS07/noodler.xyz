@@ -564,7 +564,7 @@ async function huggingfaceNodes() {
 	 * TODO: chat op, diffusion op, text2img op, ...
 	 */
 
-	const llm = await nodeBluePrintController.initOfficialNodeBluePrint('llm');
+	const llm = await nodeBluePrintController.initOfficialNodeBluePrint('promptdesign');
 	await llm.setTitle('Large Language Model (Huggingface)');
 	await llm.setDocumentation('Return output of LLM.');
 
@@ -620,7 +620,7 @@ outputs.set('output_text', output.generated_text);
 outputs.set('output_text_no_prompt', output.generated_text);
 `);
 
-	// 	await llm.setUnitTest(`
+	// 	await promptdesign.setUnitTest(`
 	// const inputs = new Map();
 	// const outputs = new Map();
 	//
@@ -825,6 +825,33 @@ async function promptDesignNodes() {
 
 	await joinText.setCode(
 		"outputs.set('text', inputs.text1+inputs.text2+inputs.text3+inputs.text4);"
+	);
+
+	const splitText = await nodeBluePrintController.initOfficialNodeBluePrint('split_text');
+	await splitText.setTitle('Split Text');
+	await splitText.setDocumentation("Splits text by seperator (sep).");
+
+	await splitText.newInputSocket('text', {
+		label: 'Text',
+		documentation: 'String of text.',
+		type: 'string',
+		params: new StringSocketParamsBuilder('').build()
+	});
+	await splitText.newInputSocket('sep', {
+		label: 'Seperator',
+		documentation: 'String of text.',
+		type: 'string',
+		params: new StringSocketParamsBuilder(',').build()
+	});
+
+	await splitText.newOutputSocket('splitText', {
+		label: 'Split Text',
+		documentation: 'Text. Split.',
+		type: 'unknown[]'
+	});
+
+	await splitText.setCode(
+		"outputs.set('splitText', inputs.text.split(inputs.sep));"
 	);
 
 	const paragraphInput = await nodeBluePrintController.initOfficialNodeBluePrint('paragraph_input');
@@ -1195,7 +1222,7 @@ outputs.set('html', d);
 	await fetchURL.newInputSocket('url', {
 		label: 'URL',
 		documentation: 'The URL to fetch data from.',
-		type: 'URL',
+		type: 'string',
 		params: new StringSocketParamsBuilder('').asWord().build()
 	});
 

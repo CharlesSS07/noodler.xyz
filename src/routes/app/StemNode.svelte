@@ -5,7 +5,8 @@
     export type StemNodeType = Node<
         {
             nid: NID;
-            socketValues: Record<string, unknown>;
+            input: Record<string, unknown>,
+            output: Record<string, unknown>,
         },
         'node-dna'
     >;
@@ -87,8 +88,8 @@
     }
 
     function ensureSocketDataDefined(socket_id: string, params: InputSocketParams) {
-        if (!data.socketValues[socket_id]) {
-            data.socketValues[socket_id] = params.default_value;
+        if (!data.input[socket_id]) {
+            data.input[socket_id] = params.default_value;
         }
     }
 </script>
@@ -165,7 +166,7 @@
                                 {/if}
                                 <input
                                         type="{convertDatatypeToInputType(socketType)}"
-                                        bind:value={data.socketValues[socket_id]}
+                                        bind:value={data.input[socket_id]}
                                 >
                             </div>
                         {:else}

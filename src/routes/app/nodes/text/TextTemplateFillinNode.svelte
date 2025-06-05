@@ -1,24 +1,30 @@
-<!--String template node with variable placeholders-->
-<!--Allows editing template text with @variable placeholders-->
-<!--Automatically fills in variables from connected input nodes-->
-<!--Outputs the processed template string-->
 <script module lang="ts">
     import { type Node } from '@xyflow/svelte';
 
-    export type StringTemplateNodeType = Node<
+    export type TemplateFillinNodeType = Node<
         {
-            template: string;
-            output: string;
+            input: Record<string, string>; // Stores connected input values for variables
+            template: string; // The user-defined template string
+            output: { text: string };
         },
-        'node-string-template'
+        'node-template-fillin'
     >;
 </script>
 
 <script lang="ts">
-    import { Handle, Position, useNodeConnections, useNodesData, useSvelteFlow, type NodeProps } from '@xyflow/svelte';
-    import { getSocketDataTypeByName } from "../../lib/DataTypes";
+    import {
+        Handle,
+        Position,
+        useNodeConnections,
+        useNodesData,
+        useSvelteFlow,
+        type NodeProps,
+        NodeResizeControl
+    } from '@xyflow/svelte';
+    import { getSocketDataTypeByName } from '../../lib/DataTypes';
+    import {Tooltip} from "flowbite-svelte";
 
-    let { id, data }: NodeProps<StringTemplateNodeType> = $props();
+    let { id, data }: NodeProps<TemplateFillinNodeType> = $props();
 
     const { updateNodeData } = useSvelteFlow();
     const connections = useNodeConnections();
@@ -42,8 +48,8 @@
         outputSocketStyle = datatype?.style || '';
     });
 
-    // Get all connected node data
-    let connectedNodesData = useNodesData(connections.current.map(conn => conn.source));
+    // Get all connected node data (though we'll use `data.input` which XYFlow handles)
+    let connectedNodesData = useNodesData(connections.current.map((conn) => conn.source));
 
     // Extract unique variables from template
     let templateVariables = $derived(() => {
@@ -51,51 +57,24 @@
         if (!matches) return [];
 
         // Get unique variable names (remove @ prefix and dedupe)
-        const uniqueVars = [...new Set(matches.map(match => match.slice(1)))];
+        const uniqueVars = [...new Set(matches.map((match) => match.slice(1)))];
         return uniqueVars;
-    });
-
-    // Create variable map from connected nodes
-    let variableMap = $derived(() => {
-        const map: Record<string, string> = {};
-
-        connections.current.forEach((connection, index) => {
-            const nodeData = connectedNodesData.current[index];
-            if (nodeData?.data) {
-                // Try to get text from various possible properties
-                let value = '';
-                if (typeof nodeData.data.output === 'string') {
-                    value = nodeData.data.output;
-                } else if (typeof nodeData.data.outputText === 'string') {
-                    value = nodeData.data.outputText;
-                } else if (typeof nodeData.data.text === 'string') {
-                    value = nodeData.data.text;
-                } else if (typeof nodeData.data === 'string') {
-                    value = nodeData.data;
-                }
-
-                // Use the target handle id as the variable name, or fall back to index
-                const variableName = connection.targetHandle || `var${index + 1}`;
-                map[variableName] = value;
-            }
-        });
-
-        return map;
     });
 
     // Process template with variables - this effect will update the output
     $effect(() => {
         let result = data.template;
 
-        // Replace each variable with its value
-        Object.entries(variableMap).forEach(([key, value]) => {
+        // Replace each variable with its value from data.input
+        Object.entries(data.input).forEach(([key, value]) => {
             const placeholder = `@${key}`;
-            result = result.replaceAll(placeholder, value || `@${key}`);
+            // Ensure that if a variable is not provided, its placeholder remains or is replaced by empty string
+            result = result.replaceAll(placeholder, value || ''); // Replaced with empty string if value is falsy
         });
 
         // Only update if the output has actually changed
-        if (result !== data.output) {
-            updateNodeData(id, { output: result });
+        if (result !== data.output.text) {
+            updateNodeData(id, { output: { text: result } });
         }
     });
 
@@ -107,6 +86,7 @@
                 if (textareaRef) {
                     textareaRef.focus();
                     textareaRef.setSelectionRange(textareaRef.value.length, textareaRef.value.length);
+                    autoResize(textareaRef); // Ensure correct size on focus
                 }
             }, 0);
         }
@@ -136,10 +116,13 @@
         updateNodeData(id, { template: target.value });
     }
 
-    // Auto-resize textarea
+    // Auto-resize textarea based on scrollHeight, with a minimum height
     function autoResize(textarea: HTMLTextAreaElement) {
-        textarea.style.height = 'auto';
-        textarea.style.height = textarea.scrollHeight + 'px';
+        textarea.style.height = 'auto'; // Reset height
+        // Set a minimum height based on a few rows for better UX
+        // text-sm has line-height: 1.25rem = 20px (assuming 1rem = 16px)
+        const minHeightBasedOnRows = 3 * 20; // 3 rows * 20px/row
+        textarea.style.height = Math.max(minHeightBasedOnRows, textarea.scrollHeight) + 'px';
     }
 
     // Resize textarea when editing starts
@@ -149,21 +132,27 @@
         }
     });
 
+    // Check if a template variable has a connected value
+    function getTemplateVariable(varname: string): string | boolean {
+        if (data && data.input) {
+            // Check if the variable exists as a key in data.input and has a non-empty value
+            return typeof data.input[varname] === 'string' && data.input[varname] !== '';
+        }
+        return false;
+    }
+
     // Highlight variables in display text
     function highlightVariables(text: string): string {
         return text.replace(/@(\w+)/g, (match, varName) => {
-            const hasValue = variableMap[varName];
+            const hasValue = getTemplateVariable(varName);
             const className = hasValue ? 'variable-filled' : 'variable-empty';
             return `<span class="${className}">${match}</span>`;
         });
     }
 </script>
 
-<div class="w-full h-[200px] relative">
-    <!-- Template Editor/Display -->
-    <div class="w-full h-full border-2 border-gray-300 rounded-lg bg-white overflow-hidden">
-        {#if isEditing}
-            <!-- Edit Mode: Textarea -->
+<div class="w-[300px] max-w-[400px] flex flex-col border-2 border-gray-300 rounded-lg bg-white relative">
+    <div class="p-3"> {#if isEditing}
             <textarea
                     bind:this={textareaRef}
                     value={data.template}
@@ -173,40 +162,44 @@
                     handleInput(e);
                     autoResize(e.target as HTMLTextAreaElement);
                 }}
-                    class="w-full h-full p-3 border-0 outline-none resize-none font-mono text-sm"
+                    class="w-full border-0 outline-none resize-y font-mono text-sm"
                     placeholder="Enter template with @variable placeholders..."
-                    style="min-height: 100%;"
+                    rows="3"
+                    style="min-height: 60px;"
             ></textarea>
-        {:else}
-            <!-- Display Mode: Show template with highlighted variables -->
-            <div
-                    class="w-full h-full overflow-auto p-3 cursor-pointer hover:bg-gray-50 transition-colors"
-                    on:click={handleClick}
-                    role="button"
-                    tabindex="0"
-                    on:keydown={(e) => {
+    {:else}
+        <div
+                class="min-h-[60px] overflow-auto cursor-pointer hover:bg-gray-50 transition-colors"
+                on:click={handleClick}
+                role="button"
+                tabindex="0"
+                on:keydown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
                         handleClick();
                     }
                 }}
-            >
-                {#if data.template.trim()}
-                    <div class="template-display font-mono text-sm whitespace-pre-wrap">
-                        {@html highlightVariables(data.template)}
-                    </div>
-                {:else}
-                    <div class="text-gray-400 text-center flex flex-col items-center justify-center h-full">
-                        <svg class="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        <span class="text-sm">Click to edit template</span>
-                    </div>
-                {/if}
-            </div>
-        {/if}
+        >
+            {#if data.template.trim()}
+                <div class="template-display font-mono text-sm whitespace-pre-wrap">
+                    {@html highlightVariables(data.template)}
+                </div>
+            {:else}
+                <div class="text-gray-400 text-center flex flex-col items-center justify-center h-full">
+                    <svg class="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                        />
+                    </svg>
+                    <span class="text-sm">Click to edit template</span>
+                </div>
+            {/if}
+        </div>
+    {/if}
 
-        <!-- Edit indicator -->
         {#if isEditing}
             <div class="absolute top-2 right-2 px-2 py-1 bg-blue-500 text-white text-xs rounded">
                 Editing (ESC to finish)
@@ -214,13 +207,12 @@
         {/if}
     </div>
 
-    <!-- Variable info panel -->
     {#if templateVariables.length > 0}
-        <div class="absolute -bottom-1 left-0 right-0 bg-gray-100 border border-gray-300 rounded-b-lg p-2 text-xs">
+        <div class="bg-gray-100 border-t border-gray-300 rounded-b-lg p-2 text-xs">
             <div class="text-gray-600 mb-1">Variables:</div>
             <div class="flex flex-wrap gap-1">
                 {#each templateVariables() as variable}
-                    <span class="px-1 py-0.5 rounded text-xs {variableMap[variable] ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
+                    <span class="px-1 py-0.5 rounded text-xs {getTemplateVariable(variable) ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
                         @{variable}
                     </span>
                 {/each}
@@ -228,18 +220,17 @@
         </div>
     {/if}
 
-    <!-- Input handles for variables -->
     {#each templateVariables() as variable, index}
         <Handle
                 type="target"
                 position={Position.Left}
-                style="top:{20 + (index * 20)}%;{inputSocketStyle}"
+                style="top:{5 + index * 10}%;{inputSocketStyle}"
                 id={variable}
                 class="socket-handle"
         />
+        <Tooltip placement="left">{variable}</Tooltip>
     {/each}
 
-    <!-- Output handle -->
     <Handle
             type="source"
             position={Position.Right}

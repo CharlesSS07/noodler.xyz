@@ -1,5 +1,6 @@
 <script>
     import DiscordJoin from "../../components/DiscordJoin.svelte";
+    import Logo from "../../components/Logo.svelte";
 
     const email = "c-shelby-07@proton.me";
     const instagram = "https://www.instagram.com/_._shelbs__/";
@@ -50,6 +51,8 @@
     }
 </style>
 
+<Logo/>
+
 <div class="card">
     <h1>Let's Make Something Amazing</h1>
     <p>
@@ -63,3 +66,5 @@
         <DiscordJoin size="60px"></DiscordJoin>
     </div>
 </div>
+
+<Logo/>

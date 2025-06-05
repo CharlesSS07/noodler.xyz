@@ -8,8 +8,8 @@
 
     export type ImageNodeType = Node<
         {
-            outputImage: JimpInstance;
-            inputImage: JimpInstance;
+            output: {image: JimpInstance};
+            input: {image: JimpInstance};
         },
         'node-dna'
     >;
@@ -68,7 +68,7 @@
 
                 // Output the loaded image
                 //@ts-ignore
-                data.outputImage = loadedImage;
+                data.output.image = loadedImage;
             } catch (error) {
                 console.error('Error loading image:', error);
             }
@@ -77,15 +77,15 @@
 
     // Handle input image changes (from connected nodes)
     $effect(() => {
-        if (data.inputImage) {
-            inputImage = data.inputImage;
+        if (data.input.image) {
+            inputImage = data.input.image;
             // Pass through the input image
-            data.outputImage = inputImage;
+            data.output.image = inputImage;
         } else {
             inputImage = null;
             // Output loaded image if available
             //@ts-ignore
-            data.outputImage = loadedImage;
+            data.output.image = loadedImage;
         }
     });
 </script>

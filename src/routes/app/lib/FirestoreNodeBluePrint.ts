@@ -29,6 +29,7 @@ import {
 	type UserFunction,
 	userFunctionAllowedModules
 } from './Execution.js';
+import {label} from "flowbite-svelte";
 
 const nodeBluePrintsRef = collection(firestore, 'nodes');
 
@@ -107,6 +108,12 @@ class FirestoreSocketBluePrintController implements SocketBluePrintControllerInt
 
 	async isHidden() {
 		return (await this.getSocketData('disabled')) as boolean;
+	}
+
+	notRequired(): void {
+	}
+
+	required(): void {
 	}
 }
 
