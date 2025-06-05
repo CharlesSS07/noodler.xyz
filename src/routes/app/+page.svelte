@@ -40,10 +40,10 @@
 
 </script>
 
-Project Key: {project_key}
+<!--Project Key: {project_key}-->
 {#if project_key!==project_key_not_assigned}
 	<SignedIn>
-		User: {auth?.currentUser?.displayName}
+<!--		User: {auth?.currentUser?.displayName}-->
 		<FlowGraph {project_key}></FlowGraph>
 	</SignedIn>
 {/if}

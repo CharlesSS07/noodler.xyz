@@ -63,7 +63,6 @@
 
     // Process template with variables - this effect will update the output
     $effect(() => {
-        console.log(data, data.input)
         if (data.input) {
             let result = data.template;
 
