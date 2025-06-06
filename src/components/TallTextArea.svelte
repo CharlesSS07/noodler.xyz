@@ -1,11 +1,11 @@
-<script>
+<script lang="ts">
     import { onMount } from 'svelte';
 
-    let textareaElement; // This will hold a reference to the textarea DOM element
-    export let textContent = ''; // The bound value of the textarea
+    let textareaElement: HTMLTextAreaElement; // This will hold a reference to the textarea DOM element
+    export let textContent: string = ''; // The bound value of the textarea
 
     // Function to adjust the height of the textarea
-    function adjustHeight() {
+    function adjustHeight(): void {
         if (textareaElement) {
             textareaElement.style.height = 'auto'; // Reset height to recalculate
             textareaElement.style.height = textareaElement.scrollHeight + 'px';

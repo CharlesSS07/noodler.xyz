@@ -1,17 +1,17 @@
-<script>
-    export let textSize = 10;
-    export let font = 'Inter';
+<script lang="ts">
+    export let textSize: number = 10;
+    export let font: string = 'Inter';
 
     // Reactive variable to control the blur state.
     // It starts as false, meaning the logo is in focus.
-    let isBlurred = false;
+    let isBlurred: boolean = false;
 
     // Reactive variable to hold the dynamically generated text-shadow style.
     // Initialized to the in-focus shadow.
-    let dynamicTextShadow = '-1px 0 2px rgba(255, 0, 0, 0.4), 1px 0 2px rgba(0, 255, 0, 0.4), 0 0 5px rgba(255, 255, 255, 0.5)';
+    let dynamicTextShadow: string = '-1px 0 2px rgba(255, 0, 0, 0.4), 1px 0 2px rgba(0, 255, 0, 0.4), 0 0 5px rgba(255, 255, 255, 0.5)';
 
     // Reference to the noodler-text element, used to get its position and dimensions.
-    let noodlerTextElement;
+    let noodlerTextElement: HTMLElement;
 
     /**
      * Generates a random integer within a specified range (inclusive).

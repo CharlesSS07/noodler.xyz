@@ -1,38 +1,35 @@
 <!-- functions/routes/auth/FlowGraph.svelte -->
-<script>
+<script lang="ts">
 	import { userStore } from 'sveltefire';
 	import {
 		signInWithEmailAndPassword,
 		createUserWithEmailAndPassword,
 		signInWithPopup,
 		GoogleAuthProvider,
-		signOut
+		signOut,
+		type AuthError
 	} from 'firebase/auth';
 	import { goto } from '$app/navigation';
 	import { auth } from '../../firebase/index.js';
-	import { page } from '$app/state';
-	import {onMount} from "svelte";
+	import { onMount } from "svelte";
 
 	const user = userStore(auth);
 	const googleProvider = new GoogleAuthProvider();
 
-	let email = '';
-	let password = '';
-	let isLogin = true;
-	let loading = false;
-	let error = '';
-	let redirectBackTo = '/app';
+	let email: string = '';
+	let password: string = '';
+	let isLogin: boolean = true;
+	let loading: boolean = false;
+	let error: string = '';
+	let redirectBackTo: string = '/app';
 
 	onMount(() => {
 		const url = new URL(window.location.href);
 		const params = new URLSearchParams(url.search);
 		redirectBackTo = params.get('from') || redirectBackTo;
-	})
+	});
 
-
-	// let redirectBackTo = page.url.searchParams.get('from') || '/my-projects/app';
-
-	async function handleEmailAuth() {
+	async function handleEmailAuth(): Promise<void> {
 		if (!email || !password) {
 			error = 'Please fill in all fields';
 			return;
@@ -47,37 +44,40 @@
 			} else {
 				await createUserWithEmailAndPassword(auth, email, password);
 			}
-			goto(redirectBackTo); // redirect after successful auth
+			goto(redirectBackTo);
 		} catch (err) {
-			error = err.message;
+			const authError = err as AuthError;
+			error = authError.message;
 		} finally {
 			loading = false;
 		}
 	}
 
-	async function handleGoogleAuth() {
+	async function handleGoogleAuth(): Promise<void> {
 		loading = true;
 		error = '';
 
 		try {
 			await signInWithPopup(auth, googleProvider);
-			goto(redirectBackTo); // redirect after successful auth
+			goto(redirectBackTo);
 		} catch (err) {
-			error = err.message;
+			const authError = err as AuthError;
+			error = authError.message;
 		} finally {
 			loading = false;
 		}
 	}
 
-	async function handleSignOut() {
+	async function handleSignOut(): Promise<void> {
 		try {
 			await signOut(auth);
 		} catch (err) {
-			error = err.message;
+			const authError = err as AuthError;
+			error = authError.message;
 		}
 	}
 
-	function toggleMode() {
+	function toggleMode(): void {
 		isLogin = !isLogin;
 		error = '';
 		email = '';

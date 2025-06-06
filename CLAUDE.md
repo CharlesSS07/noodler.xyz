@@ -20,6 +20,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Tests use Vitest framework (configured in package.json)
 - Test files follow pattern: `*.test.ts`
 
+### TypeScript
+- All Svelte components use `<script lang="ts">`
+- Explicit return types on functions
+- No `any` types - use proper type constraints
+- Firebase types imported from respective packages
+
 ## Architecture
 
 This is a SvelteKit application that implements a visual node-based flow editor with Firebase backend integration.
@@ -34,15 +40,24 @@ This is a SvelteKit application that implements a visual node-based flow editor 
 - `SocketStem.svelte` - Handles socket connections and data propagation
 - Individual node implementations in `src/routes/app/nodes/` (text, images, html, etc.)
 
+**Node Search & Discovery**:
+- `src/lib/services/NodeSearchService.ts` - Firestore-based node search with text matching and categorization
+- `src/lib/components/NodeSearch.svelte` - Modal search interface with live filtering
+- Search by text, category, trust level, and socket compatibility
+- Accessible via Tab key or "Add Node" button
+- Click on empty canvas space to add nodes at specific positions
+
+**State Management**:
+- `src/lib/stores/AppState.ts` - Central application state using Svelte stores
+- `src/lib/stores/ProjectState.ts` - Project-specific state with Firebase RTDB sync
+- All state changes go through centralized actions
+- Auto-save functionality with 2-second debounce
+
 **Project Management**:
 - `FirebaseRTDBProjectController.ts` - Manages project persistence using Firebase Realtime Database
 - `ProjectModels.ts` & `ProjectInterfaces.ts` - Define project data structures and interfaces
 - Projects are identified by URL parameter `pid` and stored per-user in Firebase
-
-**Execution System**:
-- `Execution.ts` - Handles running node graphs and data propagation between connected nodes
-- Nodes can have user-defined code snippets that execute when the node runs
-- Output from one node flows to connected input sockets of other nodes
+- Real-time synchronization via Firebase RTDB listeners
 
 **Firebase Integration**:
 - Authentication with anonymous sign-in support
@@ -53,6 +68,9 @@ This is a SvelteKit application that implements a visual node-based flow editor 
 ### Key Patterns
 
 - Node types are defined as Svelte components with standardized socket interfaces
-- Data flows through the graph via socket connections
-- Project state is synchronized in real-time via Firebase
+- Centralized state management using Svelte stores with Firebase synchronization
+- All UI state changes go through centralized actions for predictability
+- Real-time collaboration via Firebase RTDB listeners
+- Auto-save with debouncing to prevent excessive Firebase writes
+- TypeScript throughout with proper type safety
 - Each node type has input/output socket definitions that determine what data it accepts/produces

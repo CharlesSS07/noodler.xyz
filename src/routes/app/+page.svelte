@@ -6,42 +6,52 @@
 	import { auth } from '../../firebase';
 	import './nodes.css';
 
-	import {FirebaseRTDBProjectCollection, type FirebaseRTDBProjectKey} from './lib/FirebaseRTDBProjectController.js';
+	import { FirebaseRTDBProjectCollection, type FirebaseRTDBProjectKey } from './lib/FirebaseRTDBProjectController.js';
 	import type { ProjectCollectionInterface } from './lib/ProjectInterfaces.js';
-	export const ACTIVE_PROJECT_COLLECTION: ProjectCollectionInterface<FirebaseRTDBProjectKey> =
-			new FirebaseRTDBProjectCollection();
-
+	import { appActions, currentUser } from '../../lib/stores/AppState.js';
 	import { onMount } from "svelte";
 
+	export const ACTIVE_PROJECT_COLLECTION: ProjectCollectionInterface<FirebaseRTDBProjectKey> =
+		new FirebaseRTDBProjectCollection();
+
 	const project_key_not_assigned = 'project_key_not_assigned';
-	let project_key = project_key_not_assigned;
+	let project_key: string = project_key_not_assigned;
 
 	onMount(() => {
-
 		const url = new URL(window.location.href);
 		const params = new URLSearchParams(url.search);
 		project_key = params.get('pid') || project_key;
 
-		console.log('project_key', project_key);
+		console.log('project_key from URL:', project_key);
 
-		auth.authStateReady().then(() => {
-			if ((auth.currentUser && (!project_key || project_key == project_key_not_assigned) || project_key == '')) {
-				ACTIVE_PROJECT_COLLECTION.newProject('New Flow', '').then(
-					(newProject: FirebaseRTDBProjectKey) => {
-						project_key = newProject.project_key;
-						goto(`/app?pid=${project_key}`);
-					}
-				);
-			}
-		});
-	})
+		// If we have a project_key from URL, use it directly
+		if (project_key && project_key !== project_key_not_assigned) {
+			console.log('Using project_key from URL:', project_key);
+		} else {
+			// Only create new project if user is authenticated and no project_key
+			auth.authStateReady().then(() => {
+				if (auth.currentUser && (!project_key || project_key === project_key_not_assigned || project_key === '')) {
+					console.log('Creating new project for authenticated user');
+					ACTIVE_PROJECT_COLLECTION.newProject('New Flow', '').then(
+						(newProject: FirebaseRTDBProjectKey) => {
+							project_key = newProject.project_key;
+							goto(`/app?pid=${project_key}`);
+						}
+					);
+				}
+			});
+		}
+	});
 
 </script>
 
 <!--Project Key: {project_key}-->
 {#if project_key!==project_key_not_assigned}
+	<!-- Allow direct access to projects with valid project_key for collaboration testing -->
+	<FlowGraph {project_key}></FlowGraph>
+{:else}
+	<!-- Require auth only when creating new projects -->
 	<SignedIn>
-<!--		User: {auth?.currentUser?.displayName}-->
 		<FlowGraph {project_key}></FlowGraph>
 	</SignedIn>
 {/if}

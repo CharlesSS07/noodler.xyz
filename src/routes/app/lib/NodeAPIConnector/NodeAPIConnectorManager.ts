@@ -27,20 +27,19 @@ export abstract class NodeLib<T extends object> {
 }
 
 export class NodeAPIConnectorManager {
-    static connections: Map<string, NodeLib<any>> = new Map<
+    static connections: Map<string, NodeLib<object>> = new Map<
         string,
-        NodeLib<any>
+        NodeLib<object>
     >();
 
-    static registerAPIConnector<T extends object>(connector: NodeLib<T>) {
+    static registerAPIConnector<T extends object>(connector: NodeLib<T>): NodeLib<T> {
         NodeAPIConnectorManager.connections.set(connector.name, connector);
         console.log(connector);
         return connector;
     }
 
     static getConnector<T extends object>(name: string): NodeLib<T> {
-        const ret: NodeLib<T> | undefined =
-            NodeAPIConnectorManager.connections.get(name);
+        const ret = NodeAPIConnectorManager.connections.get(name) as NodeLib<T> | undefined;
         if (!ret) throw new Error(`Connector not registered:${name}`);
         return ret;
     }

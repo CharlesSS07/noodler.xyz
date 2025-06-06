@@ -1,7 +1,12 @@
-import { APIConnector } from './APIConnector.ts';
-import { HfInference } from '@huggingface/inference';
+import { NodeLib } from './NodeAPIConnectorManager.js';
 
-export class HuggingfaceNodeAPIConnector extends APIConnector<HfInference> {
+// Temporary interface until @huggingface/inference is properly installed
+interface HfInference {
+    textGeneration(params: Record<string, unknown>): Promise<{ generated_text: string }>;
+    textToImage(params: Record<string, unknown>): Promise<Blob>;
+}
+
+export class HuggingfaceNodeAPIConnector extends NodeLib<HfInference> {
     static KEY = 'huggingface-inference';
     HF_TOKEN: string;
 
@@ -11,6 +16,7 @@ export class HuggingfaceNodeAPIConnector extends APIConnector<HfInference> {
     }
 
     async setupConnection(): Promise<void> {
-        this.connection = new HfInference(this.HF_TOKEN);
+        // TODO: Implement once @huggingface/inference is installed
+        throw new Error('HuggingFace connector not yet implemented');
     }
 }
