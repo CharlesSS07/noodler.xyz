@@ -9,17 +9,6 @@ import {
 } from 'firebase/firestore';
 import { firestore } from '../../../firebase';
 import type {
-	InputSocketBluePrintControllerInterface,
-	SocketBluePrintControllerInterface
-} from './SocketInterfaces.js';
-import type {
-	InputSocketModel,
-	InputSocketParams,
-	OutputSocketModel,
-	SocketID
-} from './SocketModels.js';
-import { NID } from './NodeModels.js';
-import type {
 	NodeBluePrintControllerFactoryInterface,
 	NodeBluePrintControllerInterface,
 	NodeBluePrintModel
@@ -29,131 +18,10 @@ import {
 	type UserFunction,
 	userFunctionAllowedModules
 } from './Execution.js';
-import {label} from "flowbite-svelte";
+import {v4 as uuidv4} from "uuid";
+import type {InputSocketModel, InputSocketParams, OutputSocketModel, SocketID} from "./SocketModels";
 
 const nodeBluePrintsRef = collection(firestore, 'nodes');
-
-class FirestoreSocketBluePrintController implements SocketBluePrintControllerInterface {
-	nodeBluePrint: FirestoreNodeBluePrintController;
-	socket_key: SocketID;
-	isInput: boolean;
-
-	constructor(
-		nodeBluePrint: FirestoreNodeBluePrintController,
-		socket_key: SocketID,
-		isInput: boolean
-	) {
-		this.nodeBluePrint = nodeBluePrint;
-		this.socket_key = socket_key;
-		this.isInput = isInput;
-	}
-
-	protected async getSocketData(attributeName: string): Promise<unknown> {
-		if (this.isInput)
-			return await getDoc(this.nodeBluePrint.getNodeBluePrintRef()).then(async (snapshot) => {
-				return await snapshot.get(`input_sockets.${this.socket_key}.${attributeName}`);
-			});
-		else
-			return await getDoc(this.nodeBluePrint.getNodeBluePrintRef()).then(async (snapshot) => {
-				return await snapshot.get(`output_sockets.${this.socket_key}.${attributeName}`);
-			});
-	}
-
-	protected async setSocketData(attributeName: string, value: unknown) {
-		if (this.isInput)
-			await updateDoc(
-				this.nodeBluePrint.getNodeBluePrintRef(),
-				`input_sockets.${this.socket_key}.params.${attributeName}`,
-				value
-			);
-		else
-			await updateDoc(
-				this.nodeBluePrint.getNodeBluePrintRef(),
-				`output_sockets.${this.socket_key}.params.${attributeName}`,
-				value
-			);
-	}
-
-	async getLabel() {
-		return (await this.getSocketData('label')) as string;
-	}
-
-	setLabel(label: string) {
-		this.setSocketData('label', label);
-	}
-
-	async getDocumentation() {
-		return (await this.getSocketData('documentation')) as string;
-	}
-
-	setDocumentation(documentation: string) {
-		this.setSocketData('documentation', documentation);
-	}
-
-	async getType() {
-		return (await this.getSocketData('type')) as string;
-	}
-
-	setType(type: string) {
-		this.setSocketData('type', type);
-	}
-
-	hide() {
-		this.setSocketData('disabled', true);
-	}
-
-	unhide() {
-		this.setSocketData('disabled', false);
-	}
-
-	async isHidden() {
-		return (await this.getSocketData('disabled')) as boolean;
-	}
-
-	notRequired(): void {
-	}
-
-	required(): void {
-	}
-}
-
-export class FirestoreInputSocketBluePrintController
-	extends FirestoreSocketBluePrintController
-	implements InputSocketBluePrintControllerInterface
-{
-	constructor(nodeBluePrint: FirestoreNodeBluePrintController, socket_key: SocketID) {
-		super(nodeBluePrint, socket_key, true);
-	}
-
-	async getParams(): Promise<object> {
-		// warning: outputs do not have a config
-		return (await this.getSocketData('params')) as unknown as object;
-	}
-
-	async setParams(params: object) {
-		await this.setSocketData('params', params);
-	}
-
-	async getSocketParam(paramName: string): Promise<unknown> {
-		return await getDoc(this.nodeBluePrint.getNodeBluePrintRef()).then(async (snapshot) => {
-			return await snapshot.get(`input_sockets.${this.socket_key}.params.${paramName}`);
-		});
-	}
-
-	async setSocketParam(paramName: string, value: unknown) {
-		await updateDoc(
-			this.nodeBluePrint.getNodeBluePrintRef(),
-			`input_sockets.${this.socket_key}.params.${paramName}`,
-			value
-		);
-	}
-}
-
-export class FirestoreOutputSocketParamController extends FirestoreSocketBluePrintController {
-	constructor(nodeBluePrint: FirestoreNodeBluePrintController, socket_key: SocketID) {
-		super(nodeBluePrint, socket_key, false);
-	}
-}
 
 export class FirestoreNodeBluePrintControllerFactoryInterface
 	implements NodeBluePrintControllerFactoryInterface
@@ -196,7 +64,7 @@ export class FirestoreNodeBluePrintControllerFactoryInterface
 		author_uid: string,
 		hint?: string | undefined
 	): Promise<FirestoreNodeBluePrintController> {
-		const nid = NID.newNID('node_' + hint).toString();
+		const nid = `node_${hint}`+uuidv4();
 		const nodeBluePrint = {
 			nid: nid,
 			predecessor_node: 'root',
@@ -227,9 +95,9 @@ export class FirestoreNodeBluePrintControllerFactoryInterface
 	}
 }
 export class FirestoreNodeBluePrintController implements NodeBluePrintControllerInterface {
-	nid: NID;
+	nid: string;
 
-	constructor(nid: NID) {
+	constructor(nid: string) {
 		this.nid = nid;
 	}
 
@@ -267,7 +135,7 @@ export class FirestoreNodeBluePrintController implements NodeBluePrintController
 	}
 
 	async spinOffNode(newAuthor: string): Promise<FirestoreNodeBluePrintController> {
-		const newNid = NID.newNID('spinnoff_node').toString();
+		const newNid = 'spinnoff_node'+uuidv4();
 		const nodeBluePrint = (await getDoc(this.getNodeBluePrintRef())).data() as NodeBluePrintModel;
 		let trust_level = nodeBluePrint.trust_level;
 		if (trust_level === 'Official' || trust_level === 'Trusted') {
@@ -308,10 +176,6 @@ export class FirestoreNodeBluePrintController implements NodeBluePrintController
 		await this.updated();
 	}
 
-	async getInputSocketParam(socket_key: SocketID) {
-		return new FirestoreInputSocketBluePrintController(this, socket_key);
-	}
-
 	getInputSocketKeysInOrder(): Promise<Array<SocketID>> {
 		return getDoc(this.getNodeBluePrintRef()).then(async (snapshot) => {
 			return await snapshot.get('input_socket_order');
@@ -322,10 +186,6 @@ export class FirestoreNodeBluePrintController implements NodeBluePrintController
 		await updateDoc(this.getNodeBluePrintRef(), `output_sockets.${socket_key}`, socket);
 		await updateDoc(this.getNodeBluePrintRef(), 'output_socket_order', arrayUnion(socket_key));
 		await this.updated();
-	}
-
-	async getOutputSocketParam(socket_key: SocketID) {
-		return new FirestoreSocketBluePrintController(this, socket_key, false);
 	}
 
 	getOutputSocketKeysInOrder() {

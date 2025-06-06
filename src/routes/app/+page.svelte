@@ -6,14 +6,12 @@
 	import { auth } from '../../firebase';
 	import './nodes.css';
 
-	import { FirebaseRTDBProjectCollection } from './lib/FirebaseRTDBProjectController.js';
+	import {FirebaseRTDBProjectCollection, type FirebaseRTDBProjectKey} from './lib/FirebaseRTDBProjectController.js';
 	import type { ProjectCollectionInterface } from './lib/ProjectInterfaces.js';
-	export const ACTIVE_PROJECT_COLLECTION: ProjectCollectionInterface =
+	export const ACTIVE_PROJECT_COLLECTION: ProjectCollectionInterface<FirebaseRTDBProjectKey> =
 			new FirebaseRTDBProjectCollection();
 
-	import type { ProjectControllerInterface } from './lib/ProjectInterfaces.js';
-	import { FirebaseRTDBProjectController } from './lib/FirebaseRTDBProjectController.js';
-	import {onMount} from "svelte";
+	import { onMount } from "svelte";
 
 	const project_key_not_assigned = 'project_key_not_assigned';
 	let project_key = project_key_not_assigned;
@@ -29,8 +27,8 @@
 		auth.authStateReady().then(() => {
 			if ((auth.currentUser && (!project_key || project_key == project_key_not_assigned) || project_key == '')) {
 				ACTIVE_PROJECT_COLLECTION.newProject('New Flow', '').then(
-					(project: ProjectControllerInterface) => {
-						project_key = (project as unknown as FirebaseRTDBProjectController).project_key;
+					(newProject: FirebaseRTDBProjectKey) => {
+						project_key = newProject.project_key;
 						goto(`/app?pid=${project_key}`);
 					}
 				);

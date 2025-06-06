@@ -1,27 +1,14 @@
-import type { NID } from './NodeModels.js';
 import type {
 	InputSocketModel,
 	InputSocketParams,
 	OutputSocketModel,
 	SocketID
 } from './SocketModels.js';
-import {
-	FirestoreNodeBluePrintController,
-	FirestoreInputSocketBluePrintController,
-	type FirestoreOutputSocketParamController
-} from './FirestoreNodeBluePrint.js';
 import type { OutputSocketDataCollection } from './Execution.js';
 
-export class NodeNotFound extends Error {
-	constructor(nid: NID) {
-		super(`Node with NID ${nid} not found.`);
-		this.name = 'NodeNotFound';
-	}
-}
-
 export interface NodeBluePrintModel {
-	readonly nid: NID;
-	readonly predecessor_node: NID;
+	readonly nid: string;
+	readonly predecessor_node: string;
 	version: number;
 	title: string;
 	author_uid: string;
@@ -66,7 +53,7 @@ export interface NodeBluePrintControllerFactoryInterface {
 }
 
 export interface NodeBluePrintControllerInterface {
-	readonly nid: NID;
+	readonly nid: string;
 
 	call(inputs: Map<SocketID, unknown>, outputs: OutputSocketDataCollection): Promise<void>;
 
@@ -79,10 +66,8 @@ export interface NodeBluePrintControllerInterface {
 	spinOffNode(newAuthor: string): Promise<NodeBluePrintControllerInterface>;
 
 	newInputSocket(socket_key: SocketID, socket: InputSocketModel<InputSocketParams>): Promise<void>;
-	getInputSocketParam(socket_key: SocketID): Promise<FirestoreInputSocketBluePrintController>;
 	getInputSocketKeysInOrder(): Promise<Array<SocketID>>;
 	newOutputSocket(socket_key: SocketID, socket: OutputSocketModel): Promise<void>;
-	getOutputSocketParam(socket_key: SocketID): Promise<FirestoreOutputSocketParamController>;
 	getOutputSocketKeysInOrder(): Promise<string[]>;
 	setDocumentation(documentation: string): Promise<void>;
 	getDocumentation(): Promise<string>;

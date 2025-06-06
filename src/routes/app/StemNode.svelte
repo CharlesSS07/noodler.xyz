@@ -1,10 +1,9 @@
 <script module lang="ts">
     import {type Node} from '@xyflow/svelte';
-    import {NID} from './lib/NodeModels.js';
 
     export type StemNodeType = Node<
         {
-            nid: NID;
+            nid: string;
             input: Record<string, unknown>,
             output: Record<string, unknown>,
         },
@@ -13,15 +12,15 @@
 </script>
 
 <script lang="ts">
-    import {type NodeProps, useNodeConnections, useSvelteFlow} from '@xyflow/svelte';
+    import {type NodeProps, useSvelteFlow} from '@xyflow/svelte';
     import {Spinner} from 'flowbite-svelte';
-    import {createEventDispatcher, onMount} from 'svelte';
+    import {untrack} from 'svelte';
     import {docStore} from 'sveltefire';
     import {firestore} from '../../firebase';
     import type {NodeBluePrintModel} from './lib/NodeBluePrint.js';
-    import type {InputSocketParams} from "./lib/SocketModels";
     import SocketStem from './SocketStem.svelte';
     import NodeWrapper from './NodeWrapper.svelte';
+    import {OutputSocketDataCollection, type UserFunction, userFunctionAllowedModules} from "./lib/Execution";
 
     let {id, data}: NodeProps<StemNodeType> = $props();
 
@@ -87,11 +86,36 @@
         throw new Error("Unknown datatype");
     }
 
-    function ensureSocketDataDefined(socket_id: string, params: InputSocketParams) {
-        if (!data.input[socket_id]) {
-            data.input[socket_id] = params.default_value;
-        }
+    function executeUserDefinedScript(): void {
+
     }
+
+    $effect(() => {
+        console.log(data);
+        if (data.input) {
+            const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
+            const nodeBluePrintSnapshot = untrack(() => $nodeBluePrint);
+            if (nodeBluePrintSnapshot && nodeBluePrintSnapshot.output_socket_order && nodeBluePrintSnapshot.user_defined_code_snippet) {
+                console.log(nodeBluePrintSnapshot);
+                const outputCollection: OutputSocketDataCollection = new OutputSocketDataCollection(new Set<string>(nodeBluePrintSnapshot.output_socket_order));
+                const wrappedFn = new AsyncFunction('inputs', 'outputs', 'utils', nodeBluePrintSnapshot.user_defined_code_snippet) as UserFunction;
+
+                const output: Record<string, unknown> = {};
+
+                nodeBluePrintSnapshot.output_socket_order.forEach((socket_id: string) => {
+                    outputCollection.on(socket_id, async (value: unknown) => {
+                        output[socket_id] = value;
+                    });
+                });
+
+                wrappedFn(data.input, outputCollection, userFunctionAllowedModules);
+
+                outputCollection.waitForAllSocketsSet().then(() => {
+                    data.output = output;
+                });
+            }
+        }
+    })
 </script>
 
 {#if $nodeBluePrint}
@@ -136,7 +160,6 @@
         {#if $nodeBluePrint.input_sockets && Object.keys($nodeBluePrint.input_sockets).length > 0}
             <div class="sockets-section">
                 {#each Object.entries($nodeBluePrint.input_sockets) as [socket_id, socket_blueprint]}
-                    {ensureSocketDataDefined(socket_id, socket_blueprint.params)}
                     <SocketStem
                             type="target"
                             socket_id={socket_id}
@@ -164,10 +187,10 @@
                                         {socketType}
                                     </span>
                                 {/if}
-                                <input
-                                        type="{convertDatatypeToInputType(socketType)}"
-                                        bind:value={data.input[socket_id]}
-                                >
+<!--                                <input-->
+<!--                                        type="{convertDatatypeToInputType(socketType)}"-->
+<!--                                        bind:value={data.input[socket_id]}-->
+<!--                                >-->
                             </div>
                         {:else}
                             <div class="socket-content input-content">

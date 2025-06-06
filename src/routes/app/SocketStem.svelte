@@ -1,9 +1,3 @@
-<script module lang="ts">
-	export type SocketStemProps = {
-
-	}
-</script>
-
 <script lang="ts">
 	import {Handle, Position, type HandleType } from '@xyflow/svelte';
 	import {getSocketDataTypeByName} from "./lib/DataTypes";

@@ -1,11 +1,34 @@
 import type { JimpInstance } from 'jimp';
-import { InputSocketParamBuilder } from './SocketParamBuilder.js';
 import type { InputSocketParams, SocketData } from './SocketModels.js';
 
-export class GenericSocketParamsBuilder<
-	T,
-	C extends InputSocketParams
-> extends InputSocketParamBuilder<C> {
+export class InputSocketParamBuilder<T extends InputSocketParams>
+{
+	default_value: unknown;
+
+	constructor(default_value: SocketData) {
+		this.default_value = default_value;
+	}
+
+	setDefaultValue(default_value: SocketData) {
+		this.default_value = default_value;
+	}
+
+	getDefaultValue() {
+		return this.default_value;
+	}
+
+	check(value: unknown): void {
+		return;
+	}
+
+	build(): T {
+		return {
+			default_value: this.default_value
+		} as T;
+	}
+}
+
+export class GenericSocketParamsBuilder<T, C extends InputSocketParams> extends InputSocketParamBuilder<C> {
 	check(value: T): void {
 		if (value !== undefined && value !== null) {
 			return;

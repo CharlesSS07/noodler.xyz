@@ -1,20 +1,19 @@
 <script lang="ts">
-    import { onMount, onDestroy } from 'svelte';
-    import { Plus, Calendar, Users, Clock, Search, Filter, Grid, List, Home } from 'lucide-svelte';
+    import { onMount } from 'svelte';
+    import { Plus, Calendar, Users, Clock, Search, Filter, Grid, List } from 'lucide-svelte';
     import { auth, rtdb } from '../../firebase'; // Assuming firebase.js exports initialized auth and rtdb
     import type { ProjectInfo } from '../app/lib/ProjectModels.js';
     import { goto } from '$app/navigation';
-    import { ref, onValue, off, get } from 'firebase/database';
+    import { ref, onValue, off } from 'firebase/database';
     import { onAuthStateChanged, type User } from 'firebase/auth';
     import '../../app.css';
 
     import {
-        FirebaseRTDBProjectCollection,
-        FirebaseRTDBProjectController
+        FirebaseRTDBProjectCollection, type FirebaseRTDBProjectKey,
     } from '../app/lib/FirebaseRTDBProjectController.js';
     import type { ProjectCollectionInterface } from '../app/lib/ProjectInterfaces.js';
     import Logo from "../../components/Logo.svelte";
-    export const ACTIVE_PROJECT_COLLECTION: ProjectCollectionInterface =
+    export const ACTIVE_PROJECT_COLLECTION: ProjectCollectionInterface<FirebaseRTDBProjectKey> =
         new FirebaseRTDBProjectCollection();
 
     // Component state
@@ -149,14 +148,14 @@
 
             const projectDescription = prompt('Enter project description (optional):') || '';
 
-            const controller = await ACTIVE_PROJECT_COLLECTION.newProject(
+            const newProject = await ACTIVE_PROJECT_COLLECTION.newProject(
                 projectName,
                 projectDescription
             );
 
             // Navigate to the new project
-            console.log('New project created:', controller);
-            goto(`/app?pid=${(controller as unknown as FirebaseRTDBProjectController).project_key}`); // Assuming controller has nodeKey
+            console.log('New project created:', newProject);
+            goto(`/app?pid=${newProject.project_key}`); // Assuming controller has nodeKey
         } catch (error) {
             console.error('Failed to create project:', error);
             alert('Failed to create project. Please try again.');

@@ -40,16 +40,20 @@
     );
 
     // Sync data.output.text depending on connection
+    let inputText = $derived(data.input?.text);
+    let currentText = $derived(data.currentText ?? '');
     $effect(() => {
-        if (hasInputConnection()) {
-            updateNodeData(id, {
-                output: { text: untrack(() => data.input.text) }
-            });
+        const hasConnection = untrack(() => hasInputConnection());
+        if (hasConnection) {
+            untrack(() => updateNodeData(id, {
+                output: { text: inputText }
+            }));
         } else {
-            updateNodeData(id, {
-                output: { text: (untrack(() => data.currentText) ?? '') }
-            });
+            untrack(() => updateNodeData(id, {
+                output: { text: currentText }
+            }));
         }
+        console.log('rawtexteditor')
     });
 
     // Whether to show input socket (only if input is empty and not connected)
@@ -74,6 +78,13 @@
     $effect(() => {
         if (textareaRef) autoResize(textareaRef);
     });
+
+    // propagating data to outputs
+    $effect(() => {
+        if (data.input) {
+
+        }
+    })
 </script>
 
 <div class="w-full h-fit relative">

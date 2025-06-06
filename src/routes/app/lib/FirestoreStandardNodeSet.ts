@@ -9,7 +9,7 @@ import {
 	StringSocketParamsBuilder,
 	TSVSocketParamsBuilder,
 	CSVSocketParamsBuilder
-} from './SocketDataTypes.js';
+} from './SocketParamBuilders.js';
 
 const nodeBluePrintController: NodeBluePrintControllerFactoryInterface =
 	new FirestoreNodeBluePrintControllerFactoryInterface();

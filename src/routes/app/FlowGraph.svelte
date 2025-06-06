@@ -23,9 +23,9 @@
     import ImageNode from "./nodes/images/ImageNode.svelte";
     import TextEditorNode from "./nodes/text/TextEditorNode.svelte";
     import RawTextEditor from "./nodes/text/RawTextEditor.svelte";
-    import {onMount} from "svelte";
+    import {onMount, untrack} from "svelte";
     import Logo from "../../components/Logo.svelte";
-    import {executeStartingAtNode} from "./lib/Execution";
+    import {promptDesign} from "./lib/UnitTestProjects";
 
     let nodes = $state.raw<Node[]>([]);
 
@@ -224,7 +224,7 @@
                 const firebaseNodes = firebaseDataToNodes(snapshot);
 
                 // Direct assignment with $state.raw
-                const localNodeMap = new Map(nodes.map(node => [node.id, node]));
+                // const localNodeMap = new Map(nodes.map(node => [node.id, node]));
                 const firebaseNodeMap = new Map(firebaseNodes.map(node => [node.id, node]));
 
                 // Start with existing local nodes
@@ -291,7 +291,7 @@
                 const firebaseEdges = firebaseDataToEdges(snapshot);
 
                 // Direct assignment with $state.raw
-                const localEdgeMap = new Map(edges.map(edge => [edge.id, edge]));
+                // const localEdgeMap = new Map(edges.map(edge => [edge.id, edge]));
                 const firebaseEdgeMap = new Map(firebaseEdges.map(edge => [edge.id, edge]));
 
                 // Start with existing local edges
@@ -575,6 +575,7 @@ Here's what you can do on the Noodle Board:
                 },
                 position: { x: 0, y: 100 }
             })}>Note 📝</button> |
+            <button onclick={() => {nodes = promptDesign.nodes;edges=promptDesign.edges}}>Prompt Design Demo</button> |
 <!--            <button onclick={() => executeSelectedNodes()}>Execute Selected Nodes ▶️</button>-->
         </Panel>
         <Controls/>
