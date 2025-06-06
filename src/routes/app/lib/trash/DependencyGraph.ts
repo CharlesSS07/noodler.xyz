@@ -1,5 +1,5 @@
-import { DirectedGraph } from "graphology";
-import willCreateCycle from "graphology-dag/will-create-cycle";
+import { DirectedGraph } from 'graphology';
+import willCreateCycle from 'graphology-dag/will-create-cycle';
 
 export class CyclicDependencyException extends Error {}
 
@@ -115,9 +115,16 @@ export class DependencyGraph<T extends object> {
      */
     getAllLinks(): Array<[T, T]> {
         // @ts-expect-error mapDirectedEdges is a valid function of graphology
-        return this.graph.mapDirectedEdges((edge: string, attributes: object, source: string, target: string): [T, T] => {
-            return [this.getNodeFromId(source), this.getNodeFromId(target)];
-        });
+        return this.graph.mapDirectedEdges(
+            (
+                edge: string,
+                attributes: object,
+                source: string,
+                target: string
+            ): [T, T] => {
+                return [this.getNodeFromId(source), this.getNodeFromId(target)];
+            }
+        );
     }
 
     /**
@@ -147,7 +154,9 @@ export class DependencyGraph<T extends object> {
 
         const visit = (node: string): void => {
             if (tempMark.has(node)) {
-                throw new Error(`Graph contains a cycle involving node: ${node}`);
+                throw new Error(
+                    `Graph contains a cycle involving node: ${node}`
+                );
             }
             if (!visited.has(node)) {
                 tempMark.add(node);
@@ -195,7 +204,9 @@ export class DependencyGraph<T extends object> {
                 layers[depth].add(this.getNodeFromId(currentNode));
 
                 // @ts-ignore
-                for (const neighbor of this.graph.inboundNeighbors(currentNode)) {
+                for (const neighbor of this.graph.inboundNeighbors(
+                    currentNode
+                )) {
                     queue.push([neighbor, depth + 1]);
                 }
             }
@@ -228,7 +239,9 @@ export class DependencyGraph<T extends object> {
                 layers[depth].add(this.getNodeFromId(currentNode));
 
                 // @ts-expect-error graphology obj will have outboundNeighbors(...)
-                for (const neighbor of this.graph.outboundNeighbors(currentNode)) {
+                for (const neighbor of this.graph.outboundNeighbors(
+                    currentNode
+                )) {
                     queue.push([neighbor, depth + 1]);
                 }
             }

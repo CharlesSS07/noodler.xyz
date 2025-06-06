@@ -1,264 +1,274 @@
 import type { JimpInstance } from 'jimp';
 import type { InputSocketParams, SocketData } from './SocketModels.js';
 
-export class InputSocketParamBuilder<T extends InputSocketParams>
-{
-	default_value: unknown;
+export class InputSocketParamBuilder<T extends InputSocketParams> {
+    default_value: unknown;
 
-	constructor(default_value: SocketData) {
-		this.default_value = default_value;
-	}
+    constructor(default_value: SocketData) {
+        this.default_value = default_value;
+    }
 
-	setDefaultValue(default_value: SocketData) {
-		this.default_value = default_value;
-	}
+    setDefaultValue(default_value: SocketData) {
+        this.default_value = default_value;
+    }
 
-	getDefaultValue() {
-		return this.default_value;
-	}
+    getDefaultValue() {
+        return this.default_value;
+    }
 
-	check(value: unknown): void {
-		return;
-	}
+    check(value: unknown): void {
+        return;
+    }
 
-	build(): T {
-		return {
-			default_value: this.default_value
-		} as T;
-	}
+    build(): T {
+        return {
+            default_value: this.default_value,
+        } as T;
+    }
 }
 
-export class GenericSocketParamsBuilder<T, C extends InputSocketParams> extends InputSocketParamBuilder<C> {
-	check(value: T): void {
-		if (value !== undefined && value !== null) {
-			return;
-		}
-		throw new Error('value is undefined/null!');
-	}
+export class GenericSocketParamsBuilder<
+    T,
+    C extends InputSocketParams,
+> extends InputSocketParamBuilder<C> {
+    check(value: T): void {
+        if (value !== undefined && value !== null) {
+            return;
+        }
+        throw new Error('value is undefined/null!');
+    }
 }
 
 export interface NumberSocketParams extends InputSocketParams {
-	min: number | null;
-	max: number | null;
-	step: number | null;
+    min: number | null;
+    max: number | null;
+    step: number | null;
 }
 
 export class NumberSocketParamsBuilder extends GenericSocketParamsBuilder<
-	number,
-	NumberSocketParams
+    number,
+    NumberSocketParams
 > {
-	params: NumberSocketParams = new (class implements NumberSocketParams {
-		default_value: SocketData = 0;
-		max: number | null = null;
-		min: number | null = null;
-		step: number | null = null;
-	})();
+    params: NumberSocketParams = new (class implements NumberSocketParams {
+        default_value: SocketData = 0;
+        max: number | null = null;
+        min: number | null = null;
+        step: number | null = null;
+    })();
 
-	/**
-	 * Sets the minimum value for the number input.
-	 *
-	 * @param min The minimum value.
-	 */
-	setMin(min: number) {
-		this.params.min = min;
-		return this;
-	}
+    /**
+     * Sets the minimum value for the number input.
+     *
+     * @param min The minimum value.
+     */
+    setMin(min: number) {
+        this.params.min = min;
+        return this;
+    }
 
-	noMin() {
-		this.params.min = null;
-		return this;
-	}
+    noMin() {
+        this.params.min = null;
+        return this;
+    }
 
-	/**
-	 * Sets the maximum value for the number input.
-	 *
-	 * @param max The maximum value.
-	 */
-	setMax(max: number) {
-		this.params.max = max;
-		return this;
-	}
+    /**
+     * Sets the maximum value for the number input.
+     *
+     * @param max The maximum value.
+     */
+    setMax(max: number) {
+        this.params.max = max;
+        return this;
+    }
 
-	noMax() {
-		this.params.max = null;
-		return this;
-	}
+    noMax() {
+        this.params.max = null;
+        return this;
+    }
 
-	/**
-	 * Sets the interval (step) for the number input.
-	 *
-	 * @param step The step value.
-	 */
-	setStep(step: number) {
-		this.params.step = step;
-		return this;
-	}
+    /**
+     * Sets the interval (step) for the number input.
+     *
+     * @param step The step value.
+     */
+    setStep(step: number) {
+        this.params.step = step;
+        return this;
+    }
 
-	noStep() {
-		this.params.step = null;
-		return this;
-	}
+    noStep() {
+        this.params.step = null;
+        return this;
+    }
 
-	check(value: number): void {
-		super.check(value);
-		const val = value as number;
-		if (this.params.max && val > this.params.max)
-			throw new Error(`value should not be greater than max: ${this.params.max}`);
-		if (this.params.min && val < this.params.min)
-			throw new Error(`value should not be less than min: ${this.params.min}`);
+    check(value: number): void {
+        super.check(value);
+        const val = value as number;
+        if (this.params.max && val > this.params.max)
+            throw new Error(
+                `value should not be greater than max: ${this.params.max}`
+            );
+        if (this.params.min && val < this.params.min)
+            throw new Error(
+                `value should not be less than min: ${this.params.min}`
+            );
 
-		if (this.params.step && val % this.params.step !== 0)
-			throw new Error(`value must be increment of ${this.params.step}`);
-	}
+        if (this.params.step && val % this.params.step !== 0)
+            throw new Error(`value must be increment of ${this.params.step}`);
+    }
 
-	// build(): NumberSocketParams {
-	// 	return this.params;
-	// }
+    // build(): NumberSocketParams {
+    // 	return this.params;
+    // }
 }
 
 export interface StringSocketParams extends InputSocketParams {
-	isSensitive: boolean;
-	minCharacters: number | null;
-	maxCharacters: number | null;
-	// minWords: number | null = null;
-	// maxWords: number | null = null;
-	// minSentences: number | null = null;
-	// maxSentences: number | null = null;
-	// minParagraphs: number | null = null;
-	// maxParagraphs: number | null = null;
-	numRows: number | null;
-	// language, charset
+    isSensitive: boolean;
+    minCharacters: number | null;
+    maxCharacters: number | null;
+    // minWords: number | null = null;
+    // maxWords: number | null = null;
+    // minSentences: number | null = null;
+    // maxSentences: number | null = null;
+    // minParagraphs: number | null = null;
+    // maxParagraphs: number | null = null;
+    numRows: number | null;
+    // language, charset
 }
 
 export class StringSocketParamsBuilder extends GenericSocketParamsBuilder<
-	string,
-	StringSocketParams
+    string,
+    StringSocketParams
 > {
-	params: StringSocketParams = new (class implements StringSocketParams {
-		default_value: SocketData = '';
-		isSensitive: boolean = false;
-		maxCharacters: number | null = null;
-		minCharacters: number | null = null;
-		numRows: number | null = null;
-	})();
+    params: StringSocketParams = new (class implements StringSocketParams {
+        default_value: SocketData = '';
+        isSensitive: boolean = false;
+        maxCharacters: number | null = null;
+        minCharacters: number | null = null;
+        numRows: number | null = null;
+    })();
 
-	asWord() {
-		this.setDefaultValue('');
-		this.setMinCharacters(1);
-		return this;
-	}
+    asWord() {
+        this.setDefaultValue('');
+        this.setMinCharacters(1);
+        return this;
+    }
 
-	asSentence() {
-		this.setDefaultValue('');
-		this.setMinCharacters(20);
-		return this;
-	}
+    asSentence() {
+        this.setDefaultValue('');
+        this.setMinCharacters(20);
+        return this;
+    }
 
-	asParagraph() {
-		this.setDefaultValue('');
-		this.setMinCharacters(60);
-		return this;
-	}
+    asParagraph() {
+        this.setDefaultValue('');
+        this.setMinCharacters(60);
+        return this;
+    }
 
-	asPassword() {
-		this.setDefaultValue('');
-		this.params.isSensitive = true;
-		this.setMinCharacters(8);
-		return this;
-	}
+    asPassword() {
+        this.setDefaultValue('');
+        this.params.isSensitive = true;
+        this.setMinCharacters(8);
+        return this;
+    }
 
-	setMinCharacters(minCharacters: number) {
-		this.params.minCharacters = minCharacters;
-	}
+    setMinCharacters(minCharacters: number) {
+        this.params.minCharacters = minCharacters;
+    }
 
-	setMaxCharacters(maxCharacters: number) {
-		this.params.maxCharacters = maxCharacters;
-	}
+    setMaxCharacters(maxCharacters: number) {
+        this.params.maxCharacters = maxCharacters;
+    }
 
-	check(value: string): void {
-		super.check(value);
-		const val = value as string;
+    check(value: string): void {
+        super.check(value);
+        const val = value as string;
 
-		if (this.params.minCharacters && val.length < this.params.minCharacters)
-			throw new Error(
-				`fewer characters than minCharacters: ${val.length} < ${this.params.minCharacters}`
-			);
+        if (this.params.minCharacters && val.length < this.params.minCharacters)
+            throw new Error(
+                `fewer characters than minCharacters: ${val.length} < ${this.params.minCharacters}`
+            );
 
-		if (this.params.maxCharacters && val.length < this.params.maxCharacters)
-			throw new Error(
-				`more characters than maxCharacters: ${val.length} > ${this.params.maxCharacters}`
-			);
-	}
+        if (this.params.maxCharacters && val.length < this.params.maxCharacters)
+            throw new Error(
+                `more characters than maxCharacters: ${val.length} > ${this.params.maxCharacters}`
+            );
+    }
 
-	// build(): StringSocketParams {
-	// 	return {...this.params};
-	// }
+    // build(): StringSocketParams {
+    // 	return {...this.params};
+    // }
 }
 
 export interface JIMPSocketParams extends InputSocketParams {
-	displayImage: boolean;
+    displayImage: boolean;
 }
 
 export class JIMPImageSocketParamsBuilder extends GenericSocketParamsBuilder<
-	JimpInstance | string,
-	JIMPSocketParams
+    JimpInstance | string,
+    JIMPSocketParams
 > {
-	static EMPTY_IMAGE = 'empty_jimp_image';
+    static EMPTY_IMAGE = 'empty_jimp_image';
 
-	constructor() {
-		super(JIMPImageSocketParamsBuilder.EMPTY_IMAGE);
-	}
+    constructor() {
+        super(JIMPImageSocketParamsBuilder.EMPTY_IMAGE);
+    }
 
-	params: JIMPSocketParams = new (class implements JIMPSocketParams {
-		default_value: SocketData = JIMPImageSocketParamsBuilder.EMPTY_IMAGE;
-		displayImage: boolean = true;
-	})();
+    params: JIMPSocketParams = new (class implements JIMPSocketParams {
+        default_value: SocketData = JIMPImageSocketParamsBuilder.EMPTY_IMAGE;
+        displayImage: boolean = true;
+    })();
 
-	hide() {
-		this.params.displayImage = false;
-		return this;
-	}
+    hide() {
+        this.params.displayImage = false;
+        return this;
+    }
 
-	show() {
-		this.params.displayImage = true;
-		return this;
-	}
+    show() {
+        this.params.displayImage = true;
+        return this;
+    }
 
-	check(value: JimpInstance | string) {
-		super.check(value);
-		if (value == JIMPImageSocketParamsBuilder.EMPTY_IMAGE)
-			throw new Error(`value is the empty image`);
-	}
+    check(value: JimpInstance | string) {
+        super.check(value);
+        if (value == JIMPImageSocketParamsBuilder.EMPTY_IMAGE)
+            throw new Error(`value is the empty image`);
+    }
 }
 
 export interface ENUMSocketParams extends InputSocketParams {
-	options: string[];
+    options: string[];
 }
 
-export class ENUMSocketParamBuilder extends GenericSocketParamsBuilder<string, ENUMSocketParams> {
-	params = new (class implements ENUMSocketParams {
-		default_value: SocketData = 'Option 1';
-		options: string[] = ['Option 1', 'Option 2', 'Option 3'];
-	})();
+export class ENUMSocketParamBuilder extends GenericSocketParamsBuilder<
+    string,
+    ENUMSocketParams
+> {
+    params = new (class implements ENUMSocketParams {
+        default_value: SocketData = 'Option 1';
+        options: string[] = ['Option 1', 'Option 2', 'Option 3'];
+    })();
 
-	constructor(options: string[]) {
-		const optionsUnique = new Set<string>(options).values().toArray();
-		if (optionsUnique.length <= 1) throw new Error(`options must not be empty`);
-		super(optionsUnique[0]);
-		// this.setDefaultValue(); // set default value
-		this.params.options = optionsUnique;
-	}
+    constructor(options: string[]) {
+        const optionsUnique = new Set<string>(options).values().toArray();
+        if (optionsUnique.length <= 1)
+            throw new Error(`options must not be empty`);
+        super(optionsUnique[0]);
+        // this.setDefaultValue(); // set default value
+        this.params.options = optionsUnique;
+    }
 
-	getOptions() {
-		return this.params.options;
-	}
+    getOptions() {
+        return this.params.options;
+    }
 
-	check(value: string): void {
-		super.check(value);
-		const val = value as string;
-		if (!this.params.options.includes(val))
-			throw new Error(`value should be in enum options; illegal value`);
-	}
+    check(value: string): void {
+        super.check(value);
+        const val = value as string;
+        if (!this.params.options.includes(val))
+            throw new Error(`value should be in enum options; illegal value`);
+    }
 }
 
 /**
@@ -267,43 +277,43 @@ export class ENUMSocketParamBuilder extends GenericSocketParamsBuilder<string, E
  */
 
 export class CSVSocketParamsBuilder extends GenericSocketParamsBuilder<
-	File | string,
-	InputSocketParams
+    File | string,
+    InputSocketParams
 > {
-	// Constant to represent a placeholder (empty) CSV value
-	static EMPTY_FILE = 'empty_csv';
+    // Constant to represent a placeholder (empty) CSV value
+    static EMPTY_FILE = 'empty_csv';
 
-	constructor() {
-		super(CSVSocketParamsBuilder.EMPTY_FILE);
-	}
+    constructor() {
+        super(CSVSocketParamsBuilder.EMPTY_FILE);
+    }
 
-	/**
-	 * Validates the given value as a valid CSV input.
-	 *
-	 * @param {File | string} value - The value to check (File or placeholder).
-	 * @throws {Error} If the value is invalid.
-	 */
-	check(value: File | string) {
-		super.check(value);
+    /**
+     * Validates the given value as a valid CSV input.
+     *
+     * @param {File | string} value - The value to check (File or placeholder).
+     * @throws {Error} If the value is invalid.
+     */
+    check(value: File | string) {
+        super.check(value);
 
-		if (value === CSVSocketParamsBuilder.EMPTY_FILE) {
-			throw new Error('Value is the empty CSV placeholder.');
-		}
+        if (value === CSVSocketParamsBuilder.EMPTY_FILE) {
+            throw new Error('Value is the empty CSV placeholder.');
+        }
 
-		if (typeof value !== 'string' && !(value instanceof File)) {
-			throw new Error('Expected a File object or placeholder.');
-		}
+        if (typeof value !== 'string' && !(value instanceof File)) {
+            throw new Error('Expected a File object or placeholder.');
+        }
 
-		if (value instanceof File) {
-			if (!value.name.toLowerCase().endsWith('.csv')) {
-				throw new Error(`Expected a .csv file, got "${value.name}"`);
-			}
+        if (value instanceof File) {
+            if (!value.name.toLowerCase().endsWith('.csv')) {
+                throw new Error(`Expected a .csv file, got "${value.name}"`);
+            }
 
-			if (value.size === 0) {
-				throw new Error('CSV file is empty.');
-			}
-		}
-	}
+            if (value.size === 0) {
+                throw new Error('CSV file is empty.');
+            }
+        }
+    }
 }
 
 /**
@@ -311,42 +321,42 @@ export class CSVSocketParamsBuilder extends GenericSocketParamsBuilder<
  * Supports real File objects and an "empty" placeholder.
  */
 export class TSVSocketParamsBuilder extends GenericSocketParamsBuilder<
-	File | string,
-	InputSocketParams
+    File | string,
+    InputSocketParams
 > {
-	static EMPTY_FILE = 'empty_tsv';
+    static EMPTY_FILE = 'empty_tsv';
 
-	constructor() {
-		super(TSVSocketParamsBuilder.EMPTY_FILE);
-	}
+    constructor() {
+        super(TSVSocketParamsBuilder.EMPTY_FILE);
+    }
 
-	/**
-	 * Validates the provided value for TSV-specific rules.
-	 *
-	 * @param {File | string} value - The input value to check.
-	 * @throws {Error} If value is not valid TSV input.
-	 */
-	check(value: File | string) {
-		super.check(value);
+    /**
+     * Validates the provided value for TSV-specific rules.
+     *
+     * @param {File | string} value - The input value to check.
+     * @throws {Error} If value is not valid TSV input.
+     */
+    check(value: File | string) {
+        super.check(value);
 
-		if (value === TSVSocketParamsBuilder.EMPTY_FILE) {
-			throw new Error('Value is the empty TSV placeholder.');
-		}
+        if (value === TSVSocketParamsBuilder.EMPTY_FILE) {
+            throw new Error('Value is the empty TSV placeholder.');
+        }
 
-		if (typeof value !== 'string' && !(value instanceof File)) {
-			throw new Error('Expected a File object or placeholder.');
-		}
+        if (typeof value !== 'string' && !(value instanceof File)) {
+            throw new Error('Expected a File object or placeholder.');
+        }
 
-		if (value instanceof File) {
-			if (!value.name.toLowerCase().endsWith('.tsv')) {
-				throw new Error(`Expected a .tsv file, got "${value.name}"`);
-			}
+        if (value instanceof File) {
+            if (!value.name.toLowerCase().endsWith('.tsv')) {
+                throw new Error(`Expected a .tsv file, got "${value.name}"`);
+            }
 
-			if (value.size === 0) {
-				throw new Error('TSV file is empty.');
-			}
-		}
-	}
+            if (value.size === 0) {
+                throw new Error('TSV file is empty.');
+            }
+        }
+    }
 }
 
 /**
@@ -354,29 +364,29 @@ export class TSVSocketParamsBuilder extends GenericSocketParamsBuilder<
  * Expects an object with numeric x, y, width, and height values.
  */
 interface CropParams {
-	x: number;
-	y: number;
-	width: number;
-	height: number;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
 }
 export class CropParamSocketParamsBuilder extends GenericSocketParamsBuilder<
-	CropParams,
-	InputSocketParams
+    CropParams,
+    InputSocketParams
 > {
-	constructor() {
-		super({ x: 0, y: 0, width: 100, height: 100 });
-	}
+    constructor() {
+        super({ x: 0, y: 0, width: 100, height: 100 });
+    }
 
-	/**
-	 * Checks that all cropping parameters are present and numeric.
-	 *
-	 * @param {any} value - The crop parameter object to validate.
-	 * @throws {Error} If values are missing or not numbers.
-	 */
-	check(value: CropParams) {
-		super.check(value);
-		if (value.height <= 0 || value.width <= 0) {
-			throw new Error('Crop object must have positive width, height');
-		}
-	}
+    /**
+     * Checks that all cropping parameters are present and numeric.
+     *
+     * @param {any} value - The crop parameter object to validate.
+     * @throws {Error} If values are missing or not numbers.
+     */
+    check(value: CropParams) {
+        super.check(value);
+        if (value.height <= 0 || value.width <= 0) {
+            throw new Error('Crop object must have positive width, height');
+        }
+    }
 }

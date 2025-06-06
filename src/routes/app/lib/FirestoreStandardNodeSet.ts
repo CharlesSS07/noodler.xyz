@@ -1,38 +1,39 @@
 import type { NodeBluePrintControllerFactoryInterface } from './NodeBluePrint.js';
 import { FirestoreNodeBluePrintControllerFactoryInterface } from './FirestoreNodeBluePrint.js';
 import {
-	// ENUMSocketParamBuilder,
-	JIMPImageSocketParamsBuilder,
-	NumberSocketParamsBuilder,
-	GenericSocketParamsBuilder,
-	CropParamSocketParamsBuilder,
-	StringSocketParamsBuilder,
-	TSVSocketParamsBuilder,
-	CSVSocketParamsBuilder
+    // ENUMSocketParamBuilder,
+    JIMPImageSocketParamsBuilder,
+    NumberSocketParamsBuilder,
+    GenericSocketParamsBuilder,
+    CropParamSocketParamsBuilder,
+    StringSocketParamsBuilder,
+    TSVSocketParamsBuilder,
+    CSVSocketParamsBuilder,
 } from './SocketParamBuilders.js';
 
 const nodeBluePrintController: NodeBluePrintControllerFactoryInterface =
-	new FirestoreNodeBluePrintControllerFactoryInterface();
+    new FirestoreNodeBluePrintControllerFactoryInterface();
 
 async function simpleImageModificationNodes() {
-	const imageLoader = await nodeBluePrintController.initOfficialNodeBluePrint('image_loader');
-	await imageLoader.setTitle('Image Loader');
-	await imageLoader.setDocumentation('Read in an image from a socket/file.');
+    const imageLoader =
+        await nodeBluePrintController.initOfficialNodeBluePrint('image_loader');
+    await imageLoader.setTitle('Image Loader');
+    await imageLoader.setDocumentation('Read in an image from a socket/file.');
 
-	await imageLoader.newInputSocket('img', {
-		label: 'Upload Image',
-		documentation: 'Image uploaded from file.',
-		type: 'file',
-		params: new JIMPImageSocketParamsBuilder().build()
-	});
+    await imageLoader.newInputSocket('img', {
+        label: 'Upload Image',
+        documentation: 'Image uploaded from file.',
+        type: 'file',
+        params: new JIMPImageSocketParamsBuilder().build(),
+    });
 
-	await imageLoader.newOutputSocket('img', {
-		label: 'Image',
-		documentation: 'The image you viewed.',
-		type: 'image/jimp'
-	});
+    await imageLoader.newOutputSocket('img', {
+        label: 'Image',
+        documentation: 'The image you viewed.',
+        type: 'image/jimp',
+    });
 
-	await imageLoader.setCode(`
+    await imageLoader.setCode(`
     console.log(inputs);
     const file = inputs.img;
     console.log("[image_loader] received file:", typeof file);
@@ -58,275 +59,299 @@ async function simpleImageModificationNodes() {
     // }
   `);
 
-	const imageViewer = await nodeBluePrintController.initOfficialNodeBluePrint('image_viewer');
-	await imageViewer.setTitle('Image Viewer');
-	await imageViewer.setDocumentation('Display an image from a socket.');
+    const imageViewer =
+        await nodeBluePrintController.initOfficialNodeBluePrint('image_viewer');
+    await imageViewer.setTitle('Image Viewer');
+    await imageViewer.setDocumentation('Display an image from a socket.');
 
-	await imageViewer.newInputSocket('img', {
-		label: 'Image',
-		documentation: 'Image to view.',
-		type: 'image/jimp',
-		params: new JIMPImageSocketParamsBuilder().build()
-	});
+    await imageViewer.newInputSocket('img', {
+        label: 'Image',
+        documentation: 'Image to view.',
+        type: 'image/jimp',
+        params: new JIMPImageSocketParamsBuilder().build(),
+    });
 
-	await imageViewer.newOutputSocket('img', {
-		label: 'Image',
-		documentation: 'The image you viewed.',
-		type: 'image/jimp'
-	});
+    await imageViewer.newOutputSocket('img', {
+        label: 'Image',
+        documentation: 'The image you viewed.',
+        type: 'image/jimp',
+    });
 
-	await imageViewer.setCode(`
+    await imageViewer.setCode(`
     outputs.set('img', inputs.img);
   `);
 
-	// Use it to convert the base64 to jimp for supporting subsequent operations
-	// const base64ToJimp = await nodeBluePrintController.initOfficialNodeBluePrint("base64_to_jimp");
-	// await base64ToJimp.setTitle("Base64 to JIMP");
-	// await base64ToJimp.setDocumentation("Convert a base64-encoded image string into a JIMP object for further image processing.");
+    // Use it to convert the base64 to jimp for supporting subsequent operations
+    // const base64ToJimp = await nodeBluePrintController.initOfficialNodeBluePrint("base64_to_jimp");
+    // await base64ToJimp.setTitle("Base64 to JIMP");
+    // await base64ToJimp.setDocumentation("Convert a base64-encoded image string into a JIMP object for further image processing.");
 
-	// await base64ToJimp.newInputSocket("img", {
-	//   label: "Base64 Image",
-	//   documentation: "Base64 encoded image string",
-	//   type: "UploadImage",
-	//   config: {
-	//     defaultValue: null
-	//   }
-	// });
+    // await base64ToJimp.newInputSocket("img", {
+    //   label: "Base64 Image",
+    //   documentation: "Base64 encoded image string",
+    //   type: "UploadImage",
+    //   config: {
+    //     defaultValue: null
+    //   }
+    // });
 
-	// await base64ToJimp.newOutputSocket("img", {
-	//   label: "JIMP Image",
-	//   type: "JIMP",
-	//   documentation: "Image as a JIMP object"
-	// });
+    // await base64ToJimp.newOutputSocket("img", {
+    //   label: "JIMP Image",
+    //   type: "JIMP",
+    //   documentation: "Image as a JIMP object"
+    // });
 
-	// await base64ToJimp.setCode(`
-	//   const Jimp = require('jimp');
-	//   const input = inputs.get('img');
+    // await base64ToJimp.setCode(`
+    //   const Jimp = require('jimp');
+    //   const input = inputs.get('img');
 
-	//   if (typeof input === 'string' && input.startsWith('data:image')) {
-	//     const base64 = input.split(',')[1];
-	//     const img = await Jimp.read(Buffer.from(base64, 'base64'));
-	//     outputs.set('img', img);
-	//   } else {
-	//     throw new Error("Input is not a valid base64 image.");
-	//   }
-	// ` );
+    //   if (typeof input === 'string' && input.startsWith('data:image')) {
+    //     const base64 = input.split(',')[1];
+    //     const img = await Jimp.read(Buffer.from(base64, 'base64'));
+    //     outputs.set('img', img);
+    //   } else {
+    //     throw new Error("Input is not a valid base64 image.");
+    //   }
+    // ` );
 
-	const grayscale = await nodeBluePrintController.initOfficialNodeBluePrint('greyscale');
-	await grayscale.setTitle('Greyscale');
-	await grayscale.setDocumentation('Greyscales an image.');
+    const grayscale =
+        await nodeBluePrintController.initOfficialNodeBluePrint('greyscale');
+    await grayscale.setTitle('Greyscale');
+    await grayscale.setDocumentation('Greyscales an image.');
 
-	await grayscale.newInputSocket('img', {
-		label: 'Color Image',
-		documentation: 'Color image to greyscale.',
-		type: 'image/jimp',
-		params: new JIMPImageSocketParamsBuilder().build()
-	});
+    await grayscale.newInputSocket('img', {
+        label: 'Color Image',
+        documentation: 'Color image to greyscale.',
+        type: 'image/jimp',
+        params: new JIMPImageSocketParamsBuilder().build(),
+    });
 
-	await grayscale.newOutputSocket('img', {
-		label: 'Greyscale Image',
-		documentation: 'Greyscale version of input image.',
-		type: 'image/jimp'
-	});
+    await grayscale.newOutputSocket('img', {
+        label: 'Greyscale Image',
+        documentation: 'Greyscale version of input image.',
+        type: 'image/jimp',
+    });
 
-	await grayscale.setCode(`
+    await grayscale.setCode(`
 const img = inputs.img.clone();
 img.greyscale();
 outputs.set('img', img);
 `);
 
-	const hsv = await nodeBluePrintController.initOfficialNodeBluePrint('hsv');
-	await hsv.setTitle('HSV Shift Change');
-	await hsv.setDocumentation('Shift hue, saturation, or value of the input image.');
+    const hsv = await nodeBluePrintController.initOfficialNodeBluePrint('hsv');
+    await hsv.setTitle('HSV Shift Change');
+    await hsv.setDocumentation(
+        'Shift hue, saturation, or value of the input image.'
+    );
 
-	await hsv.newInputSocket('img', {
-		label: 'Input Image',
-		documentation: 'Any image.',
-		type: 'image/jimp',
-		params: new JIMPImageSocketParamsBuilder().build()
-	});
-	await hsv.newInputSocket('hue', {
-		label: 'Hue Shift',
-		documentation: 'Amount to shift hue by.',
-		type: 'number',
-		params: new NumberSocketParamsBuilder(0).setMin(0).setMax(360).setStep(0.1).build()
-	});
-	await hsv.newInputSocket('saturation', {
-		label: 'Saturation Shift',
-		documentation: 'Amount to shift saturation by.',
-		type: 'number',
-		params: new NumberSocketParamsBuilder(0).setMin(0).setMax(100).setStep(0.1).build()
-	});
-	await hsv.newInputSocket('value', {
-		label: 'Value Shift',
-		documentation: 'Amount to shift brightness/darkness by.',
-		type: 'number',
-		params: new NumberSocketParamsBuilder(0).setMin(0).setMax(100).setStep(0.1).build()
-	});
+    await hsv.newInputSocket('img', {
+        label: 'Input Image',
+        documentation: 'Any image.',
+        type: 'image/jimp',
+        params: new JIMPImageSocketParamsBuilder().build(),
+    });
+    await hsv.newInputSocket('hue', {
+        label: 'Hue Shift',
+        documentation: 'Amount to shift hue by.',
+        type: 'number',
+        params: new NumberSocketParamsBuilder(0)
+            .setMin(0)
+            .setMax(360)
+            .setStep(0.1)
+            .build(),
+    });
+    await hsv.newInputSocket('saturation', {
+        label: 'Saturation Shift',
+        documentation: 'Amount to shift saturation by.',
+        type: 'number',
+        params: new NumberSocketParamsBuilder(0)
+            .setMin(0)
+            .setMax(100)
+            .setStep(0.1)
+            .build(),
+    });
+    await hsv.newInputSocket('value', {
+        label: 'Value Shift',
+        documentation: 'Amount to shift brightness/darkness by.',
+        type: 'number',
+        params: new NumberSocketParamsBuilder(0)
+            .setMin(0)
+            .setMax(100)
+            .setStep(0.1)
+            .build(),
+    });
 
-	await hsv.newOutputSocket('img', {
-		label: 'Output Image',
-		documentation: 'Shifted image.',
-		type: 'image/jimp'
-	});
+    await hsv.newOutputSocket('img', {
+        label: 'Output Image',
+        documentation: 'Shifted image.',
+        type: 'image/jimp',
+    });
 
-	await hsv.setCode(
-		'const img = inputs.img.clone();\n' +
-			'const hue = inputs.hue;\n' +
-			'const saturation = inputs.saturation;\n' +
-			'const value = inputs.value;\n' +
-			'// Adjust hue (in degrees, -360 to 360)\n' +
-			'if (hue) img.color([{ apply: "hue", params: [hue.valueOf()] }]);\n' +
-			'\n' +
-			'// Adjust saturation (0 to 100)\n' +
-			'if (saturation) img.color([{ apply: "saturate", params: [saturation.valueOf()] }]);\n' +
-			'\n' +
-			'// Adjust value (0 to 100)\n' +
-			'if (value) img.color([{ apply: "brighten", params: [value.valueOf()] }]);\n' +
-			'\n' +
-			"outputs.set('img', img);\n"
-	);
+    await hsv.setCode(
+        'const img = inputs.img.clone();\n' +
+            'const hue = inputs.hue;\n' +
+            'const saturation = inputs.saturation;\n' +
+            'const value = inputs.value;\n' +
+            '// Adjust hue (in degrees, -360 to 360)\n' +
+            'if (hue) img.color([{ apply: "hue", params: [hue.valueOf()] }]);\n' +
+            '\n' +
+            '// Adjust saturation (0 to 100)\n' +
+            'if (saturation) img.color([{ apply: "saturate", params: [saturation.valueOf()] }]);\n' +
+            '\n' +
+            '// Adjust value (0 to 100)\n' +
+            'if (value) img.color([{ apply: "brighten", params: [value.valueOf()] }]);\n' +
+            '\n' +
+            "outputs.set('img', img);\n"
+    );
 }
 
 async function fileLoadingNodes() {
-	const loadExcel = await nodeBluePrintController.initOfficialNodeBluePrint('load_excel');
-	await loadExcel.setTitle('Load Excel Spreadsheet');
-	await loadExcel.setDocumentation('Display Excel Spreadsheet');
+    const loadExcel =
+        await nodeBluePrintController.initOfficialNodeBluePrint('load_excel');
+    await loadExcel.setTitle('Load Excel Spreadsheet');
+    await loadExcel.setDocumentation('Display Excel Spreadsheet');
 
-	await loadExcel.newInputSocket('xlsx_file', {
-		label: '.xlsx',
-		documentation: 'Excel File',
-		type: 'file',
-		params: new JIMPImageSocketParamsBuilder().build()
-	});
+    await loadExcel.newInputSocket('xlsx_file', {
+        label: '.xlsx',
+        documentation: 'Excel File',
+        type: 'file',
+        params: new JIMPImageSocketParamsBuilder().build(),
+    });
 
-	await loadExcel.newOutputSocket('json', {
-		label: 'JSON dict',
-		documentation: 'Json dictionary of spreadsheet',
-		type: 'json'
-	});
+    await loadExcel.newOutputSocket('json', {
+        label: 'JSON dict',
+        documentation: 'Json dictionary of spreadsheet',
+        type: 'json',
+    });
 
-	await loadExcel.setCode("console.error('Not Implemented');");
+    await loadExcel.setCode("console.error('Not Implemented');");
 }
 
 async function dropboxNodes() {
-	const saveDropbox = await nodeBluePrintController.initOfficialNodeBluePrint('save_dropbox');
-	await saveDropbox.setTitle('Save to Dropbox');
-	await saveDropbox.setDocumentation('Saves the image to Dropbox');
+    const saveDropbox =
+        await nodeBluePrintController.initOfficialNodeBluePrint('save_dropbox');
+    await saveDropbox.setTitle('Save to Dropbox');
+    await saveDropbox.setDocumentation('Saves the image to Dropbox');
 
-	await saveDropbox.newInputSocket('image_file', {
-		label: 'Image',
-		documentation: 'Image File',
-		type: 'image/jimp',
-		params: new JIMPImageSocketParamsBuilder().build()
-	});
+    await saveDropbox.newInputSocket('image_file', {
+        label: 'Image',
+        documentation: 'Image File',
+        type: 'image/jimp',
+        params: new JIMPImageSocketParamsBuilder().build(),
+    });
 
-	await saveDropbox.setCode("console.error('Not Implemented');");
+    await saveDropbox.setCode("console.error('Not Implemented');");
 
-	const loadDropbox = await nodeBluePrintController.initOfficialNodeBluePrint('load_dropbox');
-	await loadDropbox.setTitle('Load from Dropbox');
-	await loadDropbox.setDocumentation('Loads the Image from Dropbox');
+    const loadDropbox =
+        await nodeBluePrintController.initOfficialNodeBluePrint('load_dropbox');
+    await loadDropbox.setTitle('Load from Dropbox');
+    await loadDropbox.setDocumentation('Loads the Image from Dropbox');
 
-	await loadDropbox.newOutputSocket('image_file', {
-		label: 'Image',
-		documentation: 'Image File',
-		type: 'image/jimp'
-	});
+    await loadDropbox.newOutputSocket('image_file', {
+        label: 'Image',
+        documentation: 'Image File',
+        type: 'image/jimp',
+    });
 
-	await loadDropbox.setCode("console.error('Not Implemented');");
+    await loadDropbox.setCode("console.error('Not Implemented');");
 }
 
 async function timeRelatedNodes() {
-	const dateTimeParser = await nodeBluePrintController.initOfficialNodeBluePrint('datetime_parser');
-	await dateTimeParser.setTitle('Date & Time Constructor');
-	await dateTimeParser.setDocumentation('Parses a datetime object.');
+    const dateTimeParser =
+        await nodeBluePrintController.initOfficialNodeBluePrint(
+            'datetime_parser'
+        );
+    await dateTimeParser.setTitle('Date & Time Constructor');
+    await dateTimeParser.setDocumentation('Parses a datetime object.');
 
-	await dateTimeParser.newInputSocket('date_time', {
-		label: 'Date & Time',
-		documentation: 'Datetime to parse.',
-		type: 'string',
-		params: new StringSocketParamsBuilder('Wednesday, September 7, 1998 02:45 PM').build()
-	});
-	await dateTimeParser.newInputSocket('locale', {
-		label: 'Locale (Time Zone)',
-		documentation: 'Time Zone (MST=Mountain Standard Time, etc.)',
-		type: 'string',
-		params: new StringSocketParamsBuilder('MST').build()
-	});
-	await dateTimeParser.newInputSocket('lang', {
-		label: 'Language',
-		documentation: 'Language to use.',
-		type: 'string',
-		params: new StringSocketParamsBuilder('en-US').build()
-	});
-	await dateTimeParser.newOutputSocket('hour_am_pm', {
-		label: 'Hour (AM/PM)',
-		documentation: 'Hour.',
-		type: 'number'
-		// config: { defaultValue: 0, min: 0, max: 12, step: 1 }
-	});
-	await dateTimeParser.newOutputSocket('hour_24', {
-		label: 'Hour (24)',
-		documentation: 'Hour.',
-		type: 'number'
-		// params: { defaultValue: 0, min: 0, max: 24, step: 1 }
-	});
-	await dateTimeParser.newOutputSocket('minute', {
-		label: 'Minute',
-		documentation: 'Minute.',
-		type: 'number'
-		// params: { defaultValue: 0, min: 0, max: 60, step: 1 }
-	});
-	await dateTimeParser.newOutputSocket('second', {
-		label: 'Second',
-		documentation: 'Second.',
-		type: 'number'
-		// params: { defaultValue: 0, min: 0, max: 60, step: 1 }
-	});
-	await dateTimeParser.newOutputSocket('day_of_week_name', {
-		label: 'Day of Week (name)',
-		documentation: 'Day of Week (named).',
-		type: 'string'
-		// params: { defaultValue: "May-day!" }
-	});
-	await dateTimeParser.newOutputSocket('day_of_month', {
-		label: 'Day of Month',
-		documentation: 'Day of Month.',
-		type: 'number'
-		// params: { defaultValue: 0, min: 0, max: 31, step: 1 }
-	});
-	await dateTimeParser.newOutputSocket('day_of_year', {
-		label: 'Day of Year',
-		documentation: 'Day of Year.',
-		type: 'number'
-		// params: { defaultValue: 0, min: 0, max: 365, step: 1 }
-	});
-	await dateTimeParser.newOutputSocket('month', {
-		label: 'Month (0-12)',
-		documentation: 'Month index.',
-		type: 'number'
-		// params: { defaultValue: 0, min: 0, max: 12, step: 1 }
-	});
-	await dateTimeParser.newOutputSocket('month_name', {
-		label: 'Month (January-December)',
-		documentation: 'Month by name.',
-		type: 'string'
-		// params: { defaultValue: 'Movember' }
-	});
-	await dateTimeParser.newOutputSocket('year', {
-		label: 'Year (AD)',
-		documentation: 'Year after death.',
-		type: 'number'
-		// params: { defaultValue: 0, min: 0, max: null, step: 1 }
-	});
-	await dateTimeParser.newOutputSocket('second_in_epoch', {
-		label: 'Second in Epoch',
-		documentation: 'Seconds since start of epoch (1970).',
-		type: 'number'
-		// params: { defaultValue: 0, min: 0, max: null, step: 1 }
-	});
+    await dateTimeParser.newInputSocket('date_time', {
+        label: 'Date & Time',
+        documentation: 'Datetime to parse.',
+        type: 'string',
+        params: new StringSocketParamsBuilder(
+            'Wednesday, September 7, 1998 02:45 PM'
+        ).build(),
+    });
+    await dateTimeParser.newInputSocket('locale', {
+        label: 'Locale (Time Zone)',
+        documentation: 'Time Zone (MST=Mountain Standard Time, etc.)',
+        type: 'string',
+        params: new StringSocketParamsBuilder('MST').build(),
+    });
+    await dateTimeParser.newInputSocket('lang', {
+        label: 'Language',
+        documentation: 'Language to use.',
+        type: 'string',
+        params: new StringSocketParamsBuilder('en-US').build(),
+    });
+    await dateTimeParser.newOutputSocket('hour_am_pm', {
+        label: 'Hour (AM/PM)',
+        documentation: 'Hour.',
+        type: 'number',
+        // config: { defaultValue: 0, min: 0, max: 12, step: 1 }
+    });
+    await dateTimeParser.newOutputSocket('hour_24', {
+        label: 'Hour (24)',
+        documentation: 'Hour.',
+        type: 'number',
+        // params: { defaultValue: 0, min: 0, max: 24, step: 1 }
+    });
+    await dateTimeParser.newOutputSocket('minute', {
+        label: 'Minute',
+        documentation: 'Minute.',
+        type: 'number',
+        // params: { defaultValue: 0, min: 0, max: 60, step: 1 }
+    });
+    await dateTimeParser.newOutputSocket('second', {
+        label: 'Second',
+        documentation: 'Second.',
+        type: 'number',
+        // params: { defaultValue: 0, min: 0, max: 60, step: 1 }
+    });
+    await dateTimeParser.newOutputSocket('day_of_week_name', {
+        label: 'Day of Week (name)',
+        documentation: 'Day of Week (named).',
+        type: 'string',
+        // params: { defaultValue: "May-day!" }
+    });
+    await dateTimeParser.newOutputSocket('day_of_month', {
+        label: 'Day of Month',
+        documentation: 'Day of Month.',
+        type: 'number',
+        // params: { defaultValue: 0, min: 0, max: 31, step: 1 }
+    });
+    await dateTimeParser.newOutputSocket('day_of_year', {
+        label: 'Day of Year',
+        documentation: 'Day of Year.',
+        type: 'number',
+        // params: { defaultValue: 0, min: 0, max: 365, step: 1 }
+    });
+    await dateTimeParser.newOutputSocket('month', {
+        label: 'Month (0-12)',
+        documentation: 'Month index.',
+        type: 'number',
+        // params: { defaultValue: 0, min: 0, max: 12, step: 1 }
+    });
+    await dateTimeParser.newOutputSocket('month_name', {
+        label: 'Month (January-December)',
+        documentation: 'Month by name.',
+        type: 'string',
+        // params: { defaultValue: 'Movember' }
+    });
+    await dateTimeParser.newOutputSocket('year', {
+        label: 'Year (AD)',
+        documentation: 'Year after death.',
+        type: 'number',
+        // params: { defaultValue: 0, min: 0, max: null, step: 1 }
+    });
+    await dateTimeParser.newOutputSocket('second_in_epoch', {
+        label: 'Second in Epoch',
+        documentation: 'Seconds since start of epoch (1970).',
+        type: 'number',
+        // params: { defaultValue: 0, min: 0, max: null, step: 1 }
+    });
 
-	await dateTimeParser.setCode(`
+    await dateTimeParser.setCode(`
 const dateStr = inputs.date_time;
 const lang = inputs.lang || 'en-US';
 const locale = inputs.locale || 'en-US';
@@ -373,97 +398,135 @@ outputs.set('year', year);
 outputs.set('second_in_epoch', epochSeconds);
 `);
 
-	const dateTimeConstructor =
-		await nodeBluePrintController.initOfficialNodeBluePrint('datetime_constructor');
-	await dateTimeConstructor.setTitle('Date & Time Parser');
-	await dateTimeConstructor.setDocumentation('Parses a datetime object.');
+    const dateTimeConstructor =
+        await nodeBluePrintController.initOfficialNodeBluePrint(
+            'datetime_constructor'
+        );
+    await dateTimeConstructor.setTitle('Date & Time Parser');
+    await dateTimeConstructor.setDocumentation('Parses a datetime object.');
 
-	await dateTimeConstructor.newOutputSocket('date_time', {
-		label: 'Date & Time',
-		documentation: 'Datetime to parse.',
-		type: 'string'
-	});
+    await dateTimeConstructor.newOutputSocket('date_time', {
+        label: 'Date & Time',
+        documentation: 'Datetime to parse.',
+        type: 'string',
+    });
 
-	await dateTimeConstructor.newInputSocket('locale', {
-		label: 'Locale',
-		documentation: 'Time Zone/Time Zone',
-		type: 'string',
-		params: new StringSocketParamsBuilder('en/us').build()
-	});
-	await dateTimeConstructor.newInputSocket('lang', {
-		label: 'Language',
-		documentation: 'Language to use.',
-		type: 'string',
-		params: new StringSocketParamsBuilder('en-US').build()
-	});
-	await dateTimeConstructor.newInputSocket('hour_am_pm', {
-		label: 'Hour (AM/PM)',
-		documentation: 'Hour.',
-		type: 'number',
-		params: new NumberSocketParamsBuilder(0).setMin(0).setMax(12).setStep(1).build()
-	});
-	await dateTimeConstructor.newInputSocket('hour_24', {
-		label: 'Hour (24)',
-		documentation: 'Hour.',
-		type: 'number',
-		params: new NumberSocketParamsBuilder(0).setMin(0).setMax(24).setStep(1).build()
-	});
-	await dateTimeConstructor.newInputSocket('minute', {
-		label: 'Minute',
-		documentation: 'Minute.',
-		type: 'number',
-		params: new NumberSocketParamsBuilder(0).setMin(0).setMax(60).setStep(1).build()
-	});
-	await dateTimeConstructor.newInputSocket('second', {
-		label: 'Second',
-		documentation: 'Second.',
-		type: 'number',
-		params: new NumberSocketParamsBuilder(0).setMin(0).setMax(60).setStep(1).build()
-	});
-	await dateTimeConstructor.newInputSocket('day_of_week_name', {
-		label: 'Day of Week (name)',
-		documentation: 'Day of Week (named).',
-		type: 'string',
-		params: new StringSocketParamsBuilder('May-day').build()
-	});
-	await dateTimeConstructor.newInputSocket('day_of_month_name', {
-		label: 'Day of Month',
-		documentation: 'Day of Month.',
-		type: 'number',
-		params: new NumberSocketParamsBuilder(0).setMin(0).setMax(31).setStep(1).build()
-	});
-	await dateTimeConstructor.newInputSocket('day_of_year', {
-		label: 'Day of Year',
-		documentation: 'Day of Year.',
-		type: 'number',
-		params: new NumberSocketParamsBuilder(0).setMin(0).setMax(365).setStep(1).build()
-	});
-	await dateTimeConstructor.newInputSocket('month', {
-		label: 'Month (0-12)',
-		documentation: 'Month index.',
-		type: 'number',
-		params: new NumberSocketParamsBuilder(0).setMin(0).setMax(12).setStep(1).build()
-	});
-	await dateTimeConstructor.newInputSocket('month_name', {
-		label: 'Month (January-December)',
-		documentation: 'Month by name.',
-		type: 'string',
-		params: new StringSocketParamsBuilder('Movember').build()
-	});
-	await dateTimeConstructor.newInputSocket('year', {
-		label: 'Year (AD)',
-		documentation: 'Year after death.',
-		type: 'number',
-		params: new NumberSocketParamsBuilder(0).setMin(0).noMax().setStep(1).build()
-	});
-	await dateTimeConstructor.newInputSocket('second_in_epoch', {
-		label: 'Second in Epoch',
-		documentation: 'Seconds since start of epoch (1970).',
-		type: 'number',
-		params: new NumberSocketParamsBuilder(0).setMin(0).noMax().setStep(1).build()
-	});
+    await dateTimeConstructor.newInputSocket('locale', {
+        label: 'Locale',
+        documentation: 'Time Zone/Time Zone',
+        type: 'string',
+        params: new StringSocketParamsBuilder('en/us').build(),
+    });
+    await dateTimeConstructor.newInputSocket('lang', {
+        label: 'Language',
+        documentation: 'Language to use.',
+        type: 'string',
+        params: new StringSocketParamsBuilder('en-US').build(),
+    });
+    await dateTimeConstructor.newInputSocket('hour_am_pm', {
+        label: 'Hour (AM/PM)',
+        documentation: 'Hour.',
+        type: 'number',
+        params: new NumberSocketParamsBuilder(0)
+            .setMin(0)
+            .setMax(12)
+            .setStep(1)
+            .build(),
+    });
+    await dateTimeConstructor.newInputSocket('hour_24', {
+        label: 'Hour (24)',
+        documentation: 'Hour.',
+        type: 'number',
+        params: new NumberSocketParamsBuilder(0)
+            .setMin(0)
+            .setMax(24)
+            .setStep(1)
+            .build(),
+    });
+    await dateTimeConstructor.newInputSocket('minute', {
+        label: 'Minute',
+        documentation: 'Minute.',
+        type: 'number',
+        params: new NumberSocketParamsBuilder(0)
+            .setMin(0)
+            .setMax(60)
+            .setStep(1)
+            .build(),
+    });
+    await dateTimeConstructor.newInputSocket('second', {
+        label: 'Second',
+        documentation: 'Second.',
+        type: 'number',
+        params: new NumberSocketParamsBuilder(0)
+            .setMin(0)
+            .setMax(60)
+            .setStep(1)
+            .build(),
+    });
+    await dateTimeConstructor.newInputSocket('day_of_week_name', {
+        label: 'Day of Week (name)',
+        documentation: 'Day of Week (named).',
+        type: 'string',
+        params: new StringSocketParamsBuilder('May-day').build(),
+    });
+    await dateTimeConstructor.newInputSocket('day_of_month_name', {
+        label: 'Day of Month',
+        documentation: 'Day of Month.',
+        type: 'number',
+        params: new NumberSocketParamsBuilder(0)
+            .setMin(0)
+            .setMax(31)
+            .setStep(1)
+            .build(),
+    });
+    await dateTimeConstructor.newInputSocket('day_of_year', {
+        label: 'Day of Year',
+        documentation: 'Day of Year.',
+        type: 'number',
+        params: new NumberSocketParamsBuilder(0)
+            .setMin(0)
+            .setMax(365)
+            .setStep(1)
+            .build(),
+    });
+    await dateTimeConstructor.newInputSocket('month', {
+        label: 'Month (0-12)',
+        documentation: 'Month index.',
+        type: 'number',
+        params: new NumberSocketParamsBuilder(0)
+            .setMin(0)
+            .setMax(12)
+            .setStep(1)
+            .build(),
+    });
+    await dateTimeConstructor.newInputSocket('month_name', {
+        label: 'Month (January-December)',
+        documentation: 'Month by name.',
+        type: 'string',
+        params: new StringSocketParamsBuilder('Movember').build(),
+    });
+    await dateTimeConstructor.newInputSocket('year', {
+        label: 'Year (AD)',
+        documentation: 'Year after death.',
+        type: 'number',
+        params: new NumberSocketParamsBuilder(0)
+            .setMin(0)
+            .noMax()
+            .setStep(1)
+            .build(),
+    });
+    await dateTimeConstructor.newInputSocket('second_in_epoch', {
+        label: 'Second in Epoch',
+        documentation: 'Seconds since start of epoch (1970).',
+        type: 'number',
+        params: new NumberSocketParamsBuilder(0)
+            .setMin(0)
+            .noMax()
+            .setStep(1)
+            .build(),
+    });
 
-	await dateTimeConstructor.setCode(`
+    await dateTimeConstructor.setCode(`
 const lang = inputs.lang || 'en-US';
 const locale = inputs.locale || 'en-US';
 
@@ -485,130 +548,143 @@ outputs.set('date_time', dateStr);
 }
 
 async function worldStateDataNodes() {
-	const weather = await nodeBluePrintController.initOfficialNodeBluePrint('weather');
-	await weather.setTitle('Weather at GPS Coordinate (Approximate)');
-	await weather.setDocumentation('Returns the weather at a given GPS Coordinate');
+    const weather =
+        await nodeBluePrintController.initOfficialNodeBluePrint('weather');
+    await weather.setTitle('Weather at GPS Coordinate (Approximate)');
+    await weather.setDocumentation(
+        'Returns the weather at a given GPS Coordinate'
+    );
 
-	await weather.newInputSocket('lat', {
-		label: 'GPS Latitude',
-		documentation: 'Latitude',
-		type: 'number',
-		params: new NumberSocketParamsBuilder(40.758701)
-			.setMin(-90)
-			.setMax(90)
-			.setStep(0.000001)
-			.build() // millcreek
-	});
-	await weather.newInputSocket('long', {
-		label: 'GPS Longitude',
-		documentation: 'Longitude',
-		type: 'number',
-		params: new NumberSocketParamsBuilder(-111.876183)
-			.setMin(-180)
-			.setMax(180)
-			.setStep(0.000001)
-			.build() // millcreek
-	});
+    await weather.newInputSocket('lat', {
+        label: 'GPS Latitude',
+        documentation: 'Latitude',
+        type: 'number',
+        params: new NumberSocketParamsBuilder(40.758701)
+            .setMin(-90)
+            .setMax(90)
+            .setStep(0.000001)
+            .build(), // millcreek
+    });
+    await weather.newInputSocket('long', {
+        label: 'GPS Longitude',
+        documentation: 'Longitude',
+        type: 'number',
+        params: new NumberSocketParamsBuilder(-111.876183)
+            .setMin(-180)
+            .setMax(180)
+            .setStep(0.000001)
+            .build(), // millcreek
+    });
 
-	await weather.newOutputSocket('precipitation', {
-		label: 'Precipitation',
-		documentation: 'How much it rains',
-		type: 'number'
-	});
+    await weather.newOutputSocket('precipitation', {
+        label: 'Precipitation',
+        documentation: 'How much it rains',
+        type: 'number',
+    });
 
-	await weather.newOutputSocket('predipication_variance', {
-		label: 'Precipitation Uncertainty',
-		documentation: 'How much it rains when this says it will rain.',
-		type: 'number'
-	});
+    await weather.newOutputSocket('predipication_variance', {
+        label: 'Precipitation Uncertainty',
+        documentation: 'How much it rains when this says it will rain.',
+        type: 'number',
+    });
 
-	await weather.newOutputSocket('temp_f', {
-		label: 'Temperature (F)',
-		documentation: 'In farenheight',
-		type: 'number'
-	});
+    await weather.newOutputSocket('temp_f', {
+        label: 'Temperature (F)',
+        documentation: 'In farenheight',
+        type: 'number',
+    });
 
-	await weather.newOutputSocket('temp_c', {
-		label: 'Temperature (C)',
-		documentation: 'In celcius',
-		type: 'number'
-	});
+    await weather.newOutputSocket('temp_c', {
+        label: 'Temperature (C)',
+        documentation: 'In celcius',
+        type: 'number',
+    });
 
-	await weather.newOutputSocket('wind_speed_mph', {
-		label: 'Wind Speed (mph)',
-		documentation: 'Wind speed in miles per hour',
-		type: 'number'
-	});
+    await weather.newOutputSocket('wind_speed_mph', {
+        label: 'Wind Speed (mph)',
+        documentation: 'Wind speed in miles per hour',
+        type: 'number',
+    });
 
-	await weather.newOutputSocket('wind_speed_kmph', {
-		label: 'Wind Speed (km/h)',
-		documentation: 'Wind speed in kilometers per hour',
-		type: 'number'
-	});
+    await weather.newOutputSocket('wind_speed_kmph', {
+        label: 'Wind Speed (km/h)',
+        documentation: 'Wind speed in kilometers per hour',
+        type: 'number',
+    });
 
-	await weather.newOutputSocket('anomolous_rating', {
-		label: 'Anomolous rating',
-		documentation:
-			'How anomalous is the weather in this location on this day given known history? ' +
-			'Is today significatnly different?',
-		type: 'number'
-	});
+    await weather.newOutputSocket('anomolous_rating', {
+        label: 'Anomolous rating',
+        documentation:
+            'How anomalous is the weather in this location on this day given known history? ' +
+            'Is today significatnly different?',
+        type: 'number',
+    });
 
-	await weather.setCode(`
+    await weather.setCode(`
   throw new Error("Weather Node is a Work In Progress. Please Check Back Later or Implement your Own.");
 `);
 }
 
 async function huggingfaceNodes() {
-	/**
-	 * TODO: chat op, diffusion op, text2img op, ...
-	 */
+    /**
+     * TODO: chat op, diffusion op, text2img op, ...
+     */
 
-	const llm = await nodeBluePrintController.initOfficialNodeBluePrint('promptdesign');
-	await llm.setTitle('Large Language Model (Huggingface)');
-	await llm.setDocumentation('Return output of LLM.');
+    const llm =
+        await nodeBluePrintController.initOfficialNodeBluePrint('promptdesign');
+    await llm.setTitle('Large Language Model (Huggingface)');
+    await llm.setDocumentation('Return output of LLM.');
 
-	await llm.newInputSocket('hf_token', {
-		label: 'Huggingface Login',
-		documentation: 'Huggingface Account to Charge',
-		type: 'HuggingfaceLogin',
-		params: new StringSocketParamsBuilder('').asSentence().build()
-	});
+    await llm.newInputSocket('hf_token', {
+        label: 'Huggingface Login',
+        documentation: 'Huggingface Account to Charge',
+        type: 'HuggingfaceLogin',
+        params: new StringSocketParamsBuilder('').asSentence().build(),
+    });
 
-	await llm.newInputSocket('model_id', {
-		label: 'Model ID',
-		documentation: 'Initial prompt (used to instruct model on task).',
-		type: 'string',
-		params: new StringSocketParamsBuilder('HuggingFaceH4/zephyr-7b-alpha').build()
-	});
+    await llm.newInputSocket('model_id', {
+        label: 'Model ID',
+        documentation: 'Initial prompt (used to instruct model on task).',
+        type: 'string',
+        params: new StringSocketParamsBuilder(
+            'HuggingFaceH4/zephyr-7b-alpha'
+        ).build(),
+    });
 
-	await llm.newInputSocket('prompt', {
-		label: 'Prompt',
-		documentation: 'Initial prompt (used to instruct model on task). This is the text to complete.',
-		type: 'string',
-		params: new StringSocketParamsBuilder('The quick brown fox jumped over the la').build()
-	});
-	await llm.newInputSocket('temp', {
-		label: 'Temperature',
-		documentation: 'Creativity level of the mode.',
-		type: 'number',
-		params: new NumberSocketParamsBuilder(0).setMin(0).setMax(1).setStep(0.01).build()
-	});
-	// missing many
+    await llm.newInputSocket('prompt', {
+        label: 'Prompt',
+        documentation:
+            'Initial prompt (used to instruct model on task). This is the text to complete.',
+        type: 'string',
+        params: new StringSocketParamsBuilder(
+            'The quick brown fox jumped over the la'
+        ).build(),
+    });
+    await llm.newInputSocket('temp', {
+        label: 'Temperature',
+        documentation: 'Creativity level of the mode.',
+        type: 'number',
+        params: new NumberSocketParamsBuilder(0)
+            .setMin(0)
+            .setMax(1)
+            .setStep(0.01)
+            .build(),
+    });
+    // missing many
 
-	await llm.newOutputSocket('output_text', {
-		label: 'Completed Text',
-		documentation: 'LLM output with prompt',
-		type: 'number'
-	});
+    await llm.newOutputSocket('output_text', {
+        label: 'Completed Text',
+        documentation: 'LLM output with prompt',
+        type: 'number',
+    });
 
-	await llm.newOutputSocket('output_text_no_prompt', {
-		label: 'Completed Text without Prompt',
-		documentation: 'LLM output without prompt',
-		type: 'number'
-	});
+    await llm.newOutputSocket('output_text_no_prompt', {
+        label: 'Completed Text without Prompt',
+        documentation: 'LLM output without prompt',
+        type: 'number',
+    });
 
-	await llm.setCode(`
+    await llm.setCode(`
 const hf_token = inputs.hf_token;
 const inference = await utils.APIConnectionManager.getConnector("huggingface-inference").getAPI();
 const output = await inference.textGeneration({
@@ -620,66 +696,76 @@ outputs.set('output_text', output.generated_text);
 outputs.set('output_text_no_prompt', output.generated_text);
 `);
 
-	// 	await promptdesign.setUnitTest(`
-	// const inputs = new Map();
-	// const outputs = new Map();
-	//
-	// inputs.set(
-	//   'hf_token',
-	//   'hf_oauth_eyJhbGciOiJFZERTQSJ9.eyJzY29wZSI6WyJvcGVuaWQiLCJlbWFpbCIsInByb2ZpbGUiLCJpbmZlcmVuY2UtYXBpIl0sImF1ZCI6Imh0dHBzOi8vaHVnZ2luZ2ZhY2UuY28iLCJvYXV0aEFwcCI6IjIxNjRkZjlkLWJjM2YtNDk1Zi1iZGQ3LWNjOTc3ZTVkMDZjNSIsInNlc3Npb25JZCI6IjY3YzhlYmVmODYwZWFmYjYyODBmNTdkOCIsImlhdCI6MTc0Mzg5MTY3Miwic3ViIjoiNjc3ZGIzYzNkNzFiNWYxMDhkZDU4MjIyIiwiZXhwIjoxNzQ2NDgzNjcyLCJpc3MiOiJodHRwczovL2h1Z2dpbmdmYWNlLmNvIn0.S3moSoEFjH4jTnvgNgxGaRsScZT9C68VTt2cpBIJhsJs01VAhcCb2HrZKTYIIp3FzhHptWTtg-Fa9AfT69XaAQ'
-	// );
-	// inputs.set('model_id', 'HuggingFaceH4/zephyr-7b-alpha');
-	// inputs.set('temp', 0.5);
-	// inputs.set('prompt', 'The quick brown fox jumped over the la');
-	//
-	// call(inputs, outputs);
-	//
-	// console.log(outputs);
-	// `
-	// 	);
+    // 	await promptdesign.setUnitTest(`
+    // const inputs = new Map();
+    // const outputs = new Map();
+    //
+    // inputs.set(
+    //   'hf_token',
+    //   'hf_oauth_eyJhbGciOiJFZERTQSJ9.eyJzY29wZSI6WyJvcGVuaWQiLCJlbWFpbCIsInByb2ZpbGUiLCJpbmZlcmVuY2UtYXBpIl0sImF1ZCI6Imh0dHBzOi8vaHVnZ2luZ2ZhY2UuY28iLCJvYXV0aEFwcCI6IjIxNjRkZjlkLWJjM2YtNDk1Zi1iZGQ3LWNjOTc3ZTVkMDZjNSIsInNlc3Npb25JZCI6IjY3YzhlYmVmODYwZWFmYjYyODBmNTdkOCIsImlhdCI6MTc0Mzg5MTY3Miwic3ViIjoiNjc3ZGIzYzNkNzFiNWYxMDhkZDU4MjIyIiwiZXhwIjoxNzQ2NDgzNjcyLCJpc3MiOiJodHRwczovL2h1Z2dpbmdmYWNlLmNvIn0.S3moSoEFjH4jTnvgNgxGaRsScZT9C68VTt2cpBIJhsJs01VAhcCb2HrZKTYIIp3FzhHptWTtg-Fa9AfT69XaAQ'
+    // );
+    // inputs.set('model_id', 'HuggingFaceH4/zephyr-7b-alpha');
+    // inputs.set('temp', 0.5);
+    // inputs.set('prompt', 'The quick brown fox jumped over the la');
+    //
+    // call(inputs, outputs);
+    //
+    // console.log(outputs);
+    // `
+    // 	);
 
-	const text_to_image = await nodeBluePrintController.initOfficialNodeBluePrint('text_to_image');
-	await text_to_image.setTitle('Text to Image (Huggingface)');
-	await text_to_image.setDocumentation('Generates Image Given Text');
+    const text_to_image =
+        await nodeBluePrintController.initOfficialNodeBluePrint(
+            'text_to_image'
+        );
+    await text_to_image.setTitle('Text to Image (Huggingface)');
+    await text_to_image.setDocumentation('Generates Image Given Text');
 
-	await text_to_image.newInputSocket('hf_token', {
-		label: 'Huggingface Login',
-		documentation: 'Huggingface Account to Charge',
-		type: 'HuggingfaceLogin',
-		params: new StringSocketParamsBuilder('').asSentence().build()
-	});
+    await text_to_image.newInputSocket('hf_token', {
+        label: 'Huggingface Login',
+        documentation: 'Huggingface Account to Charge',
+        type: 'HuggingfaceLogin',
+        params: new StringSocketParamsBuilder('').asSentence().build(),
+    });
 
-	await text_to_image.newInputSocket('model_id', {
-		label: 'Model ID',
-		documentation:
-			'Model to generate from (serch text-to-image models category on huggingface.com).',
-		type: 'string',
-		params: new StringSocketParamsBuilder('black-forest-labs/FLUX.1-dev').build()
-	});
+    await text_to_image.newInputSocket('model_id', {
+        label: 'Model ID',
+        documentation:
+            'Model to generate from (serch text-to-image models category on huggingface.com).',
+        type: 'string',
+        params: new StringSocketParamsBuilder(
+            'black-forest-labs/FLUX.1-dev'
+        ).build(),
+    });
 
-	await text_to_image.newInputSocket('prompt', {
-		label: 'Text Prompt',
-		documentation: 'Initial prompt (used to instruct model on task). This is the text to complete.',
-		type: 'string',
-		params: new StringSocketParamsBuilder(
-			'shrek riding a motor cycle over an exploding galaxy, being chased by a dragon (the wedjat eye is the eye of horus from egyptian mythology) make the galaxy look like the wedjat eye. there should be no ground, just space with the exploding galaxy in the background'
-		).build()
-	});
-	await text_to_image.newInputSocket('temp', {
-		label: 'Temperature',
-		documentation: 'Creativity level of the model.',
-		type: 'number',
-		params: new NumberSocketParamsBuilder(0).setMin(0).setMax(1).setStep(0.01).build()
-	});
-	// missing many
+    await text_to_image.newInputSocket('prompt', {
+        label: 'Text Prompt',
+        documentation:
+            'Initial prompt (used to instruct model on task). This is the text to complete.',
+        type: 'string',
+        params: new StringSocketParamsBuilder(
+            'shrek riding a motor cycle over an exploding galaxy, being chased by a dragon (the wedjat eye is the eye of horus from egyptian mythology) make the galaxy look like the wedjat eye. there should be no ground, just space with the exploding galaxy in the background'
+        ).build(),
+    });
+    await text_to_image.newInputSocket('temp', {
+        label: 'Temperature',
+        documentation: 'Creativity level of the model.',
+        type: 'number',
+        params: new NumberSocketParamsBuilder(0)
+            .setMin(0)
+            .setMax(1)
+            .setStep(0.01)
+            .build(),
+    });
+    // missing many
 
-	await text_to_image.newOutputSocket('image', {
-		label: 'Generated Image',
-		documentation: 'Image generated from the input specifications.',
-		type: 'image/jimp'
-	});
+    await text_to_image.newOutputSocket('image', {
+        label: 'Generated Image',
+        documentation: 'Image generated from the input specifications.',
+        type: 'image/jimp',
+    });
 
-	await text_to_image.setCode(`
+    await text_to_image.setCode(`
 // inputs, outputs, utils
 const hf_token = inputs.hf_token;
 const inference = await utils.APIConnectionManager.getConnector("huggingface-inference").getAPI();
@@ -696,46 +782,49 @@ outputs.set('image', image);
 }
 
 async function aiDemoNodes() {
-	const colorize = await nodeBluePrintController.initOfficialNodeBluePrint('colorize');
-	await colorize.setTitle('Colorize');
-	await colorize.setDocumentation('Colorize a grayscale image.');
+    const colorize =
+        await nodeBluePrintController.initOfficialNodeBluePrint('colorize');
+    await colorize.setTitle('Colorize');
+    await colorize.setDocumentation('Colorize a grayscale image.');
 
-	await colorize.newInputSocket('img', {
-		label: 'Greyscale Image',
-		documentation: 'Greyscale image to colorize.',
-		type: 'image/jimp',
-		params: new JIMPImageSocketParamsBuilder().build()
-	});
+    await colorize.newInputSocket('img', {
+        label: 'Greyscale Image',
+        documentation: 'Greyscale image to colorize.',
+        type: 'image/jimp',
+        params: new JIMPImageSocketParamsBuilder().build(),
+    });
 
-	await colorize.newOutputSocket('img', {
-		label: 'Color Image',
-		documentation: 'Color version of input image.',
-		type: 'image/jimp'
-	});
+    await colorize.newOutputSocket('img', {
+        label: 'Color Image',
+        documentation: 'Color version of input image.',
+        type: 'image/jimp',
+    });
 
-	await colorize.setCode(`
+    await colorize.setCode(`
   throw new Error("Colorizer Node is a Work In Progress. Please Check Back Later or Implement your Own.");
 `);
 
-	const superResolution =
-		await nodeBluePrintController.initOfficialNodeBluePrint('super_resolution');
-	await superResolution.setTitle('Super Resolution / "Enhance"');
-	await superResolution.setDocumentation('Increase the resolution image.');
+    const superResolution =
+        await nodeBluePrintController.initOfficialNodeBluePrint(
+            'super_resolution'
+        );
+    await superResolution.setTitle('Super Resolution / "Enhance"');
+    await superResolution.setDocumentation('Increase the resolution image.');
 
-	await superResolution.newInputSocket('img', {
-		label: 'Low-res Image',
-		documentation: 'Image to enhance.',
-		type: 'image/jimp',
-		params: new JIMPImageSocketParamsBuilder().build()
-	});
+    await superResolution.newInputSocket('img', {
+        label: 'Low-res Image',
+        documentation: 'Image to enhance.',
+        type: 'image/jimp',
+        params: new JIMPImageSocketParamsBuilder().build(),
+    });
 
-	await superResolution.newOutputSocket('super_res_img', {
-		label: 'High-res Image',
-		documentation: 'Enhanced image.',
-		type: 'image/jimp'
-	});
+    await superResolution.newOutputSocket('super_res_img', {
+        label: 'High-res Image',
+        documentation: 'Enhanced image.',
+        type: 'image/jimp',
+    });
 
-	await superResolution.setCode(`
+    await superResolution.setCode(`
 throw new Error("Super resolution Node is a Work In Progress. Please Check Back Later or Implement your Own.");
 const upscaler = await pipeline('image-to-image', 'Xenova/swin2SR-classical-sr-x2-64');
 const url = 'https://huggingface.co/datasets/Xenova/transformers.js-docs/resolve/main/butterfly.jpg';
@@ -748,175 +837,191 @@ const output = await upscaler(url);
 // }
 `);
 
-	const objectBackgroundSeperation = await nodeBluePrintController.initOfficialNodeBluePrint(
-		'object_background_seperation'
-	);
-	await objectBackgroundSeperation.setTitle('Separate Background & Foreground Object');
-	await objectBackgroundSeperation.setDocumentation(
-		'Separate a foreground object and infill the background, storing them in seperate images.'
-	);
+    const objectBackgroundSeperation =
+        await nodeBluePrintController.initOfficialNodeBluePrint(
+            'object_background_seperation'
+        );
+    await objectBackgroundSeperation.setTitle(
+        'Separate Background & Foreground Object'
+    );
+    await objectBackgroundSeperation.setDocumentation(
+        'Separate a foreground object and infill the background, storing them in seperate images.'
+    );
 
-	await objectBackgroundSeperation.newInputSocket('img', {
-		label: 'Image',
-		documentation: 'Image to enhance.',
-		type: 'image/jimp',
-		params: new JIMPImageSocketParamsBuilder().build()
-	});
+    await objectBackgroundSeperation.newInputSocket('img', {
+        label: 'Image',
+        documentation: 'Image to enhance.',
+        type: 'image/jimp',
+        params: new JIMPImageSocketParamsBuilder().build(),
+    });
 
-	await objectBackgroundSeperation.newOutputSocket('foreground_img', {
-		label: 'Foreground Image',
-		documentation: 'Alpha-ed out background.',
-		type: 'image/jimp'
-	});
+    await objectBackgroundSeperation.newOutputSocket('foreground_img', {
+        label: 'Foreground Image',
+        documentation: 'Alpha-ed out background.',
+        type: 'image/jimp',
+    });
 
-	await objectBackgroundSeperation.newOutputSocket('background_img', {
-		label: 'Background Infilled Image',
-		documentation: 'Infilled image with no foreground.',
-		type: 'image/jimp'
-	});
+    await objectBackgroundSeperation.newOutputSocket('background_img', {
+        label: 'Background Infilled Image',
+        documentation: 'Infilled image with no foreground.',
+        type: 'image/jimp',
+    });
 
-	await objectBackgroundSeperation.newOutputSocket('mask', {
-		label: 'Mask',
-		documentation: 'Black for background, white for foreground.',
-		type: 'image/jimp'
-	});
+    await objectBackgroundSeperation.newOutputSocket('mask', {
+        label: 'Mask',
+        documentation: 'Black for background, white for foreground.',
+        type: 'image/jimp',
+    });
 
-	await objectBackgroundSeperation.setCode(`
+    await objectBackgroundSeperation.setCode(`
 inputs.img.greyscale();
 outputs.set('img', inputs.img);
 `);
 }
 
 async function promptDesignNodes() {
-	const joinText = await nodeBluePrintController.initOfficialNodeBluePrint('join_text');
-	await joinText.setTitle('Join Text (4)');
-	await joinText.setDocumentation("Join text. 'A'+'B'='AB'");
+    const joinText =
+        await nodeBluePrintController.initOfficialNodeBluePrint('join_text');
+    await joinText.setTitle('Join Text (4)');
+    await joinText.setDocumentation("Join text. 'A'+'B'='AB'");
 
-	await joinText.newInputSocket('text1', {
-		label: 'Text',
-		documentation: 'String of text.',
-		type: 'string',
-		params: new StringSocketParamsBuilder('').asSentence().build()
-	});
-	await joinText.newInputSocket('text2', {
-		label: 'Text',
-		documentation: 'String of text.',
-		type: 'string',
-		params: new StringSocketParamsBuilder('').asSentence().build()
-	});
-	await joinText.newInputSocket('text3', {
-		label: 'Text',
-		documentation: 'String of text.',
-		type: 'string',
-		params: new StringSocketParamsBuilder('').asSentence().build()
-	});
-	await joinText.newInputSocket('text4', {
-		label: 'Text',
-		documentation: 'String of text.',
-		type: 'string',
-		params: new StringSocketParamsBuilder('').asSentence().build()
-	});
+    await joinText.newInputSocket('text1', {
+        label: 'Text',
+        documentation: 'String of text.',
+        type: 'string',
+        params: new StringSocketParamsBuilder('').asSentence().build(),
+    });
+    await joinText.newInputSocket('text2', {
+        label: 'Text',
+        documentation: 'String of text.',
+        type: 'string',
+        params: new StringSocketParamsBuilder('').asSentence().build(),
+    });
+    await joinText.newInputSocket('text3', {
+        label: 'Text',
+        documentation: 'String of text.',
+        type: 'string',
+        params: new StringSocketParamsBuilder('').asSentence().build(),
+    });
+    await joinText.newInputSocket('text4', {
+        label: 'Text',
+        documentation: 'String of text.',
+        type: 'string',
+        params: new StringSocketParamsBuilder('').asSentence().build(),
+    });
 
-	await joinText.newOutputSocket('text', {
-		label: 'Joined Text',
-		documentation: 'Text. Joined.',
-		type: 'string'
-	});
+    await joinText.newOutputSocket('text', {
+        label: 'Joined Text',
+        documentation: 'Text. Joined.',
+        type: 'string',
+    });
 
-	await joinText.setCode(
-		"outputs.set('text', inputs.text1+inputs.text2+inputs.text3+inputs.text4);"
-	);
+    await joinText.setCode(
+        "outputs.set('text', inputs.text1+inputs.text2+inputs.text3+inputs.text4);"
+    );
 
-	const splitText = await nodeBluePrintController.initOfficialNodeBluePrint('split_text');
-	await splitText.setTitle('Split Text');
-	await splitText.setDocumentation("Splits text by seperator (sep).");
+    const splitText =
+        await nodeBluePrintController.initOfficialNodeBluePrint('split_text');
+    await splitText.setTitle('Split Text');
+    await splitText.setDocumentation('Splits text by seperator (sep).');
 
-	await splitText.newInputSocket('text', {
-		label: 'Text',
-		documentation: 'String of text.',
-		type: 'string',
-		params: new StringSocketParamsBuilder('').build()
-	});
-	await splitText.newInputSocket('sep', {
-		label: 'Seperator',
-		documentation: 'String of text.',
-		type: 'string',
-		params: new StringSocketParamsBuilder(',').build()
-	});
+    await splitText.newInputSocket('text', {
+        label: 'Text',
+        documentation: 'String of text.',
+        type: 'string',
+        params: new StringSocketParamsBuilder('').build(),
+    });
+    await splitText.newInputSocket('sep', {
+        label: 'Seperator',
+        documentation: 'String of text.',
+        type: 'string',
+        params: new StringSocketParamsBuilder(',').build(),
+    });
 
-	await splitText.newOutputSocket('splitText', {
-		label: 'Split Text',
-		documentation: 'Text. Split.',
-		type: 'unknown[]'
-	});
+    await splitText.newOutputSocket('splitText', {
+        label: 'Split Text',
+        documentation: 'Text. Split.',
+        type: 'unknown[]',
+    });
 
-	await splitText.setCode(
-		"outputs.set('splitText', inputs.text.split(inputs.sep));"
-	);
+    await splitText.setCode(
+        "outputs.set('splitText', inputs.text.split(inputs.sep));"
+    );
 
-	const paragraphInput = await nodeBluePrintController.initOfficialNodeBluePrint('paragraph_input');
-	await paragraphInput.setTitle('Paragraph');
-	await paragraphInput.setDocumentation('Contains the text of a paragraph.');
+    const paragraphInput =
+        await nodeBluePrintController.initOfficialNodeBluePrint(
+            'paragraph_input'
+        );
+    await paragraphInput.setTitle('Paragraph');
+    await paragraphInput.setDocumentation('Contains the text of a paragraph.');
 
-	await paragraphInput.newInputSocket('paragraph', {
-		label: 'Text',
-		documentation: 'String of text.',
-		type: 'string',
-		params: new StringSocketParamsBuilder('').asParagraph().build()
-	});
+    await paragraphInput.newInputSocket('paragraph', {
+        label: 'Text',
+        documentation: 'String of text.',
+        type: 'string',
+        params: new StringSocketParamsBuilder('').asParagraph().build(),
+    });
 
-	await paragraphInput.newOutputSocket('paragraph', {
-		label: 'Text',
-		documentation: 'String of text.',
-		type: 'string'
-	});
+    await paragraphInput.newOutputSocket('paragraph', {
+        label: 'Text',
+        documentation: 'String of text.',
+        type: 'string',
+    });
 
-	await paragraphInput.setCode("outputs.set('paragraph', inputs.paragraph);");
+    await paragraphInput.setCode("outputs.set('paragraph', inputs.paragraph);");
 
-	const sentenceInput = await nodeBluePrintController.initOfficialNodeBluePrint('sentence_input');
-	await sentenceInput.setTitle('Sentence');
-	await sentenceInput.setDocumentation('Contains the text of a sentence.');
+    const sentenceInput =
+        await nodeBluePrintController.initOfficialNodeBluePrint(
+            'sentence_input'
+        );
+    await sentenceInput.setTitle('Sentence');
+    await sentenceInput.setDocumentation('Contains the text of a sentence.');
 
-	await sentenceInput.newInputSocket('sentence', {
-		label: 'Text',
-		documentation: 'String of text.',
-		type: 'string',
-		params: new StringSocketParamsBuilder('').asSentence().build()
-	});
+    await sentenceInput.newInputSocket('sentence', {
+        label: 'Text',
+        documentation: 'String of text.',
+        type: 'string',
+        params: new StringSocketParamsBuilder('').asSentence().build(),
+    });
 
-	await sentenceInput.newOutputSocket('sentence', {
-		label: 'Text',
-		documentation: 'String of text.',
-		type: 'string'
-	});
+    await sentenceInput.newOutputSocket('sentence', {
+        label: 'Text',
+        documentation: 'String of text.',
+        type: 'string',
+    });
 
-	await sentenceInput.setCode("outputs.set('sentence', inputs.sentence);");
+    await sentenceInput.setCode("outputs.set('sentence', inputs.sentence);");
 
-	const fillinTextTemplate =
-		await nodeBluePrintController.initOfficialNodeBluePrint('prompt_template');
-	await fillinTextTemplate.setTitle('Fillin Text Template');
-	await fillinTextTemplate.setDocumentation('Fill in template with variable values.');
+    const fillinTextTemplate =
+        await nodeBluePrintController.initOfficialNodeBluePrint(
+            'prompt_template'
+        );
+    await fillinTextTemplate.setTitle('Fillin Text Template');
+    await fillinTextTemplate.setDocumentation(
+        'Fill in template with variable values.'
+    );
 
-	await fillinTextTemplate.newInputSocket('template', {
-		label: 'Template',
-		documentation: "Use <variable-name> to fill in variables defined in 'Fill-Ins'.",
-		type: 'string',
-		params: new StringSocketParamsBuilder('').asParagraph().build()
-	});
-	await fillinTextTemplate.newInputSocket('fillins', {
-		label: 'Fill-Ins',
-		documentation: 'Variables to fill in.',
-		type: 'unknown',
-		params: new GenericSocketParamsBuilder('{}').build()
-	});
+    await fillinTextTemplate.newInputSocket('template', {
+        label: 'Template',
+        documentation:
+            "Use <variable-name> to fill in variables defined in 'Fill-Ins'.",
+        type: 'string',
+        params: new StringSocketParamsBuilder('').asParagraph().build(),
+    });
+    await fillinTextTemplate.newInputSocket('fillins', {
+        label: 'Fill-Ins',
+        documentation: 'Variables to fill in.',
+        type: 'unknown',
+        params: new GenericSocketParamsBuilder('{}').build(),
+    });
 
-	await fillinTextTemplate.newOutputSocket('text', {
-		label: 'Filled-in template',
-		documentation: "Template filled in with values in 'Fill-Ins'.",
-		type: 'string'
-	});
+    await fillinTextTemplate.newOutputSocket('text', {
+        label: 'Filled-in template',
+        documentation: "Template filled in with values in 'Fill-Ins'.",
+        type: 'string',
+    });
 
-	await fillinTextTemplate.setCode(`
+    await fillinTextTemplate.setCode(`
 const template = inputs.template;
 const fillins = inputs.fillins;
 
@@ -932,270 +1037,297 @@ outputs.set('text', filledText);
 }
 
 async function googleDriveNodes() {
-	const googleDrive = await nodeBluePrintController.initOfficialNodeBluePrint(
-		'get_file_from_google_drive'
-	);
-	await googleDrive.setTitle('Google Drive');
-	await googleDrive.setDocumentation(
-		'Retrieves a file from a google drive. Requires access to the google drive.'
-	);
+    const googleDrive = await nodeBluePrintController.initOfficialNodeBluePrint(
+        'get_file_from_google_drive'
+    );
+    await googleDrive.setTitle('Google Drive');
+    await googleDrive.setDocumentation(
+        'Retrieves a file from a google drive. Requires access to the google drive.'
+    );
 
-	await googleDrive.newInputSocket('account', {
-		label: 'Google Account',
-		documentation: 'Google account to get the file from.',
-		type: 'string',
-		params: new StringSocketParamsBuilder('').asPassword().build()
-	});
+    await googleDrive.newInputSocket('account', {
+        label: 'Google Account',
+        documentation: 'Google account to get the file from.',
+        type: 'string',
+        params: new StringSocketParamsBuilder('').asPassword().build(),
+    });
 
-	await googleDrive.newInputSocket('file_selector', {
-		label: 'File Selector',
-		documentation: 'File to retrieve.',
-		type: 'string',
-		params: new StringSocketParamsBuilder('').asSentence().build()
-	});
+    await googleDrive.newInputSocket('file_selector', {
+        label: 'File Selector',
+        documentation: 'File to retrieve.',
+        type: 'string',
+        params: new StringSocketParamsBuilder('').asSentence().build(),
+    });
 
-	await googleDrive.newOutputSocket('file', {
-		label: 'File',
-		documentation: 'The retrieved file.',
-		type: 'string'
-	});
+    await googleDrive.newOutputSocket('file', {
+        label: 'File',
+        documentation: 'The retrieved file.',
+        type: 'string',
+    });
 
-	await googleDrive.setCode(`
+    await googleDrive.setCode(`
 inputs.img.greyscale();
 outputs.set('img', inputs.img);
 `);
 
-	const sendEmail = await nodeBluePrintController.initOfficialNodeBluePrint('send_email_google');
-	await sendEmail.setTitle('Send Email');
-	await sendEmail.setDocumentation(
-		'Retrieves a file from a google drive. Requires access to the google drive.'
-	);
+    const sendEmail =
+        await nodeBluePrintController.initOfficialNodeBluePrint(
+            'send_email_google'
+        );
+    await sendEmail.setTitle('Send Email');
+    await sendEmail.setDocumentation(
+        'Retrieves a file from a google drive. Requires access to the google drive.'
+    );
 
-	await sendEmail.newInputSocket('account', {
-		label: 'From Google Account',
-		documentation: 'Google account to get the file from.',
-		type: 'string',
-		params: new StringSocketParamsBuilder('').asPassword().build()
-	});
+    await sendEmail.newInputSocket('account', {
+        label: 'From Google Account',
+        documentation: 'Google account to get the file from.',
+        type: 'string',
+        params: new StringSocketParamsBuilder('').asPassword().build(),
+    });
 
-	await sendEmail.newInputSocket('to', {
-		label: 'To',
-		documentation: 'Google account to get the file from.',
-		type: 'string',
-		params: new StringSocketParamsBuilder('').asSentence().build()
-	});
+    await sendEmail.newInputSocket('to', {
+        label: 'To',
+        documentation: 'Google account to get the file from.',
+        type: 'string',
+        params: new StringSocketParamsBuilder('').asSentence().build(),
+    });
 
-	await sendEmail.newInputSocket('cc', {
-		label: 'CC',
-		documentation: 'Google account to get the file from.',
-		type: 'string',
-		params: new StringSocketParamsBuilder('').asSentence().build()
-	});
+    await sendEmail.newInputSocket('cc', {
+        label: 'CC',
+        documentation: 'Google account to get the file from.',
+        type: 'string',
+        params: new StringSocketParamsBuilder('').asSentence().build(),
+    });
 
-	await sendEmail.newInputSocket('bcc', {
-		label: 'BCC',
-		documentation: 'Google account to get the file from.',
-		type: 'string',
-		params: new StringSocketParamsBuilder('').asSentence().build()
-	});
+    await sendEmail.newInputSocket('bcc', {
+        label: 'BCC',
+        documentation: 'Google account to get the file from.',
+        type: 'string',
+        params: new StringSocketParamsBuilder('').asSentence().build(),
+    });
 
-	await sendEmail.newInputSocket('subject', {
-		label: 'Subject',
-		documentation: 'Google account to get the file from.',
-		type: 'string',
-		params: new StringSocketParamsBuilder('').asSentence().build()
-	});
+    await sendEmail.newInputSocket('subject', {
+        label: 'Subject',
+        documentation: 'Google account to get the file from.',
+        type: 'string',
+        params: new StringSocketParamsBuilder('').asSentence().build(),
+    });
 
-	await sendEmail.newInputSocket('body', {
-		label: 'Email Body',
-		documentation: 'File to retrieve.',
-		type: 'string',
-		params: new StringSocketParamsBuilder('').asParagraph().build()
-	});
+    await sendEmail.newInputSocket('body', {
+        label: 'Email Body',
+        documentation: 'File to retrieve.',
+        type: 'string',
+        params: new StringSocketParamsBuilder('').asParagraph().build(),
+    });
 
-	await sendEmail.setCode(`
+    await sendEmail.setCode(`
 inputs.img.greyscale();
 outputs.set('img', inputs.img);
 `);
 }
 
 async function jimpNodes() {
-	const newBlankImage =
-		await nodeBluePrintController.initOfficialNodeBluePrint('jimp_new_blank_image');
-	await newBlankImage.setTitle('New Image');
-	await newBlankImage.setDocumentation('Generates a new image from parameters.');
+    const newBlankImage =
+        await nodeBluePrintController.initOfficialNodeBluePrint(
+            'jimp_new_blank_image'
+        );
+    await newBlankImage.setTitle('New Image');
+    await newBlankImage.setDocumentation(
+        'Generates a new image from parameters.'
+    );
 
-	await newBlankImage.newInputSocket('color', {
-		label: 'Color',
-		documentation: 'Color of solid image background.',
-		type: 'Color',
-		params: new StringSocketParamsBuilder('').asSentence().build()
-	});
+    await newBlankImage.newInputSocket('color', {
+        label: 'Color',
+        documentation: 'Color of solid image background.',
+        type: 'Color',
+        params: new StringSocketParamsBuilder('').asSentence().build(),
+    });
 
-	await newBlankImage.newInputSocket('height', {
-		label: 'Height',
-		documentation: 'Height of the image.',
-		type: 'number',
-		params: new NumberSocketParamsBuilder(1024).setMin(0).build()
-	});
+    await newBlankImage.newInputSocket('height', {
+        label: 'Height',
+        documentation: 'Height of the image.',
+        type: 'number',
+        params: new NumberSocketParamsBuilder(1024).setMin(0).build(),
+    });
 
-	await newBlankImage.newInputSocket('width', {
-		label: 'Width',
-		documentation: 'Width of the image.',
-		type: 'number',
-		params: new NumberSocketParamsBuilder(1024).setMin(0).build()
-	});
+    await newBlankImage.newInputSocket('width', {
+        label: 'Width',
+        documentation: 'Width of the image.',
+        type: 'number',
+        params: new NumberSocketParamsBuilder(1024).setMin(0).build(),
+    });
 
-	await newBlankImage.newOutputSocket('image', {
-		label: 'Image (JIMP)',
-		documentation: 'The new images.',
-		type: 'image/jimp'
-	});
+    await newBlankImage.newOutputSocket('image', {
+        label: 'Image (JIMP)',
+        documentation: 'The new images.',
+        type: 'image/jimp',
+    });
 
-	await newBlankImage.setCode(
-		"outputs.set('image', new Jimp({ width: inputs.width, height: inputs.height, color: inputs.color }));"
-	);
+    await newBlankImage.setCode(
+        "outputs.set('image', new Jimp({ width: inputs.width, height: inputs.height, color: inputs.color }));"
+    );
 
-	const resize = await nodeBluePrintController.initOfficialNodeBluePrint('jimp_resize_image');
-	await resize.setTitle('Resize Image');
-	await resize.setDocumentation('Resizes a Jimp Image');
+    const resize =
+        await nodeBluePrintController.initOfficialNodeBluePrint(
+            'jimp_resize_image'
+        );
+    await resize.setTitle('Resize Image');
+    await resize.setDocumentation('Resizes a Jimp Image');
 
-	await resize.newInputSocket('image', {
-		label: 'Image (JIMP)',
-		documentation: 'The high-res images.',
-		type: 'image/jimp',
-		params: new JIMPImageSocketParamsBuilder().build()
-	});
+    await resize.newInputSocket('image', {
+        label: 'Image (JIMP)',
+        documentation: 'The high-res images.',
+        type: 'image/jimp',
+        params: new JIMPImageSocketParamsBuilder().build(),
+    });
 
-	await resize.newInputSocket('width', {
-		label: 'Width',
-		documentation: 'Width of the image.',
-		type: 'number',
-		params: new NumberSocketParamsBuilder(1024).setMin(0).setStep(1).build()
-	});
+    await resize.newInputSocket('width', {
+        label: 'Width',
+        documentation: 'Width of the image.',
+        type: 'number',
+        params: new NumberSocketParamsBuilder(1024)
+            .setMin(0)
+            .setStep(1)
+            .build(),
+    });
 
-	await resize.newInputSocket('height', {
-		label: 'Height',
-		documentation: 'Height of the image.',
-		type: 'number',
-		params: new NumberSocketParamsBuilder(1024).setMin(0).setStep(1).build()
-	});
+    await resize.newInputSocket('height', {
+        label: 'Height',
+        documentation: 'Height of the image.',
+        type: 'number',
+        params: new NumberSocketParamsBuilder(1024)
+            .setMin(0)
+            .setStep(1)
+            .build(),
+    });
 
-	await resize.newOutputSocket('image', {
-		label: 'Image (JIMP)',
-		documentation: 'The resized images.',
-		type: 'image/jimp'
-	});
+    await resize.newOutputSocket('image', {
+        label: 'Image (JIMP)',
+        documentation: 'The resized images.',
+        type: 'image/jimp',
+    });
 
-	await resize.setCode(
-		'const img2 = inputs.image.clone();' +
-			'img2.resize({\n' +
-			'  w: Math.floor(inputs.width,\n' +
-			'  h: Math.floor(inputs.height\n' +
-			'});\n' +
-			"outputs.set('image', img2);"
-	);
+    await resize.setCode(
+        'const img2 = inputs.image.clone();' +
+            'img2.resize({\n' +
+            '  w: Math.floor(inputs.width,\n' +
+            '  h: Math.floor(inputs.height\n' +
+            '});\n' +
+            "outputs.set('image', img2);"
+    );
 }
 
 async function jsonNodes() {
-	const jsonEditorAndViewer =
-		await nodeBluePrintController.initOfficialNodeBluePrint('json_editor');
-	await jsonEditorAndViewer.setTitle('JSON');
-	await jsonEditorAndViewer.setDocumentation('Create, or view a single instance of a JSON object.');
+    const jsonEditorAndViewer =
+        await nodeBluePrintController.initOfficialNodeBluePrint('json_editor');
+    await jsonEditorAndViewer.setTitle('JSON');
+    await jsonEditorAndViewer.setDocumentation(
+        'Create, or view a single instance of a JSON object.'
+    );
 
-	await jsonEditorAndViewer.newInputSocket('jsonObject', {
-		label: 'JSON',
-		documentation: 'JSON text to parse.',
-		type: 'unknown',
-		params: new GenericSocketParamsBuilder('{}').build()
-	});
+    await jsonEditorAndViewer.newInputSocket('jsonObject', {
+        label: 'JSON',
+        documentation: 'JSON text to parse.',
+        type: 'unknown',
+        params: new GenericSocketParamsBuilder('{}').build(),
+    });
 
-	await jsonEditorAndViewer.newOutputSocket('jsonObject', {
-		label: 'Object',
-		documentation: 'The parsed JSON object.',
-		type: 'unknown'
-	});
+    await jsonEditorAndViewer.newOutputSocket('jsonObject', {
+        label: 'Object',
+        documentation: 'The parsed JSON object.',
+        type: 'unknown',
+    });
 
-	await jsonEditorAndViewer.setCode(
-		`
+    await jsonEditorAndViewer.setCode(
+        `
     const jsonObject = JSON.parse(inputs.jsonObject);
     outputs.set('jsonObject', jsonObject);
     console.log('jsonObject', jsonObject, typeof jsonObject);
     `
-	);
+    );
 
-	const jsonToString = await nodeBluePrintController.initOfficialNodeBluePrint('json_to_string');
-	await jsonToString.setTitle('JSON to Text');
-	await jsonToString.setDocumentation('Stringify a JSON object.');
+    const jsonToString =
+        await nodeBluePrintController.initOfficialNodeBluePrint(
+            'json_to_string'
+        );
+    await jsonToString.setTitle('JSON to Text');
+    await jsonToString.setDocumentation('Stringify a JSON object.');
 
-	await jsonToString.newInputSocket('jsonObject', {
-		label: 'Object',
-		documentation: 'Object to stringify into JSON.',
-		type: 'unknown',
-		params: new GenericSocketParamsBuilder('{}').build()
-	});
+    await jsonToString.newInputSocket('jsonObject', {
+        label: 'Object',
+        documentation: 'Object to stringify into JSON.',
+        type: 'unknown',
+        params: new GenericSocketParamsBuilder('{}').build(),
+    });
 
-	await jsonToString.newOutputSocket('jsonString', {
-		label: 'Text',
-		documentation: 'The string JSON.',
-		type: 'string'
-	});
+    await jsonToString.newOutputSocket('jsonString', {
+        label: 'Text',
+        documentation: 'The string JSON.',
+        type: 'string',
+    });
 
-	await jsonToString.setCode("outputs.set('jsonString', JSON.stringify(inputs.jsonObject));");
+    await jsonToString.setCode(
+        "outputs.set('jsonString', JSON.stringify(inputs.jsonObject));"
+    );
 }
 
 async function htmlNodes() {
-	const htmlViewer = await nodeBluePrintController.initOfficialNodeBluePrint('html_viewer');
-	await htmlViewer.setTitle('Render HTML');
-	await htmlViewer.setDocumentation('Display HTML from text.');
+    const htmlViewer =
+        await nodeBluePrintController.initOfficialNodeBluePrint('html_viewer');
+    await htmlViewer.setTitle('Render HTML');
+    await htmlViewer.setDocumentation('Display HTML from text.');
 
-	await htmlViewer.newInputSocket('html', {
-		label: 'HTML',
-		documentation: 'HTML string',
-		type: 'HTML',
-		params: new StringSocketParamsBuilder('').asParagraph().build()
-	});
+    await htmlViewer.newInputSocket('html', {
+        label: 'HTML',
+        documentation: 'HTML string',
+        type: 'HTML',
+        params: new StringSocketParamsBuilder('').asParagraph().build(),
+    });
 
-	await htmlViewer.setCode("console.log('Rendered HTML');");
+    await htmlViewer.setCode("console.log('Rendered HTML');");
 
-	const htmlElement = await nodeBluePrintController.initOfficialNodeBluePrint('html_elementify');
-	await htmlElement.setTitle('HTML Elementify');
-	await htmlElement.setDocumentation(
-		'Wrap text in html element tags and unpack args into html tags.'
-	);
+    const htmlElement =
+        await nodeBluePrintController.initOfficialNodeBluePrint(
+            'html_elementify'
+        );
+    await htmlElement.setTitle('HTML Elementify');
+    await htmlElement.setDocumentation(
+        'Wrap text in html element tags and unpack args into html tags.'
+    );
 
-	await htmlElement.newInputSocket('tag', {
-		label: 'Tag',
-		documentation: 'Object to stringify into JSON.',
-		// type: "ENUM",
-		// params: new ENUMSocketConfig(Array.from(new Set(Array.from(document.querySelectorAll("*"), el => el.tagName.toLowerCase()))))
-		type: 'string',
-		params: new StringSocketParamsBuilder('').asSentence().build()
-	});
+    await htmlElement.newInputSocket('tag', {
+        label: 'Tag',
+        documentation: 'Object to stringify into JSON.',
+        // type: "ENUM",
+        // params: new ENUMSocketConfig(Array.from(new Set(Array.from(document.querySelectorAll("*"), el => el.tagName.toLowerCase()))))
+        type: 'string',
+        params: new StringSocketParamsBuilder('').asSentence().build(),
+    });
 
-	await htmlElement.newInputSocket('innerHTML', {
-		label: 'Inner HTML',
-		documentation: 'Inner html of this element.',
-		type: 'string',
-		params: new StringSocketParamsBuilder('').asParagraph().build()
-	});
+    await htmlElement.newInputSocket('innerHTML', {
+        label: 'Inner HTML',
+        documentation: 'Inner html of this element.',
+        type: 'string',
+        params: new StringSocketParamsBuilder('').asParagraph().build(),
+    });
 
-	await htmlElement.newInputSocket('attributes', {
-		label: 'Attributes',
-		documentation: 'Object to specify attributes.',
-		type: 'unknown',
-		params: new GenericSocketParamsBuilder('{}').build()
-	});
+    await htmlElement.newInputSocket('attributes', {
+        label: 'Attributes',
+        documentation: 'Object to specify attributes.',
+        type: 'unknown',
+        params: new GenericSocketParamsBuilder('{}').build(),
+    });
 
-	await htmlElement.newOutputSocket('html', {
-		label: 'HTML',
-		documentation: 'The html.',
-		type: 'string'
-	});
+    await htmlElement.newOutputSocket('html', {
+        label: 'HTML',
+        documentation: 'The html.',
+        type: 'string',
+    });
 
-	await htmlElement.setCode(
-		// TODO: implement attributes, hope and pray this parses valid html
-		`
+    await htmlElement.setCode(
+        // TODO: implement attributes, hope and pray this parses valid html
+        `
 let d = '<'+inputs.tag;
 if (inputs.attributes) {
   const attributes =  inputs.attributes;//JSON.parse(inputs.attributes);
@@ -1213,105 +1345,117 @@ if (inputs.attributes) {
 d += '>'+inputs.innerHTML+'</'+inputs.tag+'>'
 outputs.set('html', d);
 `
-	);
+    );
 
-	const fetchURL = await nodeBluePrintController.initOfficialNodeBluePrint('fetch_url');
-	await fetchURL.setTitle('Fetch URL');
-	await fetchURL.setDocumentation('Fetches content from a given URL and returns it as plain text.');
+    const fetchURL =
+        await nodeBluePrintController.initOfficialNodeBluePrint('fetch_url');
+    await fetchURL.setTitle('Fetch URL');
+    await fetchURL.setDocumentation(
+        'Fetches content from a given URL and returns it as plain text.'
+    );
 
-	await fetchURL.newInputSocket('url', {
-		label: 'URL',
-		documentation: 'The URL to fetch data from.',
-		type: 'string',
-		params: new StringSocketParamsBuilder('').asWord().build()
-	});
+    await fetchURL.newInputSocket('url', {
+        label: 'URL',
+        documentation: 'The URL to fetch data from.',
+        type: 'string',
+        params: new StringSocketParamsBuilder('').asWord().build(),
+    });
 
-	await fetchURL.newOutputSocket('text', {
-		label: 'Fetched Content',
-		documentation: 'The plain text fetched from the URL.',
-		type: 'string'
-	});
+    await fetchURL.newOutputSocket('text', {
+        label: 'Fetched Content',
+        documentation: 'The plain text fetched from the URL.',
+        type: 'string',
+    });
 
-	await fetchURL.setCode(`
+    await fetchURL.setCode(`
   outputs.set('text', inputs.url);
 `);
 }
 
 async function fileNodes() {
-	const loadCSV = await nodeBluePrintController.initOfficialNodeBluePrint('load_csv');
+    const loadCSV =
+        await nodeBluePrintController.initOfficialNodeBluePrint('load_csv');
 
-	await loadCSV.setTitle('CSV Loader');
-	await loadCSV.setDocumentation('Reads a CSV file and returns its raw content as plain text.');
+    await loadCSV.setTitle('CSV Loader');
+    await loadCSV.setDocumentation(
+        'Reads a CSV file and returns its raw content as plain text.'
+    );
 
-	await loadCSV.newInputSocket('file', {
-		label: 'CSV File',
-		documentation: 'Upload a .csv file.',
-		type: 'CSV',
-		params: new CSVSocketParamsBuilder().build()
-	});
+    await loadCSV.newInputSocket('file', {
+        label: 'CSV File',
+        documentation: 'Upload a .csv file.',
+        type: 'CSV',
+        params: new CSVSocketParamsBuilder().build(),
+    });
 
-	await loadCSV.newOutputSocket('text', {
-		label: 'CSV Content',
-		documentation: 'Raw text content from the CSV file.',
-		type: 'string'
-	});
+    await loadCSV.newOutputSocket('text', {
+        label: 'CSV Content',
+        documentation: 'Raw text content from the CSV file.',
+        type: 'string',
+    });
 
-	await loadCSV.setCode(`
+    await loadCSV.setCode(`
     outputs.set('text', inputs.file.text);
   `);
 
-	const loadTSV = await nodeBluePrintController.initOfficialNodeBluePrint('load_tsv');
+    const loadTSV =
+        await nodeBluePrintController.initOfficialNodeBluePrint('load_tsv');
 
-	await loadTSV.setTitle('TSV Loader');
-	await loadTSV.setDocumentation(
-		'Reads a TSV (Tab-Separated Values) file and returns its raw content as plain text.'
-	);
+    await loadTSV.setTitle('TSV Loader');
+    await loadTSV.setDocumentation(
+        'Reads a TSV (Tab-Separated Values) file and returns its raw content as plain text.'
+    );
 
-	await loadTSV.newInputSocket('file', {
-		label: 'TSV File',
-		documentation: 'Upload a .tsv file.',
-		type: 'TSV',
-		params: new TSVSocketParamsBuilder().build()
-	});
+    await loadTSV.newInputSocket('file', {
+        label: 'TSV File',
+        documentation: 'Upload a .tsv file.',
+        type: 'TSV',
+        params: new TSVSocketParamsBuilder().build(),
+    });
 
-	await loadTSV.newOutputSocket('text', {
-		label: 'TSV Content',
-		documentation: 'Raw text content from the TSV file.',
-		type: 'string'
-	});
+    await loadTSV.newOutputSocket('text', {
+        label: 'TSV Content',
+        documentation: 'Raw text content from the TSV file.',
+        type: 'string',
+    });
 
-	await loadTSV.setCode(`
+    await loadTSV.setCode(`
     outputs.set('text', inputs.file.text);
   `);
 }
 
 async function rank3Nodes() {
-	const imageCropper = await nodeBluePrintController.initOfficialNodeBluePrint('image_cropper');
+    const imageCropper =
+        await nodeBluePrintController.initOfficialNodeBluePrint(
+            'image_cropper'
+        );
 
-	await imageCropper.setTitle('Image Cropper');
-	await imageCropper.setDocumentation('Crop a region from an uploaded image.');
+    await imageCropper.setTitle('Image Cropper');
+    await imageCropper.setDocumentation(
+        'Crop a region from an uploaded image.'
+    );
 
-	await imageCropper.newInputSocket('img', {
-		label: 'Image',
-		documentation: 'Image uploaded from file.',
-		type: 'Crop',
-		params: new JIMPImageSocketParamsBuilder().build()
-	});
+    await imageCropper.newInputSocket('img', {
+        label: 'Image',
+        documentation: 'Image uploaded from file.',
+        type: 'Crop',
+        params: new JIMPImageSocketParamsBuilder().build(),
+    });
 
-	await imageCropper.newInputSocket('crop', {
-		label: 'Crop Area',
-		type: 'unknown',
-		documentation: 'Object with {x, y, width, height}',
-		params: new CropParamSocketParamsBuilder().build()
-	});
+    await imageCropper.newInputSocket('crop', {
+        label: 'Crop Area',
+        type: 'unknown',
+        documentation: 'Object with {x, y, width, height}',
+        params: new CropParamSocketParamsBuilder().build(),
+    });
 
-	await imageCropper.newOutputSocket('img', {
-		label: 'Cropped Image',
-		documentation: 'Image after cropping.',
-		type: 'image/jimp'
-	});
+    await imageCropper.newOutputSocket('img', {
+        label: 'Cropped Image',
+        documentation: 'Image after cropping.',
+        type: 'image/jimp',
+    });
 
-	await imageCropper.setCode(`
+    await imageCropper.setCode(`
   const { x, y, width, height } = inputs.crop;
 
   console.log("[image_cropper] Received crop params:", inputs.crop);
@@ -1332,24 +1476,24 @@ async function rank3Nodes() {
 }
 
 export async function generateStandardNodeSuite() {
-	const opBuilders = [
-		simpleImageModificationNodes(),
-		// timeRelatedNodes(),
-		// worldStateDataNodes(),
-		// huggingfaceNodes(),
-		// aiDemoNodes(),
-		promptDesignNodes(),
-		googleDriveNodes(),
-		fileLoadingNodes(),
-		// dropboxNodes(),
-		jimpNodes(),
-		jsonNodes(),
-		htmlNodes(),
-		// fileNodes(),
-		// rank3Nodes()
-		// buildAllChatGPTNodes()
-	];
-	await Promise.all(opBuilders);
+    const opBuilders = [
+        simpleImageModificationNodes(),
+        // timeRelatedNodes(),
+        // worldStateDataNodes(),
+        // huggingfaceNodes(),
+        // aiDemoNodes(),
+        promptDesignNodes(),
+        googleDriveNodes(),
+        fileLoadingNodes(),
+        // dropboxNodes(),
+        jimpNodes(),
+        jsonNodes(),
+        htmlNodes(),
+        // fileNodes(),
+        // rank3Nodes()
+        // buildAllChatGPTNodes()
+    ];
+    await Promise.all(opBuilders);
 
-	console.log('All STD lib nodes added.');
+    console.log('All STD lib nodes added.');
 }
