@@ -16,6 +16,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `yarn emulators` - Start Firebase emulators (auth:9099, database:9000, firestore:8080, storage:9199)
 - `yarn deploy` - Build and deploy to Firebase
 
+### SvelteFlow
+- Examples and documentation for svelteflow are in examplesAndDocs/svelteflow.dev/
+
+### Svelte Language
+- Alwaus use runes. When using runes, make sure you don't introduce any infinite loops.
+- Use untrack to break reactivit within an $effect.
+
 ### Testing
 - Tests use Vitest framework (configured in package.json)
 - Test files follow pattern: `*.test.ts`

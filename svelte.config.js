@@ -32,5 +32,17 @@ export default {
             precompress: false,
             strict: true,
         }),
+        files: {
+            // Exclude examplesAndDocs from being processed by SvelteKit
+            lib: 'src/lib',
+            routes: 'src/routes'
+        }
     },
+    onwarn: (warning, handler) => {
+        // Ignore warnings from examplesAndDocs folder
+        if (warning.filename?.includes('examplesAndDocs')) {
+            return;
+        }
+        handler(warning);
+    }
 };

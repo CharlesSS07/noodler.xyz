@@ -24,8 +24,6 @@
 
     let {id, data}: NodeProps<StemNodeType> = $props();
 
-    const {updateNodeData} = useSvelteFlow();
-
     let nodeBluePrint = docStore<NodeBluePrintModel>(firestore, `nodes/${data.nid}`);
 
     let nodeState: 'idle' | 'running' | 'success' | 'error' = 'idle';
@@ -91,12 +89,10 @@
     }
 
     $effect(() => {
-        console.log(data);
         if (data.input) {
             const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
             const nodeBluePrintSnapshot = untrack(() => $nodeBluePrint);
             if (nodeBluePrintSnapshot && nodeBluePrintSnapshot.output_socket_order && nodeBluePrintSnapshot.user_defined_code_snippet) {
-                console.log(nodeBluePrintSnapshot);
                 const outputCollection: OutputSocketDataCollection = new OutputSocketDataCollection(new Set<string>(nodeBluePrintSnapshot.output_socket_order));
                 const wrappedFn = new AsyncFunction('inputs', 'outputs', 'utils', nodeBluePrintSnapshot.user_defined_code_snippet) as UserFunction;
 
@@ -115,7 +111,7 @@
                 });
             }
         }
-    })
+    });
 </script>
 
 {#if $nodeBluePrint}
