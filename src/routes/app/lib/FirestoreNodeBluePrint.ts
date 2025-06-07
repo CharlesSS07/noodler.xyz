@@ -20,6 +20,7 @@ import type {
     OutputSocketModel,
     SocketID,
 } from './SocketModels';
+import type { OutputSocketAsyncReturner } from './Interpreter';
 
 const nodeBluePrintsRef = collection(firestore, 'nodes');
 
@@ -283,5 +284,60 @@ export class FirestoreNodeBluePrintController
     async updated() {
         this.markAsUpdated();
         this.bumpVersion();
+    }
+
+    async call(inputs: Map<SocketID, unknown>, outputs: OutputSocketAsyncReturner): Promise<void> {
+        try {
+            // Get the node blueprint data from Firestore
+            const doc = await getDoc(this.getNodeBluePrintRef());
+            if (!doc.exists()) {
+                throw new Error(`Node blueprint not found: ${this.nid}`);
+            }
+
+            const nodeData = doc.data() as NodeBluePrintModel;
+            const code = nodeData.user_defined_code_snippet;
+
+            if (!code || code.trim() === '') {
+                throw new Error(`No code defined for node: ${this.nid}`);
+            }
+
+            // Create execution context
+            const executionContext = {
+                inputs: Object.fromEntries(inputs),
+                outputs,
+                utils: {
+                    // Add utility functions that nodes might need
+                    Jimp: (globalThis as any).Jimp || null,
+                    APIConnectionManager: (globalThis as any).APIConnectionManager || null,
+                    console: console
+                },
+                console: console
+            };
+
+            // Create async function from the code
+            const asyncFunction = new Function(
+                'inputs', 
+                'outputs', 
+                'utils', 
+                'console',
+                `
+                return (async function() {
+                    ${code}
+                })();
+                `
+            );
+
+            // Execute the code with the context
+            await asyncFunction(
+                executionContext.inputs,
+                executionContext.outputs,
+                executionContext.utils,
+                executionContext.console
+            );
+
+        } catch (error) {
+            console.error(`Error executing node ${this.nid}:`, error);
+            throw new Error(`Node execution failed: ${error.message}`);
+        }
     }
 }

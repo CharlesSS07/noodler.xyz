@@ -4,6 +4,7 @@ import type {
     OutputSocketModel,
     SocketID,
 } from './SocketModels.js';
+import {OutputSocketAsyncReturner} from "./Interpreter";
 
 export interface NodeBluePrintModel {
     readonly nid: string;
@@ -55,6 +56,11 @@ export interface NodeBluePrintControllerFactoryInterface {
 
 export interface NodeBluePrintControllerInterface {
     readonly nid: string;
+
+    call(
+        inputs: Map<SocketID, unknown>,
+        outputs: OutputSocketAsyncReturner
+    ): Promise<void>;
 
     /**
      * This is not just copying all the logic and sockets, but specifies and gives credit to the node

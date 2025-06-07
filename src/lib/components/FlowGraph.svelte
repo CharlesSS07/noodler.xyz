@@ -26,8 +26,10 @@
     import {onMount} from "svelte";
     import Logo from "../../components/Logo.svelte";
     import NodeSearch from "./NodeSearch.svelte";
-    import { Plus } from "lucide-svelte";
+    import { Plus, Play } from "lucide-svelte";
     import {projectState} from "$lib/stores/ProjectState";
+    import { DecentralizedFlowInterpreter } from "../../routes/app/lib/Interpreter";
+    import { FirestoreNodeBluePrintController } from "../../routes/app/lib/FirestoreNodeBluePrint";
 
     let nodes = $state.raw<Node[]>([]);
 
@@ -457,6 +459,12 @@
     let searchPosition = $state({ x: 0, y: 0 });
     let flowContainer: HTMLDivElement;
 
+    // Execution state
+    let executionInterpreter: DecentralizedFlowInterpreter | null = null;
+    let isExecuting = $state(false);
+    let executionResults = $state<Record<string, any>>({});
+    let executionLogs = $state<string[]>([]);
+
     // Node search functions
     function openNodeSearch(event?: KeyboardEvent | MouseEvent): void {
         console.log('openNodeSearch called');
@@ -553,6 +561,151 @@
         addEdge(newEdge);
     }
 
+    // Execution functions
+    async function getFirestoreNodeBlueprint(nodeId: string, nodeData: any): Promise<FirestoreNodeBluePrintController | null> {
+        try {
+            // Get the node blueprint ID from the node data
+            const blueprintId = nodeData.nid || nodeId;
+            
+            // Create a controller for this blueprint
+            const controller = new FirestoreNodeBluePrintController(blueprintId);
+            
+            // Test if the blueprint exists by trying to get its title
+            try {
+                await controller.getTitle();
+                return controller;
+            } catch (error) {
+                console.warn(`Blueprint not found for ${blueprintId}, creating fallback`);
+                return null;
+            }
+        } catch (error) {
+            console.error(`Error getting Firestore blueprint for ${nodeId}:`, error);
+            return null;
+        }
+    }
+
+    function createFallbackNodeBlueprint(nodeId: string, nodeData: any) {
+        return {
+            nid: nodeId,
+            async call(inputs: Map<string, unknown>, outputs: any): Promise<void> {
+                executionLogs = [...executionLogs, `Executing fallback node ${nodeId} with inputs: ${JSON.stringify(Object.fromEntries(inputs))}`];
+                
+                // Simple fallback execution - just pass through or echo
+                const inputEntries = Object.fromEntries(inputs);
+                
+                if (Object.keys(inputEntries).length > 0) {
+                    // If there are inputs, pass the first one as output
+                    const firstValue = Object.values(inputEntries)[0];
+                    await outputs.set('result', firstValue);
+                } else {
+                    // No inputs, return a simple result
+                    await outputs.set('result', `Fallback result from ${nodeId}`);
+                }
+                
+                executionLogs = [...executionLogs, `Fallback node ${nodeId} completed execution`];
+            },
+            async spinOffNode(): Promise<any> { throw new Error('Not implemented'); },
+            async newInputSocket(): Promise<void> { throw new Error('Not implemented'); },
+            async getInputSocketKeysInOrder(): Promise<Array<string>> { return Object.keys(nodeData.inputSockets || {}); },
+            async newOutputSocket(): Promise<void> { throw new Error('Not implemented'); },
+            async getOutputSocketKeysInOrder(): Promise<string[]> { return Object.keys(nodeData.outputSockets || {}); },
+            async setDocumentation(): Promise<void> { throw new Error('Not implemented'); },
+            async getDocumentation(): Promise<string> { return ''; },
+            async setTitle(): Promise<void> { throw new Error('Not implemented'); },
+            async getTitle(): Promise<string> { return nodeData.title || ''; },
+            async setCode(): Promise<void> { throw new Error('Not implemented'); },
+            async getCode(): Promise<string> { return ''; },
+            async markAsUpdated(): Promise<void> { throw new Error('Not implemented'); },
+            async getLastUpdatedTimestamp(): Promise<Date> { return new Date(); },
+            async bumpVersion(): Promise<void> { throw new Error('Not implemented'); },
+            async getVersion(): Promise<number> { return 1; },
+            async updated(): Promise<void> { throw new Error('Not implemented'); }
+        };
+    }
+
+    async function testExecution(): Promise<void> {
+        if (isExecuting) return;
+        
+        isExecuting = true;
+        executionLogs = ['Starting execution test...'];
+        executionResults = {};
+        
+        try {
+            // Create Firestore node blueprints for all nodes
+            const nodeBlueprints = new Map();
+            executionLogs = [...executionLogs, 'Loading node blueprints from Firestore...'];
+            
+            for (const node of nodes) {
+                try {
+                    const firestoreBlueprint = await getFirestoreNodeBlueprint(node.id, node.data);
+                    if (firestoreBlueprint) {
+                        nodeBlueprints.set(node.id, firestoreBlueprint);
+                        executionLogs = [...executionLogs, `Loaded Firestore blueprint for ${node.id}`];
+                    } else {
+                        const fallbackBlueprint = createFallbackNodeBlueprint(node.id, node.data);
+                        nodeBlueprints.set(node.id, fallbackBlueprint);
+                        executionLogs = [...executionLogs, `Using fallback blueprint for ${node.id}`];
+                    }
+                } catch (error) {
+                    console.error(`Error loading blueprint for ${node.id}:`, error);
+                    const fallbackBlueprint = createFallbackNodeBlueprint(node.id, node.data);
+                    nodeBlueprints.set(node.id, fallbackBlueprint);
+                    executionLogs = [...executionLogs, `Error loading ${node.id}, using fallback`];
+                }
+            }
+            
+            // Initialize the interpreter
+            executionInterpreter = new DecentralizedFlowInterpreter();
+            
+            // Add execution listener to track progress
+            executionInterpreter.addExecutionListener((nodeId, status) => {
+                executionLogs = [...executionLogs, `Node ${nodeId}: ${status}`];
+                
+                if (status === 'completed') {
+                    const result = executionInterpreter?.getNodeExecutionStatus(nodeId);
+                    if (result) {
+                        executionResults = { ...executionResults, [nodeId]: result };
+                    }
+                }
+            });
+            
+            // Initialize the flow
+            executionInterpreter.initializeFlow(nodes, edges, nodeBlueprints);
+            
+            // Find start nodes (nodes with no incoming edges)
+            const targetNodes = new Set(edges.map(edge => edge.target));
+            const startNodes = nodes
+                .filter(node => !targetNodes.has(node.id))
+                .map(node => node.id);
+            
+            if (startNodes.length === 0) {
+                // If no clear start nodes, use all nodes
+                startNodes.push(...nodes.map(node => node.id));
+            }
+            
+            executionLogs = [...executionLogs, `Starting execution with nodes: ${startNodes.join(', ')}`];
+            
+            // Start execution
+            await executionInterpreter.startExecution(startNodes);
+            
+            executionLogs = [...executionLogs, 'Execution completed successfully!'];
+            
+        } catch (error) {
+            console.error('Execution error:', error);
+            executionLogs = [...executionLogs, `Execution error: ${error.message}`];
+        } finally {
+            isExecuting = false;
+        }
+    }
+
+    function clearExecutionResults(): void {
+        executionLogs = [];
+        executionResults = {};
+        if (executionInterpreter) {
+            executionInterpreter.reset();
+        }
+    }
+
     onMount(() => {
         auth.authStateReady().then(() => {
             setTimeout(() => {
@@ -619,16 +772,39 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
         </Panel>
 
         <Panel position="top-right">
-            <button
-                onclick={() => {
-                    openNodeSearch();
-                }}
-                class="add-node-btn"
-                title="Add Node (Tab)"
-            >
-                <Plus class="w-4 h-4" />
-                Add Node
-            </button>
+            <div class="controls-panel">
+                <button
+                    onclick={() => {
+                        openNodeSearch();
+                    }}
+                    class="control-btn"
+                    title="Add Node (Tab)"
+                >
+                    <Plus class="w-4 h-4" />
+                    Add Node
+                </button>
+                
+                <button
+                    onclick={testExecution}
+                    class="control-btn execution-btn"
+                    class:executing={isExecuting}
+                    disabled={isExecuting || nodes.length === 0}
+                    title="Test Execution"
+                >
+                    <Play class="w-4 h-4" />
+                    {isExecuting ? 'Executing...' : 'Test Flow'}
+                </button>
+                
+                {#if executionLogs.length > 0}
+                    <button
+                        onclick={clearExecutionResults}
+                        class="control-btn clear-btn"
+                        title="Clear Results"
+                    >
+                        Clear
+                    </button>
+                {/if}
+            </div>
         </Panel>
     </SvelteFlow>
 
@@ -639,6 +815,43 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
         on:nodeSelected={handleNodeSelected}
         on:close={() => showNodeSearch = false}
     />
+
+    <!-- Execution Results Panel -->
+    {#if executionLogs.length > 0}
+        <div class="execution-panel">
+            <div class="execution-header">
+                <h3>Execution Results</h3>
+                <button onclick={clearExecutionResults} class="close-btn">×</button>
+            </div>
+            
+            <div class="execution-content">
+                <div class="logs-section">
+                    <h4>Execution Log:</h4>
+                    <div class="logs">
+                        {#each executionLogs as log}
+                            <div class="log-entry">{log}</div>
+                        {/each}
+                    </div>
+                </div>
+                
+                {#if Object.keys(executionResults).length > 0}
+                    <div class="results-section">
+                        <h4>Node Status:</h4>
+                        <div class="results">
+                            {#each Object.entries(executionResults) as [nodeId, result]}
+                                <div class="result-entry">
+                                    <strong>{nodeId}:</strong>
+                                    <span class="status" class:completed={result.isCompleted} class:executing={result.isExecuting}>
+                                        {result.isCompleted ? 'Completed' : result.isExecuting ? 'Executing' : 'Pending'}
+                                    </span>
+                                </div>
+                            {/each}
+                        </div>
+                    </div>
+                {/if}
+            </div>
+        </div>
+    {/if}
 </div>
 
 <style>
@@ -660,7 +873,13 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
         align-items: flex-start;
     }
 
-    .add-node-btn {
+    .controls-panel {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .control-btn {
         background: white;
         border: 1px solid #e5e7eb;
         padding: 0.5rem 0.75rem;
@@ -675,13 +894,163 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
         transition: all 0.15s ease;
     }
 
-    .add-node-btn:hover {
+    .control-btn:hover:not(:disabled) {
         background: #f9fafb;
         border-color: #d1d5db;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
 
-    .add-node-btn:active {
+    .control-btn:active:not(:disabled) {
         transform: translateY(1px);
+    }
+
+    .control-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .execution-btn {
+        background: #10b981;
+        color: white;
+        border-color: #059669;
+    }
+
+    .execution-btn:hover:not(:disabled) {
+        background: #059669;
+    }
+
+    .execution-btn.executing {
+        background: #f59e0b;
+        border-color: #d97706;
+        animation: pulse 2s infinite;
+    }
+
+    .clear-btn {
+        background: #ef4444;
+        color: white;
+        border-color: #dc2626;
+    }
+
+    .clear-btn:hover {
+        background: #dc2626;
+    }
+
+    .execution-panel {
+        position: absolute;
+        bottom: 1rem;
+        left: 1rem;
+        right: 1rem;
+        max-height: 300px;
+        background: white;
+        border-radius: 0.5rem;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        border: 1px solid #e5e7eb;
+        z-index: 1000;
+        overflow: hidden;
+    }
+
+    .execution-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        border-bottom: 1px solid #e5e7eb;
+        background: #f9fafb;
+    }
+
+    .execution-header h3 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 600;
+    }
+
+    .close-btn {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #6b7280;
+        line-height: 1;
+        padding: 0;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .close-btn:hover {
+        color: #374151;
+    }
+
+    .execution-content {
+        padding: 1rem;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+    .logs-section, .results-section {
+        margin-bottom: 1rem;
+    }
+
+    .logs-section h4, .results-section h4 {
+        margin: 0 0 0.5rem 0;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #374151;
+    }
+
+    .logs {
+        background: #f9fafb;
+        border-radius: 0.375rem;
+        padding: 0.5rem;
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        font-size: 0.75rem;
+        max-height: 120px;
+        overflow-y: auto;
+    }
+
+    .log-entry {
+        margin-bottom: 0.25rem;
+        color: #374151;
+    }
+
+    .results {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .result-entry {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.875rem;
+    }
+
+    .status {
+        padding: 0.125rem 0.5rem;
+        border-radius: 0.25rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .status.completed {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .status.executing {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.7;
+        }
     }
 </style>

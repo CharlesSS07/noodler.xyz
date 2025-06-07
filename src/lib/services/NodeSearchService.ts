@@ -1,4 +1,4 @@
-import { firestore } from '../../firebase/index.js';
+import { firestore } from '../../firebase';
 import { 
     collection, 
     query, 
