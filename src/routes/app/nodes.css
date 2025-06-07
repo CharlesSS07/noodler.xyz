@@ -248,6 +248,20 @@
     pointer-events: none;
 }
 
+/* Socket input container - allows pointer events for input components */
+.socket-input-container {
+    pointer-events: auto;
+}
+
+/* Socket input components - ensure all inputs can receive pointer events */
+.socket-input-container .socket-input,
+.socket-input-container input,
+.socket-input-container textarea,
+.socket-input-container select,
+.socket-input-container button {
+    pointer-events: auto;
+}
+
 /* Input socket content - left-aligned text */
 .input-content {
     align-items: flex-start;

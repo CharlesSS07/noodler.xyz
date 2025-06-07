@@ -20,6 +20,7 @@
     import type {NodeBluePrintModel} from '../../routes/app/lib/NodeBluePrint.js';
     import SocketStem from '$lib/components/SocketStem.svelte';
     import NodeWrapper from '$lib/components/NodeWrapper.svelte';
+    import { getInputComponentForDataType, canDataTypeHaveInput } from '$lib/components/socket-inputs/SocketInputMapping';
     // import {OutputSocketDataCollection, type UserFunction, userFunctionAllowedModules} from "./lib/Execution";
 
     let {id, data}: NodeProps<StemNodeType> = $props();
@@ -32,6 +33,30 @@
     let isSelected: boolean = false;
     let connectedInputs: Set<string> = new Set();
     let connectedOutputs: Set<string> = new Set();
+
+    // Initialize data.input if it doesn't exist
+    $effect(() => {
+        if (!data.input) {
+            data.input = {};
+        }
+    });
+
+    // Initialize default values for input sockets
+    $effect(() => {
+        const blueprint = untrack(() => $nodeBluePrint);
+        if (blueprint?.input_sockets) {
+            for (const [socketId, socket] of Object.entries(blueprint.input_sockets)) {
+                if (data.input[socketId] === undefined && socket.params?.default_value !== undefined) {
+                    data.input[socketId] = socket.params.default_value;
+                }
+            }
+        }
+    });
+
+    // Function to update input data
+    function updateInputData(socketId: string, value: unknown) {
+        data.input = { ...data.input, [socketId]: value };
+    }
 
 
     // $effect(() => {
@@ -127,6 +152,24 @@
                                     {socketType}
                                 </span>
                             {/if}
+                            
+                            <!-- Dynamic input component based on socket type -->
+                            {#if canDataTypeHaveInput(socket_blueprint.type) && !connectedInputs.has(socket_id)}
+                                {@const inputMapping = getInputComponentForDataType(socket_blueprint.type)}
+                                {#if inputMapping}
+                                    {@const Component = inputMapping.component}
+                                    <div class="socket-input-container">
+                                        <Component
+                                            bind:value={data.input[socket_id]}
+                                            params={socket_blueprint.params}
+                                            disabled={nodeState === 'running'}
+                                            socketId={socket_id}
+                                            label={socket_blueprint.label}
+                                            on:change={() => updateInputData(socket_id, data.input[socket_id])}
+                                        />
+                                    </div>
+                                {/if}
+                            {/if}
                         </div>
                     </SocketStem>
                 {/each}
@@ -214,6 +257,11 @@
         outline: none;
         border-color: #3b82f6;
         box-shadow: 0 0 0 1px #3b82f6;
+    }
+
+    .socket-input-container {
+        margin-top: 0.5rem;
+        width: 100%;
     }
 
     .loading-content {

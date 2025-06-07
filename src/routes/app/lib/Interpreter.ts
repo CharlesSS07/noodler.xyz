@@ -1,6 +1,55 @@
-import type {Node, Edge} from "@xyflow/svelte";
+import type {Edge, Node} from "@xyflow/svelte";
 import type {NodeBluePrintControllerInterface} from './NodeBluePrint.js';
 import type {SocketID} from './SocketModels.js';
+
+function socketInstanceKey(node_id: string, socket_id: string) {
+    return `${node_id}:${socket_id}`;
+}
+
+function parseSocketInstanceKey(socketInstanceKey: string) {
+    const [node_id, socket_id] = socketInstanceKey.split(":");
+    return {node_id: node_id, socket_id: socket_id};
+}
+
+export class OutputSocketDataCache {
+
+    private data: Map<string, unknown> = new Map<string, unknown>();
+    // private lastUsed: Map<string, number> = new Map<string, number>();
+
+    constructor() {
+    }
+
+    async cache(node_id: string, socket_id: string, data: unknown): Promise<void> {
+        const key = socketInstanceKey(node_id, socket_id);
+
+        if (this.data.has(key)) {
+            throw new Error(`Socket ${key} already cached. This would overwrite the socket data. The whole node should have been dumped first.`)
+        }
+
+        this.data.set(key, data);
+        // this.lastUsed.set(key, new Date().getTime());
+    }
+
+    async dumpNodeCaches(node_id: string): Promise<void> {
+        for (const socketInstanceKey in this.data.keys()) {
+            if (parseSocketInstanceKey(socketInstanceKey).node_id === node_id) {
+                this.data.delete(socketInstanceKey);
+                // this.lastUsed.delete(socketInstanceKey);
+            }
+        }
+    }
+
+    async get(node_id: string, socket_id: string) {
+        const key = socketInstanceKey(node_id, socket_id);
+
+        if (this.data.has(key)) {
+            // this.lastUsed.set(key, new Date().getTime());
+            return this.data.get(key); // even if it's null
+        }
+        throw new Error(`Socket ${key} not found`);
+    }
+
+}
 
 export class OutputSocketAsyncReturner {
     output: Set<string>;
@@ -261,51 +310,4 @@ export class DecentralizedFlowInterpreter {
             isCompleted: context.isCompleted
         } : null;
     }
-}
-
-// Legacy function for backwards compatibility
-export function executeFlowGraph(
-    startNode: string,
-    nodes: Node[],
-    edges: Edge[],
-    onExecuteNode: {(input: Record<string, unknown>, output: OutputSocketAsyncReturner): void},
-): DecentralizedFlowInterpreter {
-    const interpreter = new DecentralizedFlowInterpreter();
-    
-    // Create mock blueprints that use the provided callback
-    const blueprints = new Map<string, NodeBluePrintControllerInterface>();
-    for (const node of nodes) {
-        const mockBlueprint: NodeBluePrintControllerInterface = {
-            nid: node.id,
-            async call(inputs: Map<string, unknown>, outputs: OutputSocketAsyncReturner): Promise<void> {
-                const inputRecord: Record<string, unknown> = {};
-                for (const [key, value] of inputs) {
-                    inputRecord[key] = value;
-                }
-                onExecuteNode(inputRecord, outputs);
-            },
-            async spinOffNode(): Promise<NodeBluePrintControllerInterface> { throw new Error('Not implemented'); },
-            async newInputSocket(): Promise<void> { throw new Error('Not implemented'); },
-            async getInputSocketKeysInOrder(): Promise<Array<string>> { return []; },
-            async newOutputSocket(): Promise<void> { throw new Error('Not implemented'); },
-            async getOutputSocketKeysInOrder(): Promise<string[]> { return []; },
-            async setDocumentation(): Promise<void> { throw new Error('Not implemented'); },
-            async getDocumentation(): Promise<string> { return ''; },
-            async setTitle(): Promise<void> { throw new Error('Not implemented'); },
-            async getTitle(): Promise<string> { return ''; },
-            async setCode(): Promise<void> { throw new Error('Not implemented'); },
-            async getCode(): Promise<string> { return ''; },
-            async markAsUpdated(): Promise<void> { throw new Error('Not implemented'); },
-            async getLastUpdatedTimestamp(): Promise<Date> { return new Date(); },
-            async bumpVersion(): Promise<void> { throw new Error('Not implemented'); },
-            async getVersion(): Promise<number> { return 1; },
-            async updated(): Promise<void> { throw new Error('Not implemented'); }
-        };
-        blueprints.set(node.id, mockBlueprint);
-    }
-
-    interpreter.initializeFlow(nodes, edges, blueprints);
-    interpreter.startExecution([startNode]);
-    
-    return interpreter;
 }

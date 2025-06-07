@@ -1,7 +1,8 @@
 import { writable, derived, type Writable, type Readable } from 'svelte/store';
-import { rtdb } from '../../firebase/index.js';
+import { rtdb } from '../../firebase';
 import { ref, onValue, off, set, update, type DatabaseReference } from 'firebase/database';
 import type { Node, Edge } from '@xyflow/svelte';
+import {OutputSocketDataCache} from "../../routes/app/lib/Interpreter";
 
 // Project state interface
 export interface ProjectState {
@@ -10,6 +11,7 @@ export interface ProjectState {
     description: string;
     nodes: Node[];
     edges: Edge[];
+    outputs: OutputSocketDataCache;
     lastSyncTime: Date | null;
     isDirty: boolean; // Has unsaved changes
     isSyncing: boolean;
@@ -22,6 +24,7 @@ const initialProjectState: ProjectState = {
     description: '',
     nodes: [],
     edges: [],
+    outputs: new OutputSocketDataCache(),
     lastSyncTime: null,
     isDirty: false,
     isSyncing: false
@@ -33,6 +36,7 @@ export const projectState: Writable<ProjectState> = writable(initialProjectState
 // Derived stores
 export const projectNodes: Readable<Node[]> = derived(projectState, $state => $state.nodes);
 export const projectEdges: Readable<Edge[]> = derived(projectState, $state => $state.edges);
+export const projectOutput: Readable<OutputSocketDataCache> = derived(projectState, $state => $state.outputs);
 export const projectTitle: Readable<string> = derived(projectState, $state => $state.title);
 export const isDirty: Readable<boolean> = derived(projectState, $state => $state.isDirty);
 export const isSyncing: Readable<boolean> = derived(projectState, $state => $state.isSyncing);
@@ -70,6 +74,13 @@ export const projectActions = {
                 node.id === nodeId ? { ...node, data: { ...node.data, ...data } } : node
             ),
             isDirty: true
+        }));
+    },
+
+    setOutputs: (outputs: OutputSocketDataCache): void => {
+        projectState.update(state => ({
+            ...state,
+            outputs: outputs
         }));
     },
 
