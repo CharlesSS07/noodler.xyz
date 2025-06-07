@@ -52,19 +52,27 @@ export const projectActions = {
     },
 
     setNodes: (nodes: Node[]): void => {
-        projectState.update(state => ({ 
-            ...state, 
-            nodes, 
-            isDirty: true 
-        }));
+        projectState.update(state => {
+            // Don't set dirty flag if we're setting the same data (prevents blocking Firebase loads)
+            const isSameData = JSON.stringify(state.nodes) === JSON.stringify(nodes);
+            return { 
+                ...state, 
+                nodes, 
+                isDirty: !isSameData && projectSync.isInitialLoadComplete()
+            };
+        });
     },
 
     setEdges: (edges: Edge[]): void => {
-        projectState.update(state => ({ 
-            ...state, 
-            edges, 
-            isDirty: true 
-        }));
+        projectState.update(state => {
+            // Don't set dirty flag if we're setting the same data (prevents blocking Firebase loads)
+            const isSameData = JSON.stringify(state.edges) === JSON.stringify(edges);
+            return { 
+                ...state, 
+                edges, 
+                isDirty: !isSameData && projectSync.isInitialLoadComplete()
+            };
+        });
     },
 
     updateNodeData: (nodeId: string, data: Record<string, unknown>): void => {
@@ -121,6 +129,59 @@ export const projectActions = {
 class ProjectFirebaseSync {
     private projectListener: DatabaseReference | null = null;
     private currentProjectId: string | null = null;
+    private isLocalUpdate: boolean = false; // Flag to prevent overwriting local changes
+    private hasInitialLoad: boolean = false; // Flag to prevent saving during initial load
+
+    // Helper method to convert Firebase objects to arrays
+    private convertFirebaseDataToArray(data: any): any[] {
+        console.log('convertFirebaseDataToArray called with:', data);
+        
+        if (!data) {
+            console.log('No data provided, returning empty array');
+            return [];
+        }
+        
+        if (Array.isArray(data)) {
+            console.log('Data is already array, returning as-is');
+            return data;
+        }
+        
+        // If it's an object, convert to array of objects with id property
+        if (typeof data === 'object') {
+            const result = Object.entries(data).map(([id, item]: [string, any]) => {
+                console.log('Processing entry:', { id, item });
+                if (item && typeof item === 'object' && !item.id) {
+                    return { id, ...item };
+                }
+                return item;
+            }).filter(Boolean);
+            
+            console.log('Converting Firebase object to array:', { input: data, output: result });
+            return result;
+        }
+        
+        console.log('Data is not object or array, returning empty array');
+        return [];
+    }
+
+    // Helper method to convert arrays to Firebase objects
+    private convertArrayToFirebaseObject(array: any[]): Record<string, any> {
+        if (!array || !Array.isArray(array)) {
+            console.log('convertArrayToFirebaseObject: Invalid input', array);
+            return {};
+        }
+        
+        const result: Record<string, any> = {};
+        array.forEach(item => {
+            if (item && item.id) {
+                const { id, ...itemWithoutId } = item;
+                result[id] = itemWithoutId;
+            }
+        });
+        
+        console.log('Converting array to Firebase object:', { input: array, output: result });
+        return result;
+    }
 
     // Start syncing a project
     syncProject(projectId: string): void {
@@ -130,24 +191,56 @@ class ProjectFirebaseSync {
         this.cleanup();
 
         this.currentProjectId = projectId;
+        this.hasInitialLoad = false; // Reset flag for new project
         this.projectListener = ref(rtdb, `fridge/${projectId}`);
 
         onValue(this.projectListener, (snapshot) => {
             const projectData = snapshot.val();
             console.log('Firebase RTDB data received:', projectData);
             
+            // Skip updates if we're in the middle of a local update
+            if (this.isLocalUpdate) {
+                console.log('Skipping Firebase update - local update in progress');
+                return;
+            }
+            
+            // Check if we have pending local changes - if so, don't overwrite them
+            let currentState: ProjectState;
+            const unsubscribe = projectState.subscribe(value => {
+                currentState = value;
+            });
+            unsubscribe();
+            
+            if (currentState!.isDirty) {
+                console.log('Skipping Firebase update - local changes are pending save');
+                return;
+            }
+            
             if (projectData) {
                 console.log('Updating project state with Firebase data');
+                
+                // Convert Firebase objects to arrays if needed
+                console.log('Raw Firebase data - nodes:', projectData.nodes, 'edges:', projectData.edges);
+                const nodes = this.convertFirebaseDataToArray(projectData.nodes);
+                const edges = this.convertFirebaseDataToArray(projectData.edges);
+                console.log('Converted arrays - nodes:', nodes, 'edges:', edges);
+                
                 projectState.update(state => ({
                     ...state,
                     projectId,
                     title: projectData.title || '',
                     description: projectData.description || '',
-                    nodes: projectData.nodes || [],
-                    edges: projectData.edges || [],
+                    nodes,
+                    edges,
                     lastSyncTime: new Date(),
                     isDirty: false
                 }));
+                
+                // Mark that we've completed the initial load
+                if (!this.hasInitialLoad) {
+                    this.hasInitialLoad = true;
+                    console.log('Initial load completed');
+                }
             } else {
                 console.log('No project data found - initializing empty project');
                 projectState.update(state => ({
@@ -160,6 +253,12 @@ class ProjectFirebaseSync {
                     lastSyncTime: new Date(),
                     isDirty: false
                 }));
+                
+                // Mark that we've completed the initial load
+                if (!this.hasInitialLoad) {
+                    this.hasInitialLoad = true;
+                    console.log('Initial load completed (new project)');
+                }
             }
         });
 
@@ -182,17 +281,40 @@ class ProjectFirebaseSync {
         }
 
         console.log('Saving project to Firebase RTDB:', currentState!.projectId);
+        this.isLocalUpdate = true; // Set flag to prevent Firebase listener from overwriting
         projectActions.setSyncing(true);
 
         try {
             const projectRef = ref(rtdb, `fridge/${currentState!.projectId}`);
-            const saveData = {
+            
+            // Convert arrays to objects for Firebase storage
+            console.log('Current state before save - nodes:', currentState!.nodes, 'edges:', currentState!.edges);
+            const nodesToSave = this.convertArrayToFirebaseObject(currentState!.nodes);
+            const edgesToSave = this.convertArrayToFirebaseObject(currentState!.edges);
+            console.log('Converted for save - nodes:', nodesToSave, 'edges:', edgesToSave);
+            
+            // Prevent accidental deletion of existing data when saving empty arrays
+            if (Object.keys(nodesToSave).length === 0 && currentState!.nodes.length === 0) {
+                console.warn('Attempted to save empty nodes array - this might delete existing data');
+                // For extra safety, don't include nodes field in the save if it's empty
+                // This prevents overwriting existing nodes with empty data
+            }
+            if (Object.keys(edgesToSave).length === 0 && currentState!.edges.length === 0) {
+                console.warn('Attempted to save empty edges array - this might delete existing data');
+                // For extra safety, don't include edges field in the save if it's empty
+                // This prevents overwriting existing edges with empty data
+            }
+            
+            const saveData: any = {
                 title: currentState!.title,
                 description: currentState!.description,
-                nodes: currentState!.nodes,
-                edges: currentState!.edges,
                 last_updated_at: new Date().toISOString()
             };
+            
+            // Always include nodes/edges in save data
+            // The earlier safeguards prevent saving during initial load
+            saveData.nodes = nodesToSave;
+            saveData.edges = edgesToSave;
             
             console.log('Saving data:', saveData);
             await update(projectRef, saveData);
@@ -203,8 +325,14 @@ class ProjectFirebaseSync {
             console.error('Error saving project:', error);
             throw error;
         } finally {
+            this.isLocalUpdate = false; // Clear flag to allow Firebase updates again
             projectActions.setSyncing(false);
         }
+    }
+
+    // Check if initial load is complete
+    isInitialLoadComplete(): boolean {
+        return this.hasInitialLoad;
     }
 
     // Clean up listeners
@@ -214,6 +342,7 @@ class ProjectFirebaseSync {
             this.projectListener = null;
         }
         this.currentProjectId = null;
+        this.hasInitialLoad = false;
     }
 }
 
@@ -224,17 +353,46 @@ let saveTimeout: ReturnType<typeof setTimeout> | null = null;
 
 projectState.subscribe(state => {
     if (state.isDirty && state.projectId) {
-        console.log('Project is dirty, scheduling auto-save...');
+        // Don't auto-save empty arrays immediately after initial load
+        // This prevents overwriting existing data with empty arrays during initialization
+        if (!projectSync.isInitialLoadComplete()) {
+            console.log('Skipping auto-save - initial load not complete yet');
+            return;
+        }
+        
+        
+        console.log('Project is dirty, scheduling auto-save...', { 
+            nodes: state.nodes.length, 
+            edges: state.edges.length 
+        });
         
         // Clear existing timeout
         if (saveTimeout) {
             clearTimeout(saveTimeout);
         }
-        
-        // Set new timeout for auto-save (2 seconds after last change)
-        saveTimeout = setTimeout(() => {
-            console.log('Auto-saving project...');
+
+        let debounce = true;
+
+        if (debounce) {
+            // Use shorter timeout for critical changes
+            const debounceTime = 50;
+            
+            // Set new timeout for auto-save
+            saveTimeout = setTimeout(() => {
+                console.log('Auto-saving project...', { 
+                    nodes: state.nodes.length, 
+                    edges: state.edges.length 
+                });
+                projectSync.saveProject().catch(console.error);
+            }, debounceTime);
+        } else {
+            console.log('Auto-saving project...', { 
+                nodes: state.nodes.length, 
+                edges: state.edges.length 
+            });
             projectSync.saveProject().catch(console.error);
-        }, 2000);
+        }
+        
+
     }
 });
