@@ -17,10 +17,10 @@
     import {untrack} from 'svelte';
     import {docStore} from 'sveltefire';
     import {firestore} from '../../firebase';
-    import type {NodeBluePrintModel} from './lib/NodeBluePrint.js';
-    import SocketStem from './SocketStem.svelte';
-    import NodeWrapper from './NodeWrapper.svelte';
-    import {OutputSocketDataCollection, type UserFunction, userFunctionAllowedModules} from "./lib/Execution";
+    import type {NodeBluePrintModel} from '../../routes/app/lib/NodeBluePrint.js';
+    import SocketStem from '$lib/components/SocketStem.svelte';
+    import NodeWrapper from '$lib/components/NodeWrapper.svelte';
+    // import {OutputSocketDataCollection, type UserFunction, userFunctionAllowedModules} from "./lib/Execution";
 
     let {id, data}: NodeProps<StemNodeType> = $props();
 
@@ -33,85 +33,31 @@
     let connectedInputs: Set<string> = new Set();
     let connectedOutputs: Set<string> = new Set();
 
-    const html_input_types = [
-        "button",
-        "checkbox",
-        "color",
-        "date",
-        "datetime-local",
-        "email",
-        "file",
-        "hidden",
-        "image",
-        "month",
-        "number",
-        "password",
-        "radio",
-        "range",
-        "reset",
-        "search",
-        "submit",
-        "tel",
-        "text",
-        "time",
-        "url",
-        "week"
-    ];
 
-    const otherCompatibleDatatypes = new Map<string, string>(Object.entries({
-        'string': 'text',
-    }));
-
-    function datatypeIsInputTypeCompatible(datatype: string): boolean {
-        const datatypeLowercase = datatype.toLowerCase();
-        if (html_input_types.indexOf(datatypeLowercase) !== -1 || otherCompatibleDatatypes.has(datatypeLowercase)) {
-            return true;
-        }
-        return false;
-    }
-
-    function convertDatatypeToInputType(datatype: string): string {
-        const datatypeLowercase = datatype.toLowerCase();
-
-        if (html_input_types.indexOf(datatypeLowercase) !== -1) {
-            return datatypeLowercase;
-        }
-
-        if (otherCompatibleDatatypes.has(datatypeLowercase)) {
-            return otherCompatibleDatatypes.get(datatypeLowercase) || 'text';
-        }
-
-        throw new Error("Unknown datatype");
-    }
-
-    function executeUserDefinedScript(): void {
-
-    }
-
-    $effect(() => {
-        if (data.input) {
-            const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
-            const nodeBluePrintSnapshot = untrack(() => $nodeBluePrint);
-            if (nodeBluePrintSnapshot && nodeBluePrintSnapshot.output_socket_order && nodeBluePrintSnapshot.user_defined_code_snippet) {
-                const outputCollection: OutputSocketDataCollection = new OutputSocketDataCollection(new Set<string>(nodeBluePrintSnapshot.output_socket_order));
-                const wrappedFn = new AsyncFunction('inputs', 'outputs', 'utils', nodeBluePrintSnapshot.user_defined_code_snippet) as UserFunction;
-
-                const output: Record<string, unknown> = {};
-
-                nodeBluePrintSnapshot.output_socket_order.forEach((socket_id: string) => {
-                    outputCollection.on(socket_id, async (value: unknown) => {
-                        output[socket_id] = value;
-                    });
-                });
-
-                wrappedFn(data.input, outputCollection, userFunctionAllowedModules);
-
-                outputCollection.waitForAllSocketsSet().then(() => {
-                    data.output = output;
-                });
-            }
-        }
-    });
+    // $effect(() => {
+    //     if (data.input) {
+    //         const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
+    //         const nodeBluePrintSnapshot = untrack(() => $nodeBluePrint);
+    //         if (nodeBluePrintSnapshot && nodeBluePrintSnapshot.output_socket_order && nodeBluePrintSnapshot.user_defined_code_snippet) {
+    //             const outputCollection: OutputSocketDataCollection = new OutputSocketDataCollection(new Set<string>(nodeBluePrintSnapshot.output_socket_order));
+    //             const wrappedFn = new AsyncFunction('inputs', 'outputs', 'utils', nodeBluePrintSnapshot.user_defined_code_snippet) as UserFunction;
+    //
+    //             const output: Record<string, unknown> = {};
+    //
+    //             nodeBluePrintSnapshot.output_socket_order.forEach((socket_id: string) => {
+    //                 outputCollection.on(socket_id, async (value: unknown) => {
+    //                     output[socket_id] = value;
+    //                 });
+    //             });
+    //
+    //             wrappedFn(data.input, outputCollection, userFunctionAllowedModules);
+    //
+    //             outputCollection.waitForAllSocketsSet().then(() => {
+    //                 data.output = output;
+    //             });
+    //         }
+    //     }
+    // });
 </script>
 
 {#if $nodeBluePrint}
@@ -168,41 +114,20 @@
                             let:socketType={socketType}
                             let:label={label}
                             let:isRequired={isRequired}
-                            let:socketStyle={socketStyle}
-                    >
-                        {#if datatypeIsInputTypeCompatible(socketType)}
-                            <div class="socket-content input-content">
-                                <span class="socket-label" class:required={isRequired}>
-                                    {label} <small>.{socket_id}</small>
-                                    {#if isRequired}
-                                        <span class="required-indicator">*</span>
-                                    {/if}
-                                </span>
-                                {#if socketType}
-                                    <span class="socket-type" style="{socketStyle}">
-                                        {socketType}
-                                    </span>
+                            let:socketStyle={socketStyle}>
+                        <div class="socket-content input-content">
+                            <span class="socket-label" class:required={isRequired}>
+                                {label} <small>.{socket_id}</small>
+                                {#if isRequired}
+                                    <span class="required-indicator">*</span>
                                 {/if}
-<!--                                <input-->
-<!--                                        type="{convertDatatypeToInputType(socketType)}"-->
-<!--                                        bind:value={data.input[socket_id]}-->
-<!--                                >-->
-                            </div>
-                        {:else}
-                            <div class="socket-content input-content">
-                                <span class="socket-label" class:required={isRequired}>
-                                    {label} <small>.{socket_id}</small>
-                                    {#if isRequired}
-                                        <span class="required-indicator">*</span>
-                                    {/if}
+                            </span>
+                            {#if socketType}
+                                <span class="socket-type" style="{socketStyle}">
+                                    {socketType}
                                 </span>
-                                {#if socketType}
-                                    <span class="socket-type" style="{socketStyle}">
-                                        {socketType}
-                                    </span>
-                                {/if}
-                            </div>
-                        {/if}
+                            {/if}
+                        </div>
                     </SocketStem>
                 {/each}
             </div>

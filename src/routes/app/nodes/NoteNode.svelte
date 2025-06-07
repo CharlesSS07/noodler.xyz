@@ -13,7 +13,7 @@
 	import { marked } from 'marked';
 	import {type NodeProps, useSvelteFlow} from "@xyflow/svelte";
 	import { untrack } from 'svelte';
-	import TallTextArea from "../../../components/TallTextArea.svelte";
+	import TallTextArea from "$lib/components/TallTextArea.svelte";
 
 
 	let { id, data }: NodeProps<NoteNodeType> = $props();

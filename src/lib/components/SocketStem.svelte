@@ -1,6 +1,6 @@
 <script lang="ts">
 	import {Handle, Position, type HandleType } from '@xyflow/svelte';
-	import {getSocketDataTypeByName} from "./lib/DataTypes";
+	import {getSocketDataTypeByName} from "../../routes/app/lib/DataTypes";
 
 	// Props
 	export let type: HandleType; // 'source' for output, 'target' for input

@@ -1,5 +1,5 @@
 <script>
-    import NodeWrapper from "../../NodeWrapper.svelte";
+    import NodeWrapper from "$lib/components/NodeWrapper.svelte";
     import {Handle, Position} from "@xyflow/svelte";
     import {getSocketDataTypeByName} from "../../lib/DataTypes.ts";
 

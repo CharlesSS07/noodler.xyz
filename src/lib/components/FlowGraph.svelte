@@ -1,5 +1,5 @@
 <script lang="ts">
-    import HTMLRendererNode from "./nodes/html/HTMLRendererNode.svelte";
+    import HTMLRendererNode from "../../routes/app/nodes/html/HTMLRendererNode.svelte";
 
     let {project_key = 'project_key_not_assigned'} = $props<{ project_key?: string }>();
 
@@ -15,17 +15,17 @@
     } from '@xyflow/svelte';
     import '@xyflow/svelte/dist/style.css';
 
-    import NoteNode from './nodes/NoteNode.svelte';
+    import NoteNode from '../../routes/app/nodes/NoteNode.svelte';
     import {auth, rtdb} from '../../firebase';
-    import StemNode from './StemNode.svelte';
+    import StemNode from '$lib/components/StemNode.svelte';
     import {onValue, ref, update, child, remove, off} from 'firebase/database';
-    import TextTemplateFillinNode from "./nodes/text/TextTemplateFillinNode.svelte";
-    import ImageNode from "./nodes/images/ImageNode.svelte";
-    import TextEditorNode from "./nodes/text/TextEditorNode.svelte";
-    import RawTextEditor from "./nodes/text/RawTextEditor.svelte";
+    import TextTemplateFillinNode from "../../routes/app/nodes/text/TextTemplateFillinNode.svelte";
+    import ImageNode from "../../routes/app/nodes/images/ImageNode.svelte";
+    import TextEditorNode from "../../routes/app/nodes/text/TextEditorNode.svelte";
+    import RawTextEditor from "../../routes/app/nodes/text/RawTextEditor.svelte";
     import {onMount} from "svelte";
     import Logo from "../../components/Logo.svelte";
-    import NodeSearch from "../../lib/components/NodeSearch.svelte";
+    import NodeSearch from "./NodeSearch.svelte";
     import { Plus } from "lucide-svelte";
     import {projectState} from "$lib/stores/ProjectState";
 

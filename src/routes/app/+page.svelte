@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { SignedIn, SignedOut } from 'sveltefire';
 	import { signInAnonymously } from 'firebase/auth';
-	import FlowGraph from './FlowGraph.svelte';
+	import FlowGraph from '$lib/components/FlowGraph.svelte';
 	import { goto } from '$app/navigation';
 	import { auth } from '../../firebase';
 	import './nodes.css';

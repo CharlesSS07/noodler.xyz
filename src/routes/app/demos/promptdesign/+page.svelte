@@ -12,7 +12,7 @@
     } from "@xyflow/svelte";
     import '@xyflow/svelte/dist/style.css';
     import NoteNode from "../../nodes/NoteNode.svelte";
-    import StemNode from "../../StemNode.svelte";
+    import StemNode from "$lib/components/StemNode.svelte";
     import ImageNode from "../../nodes/images/ImageNode.svelte";
     import HTMLRendererNode from "../../nodes/html/HTMLRendererNode.svelte";
     import TextTemplateFillinNode from "../../nodes/text/TextTemplateFillinNode.svelte";

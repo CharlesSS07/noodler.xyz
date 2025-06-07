@@ -13,11 +13,6 @@ import type {
     NodeBluePrintControllerInterface,
     NodeBluePrintModel,
 } from './NodeBluePrint.js';
-import {
-    type OutputSocketDataCollection,
-    type UserFunction,
-    userFunctionAllowedModules,
-} from './Execution.js';
 import { v4 as uuidv4 } from 'uuid';
 import type {
     InputSocketModel,
@@ -120,45 +115,6 @@ export class FirestoreNodeBluePrintController
 
     getNodeBluePrintRef() {
         return doc(nodeBluePrintsRef, this.nid as string);
-    }
-
-    async call(
-        inputs: Map<SocketID, unknown>,
-        outputs: OutputSocketDataCollection
-    ): Promise<void> {
-        console.log(`Executing ${this.nid}`);
-        //
-        // // Instantiate function from code
-        // const fn = new Function("inputs", "outputs", await this.getCode()) as (inputs: Record<SocketID, unknown>, outputs: OutputSocketValueCollection) => Promise<void>;
-        //
-        // // Execute the function and return the result
-        // await fn(inputs, outputs);
-        // return outputs;
-        const userCode = await this.getCode(); // User’s function body (just the inside of the function)
-
-        // Create an async function that takes inputs and utils
-        const AsyncFunction = Object.getPrototypeOf(
-            async function () {}
-        ).constructor;
-        const wrappedFn = new AsyncFunction(
-            'inputs',
-            'outputs',
-            'utils',
-            userCode
-        ) as UserFunction;
-
-        // const require = (name: string) => {
-        //   if (!(name in userFunctionAllowedModules)) {
-        //     throw new Error(`Module '${name}' not allowed.`);
-        //   }
-        //   return userFunctionAllowedModules[name];
-        // };
-
-        // Convert your Map to plain object for easier use
-        const inputObj: Record<string, unknown> = Object.fromEntries(inputs);
-
-        // Call the function and get structured result
-        await wrappedFn(inputObj, outputs, userFunctionAllowedModules);
     }
 
     async spinOffNode(

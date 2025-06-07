@@ -56,7 +56,7 @@ const standardDataTypes: SocketDataType[] = [
         name: 'object',
         style: baseSocketStyle('#f39c12'),
         description: 'Holds a standard JavaScript object.',
-        type: 'unknown',
+        type: 'object',
     },
     {
         name: 'array',

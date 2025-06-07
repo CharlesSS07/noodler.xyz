@@ -11,10 +11,10 @@
 </script>
 
 <script lang="ts">
-    import NodeWrapper from "../../NodeWrapper.svelte";
+    import NodeWrapper from "$lib/components/NodeWrapper.svelte";
     import {Handle, type NodeProps, Position} from "@xyflow/svelte";
     import {getSocketDataTypeByName} from "../../lib/DataTypes";
-    import SocketStem from "../../SocketStem.svelte";
+    import SocketStem from "$lib/components/SocketStem.svelte";
 
     let { id, data }: NodeProps<CompleteTextNodeType> = $props();
 
