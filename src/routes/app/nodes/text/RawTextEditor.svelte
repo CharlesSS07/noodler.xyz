@@ -58,7 +58,7 @@
 
     // Whether to show input socket (only if input is empty and not connected)
     let showInputSocket = $derived(() => {
-        return (!data.input.text || data.input.text.trim() === '');
+        return (!data.input?.text || data.input?.text.trim() === '');
     });
 
     // Handle manual input
@@ -92,7 +92,7 @@
     <div class="w-full border-2 border-gray-300 rounded-lg bg-white overflow-hidden">
 		<textarea
                 bind:this={textareaRef}
-                value={hasInputConnection() ? data.input.text : data.currentText ?? ''}
+                value={hasInputConnection() ? data.input?.text : data.currentText ?? ''}
                 readonly={hasInputConnection()}
                 on:input={(e) => {
 				if (!hasInputConnection()) {

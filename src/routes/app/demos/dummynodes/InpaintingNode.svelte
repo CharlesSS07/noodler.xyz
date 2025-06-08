@@ -148,7 +148,7 @@
     const nodeDescription = "Fill, replace, or extend parts of images using AI inpainting";
 </script>
 
-<NodeWrapper title={nodeTitle} description={nodeDescription}>
+<NodeWrapper title={nodeTitle} description={nodeDescription} label="AI Inpainting">
     <!-- Input Sockets -->
     <SocketStem 
         type="target"

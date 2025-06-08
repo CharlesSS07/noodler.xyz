@@ -1,20 +1,20 @@
 <script module lang="ts">
     import { type Node } from '@xyflow/svelte';
+    import type { JimpInstance } from 'jimp';
 
-    export type CompositeGeneratorType = Node<
+    export type BackgroundGeneratorType = Node<
         {
             input: {
-                mainPrompt?: string;
-                backgroundImage?: string;
-                overlayImage?: string;
-                maskImage?: string;
+                backgroundPrompt?: string;
+                backgroundMask?: JimpInstance;
+                styleReference?: JimpInstance;
             };
             output: {
-                compositeImage?: string;
+                generatedBackground?: JimpInstance;
                 processingInfo?: Record<string, any>;
             };
         },
-        'composite-generator'
+        'background-generator'
     >;
 </script>
 
@@ -23,18 +23,16 @@
     import NodeWrapper from "$lib/components/NodeWrapper.svelte";
     import SocketStem from "$lib/components/SocketStem.svelte";
     
-    let { id, data }: NodeProps<CompositeGeneratorType> = $props();
+    let { id, data }: NodeProps<BackgroundGeneratorType> = $props();
 
     // Node settings
-    let compositeMode = $state('overlay');
-    let opacity = $state(0.8);
-    let blendStrength = $state(0.7);
-    let colorBalance = $state(0.5);
-    let contrast = $state(1.0);
-    let saturation = $state(1.0);
+    let creativityLevel = $state(0.7);
+    let detailLevel = $state(0.8);
+    let colorHarmony = $state(0.6);
+    let generationSteps = $state(30);
 
     // Output
-    let compositeResult = $state('');
+    let generatedResult = $state('');
     let processingStatus = $state('ready');
     let generationProgress = $state(0);
 
@@ -45,158 +43,142 @@
     });
 
     // Access input values
-    let mainPrompt = $derived(data.input.mainPrompt || '');
-    let backgroundImage = $derived(data.input.backgroundImage || '');
-    let overlayImage = $derived(data.input.overlayImage || '');
-    let maskImage = $derived(data.input.maskImage || '');
+    let backgroundPrompt = $derived(data.input?.backgroundPrompt || '');
+    let backgroundMask = $derived(data.input?.backgroundMask || '');
+    let styleReference = $derived(data.input?.styleReference || '');
 
-    // Process composite when inputs change
+    // Generate background when inputs change
     $effect(() => {
-        if (mainPrompt && (backgroundImage || overlayImage)) {
-            generateComposite();
+        if (backgroundPrompt && backgroundMask) {
+            generateBackground();
         } else {
             processingStatus = 'ready';
-            compositeResult = '';
+            generatedResult = '';
             generationProgress = 0;
         }
     });
 
-    async function generateComposite() {
+    async function generateBackground() {
         processingStatus = 'processing';
         generationProgress = 0;
 
         // Simulate progressive generation
-        const steps = 10;
+        const steps = generationSteps;
         for (let i = 1; i <= steps; i++) {
-            await new Promise(resolve => setTimeout(resolve, 300));
+            await new Promise(resolve => setTimeout(resolve, 100));
             generationProgress = (i / steps) * 100;
         }
 
-        compositeResult = createMockComposite();
+        generatedResult = createMockBackground();
         processingStatus = 'complete';
         
-        data.output.compositeImage = compositeResult;
+        data.output.generatedBackground = generatedResult;
         data.output.processingInfo = {
-            compositeMode,
-            opacity,
-            blendStrength,
-            colorBalance,
-            contrast,
-            saturation,
+            creativityLevel,
+            detailLevel,
+            colorHarmony,
+            generationSteps,
             timestamp: new Date().toISOString()
         };
     }
 
-    function createMockComposite(): string {
+    function createMockBackground(): string {
         const canvas = document.createElement('canvas');
         canvas.width = 600;
         canvas.height = 400;
         const ctx = canvas.getContext('2d')!;
 
-        // Create composite based on mode and settings
+        // Create realistic background based on settings
         const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
         
-        if (compositeMode === 'overlay') {
-            gradient.addColorStop(0, `rgba(255, 107, 107, ${opacity})`);
-            gradient.addColorStop(0.5, `rgba(78, 205, 196, ${opacity})`);
-            gradient.addColorStop(1, `rgba(69, 183, 209, ${opacity})`);
-        } else if (compositeMode === 'multiply') {
-            gradient.addColorStop(0, `rgba(150, 206, 180, ${opacity})`);
-            gradient.addColorStop(0.5, `rgba(254, 202, 87, ${opacity})`);
-            gradient.addColorStop(1, `rgba(255, 159, 243, ${opacity})`);
+        if (backgroundPrompt.includes('sunset') || backgroundPrompt.includes('golden')) {
+            gradient.addColorStop(0, '#ff9a9e');
+            gradient.addColorStop(0.5, '#fad0c4');
+            gradient.addColorStop(1, '#a8edea');
+        } else if (backgroundPrompt.includes('forest') || backgroundPrompt.includes('nature')) {
+            gradient.addColorStop(0, '#134e5e');
+            gradient.addColorStop(0.5, '#71b280');
+            gradient.addColorStop(1, '#85d8ce');
+        } else if (backgroundPrompt.includes('city') || backgroundPrompt.includes('urban')) {
+            gradient.addColorStop(0, '#4b6cb7');
+            gradient.addColorStop(0.5, '#182848');
+            gradient.addColorStop(1, '#667eea');
         } else {
-            gradient.addColorStop(0, `rgba(102, 126, 234, ${opacity})`);
-            gradient.addColorStop(0.5, `rgba(118, 75, 162, ${opacity})`);
-            gradient.addColorStop(1, `rgba(240, 147, 251, ${opacity})`);
+            gradient.addColorStop(0, '#667eea');
+            gradient.addColorStop(0.5, '#764ba2');
+            gradient.addColorStop(1, '#f093fb');
         }
-
+        
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        // Apply color adjustments
-        ctx.globalCompositeOperation = 'multiply';
-        ctx.globalAlpha = contrast;
         
-        // Add texture based on settings
-        for (let i = 0; i < 20; i++) {
-            ctx.fillStyle = `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, ${blendStrength * 0.3})`;
-            ctx.fillRect(
+        // Add detail based on detail level
+        ctx.globalAlpha = detailLevel;
+        for (let i = 0; i < Math.floor(detailLevel * 15); i++) {
+            ctx.fillStyle = `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, ${colorHarmony * 0.3})`;
+            ctx.beginPath();
+            ctx.arc(
                 Math.random() * canvas.width,
                 Math.random() * canvas.height,
-                Math.random() * 100 + 20,
-                Math.random() * 100 + 20
+                Math.random() * 40 + 5,
+                0,
+                Math.PI * 2
             );
+            ctx.fill();
         }
-
-        // Add "generated" text overlay
-        ctx.globalCompositeOperation = 'source-over';
-        ctx.globalAlpha = 1;
-        ctx.font = '24px Arial';
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-        ctx.textAlign = 'center';
-        ctx.fillText('AI Generated Composite', canvas.width / 2, canvas.height / 2);
         
-        ctx.font = '14px Arial';
-        ctx.fillText(`Mode: ${compositeMode} | Blend: ${blendStrength}`, canvas.width / 2, canvas.height / 2 + 30);
-
+        // Add "AI Generated" watermark
+        ctx.globalAlpha = 1;
+        ctx.font = '16px Arial';
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+        ctx.textAlign = 'center';
+        ctx.fillText('AI Generated Background', canvas.width / 2, canvas.height - 20);
+        
         return canvas.toDataURL();
     }
 
-    const nodeTitle = "Composite Generator";
-    const nodeDescription = "Generate complex composite images by blending multiple inputs with AI";
+    const nodeTitle = "Background Generator";
+    const nodeDescription = "Generate new backgrounds using AI diffusion models";
 </script>
 
-<NodeWrapper title={nodeTitle} description={nodeDescription} label="Composite Generator">
+<NodeWrapper title={nodeTitle} description={nodeDescription} label="Background Generator">
     <!-- Input Sockets -->
     <SocketStem 
         type="target"
         socketType="string"
-        label="Main Prompt"
-        socket_id="mainPrompt"
-        tooltip="Primary generation prompt"
+        label="Background Prompt"
+        socket_id="backgroundPrompt"
+        tooltip="Description of desired background"
     >
         <div class="socket-content input-content">
-            <span class="socket-label">Main Prompt</span>
+            <span class="socket-label">Background Prompt</span>
             <span class="socket-type">string</span>
         </div>
     </SocketStem>
     
     <SocketStem 
         type="target"
-        socketType="image"
-        label="Background"
-        socket_id="backgroundImage"
-        tooltip="Base background image"
+        socketType="image/jimp"
+        label="Background Mask"
+        socket_id="backgroundMask"
+        tooltip="Mask defining background area"
     >
         <div class="socket-content input-content">
-            <span class="socket-label">Background</span>
-            <span class="socket-type">image</span>
+            <span class="socket-label">Background Mask</span>
+            <span class="socket-type">image/jimp</span>
         </div>
     </SocketStem>
     
     <SocketStem 
         type="target"
-        socketType="image"
-        label="Overlay"
-        socket_id="overlayImage"
-        tooltip="Overlay image to blend"
+        socketType="image/jimp"
+        label="Style Reference"
+        socket_id="styleReference"
+        tooltip="Optional style reference image"
     >
         <div class="socket-content input-content">
-            <span class="socket-label">Overlay</span>
-            <span class="socket-type">image</span>
-        </div>
-    </SocketStem>
-    
-    <SocketStem 
-        type="target"
-        socketType="image"
-        label="Mask"
-        socket_id="maskImage"
-        tooltip="Blend mask (optional)"
-    >
-        <div class="socket-content input-content">
-            <span class="socket-label">Mask</span>
-            <span class="socket-type">image</span>
+            <span class="socket-label">Style Reference</span>
+            <span class="socket-type">image/jimp</span>
         </div>
     </SocketStem>
 
@@ -204,80 +186,55 @@
     <div class="generator-content">
         <div class="settings-grid">
             <div class="setting">
-                <label for="mode">Composite Mode:</label>
-                <select bind:value={compositeMode} id="mode">
-                    <option value="overlay">Overlay</option>
-                    <option value="multiply">Multiply</option>
-                    <option value="screen">Screen</option>
-                    <option value="softlight">Soft Light</option>
-                    <option value="hardlight">Hard Light</option>
-                    <option value="difference">Difference</option>
-                </select>
-            </div>
-
-            <div class="setting">
-                <label for="opacity">Opacity:</label>
+                <label for="creativity">Creativity Level:</label>
                 <input 
                     type="range" 
-                    id="opacity"
-                    bind:value={opacity} 
+                    id="creativity"
+                    bind:value={creativityLevel} 
                     min="0" 
                     max="1" 
                     step="0.1"
                 />
-                <span class="value">{opacity}</span>
+                <span class="value">{creativityLevel}</span>
             </div>
 
             <div class="setting">
-                <label for="blend">Blend Strength:</label>
+                <label for="detail">Detail Level:</label>
                 <input 
                     type="range" 
-                    id="blend"
-                    bind:value={blendStrength} 
+                    id="detail"
+                    bind:value={detailLevel} 
                     min="0" 
                     max="1" 
                     step="0.1"
                 />
-                <span class="value">{blendStrength}</span>
+                <span class="value">{detailLevel}</span>
             </div>
 
             <div class="setting">
-                <label for="balance">Color Balance:</label>
+                <label for="harmony">Color Harmony:</label>
                 <input 
                     type="range" 
-                    id="balance"
-                    bind:value={colorBalance} 
+                    id="harmony"
+                    bind:value={colorHarmony} 
                     min="0" 
                     max="1" 
                     step="0.1"
                 />
-                <span class="value">{colorBalance}</span>
+                <span class="value">{colorHarmony}</span>
             </div>
 
             <div class="setting">
-                <label for="contrast">Contrast:</label>
+                <label for="steps">Generation Steps:</label>
                 <input 
                     type="range" 
-                    id="contrast"
-                    bind:value={contrast} 
-                    min="0.5" 
-                    max="2" 
-                    step="0.1"
+                    id="steps"
+                    bind:value={generationSteps} 
+                    min="10" 
+                    max="100" 
+                    step="5"
                 />
-                <span class="value">{contrast}</span>
-            </div>
-
-            <div class="setting">
-                <label for="saturation">Saturation:</label>
-                <input 
-                    type="range" 
-                    id="saturation"
-                    bind:value={saturation} 
-                    min="0" 
-                    max="2" 
-                    step="0.1"
-                />
-                <span class="value">{saturation}</span>
+                <span class="value">{generationSteps}</span>
             </div>
         </div>
 
@@ -286,7 +243,7 @@
                 {#if processingStatus === 'ready'}
                     🎨 Ready to Generate
                 {:else if processingStatus === 'processing'}
-                    🔄 Generating Composite...
+                    🔄 Generating Background...
                 {:else}
                     ✅ Generation Complete
                 {/if}
@@ -300,14 +257,14 @@
             {/if}
         </div>
 
-        {#if compositeResult}
+        {#if generatedResult}
             <div class="result-preview">
-                <h4>Generated Composite:</h4>
-                <img src={compositeResult} alt="Generated composite" />
+                <h4>Generated Background:</h4>
+                <img src={generatedResult} alt="Generated background" />
                 <div class="result-info">
-                    <div class="info-item">Mode: {compositeMode}</div>
-                    <div class="info-item">Opacity: {opacity}</div>
-                    <div class="info-item">Blend: {blendStrength}</div>
+                    <div class="info-item">Creativity: {creativityLevel}</div>
+                    <div class="info-item">Detail: {detailLevel}</div>
+                    <div class="info-item">Steps: {generationSteps}</div>
                 </div>
             </div>
         {/if}
@@ -316,14 +273,14 @@
     <!-- Output Socket -->
     <SocketStem 
         type="source"
-        socketType="image"
-        label="Composite Image"
-        socket_id="compositeImage"
-        tooltip="Generated composite result"
+        socketType="image/jimp"
+        label="Generated Background"
+        socket_id="generatedBackground"
+        tooltip="AI-generated background image"
     >
         <div class="socket-content output-content">
-            <span class="socket-label">Composite Image</span>
-            <span class="socket-type">image</span>
+            <span class="socket-label">Generated Background</span>
+            <span class="socket-type">image/jimp</span>
         </div>
     </SocketStem>
 </NodeWrapper>
@@ -357,14 +314,6 @@
     .setting input[type="range"] {
         flex: 1;
         min-width: 60px;
-    }
-
-    .setting select {
-        flex: 1;
-        padding: 0.25rem;
-        border: 1px solid #d1d5db;
-        border-radius: 0.25rem;
-        font-size: 0.75rem;
     }
 
     .value {

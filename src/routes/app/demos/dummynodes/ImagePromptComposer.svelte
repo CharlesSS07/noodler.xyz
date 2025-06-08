@@ -65,7 +65,7 @@
     const nodeDescription = "Combines multiple prompt elements into a sophisticated image generation prompt";
 </script>
 
-<NodeWrapper title={nodeTitle} description={nodeDescription}>
+<NodeWrapper title={nodeTitle} description={nodeDescription} label="Prompt Composer">
     <!-- Input Sockets -->
     <SocketStem 
         type="target"

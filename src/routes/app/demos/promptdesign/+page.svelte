@@ -25,6 +25,8 @@
     import {edgesVersion2, nodesVersion0, nodesVersion2} from "./projectVersions";
     import Logo from "../../../../components/Logo.svelte";
     import EmailSignup from "../../../../components/EmailSignup.svelte";
+    import { Play, RefreshCw, Download, ArrowLeft } from "lucide-svelte";
+    import { Panel } from "@xyflow/svelte";
 
     let nodes = $state.raw<Node[]>(nodesVersion2);
 
@@ -42,6 +44,7 @@
     };
 
     let colorMode: ColorMode = $state('light');
+    let isProcessing = $state(false);
 
     const elk = new ELK();
 
@@ -142,6 +145,30 @@
         // onLayout('RIGHT');
     }
 
+    function runWorkflow() {
+        isProcessing = true;
+        // Simulate workflow execution
+        setTimeout(() => {
+            isProcessing = false;
+            alert('Prompt design workflow completed! Check the output nodes.');
+        }, 2500);
+    }
+
+    function resetWorkflow() {
+        // Reset all nodes to initial state
+        nodes = [...nodesVersion2]; // Trigger reactivity
+        edges = [...edgesVersion2];
+        alert('Workflow reset to initial state.');
+    }
+
+    function exportResult() {
+        alert('Export functionality would save the generated prompts and templates.');
+    }
+
+    function goBack() {
+        window.location.href = '/app/demos';
+    }
+
 </script>
 <div style="height: 100vh;">
 <!--    <button on:click={() => {console.log(nodes, edges);}}>Print Node State</button>-->
@@ -150,8 +177,241 @@
         <Controls/>
         <Background variant={BackgroundVariant.Dots}/>
         <MiniMap/>
+
+        <!-- Header Panel -->
+        <Panel position="top-center">
+            <div class="header-panel">
+                <div class="header-content">
+                    <h1>Prompt Design Studio</h1>
+                    <p>Visual prompt engineering and template composition</p>
+                </div>
+            </div>
+        </Panel>
+
+        <!-- Control Panel -->
+        <Panel position="top-right">
+            <div class="controls-panel">
+                <button 
+                    onclick={goBack}
+                    class="control-btn back-btn"
+                    title="Back to Demos"
+                >
+                    <ArrowLeft class="btn-icon" />
+                    Back
+                </button>
+                
+                <button 
+                    onclick={runWorkflow}
+                    class="control-btn run-btn"
+                    class:processing={isProcessing}
+                    disabled={isProcessing}
+                    title="Run Complete Workflow"
+                >
+                    <Play class="btn-icon" />
+                    {isProcessing ? 'Processing...' : 'Run Workflow'}
+                </button>
+                
+                <button 
+                    onclick={resetWorkflow}
+                    class="control-btn reset-btn"
+                    title="Reset Workflow"
+                >
+                    <RefreshCw class="btn-icon" />
+                    Reset
+                </button>
+                
+                <button 
+                    onclick={exportResult}
+                    class="control-btn export-btn"
+                    title="Export Result"
+                >
+                    <Download class="btn-icon" />
+                    Export
+                </button>
+            </div>
+        </Panel>
+
+        <!-- Info Panel -->
+        <Panel position="bottom-left">
+            <div class="info-panel">
+                <div class="info-content">
+                    <h3>🎯 Quick Start</h3>
+                    <ol>
+                        <li>Edit text inputs to customize prompt components</li>
+                        <li>Watch the template engine combine elements</li>
+                        <li>Adjust LLM transformation parameters</li>
+                        <li>Click "Run Workflow" to process the pipeline</li>
+                        <li>View the optimized prompt results</li>
+                    </ol>
+                </div>
+            </div>
+        </Panel>
     </SvelteFlow>
     <div style="position: fixed;top: 0;left: 0;scale: 0.5">
         <EmailSignup></EmailSignup>
     </div>
 </div>
+
+<style>
+    .header-panel {
+        background: rgba(255, 255, 255, 0.95);
+        padding: 1rem 2rem;
+        border-radius: 0.75rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .header-content {
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .header-content h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin: 0;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .header-content p {
+        font-size: 0.875rem;
+        color: #6b7280;
+        margin: 0;
+    }
+
+    .controls-panel {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .control-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: rgba(255, 255, 255, 0.95);
+        color: #374151;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+    }
+
+    .control-btn:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .control-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .back-btn {
+        background: rgba(107, 114, 128, 0.9);
+        color: white;
+    }
+
+    .back-btn:hover:not(:disabled) {
+        background: rgba(75, 85, 99, 0.9);
+    }
+
+    .run-btn {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+    }
+
+    .run-btn:hover:not(:disabled) {
+        background: linear-gradient(135deg, #059669, #047857);
+    }
+
+    .run-btn.processing {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        animation: pulse 2s infinite;
+    }
+
+    .reset-btn {
+        background: rgba(239, 68, 68, 0.9);
+        color: white;
+    }
+
+    .reset-btn:hover:not(:disabled) {
+        background: rgba(220, 38, 38, 0.9);
+    }
+
+    .export-btn {
+        background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+        color: white;
+    }
+
+    .export-btn:hover:not(:disabled) {
+        background: linear-gradient(135deg, #7c3aed, #6d28d9);
+    }
+
+    :global(.btn-icon) {
+        width: 1rem;
+        height: 1rem;
+    }
+
+    .info-panel {
+        background: rgba(255, 255, 255, 0.95);
+        padding: 1rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        max-width: 300px;
+    }
+
+    .info-content h3 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin: 0 0 0.75rem 0;
+    }
+
+    .info-content ol {
+        font-size: 0.75rem;
+        color: #4b5563;
+        margin: 0;
+        padding-left: 1.25rem;
+        line-height: 1.5;
+    }
+
+    .info-content li {
+        margin-bottom: 0.25rem;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.8; }
+    }
+
+    @media (max-width: 768px) {
+        .controls-panel {
+            flex-direction: column;
+        }
+        
+        .header-content h1 {
+            font-size: 1.25rem;
+        }
+        
+        .info-panel {
+            max-width: 250px;
+        }
+    }
+</style>

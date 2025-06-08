@@ -63,8 +63,8 @@
                 <button on:click={goto('/app')} class="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold text-lg rounded-lg transform hover:-translate-y-1 transition-all duration-200 shadow-lg hover:shadow-xl">
                     Start Building
                 </button>
-                <button class="px-8 py-4 bg-transparent border-2 border-gray-600 hover:border-gray-400 text-gray-300 hover:text-white font-semibold text-lg rounded-lg transform hover:-translate-y-1 transition-all duration-200">
-                    Watch Demo
+                <button on:click={goto('/app/demos')} class="px-8 py-4 bg-transparent border-2 border-gray-600 hover:border-gray-400 text-gray-300 hover:text-white font-semibold text-lg rounded-lg transform hover:-translate-y-1 transition-all duration-200">
+                    Explore Demos
                 </button>
             </div>
         </section>

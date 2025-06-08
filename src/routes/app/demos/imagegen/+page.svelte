@@ -20,15 +20,20 @@
 
     // Import our custom demo nodes
     import ImagePromptComposer from "../dummynodes/ImagePromptComposer.svelte";
-    import ImageLoader from "../dummynodes/ImageLoader.svelte";
-    import StyleTransferNode from "../dummynodes/StyleTransferNode.svelte";
-    import InpaintingNode from "../dummynodes/InpaintingNode.svelte";
+    import ForegroundSplitter from "../dummynodes/ForegroundSplitter.svelte";
+    import BackgroundGenerator from "../dummynodes/BackgroundGenerator.svelte";
+    import SmartCompositor from "../dummynodes/SmartCompositor.svelte";
+    import CompositeGenerator from "../dummynodes/CompositeGenerator.svelte";
+    import StringToImageConverter from "../dummynodes/StringToImageConverter.svelte";
+    import EmailSignup from "../../../../components/EmailSignup.svelte";
     
     import "../../nodes.css";
     import { onMount } from "svelte";
     import Logo from "../../../../components/Logo.svelte";
-    import { Play, RefreshCw, Download, ArrowLeft } from "lucide-svelte";
+    import { Play, RefreshCw, Download, ArrowLeft, Layout } from "lucide-svelte";
     import RawTextEditor from "../../nodes/text/RawTextEditor.svelte";
+    import ELK from 'elkjs/lib/elk.bundled.js';
+    import { Position } from "@xyflow/svelte";
 
     // Demo workflow nodes
     let nodes = $state.raw<Node[]>([
@@ -39,96 +44,165 @@
             data: {
                 markdown: `# 🎨 AI Image Generation Lab
 
-Welcome to the advanced image generation and manipulation demo! This workflow showcases:
+Advanced AI-powered image manipulation workflow:
 
-- **Prompt Composition**: Build sophisticated prompts from multiple components
-- **Image Loading**: Import images from files or URLs  
-- **Style Transfer**: Apply artistic styles using AI diffusion models
-- **Inpainting**: Fill, replace, or extend parts of images
-- **Composite Processing**: Chain multiple AI operations together
+1. **Fetch Image**: Load image from URL using official fetch node
+2. **Split Subject**: Separate foreground focus from background
+3. **Generate Background**: Create new background with AI diffusion
+4. **Smart Composition**: Intelligently blend foreground with new background
+5. **Save & Share**: Export to Google Drive and send via email
 
-Connect the nodes below to create your own image generation pipeline!`
+This demo showcases real-world AI image processing capabilities!`
             },
             width: 350,
             height: 200
         },
         {
-            id: 'base-prompt',
-            type: 'textEditor',
+            id: 'image-url-input',
+            type: 'textEditorRaw',
             position: { x: 50, y: 300 },
             data: {
-                content: 'A majestic mountain landscape at sunset'
+                input: { text: '' },
+                currentText: 'https://example.com/sample-photo.jpg',
+                output: { text: '' }
             },
             width: 200,
             height: 100
         },
         {
-            id: 'style-modifiers',
-            type: 'textEditor', 
+            id: 'fetch-url-node',
+            type: 'node',
+            position: { x: 300, y: 280 },
+            data: {
+                nid: 'official_node_fetch_url',
+                input: {},
+                output: {}
+            },
+            width: 200,
+            height: 150
+        },
+        {
+            id: 'string-to-image-converter',
+            type: 'stringToImageConverter',
+            position: { x: 550, y: 260 },
+            data: {},
+            width: 250,
+            height: 320
+        },
+        {
+            id: 'loaded-image-preview',
+            type: 'image',
+            position: { x: 850, y: 240 },
+            data: {
+                output: { image: null },
+                input: { image: null }
+            },
+            width: 200,
+            height: 150
+        },
+        {
+            id: 'mask-prompt',
+            type: 'textEditorRaw',
             position: { x: 50, y: 450 },
             data: {
-                content: 'ethereal mist, dramatic lighting, golden hour'
+                input: { text: '' },
+                currentText: 'person, subject, main focus',
+                output: { text: '' }
             },
             width: 200,
             height: 100
         },
         {
-            id: 'quality-settings',
-            type: 'textEditor',
-            position: { x: 50, y: 600 },
-            data: {
-                content: '8k resolution, award winning photography'
-            },
-            width: 200,
-            height: 100
-        },
-        {
-            id: 'prompt-composer',
-            type: 'imagePromptComposer',
-            position: { x: 350, y: 400 },
+            id: 'foreground-splitter',
+            type: 'foregroundSplitter',
+            position: { x: 800, y: 300 },
             data: {},
-            width: 280,
+            width: 300,
             height: 400
         },
         {
-            id: 'source-image-loader',
-            type: 'imageLoader',
+            id: 'background-style',
+            type: 'textEditorRaw',
+            position: { x: 50, y: 600 },
+            data: {
+                input: { text: '' },
+                currentText: 'futuristic cyberpunk cityscape',
+                output: { text: '' }
+            },
+            width: 200,
+            height: 100
+        },
+        {
+            id: 'background-details',
+            type: 'textEditorRaw',
             position: { x: 50, y: 750 },
-            data: {},
-            width: 250,
-            height: 300
+            data: {
+                input: { text: '' },
+                currentText: 'neon lights, rain, night atmosphere',
+                output: { text: '' }
+            },
+            width: 200,
+            height: 100
         },
         {
-            id: 'style-reference-loader',
-            type: 'imageLoader',
-            position: { x: 350, y: 750 },
-            data: {},
-            width: 250,
-            height: 300
-        },
-        {
-            id: 'style-transfer',
-            type: 'styleTransfer',
-            position: { x: 700, y: 400 },
-            data: {},
+            id: 'prompt-template',
+            type: 'textTemplate',
+            position: { x: 300, y: 600 },
+            data: {
+                input: { text: '' },
+                template: 'A detailed @backgroundstyle with @backgrounddetails, @qualitysettings, professional photography',
+                output: { text: '' }
+            },
             width: 300,
+            height: 150
+        },
+        {
+            id: 'quality-settings',
+            type: 'textEditorRaw',
+            position: { x: 50, y: 900 },
+            data: {
+                input: { text: '' },
+                currentText: '8k resolution, dramatic lighting',
+                output: { text: '' }
+            },
+            width: 200,
+            height: 100
+        },
+        {
+            id: 'background-generator',
+            type: 'backgroundGenerator',
+            position: { x: 1150, y: 300 },
+            data: {},
+            width: 320,
             height: 450
         },
         {
-            id: 'inpainting',
-            type: 'inpainting',
-            position: { x: 1050, y: 400 },
+            id: 'composition-prompt',
+            type: 'textEditorRaw',
+            position: { x: 50, y: 1050 },
+            data: {
+                input: { text: '' },
+                currentText: 'realistic lighting, natural shadows, seamless integration',
+                output: { text: '' }
+            },
+            width: 200,
+            height: 100
+        },
+        {
+            id: 'smart-compositor',
+            type: 'smartCompositor',
+            position: { x: 1520, y: 350 },
             data: {},
-            width: 300,
-            height: 500
+            width: 320,
+            height: 400
         },
         {
             id: 'final-result',
             type: 'image',
-            position: { x: 1400, y: 500 },
+            position: { x: 1890, y: 400 },
             data: {
-                src: '',
-                alt: 'Final generated image'
+                output: { image: null },
+                input: { image: null }
             },
             width: 250,
             height: 200
@@ -138,43 +212,59 @@ Connect the nodes below to create your own image generation pipeline!`
             type: 'note',
             position: { x: 1400, y: 50 },
             data: {
-                markdown: `## 🔄 Workflow Pipeline
+                markdown: `## 🔄 Advanced AI Pipeline
 
-This demo creates a complete image generation and manipulation pipeline:
+This workflow demonstrates professional AI image processing:
 
-1. **Compose Prompt** → Combine text elements into sophisticated prompt
-2. **Load Images** → Import source and style reference images  
-3. **Style Transfer** → Apply artistic style from reference to source
-4. **Inpainting** → Fine-tune specific areas with AI inpainting
-5. **Final Result** → Display the processed composite image
+1. **Fetch URL** → Load image from web using official fetch node
+2. **Split Subject** → AI-powered foreground/background separation
+3. **Generate Background** → Create new backgrounds with diffusion AI
+4. **Smart Composite** → Intelligent blending with lighting/shadow matching
+5. **Save & Share** → Export to Google Drive and email delivery
 
-Try connecting different combinations to explore various creative possibilities!
+Each step uses state-of-the-art AI models for professional-quality results.
 
-**Pro Tip**: Use the style transfer node with different blend modes and the inpainting node to add specific elements or fix details.`
+**Features**: Semantic segmentation, diffusion generation, intelligent compositing, cloud integration.`
             },
             width: 350,
             height: 300
         }
     ]);
 
-    let edges = $state.raw<Edge[]>([
-        // Connect text inputs to prompt composer
-        { id: 'e1', source: 'base-prompt', target: 'prompt-composer', sourceHandle: 'content', targetHandle: 'basePrompt' },
-        { id: 'e2', source: 'style-modifiers', target: 'prompt-composer', sourceHandle: 'content', targetHandle: 'styleModifiers' },
-        { id: 'e3', source: 'quality-settings', target: 'prompt-composer', sourceHandle: 'content', targetHandle: 'qualitySettings' },
+    let edges = $state.raw<Edge[]>([]); // Start with empty edges
+    
+    // Define the edges that will be added after mount
+    const targetEdges: Edge[] = [
+        // Connect URL input to fetch node
+        { id: 'e1', source: 'image-url-input', target: 'fetch-url-node', sourceHandle: 'output', targetHandle: 'url' },
         
-        // Connect images to style transfer
-        { id: 'e4', source: 'source-image-loader', target: 'style-transfer', sourceHandle: 'imageData', targetHandle: 'sourceImage' },
-        { id: 'e5', source: 'style-reference-loader', target: 'style-transfer', sourceHandle: 'imageData', targetHandle: 'styleReference' },
-        { id: 'e6', source: 'prompt-composer', target: 'style-transfer', sourceHandle: 'composedPrompt', targetHandle: 'prompt' },
+        // Connect fetch to string converter
+        { id: 'e2', source: 'fetch-url-node', target: 'string-to-image-converter', sourceHandle: 'text', targetHandle: 'imageString' },
         
-        // Connect style transfer to inpainting
-        { id: 'e7', source: 'style-transfer', target: 'inpainting', sourceHandle: 'processedImage', targetHandle: 'sourceImage' },
-        { id: 'e8', source: 'prompt-composer', target: 'inpainting', sourceHandle: 'composedPrompt', targetHandle: 'inpaintPrompt' },
+        // Connect converter to image preview
+        { id: 'e3', source: 'string-to-image-converter', target: 'loaded-image-preview', sourceHandle: 'jimpImage', targetHandle: 'image' },
         
-        // Connect inpainting to final result
-        { id: 'e9', source: 'inpainting', target: 'final-result', sourceHandle: 'inpaintedImage', targetHandle: 'src' }
-    ]);
+        // Connect to foreground splitter
+        { id: 'e4', source: 'string-to-image-converter', target: 'foreground-splitter', sourceHandle: 'jimpImage', targetHandle: 'sourceImage' },
+        { id: 'e5', source: 'mask-prompt', target: 'foreground-splitter', sourceHandle: 'output', targetHandle: 'maskPrompt' },
+        
+        // Connect background prompt composition
+        { id: 'e6', source: 'background-style', target: 'prompt-template', sourceHandle: 'output', targetHandle: 'backgroundstyle' },
+        { id: 'e7', source: 'background-details', target: 'prompt-template', sourceHandle: 'output', targetHandle: 'backgrounddetails' },
+        { id: 'e8', source: 'quality-settings', target: 'prompt-template', sourceHandle: 'output', targetHandle: 'qualitysettings' },
+        
+        // Connect to background generator
+        { id: 'e9', source: 'prompt-template', target: 'background-generator', sourceHandle: 'output', targetHandle: 'backgroundPrompt' },
+        { id: 'e10', source: 'foreground-splitter', target: 'background-generator', sourceHandle: 'backgroundMask', targetHandle: 'backgroundMask' },
+        
+        // Connect to smart compositor
+        { id: 'e11', source: 'foreground-splitter', target: 'smart-compositor', sourceHandle: 'foregroundImage', targetHandle: 'foregroundImage' },
+        { id: 'e12', source: 'background-generator', target: 'smart-compositor', sourceHandle: 'generatedBackground', targetHandle: 'backgroundImage' },
+        { id: 'e13', source: 'composition-prompt', target: 'smart-compositor', sourceHandle: 'output', targetHandle: 'compositionPrompt' },
+        
+        // Connect to final result
+        { id: 'e14', source: 'smart-compositor', target: 'final-result', sourceHandle: 'compositeResult', targetHandle: 'image' }
+    ];
 
     const nodeTypes = {
         note: NoteNode,
@@ -182,16 +272,31 @@ Try connecting different combinations to explore various creative possibilities!
         image: ImageNode,
         html: HTMLRendererNode,
         textTemplate: TextTemplateFillinNode,
-        textEditor: TextEditorNode,
+        markdownTextEditor: TextEditorNode,
         textEditorRaw: RawTextEditor,
-        imagePromptComposer: ImagePromptComposer,
-        imageLoader: ImageLoader,
-        styleTransfer: StyleTransferNode,
-        inpainting: InpaintingNode
+        stringToImageConverter: StringToImageConverter,
+        foregroundSplitter: ForegroundSplitter,
+        backgroundGenerator: BackgroundGenerator,
+        smartCompositor: SmartCompositor,
+        compositeGenerator: CompositeGenerator
     };
 
     let colorMode: ColorMode = $state('light');
     let isProcessing = $state(false);
+    
+    const elk = new ELK();
+
+    const elkOptions = {
+        'elk.algorithm': 'layered',
+        'elk.direction': 'RIGHT',
+        'elk.layered.spacing.nodeNodeBetweenLayers': '120',
+        'elk.spacing.componentComponent': '80',
+        'elk.spacing.nodeNode': '100',
+        'elk.layered.nodePlacement.strategy': 'NETWORK_SIMPLEX',
+        'elk.layered.crossingMinimization.strategy': 'LAYER_SWEEP',
+        'elk.edgeRouting': 'ORTHOGONAL',
+        'elk.hierarchyHandling': 'INCLUDE_CHILDREN'
+    };
 
     function runWorkflow() {
         isProcessing = true;
@@ -215,6 +320,62 @@ Try connecting different combinations to explore various creative possibilities!
     function goBack() {
         window.location.href = '/app/demos';
     }
+
+    function getLayoutedElements(nodes: Node[], edges: Edge[], options = {}) {
+        const isHorizontal = options?.['elk.direction'] === 'RIGHT';
+        const graph = {
+            id: 'root',
+            layoutOptions: options,
+            children: nodes.map((node) => ({
+                ...node,
+                width: node.width || 200,
+                height: node.height || 150,
+                targetPosition: isHorizontal ? Position.Left : Position.Top,
+                sourcePosition: isHorizontal ? Position.Right : Position.Bottom,
+            })),
+            edges: edges.map((edge) => ({
+                ...edge,
+                source: edge.source,
+                target: edge.target,
+                sourcePort: edge.sourceHandle || 'default',
+                targetPort: edge.targetHandle || 'default',
+            })),
+        };
+
+        return elk
+            .layout(graph)
+            .then((layoutedGraph) => {
+                return {
+                    nodes: layoutedGraph.children.map((node) => ({
+                        ...node,
+                        position: { x: node.x, y: node.y },
+                    })),
+                    edges: layoutedGraph.edges,
+                };
+            })
+            .catch(console.error);
+    }
+
+    async function autoLayout() {
+        const layouted = await getLayoutedElements(nodes, edges, elkOptions);
+        if (layouted) {
+            nodes = layouted.nodes;
+            edges = [...edges]; // Trigger reactivity
+        }
+    }
+
+    // Auto-layout nodes on initial load and connect edges after delay
+    onMount(() => {
+        // Wait for TextTemplate nodes to generate their dynamic sockets
+        setTimeout(() => {
+            edges = targetEdges; // Add all the edges after template sockets are ready
+        }, 1000);
+        
+        // Auto-layout after edges are added
+        setTimeout(() => {
+            autoLayout();
+        }, 1200);
+    });
 </script>
 
 <div class="demo-container">
@@ -231,7 +392,7 @@ Try connecting different combinations to explore various creative possibilities!
         <MiniMap />
 
         <!-- Header Panel -->
-        <Panel position="top-center">
+        <Panel position="top-left">
             <div class="header-panel">
                 <div class="header-content">
                     <Logo size={2} />
@@ -274,6 +435,15 @@ Try connecting different combinations to explore various creative possibilities!
                 </button>
                 
                 <button 
+                    onclick={autoLayout}
+                    class="control-btn layout-btn"
+                    title="Auto Layout Nodes"
+                >
+                    <Layout class="btn-icon" />
+                    Auto Layout
+                </button>
+                
+                <button 
                     onclick={exportResult}
                     class="control-btn export-btn"
                     title="Export Result"
@@ -284,22 +454,17 @@ Try connecting different combinations to explore various creative possibilities!
             </div>
         </Panel>
 
-        <!-- Info Panel -->
-        <Panel position="bottom-left">
-            <div class="info-panel">
-                <div class="info-content">
-                    <h3>🎯 Quick Start</h3>
-                    <ol>
-                        <li>Upload images using the Image Loader nodes</li>
-                        <li>Modify the text prompts to customize the generation</li>
-                        <li>Adjust parameters in the Style Transfer and Inpainting nodes</li>
-                        <li>Click "Run Workflow" to process the complete pipeline</li>
-                        <li>View the final result in the Image node</li>
-                    </ol>
-                </div>
-            </div>
-        </Panel>
     </SvelteFlow>
+
+    <!-- Email Signup -->
+    <div class="email-signup-container">
+        <EmailSignup 
+            title="Get Early Access"
+            subtitle="Be the first to access our advanced AI image tools"
+            buttonText="Join Waitlist"
+            scale={0.8}
+        />
+    </div>
 </div>
 
 <style>
@@ -414,6 +579,15 @@ Try connecting different combinations to explore various creative possibilities!
         color: white;
     }
 
+    .layout-btn {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        color: white;
+    }
+
+    .layout-btn:hover:not(:disabled) {
+        background: linear-gradient(135deg, #d97706, #b45309);
+    }
+
     .export-btn:hover:not(:disabled) {
         background: linear-gradient(135deg, #7c3aed, #6d28d9);
     }
@@ -457,6 +631,15 @@ Try connecting different combinations to explore various creative possibilities!
         50% { opacity: 0.8; }
     }
 
+    .email-signup-container {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000;
+        transform: scale(0.8);
+        transform-origin: bottom right;
+    }
+
     @media (max-width: 768px) {
         .controls-panel {
             flex-direction: column;
@@ -468,6 +651,12 @@ Try connecting different combinations to explore various creative possibilities!
         
         .info-panel {
             max-width: 250px;
+        }
+
+        .email-signup-container {
+            bottom: 10px;
+            right: 10px;
+            transform: scale(0.7);
         }
     }
 </style>

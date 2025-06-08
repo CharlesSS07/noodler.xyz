@@ -118,7 +118,7 @@
     const nodeDescription = "Apply artistic style transfer to images using AI diffusion models";
 </script>
 
-<NodeWrapper title={nodeTitle} description={nodeDescription}>
+<NodeWrapper title={nodeTitle} description={nodeDescription} label="Style Transfer">
     <!-- Input Sockets -->
     <SocketStem 
         type="target"
