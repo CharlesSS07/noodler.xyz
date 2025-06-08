@@ -25,9 +25,13 @@
     import {onMount} from "svelte";
     import Logo from "../../components/Logo.svelte";
     import NodeSearch from "./NodeSearch.svelte";
-    import { Plus, Play } from "lucide-svelte";
+    import { Plus, Play, X, ChevronDown } from "lucide-svelte";
     import {projectState, projectActions, projectSync} from "$lib/stores/ProjectState";
     import { FirestoreNodeBluePrintController } from "../../routes/app/lib/FirestoreNodeBluePrint";
+    import { executeFlowGraph } from "../../routes/app/lib/Interpreter";
+    
+    // Import the existing nodes
+    import CompleteTextLLM from "../../routes/app/nodes/huggingface/CompleteTextLLM.svelte";
 
     let nodes = $state.raw<Node[]>([]);
 
@@ -202,7 +206,8 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
         html: HTMLRendererNode,
         textTemplate: TextTemplateFillinNode,
         textEditor: TextEditorNode,
-        textEditorRaw: RawTextEditor
+        textEditorRaw: RawTextEditor,
+        huggingfaceLLM: CompleteTextLLM
     };
 
     let selectedNodeNID = $state('official_node_fetch_url');
@@ -212,6 +217,79 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
     let showNodeSearch = $state(false);
     let searchPosition = $state({ x: 0, y: 0 });
     let flowContainer: HTMLDivElement;
+
+    // Execution state
+    let isExecuting = $state(false);
+    let showExecutionPanel = $state(false);
+    let executionLogs = $state<string[]>([]);
+    let selectedExecutionNode = $state<string | null>(null);
+
+    // Dropdown state
+    let showNodeDropdown = $state(false);
+
+    // Available node types for dropdown
+    const availableNodes = [
+        {
+            id: 'note',
+            type: 'note',
+            title: 'Note',
+            description: 'Markdown note with editing capabilities',
+            category: 'Basic',
+            defaultData: { markdown: '# New Note\n\nWrite your markdown here...' }
+        },
+        {
+            id: 'textEditorRaw',
+            type: 'textEditorRaw',
+            title: 'Raw Text Editor',
+            description: 'Simple text input/output editor',
+            category: 'Text',
+            defaultData: { 
+                input: { text: '' }, 
+                currentText: 'Enter text here...', 
+                output: { text: '' } 
+            }
+        },
+        {
+            id: 'textEditor',
+            type: 'textEditor',
+            title: 'Text Editor',
+            description: 'Advanced text editor with formatting',
+            category: 'Text',
+            defaultData: { content: '' }
+        },
+        {
+            id: 'textTemplate',
+            type: 'textTemplate',
+            title: 'Text Template',
+            description: 'Template with variable substitution',
+            category: 'Text',
+            defaultData: { template: 'Hello @name!', variables: {} }
+        },
+        {
+            id: 'html',
+            type: 'html',
+            title: 'HTML Renderer',
+            description: 'Renders HTML content in iframe',
+            category: 'Display',
+            defaultData: { input: { html: '' } }
+        },
+        {
+            id: 'image',
+            type: 'image',
+            title: 'Image',
+            description: 'Image display and processing',
+            category: 'Media',
+            defaultData: { src: '', alt: 'Image' }
+        },
+        {
+            id: 'huggingfaceLLM',
+            type: 'huggingfaceLLM',
+            title: 'HuggingFace LLM',
+            description: 'Text completion using HuggingFace models',
+            category: 'AI',
+            defaultData: { input: '', output: '', model: 'gpt2' }
+        }
+    ];
 
     // Node search functions
     function openNodeSearch(event?: KeyboardEvent | MouseEvent): void {
@@ -263,6 +341,22 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
         } else if (event.key === 'Tab' && !event.shiftKey) {
             event.preventDefault();
             openNodeSearch(event);
+        } else if (event.key === 'Escape') {
+            showNodeDropdown = false;
+            showNodeSearch = false;
+        }
+    }
+
+    // Handle click outside to close dropdown
+    function handleClickOutside(event: MouseEvent): void {
+        if (showNodeDropdown) {
+            const target = event.target as HTMLElement;
+            const dropdownButton = target.closest('.dropdown-btn');
+            const dropdownMenu = target.closest('.dropdown-menu');
+            
+            if (!dropdownButton && !dropdownMenu) {
+                showNodeDropdown = false;
+            }
         }
     }
 
@@ -310,6 +404,82 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
         addEdge(newEdge);
     }
 
+    // Execution functions
+    async function executeFromNode(nodeId: string): Promise<void> {
+        if (isExecuting) return;
+        
+        isExecuting = true;
+        showExecutionPanel = true;
+        selectedExecutionNode = nodeId;
+        executionLogs = [`Starting execution from node: ${nodeId}`];
+        
+        try {
+            // Capture console.log for execution logs
+            const originalLog = console.log;
+            console.log = (...args: any[]) => {
+                executionLogs = [...executionLogs, args.join(' ')];
+                originalLog(...args);
+            };
+            
+            await executeFlowGraph(nodeId, nodes, edges);
+            
+            // Restore original console.log
+            console.log = originalLog;
+            
+            executionLogs = [...executionLogs, `✅ Execution completed successfully`];
+        } catch (error) {
+            console.error('Execution failed:', error);
+            executionLogs = [...executionLogs, `❌ Execution failed: ${error}`];
+        } finally {
+            isExecuting = false;
+        }
+    }
+
+    function executeFromSelectedNode(): void {
+        const selectedNodes = nodes.filter(node => node.selected);
+        if (selectedNodes.length === 1) {
+            executeFromNode(selectedNodes[0].id);
+        } else if (selectedNodes.length === 0) {
+            alert('Please select a node to execute from');
+        } else {
+            alert('Please select only one node to execute from');
+        }
+    }
+
+    function clearExecutionLogs(): void {
+        executionLogs = [];
+        showExecutionPanel = false;
+        selectedExecutionNode = null;
+    }
+
+    // Dropdown functions
+    function addNodeFromDropdown(nodeConfig: typeof availableNodes[0]): void {
+        const newNode: Node = {
+            id: `${nodeConfig.id}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            type: nodeConfig.type,
+            position: {
+                x: Math.random() * 400 + 100, // Random position
+                y: Math.random() * 400 + 100
+            },
+            data: nodeConfig.defaultData
+        };
+
+        addNode(newNode, newNode.id);
+        showNodeDropdown = false;
+    }
+
+    // Group nodes by category for dropdown
+    const nodesByCategory = $derived(() => {
+        const grouped: Record<string, typeof availableNodes> = {};
+        availableNodes.forEach(node => {
+            if (!grouped[node.category]) {
+                grouped[node.category] = [];
+            }
+            grouped[node.category].push(node);
+        });
+        return grouped;
+    });
+
     onMount(() => {
         auth.authStateReady().then(() => {
             setTimeout(() => {
@@ -329,7 +499,7 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
 </script>
 
 
-<svelte:window onkeydown={handleKeydown} />
+<svelte:window onkeydown={handleKeydown} onclick={handleClickOutside} />
 
 <div class="flowgraph-container" bind:this={flowContainer}>
     <SvelteFlow
@@ -364,15 +534,70 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
         <Panel position="top-right">
             <div class="controls-panel">
                 <button
+                    onclick={executeFromSelectedNode}
+                    class="control-btn execution-btn"
+                    class:executing={isExecuting}
+                    disabled={isExecuting}
+                    title="Execute from selected node"
+                >
+                    <Play class="w-4 h-4" />
+                    {isExecuting ? 'Executing...' : 'Execute'}
+                </button>
+                
+                <!-- Node Dropdown -->
+                <div class="relative">
+                    <button
+                        onclick={() => showNodeDropdown = !showNodeDropdown}
+                        class="control-btn dropdown-btn"
+                        title="Add existing node types"
+                    >
+                        <Plus class="w-4 h-4" />
+                        Node Types
+                        <ChevronDown class="w-3 h-3 ml-1" />
+                    </button>
+                    
+                    {#if showNodeDropdown}
+                        <div class="dropdown-menu">
+                            {#each Object.entries(nodesByCategory()) as [category, nodes]}
+                                <div class="dropdown-category">
+                                    <div class="category-header">{category}</div>
+                                    {#each nodes as node}
+                                        <button
+                                            onclick={() => addNodeFromDropdown(node)}
+                                            class="dropdown-item"
+                                            title={node.description}
+                                        >
+                                            <span class="node-title">{node.title}</span>
+                                            <span class="node-description">{node.description}</span>
+                                        </button>
+                                    {/each}
+                                </div>
+                            {/each}
+                        </div>
+                    {/if}
+                </div>
+                
+                <button
                     onclick={() => {
                         openNodeSearch();
                     }}
                     class="control-btn"
-                    title="Add Node (Tab)"
+                    title="Search all nodes (Tab)"
                 >
                     <Plus class="w-4 h-4" />
-                    Add Node
+                    Search Nodes
                 </button>
+                
+                {#if showExecutionPanel}
+                    <button
+                        onclick={clearExecutionLogs}
+                        class="control-btn clear-btn"
+                        title="Clear execution logs"
+                    >
+                        <X class="w-4 h-4" />
+                        Clear
+                    </button>
+                {/if}
             </div>
         </Panel>
     </SvelteFlow>
@@ -384,6 +609,45 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
         on:nodeSelected={handleNodeSelected}
         on:close={() => showNodeSearch = false}
     />
+
+    <!-- Execution Panel -->
+    {#if showExecutionPanel}
+        <div class="execution-panel">
+            <div class="execution-header">
+                <h3>Flow Execution</h3>
+                <button class="close-btn" onclick={() => showExecutionPanel = false}>
+                    <X class="w-4 h-4" />
+                </button>
+            </div>
+            <div class="execution-content">
+                <div class="logs-section">
+                    <h4>Execution Logs:</h4>
+                    <div class="logs">
+                        {#each executionLogs as log}
+                            <div class="log-entry">{log}</div>
+                        {/each}
+                        {#if executionLogs.length === 0}
+                            <div class="log-entry">No logs yet...</div>
+                        {/if}
+                    </div>
+                </div>
+                
+                {#if selectedExecutionNode}
+                    <div class="results-section">
+                        <h4>Execution Status:</h4>
+                        <div class="results">
+                            <div class="result-entry">
+                                <span>Target Node: {selectedExecutionNode}</span>
+                                <span class="status" class:executing={isExecuting} class:completed={!isExecuting}>
+                                    {isExecuting ? 'Running' : 'Completed'}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                {/if}
+            </div>
+        </div>
+    {/if}
 </div>
 
 <style>
@@ -584,5 +848,85 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
         50% {
             opacity: 0.7;
         }
+    }
+
+    /* Dropdown styles */
+    .dropdown-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .dropdown-btn :global(.rotate180) {
+        transform: rotate(180deg);
+        transition: transform 0.2s ease;
+    }
+
+    .dropdown-menu {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        min-width: 280px;
+        max-height: 400px;
+        overflow-y: auto;
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        z-index: 1000;
+        margin-top: 0.25rem;
+    }
+
+    .dropdown-category {
+        border-bottom: 1px solid #f3f4f6;
+    }
+
+    .dropdown-category:last-child {
+        border-bottom: none;
+    }
+
+    .category-header {
+        padding: 0.75rem 1rem;
+        background: #f9fafb;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #6b7280;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .dropdown-item {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        text-align: left;
+        background: none;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.15s ease;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .dropdown-item:hover {
+        background: #f3f4f6;
+    }
+
+    .node-title {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #374151;
+    }
+
+    .node-description {
+        font-size: 0.75rem;
+        color: #6b7280;
+        line-height: 1.3;
+    }
+
+    .relative {
+        position: relative;
     }
 </style>
