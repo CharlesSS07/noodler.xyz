@@ -27,7 +27,6 @@
     import NodeSearch from "./NodeSearch.svelte";
     import { Plus, Play } from "lucide-svelte";
     import {projectState, projectActions, projectSync} from "$lib/stores/ProjectState";
-    import { DecentralizedFlowInterpreter } from "../../routes/app/lib/Interpreter";
     import { FirestoreNodeBluePrintController } from "../../routes/app/lib/FirestoreNodeBluePrint";
 
     let nodes = $state.raw<Node[]>([]);
@@ -214,12 +213,6 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
     let searchPosition = $state({ x: 0, y: 0 });
     let flowContainer: HTMLDivElement;
 
-    // Execution state
-    let executionInterpreter: DecentralizedFlowInterpreter | null = null;
-    let isExecuting = $state(false);
-    let executionResults = $state<Record<string, any>>({});
-    let executionLogs = $state<string[]>([]);
-
     // Node search functions
     function openNodeSearch(event?: KeyboardEvent | MouseEvent): void {
         console.log('openNodeSearch called');
@@ -317,151 +310,6 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
         addEdge(newEdge);
     }
 
-    // Execution functions
-    async function getFirestoreNodeBlueprint(nodeId: string, nodeData: any): Promise<FirestoreNodeBluePrintController | null> {
-        try {
-            // Get the node blueprint ID from the node data
-            const blueprintId = nodeData.nid || nodeId;
-            
-            // Create a controller for this blueprint
-            const controller = new FirestoreNodeBluePrintController(blueprintId);
-            
-            // Test if the blueprint exists by trying to get its title
-            try {
-                await controller.getTitle();
-                return controller;
-            } catch (error) {
-                console.warn(`Blueprint not found for ${blueprintId}, creating fallback`);
-                return null;
-            }
-        } catch (error) {
-            console.error(`Error getting Firestore blueprint for ${nodeId}:`, error);
-            return null;
-        }
-    }
-
-    function createFallbackNodeBlueprint(nodeId: string, nodeData: any) {
-        return {
-            nid: nodeId,
-            async call(inputs: Map<string, unknown>, outputs: any): Promise<void> {
-                executionLogs = [...executionLogs, `Executing fallback node ${nodeId} with inputs: ${JSON.stringify(Object.fromEntries(inputs))}`];
-                
-                // Simple fallback execution - just pass through or echo
-                const inputEntries = Object.fromEntries(inputs);
-                
-                if (Object.keys(inputEntries).length > 0) {
-                    // If there are inputs, pass the first one as output
-                    const firstValue = Object.values(inputEntries)[0];
-                    await outputs.set('result', firstValue);
-                } else {
-                    // No inputs, return a simple result
-                    await outputs.set('result', `Fallback result from ${nodeId}`);
-                }
-                
-                executionLogs = [...executionLogs, `Fallback node ${nodeId} completed execution`];
-            },
-            async spinOffNode(): Promise<any> { throw new Error('Not implemented'); },
-            async newInputSocket(): Promise<void> { throw new Error('Not implemented'); },
-            async getInputSocketKeysInOrder(): Promise<Array<string>> { return Object.keys(nodeData.inputSockets || {}); },
-            async newOutputSocket(): Promise<void> { throw new Error('Not implemented'); },
-            async getOutputSocketKeysInOrder(): Promise<string[]> { return Object.keys(nodeData.outputSockets || {}); },
-            async setDocumentation(): Promise<void> { throw new Error('Not implemented'); },
-            async getDocumentation(): Promise<string> { return ''; },
-            async setTitle(): Promise<void> { throw new Error('Not implemented'); },
-            async getTitle(): Promise<string> { return nodeData.title || ''; },
-            async setCode(): Promise<void> { throw new Error('Not implemented'); },
-            async getCode(): Promise<string> { return ''; },
-            async markAsUpdated(): Promise<void> { throw new Error('Not implemented'); },
-            async getLastUpdatedTimestamp(): Promise<Date> { return new Date(); },
-            async bumpVersion(): Promise<void> { throw new Error('Not implemented'); },
-            async getVersion(): Promise<number> { return 1; },
-            async updated(): Promise<void> { throw new Error('Not implemented'); }
-        };
-    }
-
-    async function testExecution(): Promise<void> {
-        if (isExecuting) return;
-        
-        isExecuting = true;
-        executionLogs = ['Starting execution test...'];
-        executionResults = {};
-        
-        try {
-            // Create Firestore node blueprints for all nodes
-            const nodeBlueprints = new Map();
-            executionLogs = [...executionLogs, 'Loading node blueprints from Firestore...'];
-            
-            for (const node of nodes) {
-                try {
-                    const firestoreBlueprint = await getFirestoreNodeBlueprint(node.id, node.data);
-                    if (firestoreBlueprint) {
-                        nodeBlueprints.set(node.id, firestoreBlueprint);
-                        executionLogs = [...executionLogs, `Loaded Firestore blueprint for ${node.id}`];
-                    } else {
-                        const fallbackBlueprint = createFallbackNodeBlueprint(node.id, node.data);
-                        nodeBlueprints.set(node.id, fallbackBlueprint);
-                        executionLogs = [...executionLogs, `Using fallback blueprint for ${node.id}`];
-                    }
-                } catch (error) {
-                    console.error(`Error loading blueprint for ${node.id}:`, error);
-                    const fallbackBlueprint = createFallbackNodeBlueprint(node.id, node.data);
-                    nodeBlueprints.set(node.id, fallbackBlueprint);
-                    executionLogs = [...executionLogs, `Error loading ${node.id}, using fallback`];
-                }
-            }
-            
-            // Initialize the interpreter
-            executionInterpreter = new DecentralizedFlowInterpreter();
-            
-            // Add execution listener to track progress
-            executionInterpreter.addExecutionListener((nodeId, status) => {
-                executionLogs = [...executionLogs, `Node ${nodeId}: ${status}`];
-                
-                if (status === 'completed') {
-                    const result = executionInterpreter?.getNodeExecutionStatus(nodeId);
-                    if (result) {
-                        executionResults = { ...executionResults, [nodeId]: result };
-                    }
-                }
-            });
-            
-            // Initialize the flow
-            executionInterpreter.initializeFlow(nodes, edges, nodeBlueprints);
-            
-            // Find start nodes (nodes with no incoming edges)
-            const targetNodes = new Set(edges.map(edge => edge.target));
-            const startNodes = nodes
-                .filter(node => !targetNodes.has(node.id))
-                .map(node => node.id);
-            
-            if (startNodes.length === 0) {
-                // If no clear start nodes, use all nodes
-                startNodes.push(...nodes.map(node => node.id));
-            }
-            
-            executionLogs = [...executionLogs, `Starting execution with nodes: ${startNodes.join(', ')}`];
-            
-            // Start execution
-            await executionInterpreter.startExecution(startNodes);
-            
-            executionLogs = [...executionLogs, 'Execution completed successfully!'];
-            
-        } catch (error) {
-            console.error('Execution error:', error);
-            executionLogs = [...executionLogs, `Execution error: ${error.message}`];
-        } finally {
-            isExecuting = false;
-        }
-    }
-
-    function clearExecutionResults(): void {
-        executionLogs = [];
-        executionResults = {};
-        if (executionInterpreter) {
-            executionInterpreter.reset();
-        }
-    }
-
     onMount(() => {
         auth.authStateReady().then(() => {
             setTimeout(() => {
@@ -525,27 +373,6 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
                     <Plus class="w-4 h-4" />
                     Add Node
                 </button>
-                
-                <button
-                    onclick={testExecution}
-                    class="control-btn execution-btn"
-                    class:executing={isExecuting}
-                    disabled={isExecuting || nodes.length === 0}
-                    title="Test Execution"
-                >
-                    <Play class="w-4 h-4" />
-                    {isExecuting ? 'Executing...' : 'Test Flow'}
-                </button>
-                
-                {#if executionLogs.length > 0}
-                    <button
-                        onclick={clearExecutionResults}
-                        class="control-btn clear-btn"
-                        title="Clear Results"
-                    >
-                        Clear
-                    </button>
-                {/if}
             </div>
         </Panel>
     </SvelteFlow>
@@ -557,43 +384,6 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
         on:nodeSelected={handleNodeSelected}
         on:close={() => showNodeSearch = false}
     />
-
-    <!-- Execution Results Panel -->
-    {#if executionLogs.length > 0}
-        <div class="execution-panel">
-            <div class="execution-header">
-                <h3>Execution Results</h3>
-                <button onclick={clearExecutionResults} class="close-btn">×</button>
-            </div>
-            
-            <div class="execution-content">
-                <div class="logs-section">
-                    <h4>Execution Log:</h4>
-                    <div class="logs">
-                        {#each executionLogs as log}
-                            <div class="log-entry">{log}</div>
-                        {/each}
-                    </div>
-                </div>
-                
-                {#if Object.keys(executionResults).length > 0}
-                    <div class="results-section">
-                        <h4>Node Status:</h4>
-                        <div class="results">
-                            {#each Object.entries(executionResults) as [nodeId, result]}
-                                <div class="result-entry">
-                                    <strong>{nodeId}:</strong>
-                                    <span class="status" class:completed={result.isCompleted} class:executing={result.isExecuting}>
-                                        {result.isCompleted ? 'Completed' : result.isExecuting ? 'Executing' : 'Pending'}
-                                    </span>
-                                </div>
-                            {/each}
-                        </div>
-                    </div>
-                {/if}
-            </div>
-        </div>
-    {/if}
 </div>
 
 <style>

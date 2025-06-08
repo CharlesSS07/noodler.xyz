@@ -77,8 +77,8 @@
 
     // Handle input image changes (from connected nodes)
     $effect(() => {
-        if (data.input.image) {
-            inputImage = data.input.image;
+        if (data.input?.image) {
+            inputImage = data.input?.image;
             // Pass through the input image
             data.output.image = inputImage;
         } else {

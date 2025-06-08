@@ -359,8 +359,7 @@ projectState.subscribe(state => {
             console.log('Skipping auto-save - initial load not complete yet');
             return;
         }
-        
-        
+
         console.log('Project is dirty, scheduling auto-save...', { 
             nodes: state.nodes.length, 
             edges: state.edges.length 
@@ -371,28 +370,16 @@ projectState.subscribe(state => {
             clearTimeout(saveTimeout);
         }
 
-        let debounce = true;
+        // Use shorter timeout for critical changes
+        const debounceTime = 50;
 
-        if (debounce) {
-            // Use shorter timeout for critical changes
-            const debounceTime = 50;
-            
-            // Set new timeout for auto-save
-            saveTimeout = setTimeout(() => {
-                console.log('Auto-saving project...', { 
-                    nodes: state.nodes.length, 
-                    edges: state.edges.length 
-                });
-                projectSync.saveProject().catch(console.error);
-            }, debounceTime);
-        } else {
-            console.log('Auto-saving project...', { 
-                nodes: state.nodes.length, 
-                edges: state.edges.length 
+        // Set new timeout for auto-save
+        saveTimeout = setTimeout(() => {
+            console.log('Auto-saving project...', {
+                nodes: state.nodes.length,
+                edges: state.edges.length
             });
             projectSync.saveProject().catch(console.error);
-        }
-        
-
+        }, debounceTime);
     }
 });
