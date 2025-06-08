@@ -1,7 +1,7 @@
 <script lang="ts">
     import { onMount } from 'svelte';
     import Logo from '../../../components/Logo.svelte';
-    import { Play, Image, MessageSquare, Wand2, Sparkles } from 'lucide-svelte';
+    import { Play, Image, MessageSquare, Wand2, Sparkles, Globe } from 'lucide-svelte';
 
     interface Demo {
         id: string;
@@ -42,6 +42,21 @@
                 'Style transfer & modifications',
                 'Inpainting & outpainting',
                 'Batch processing workflows'
+            ]
+        },
+        {
+            id: 'webdev',
+            title: 'AI Website Builder',
+            description: 'Complete webpage composition with AI-generated content, HTML components, and professional layouts.',
+            icon: Globe,
+            path: '/app/demos/webdev',
+            status: 'active',
+            features: [
+                'AI content generation',
+                'Modular HTML components',
+                'Dynamic navbar creation',
+                'Complete page assembly',
+                'Professional website structure'
             ]
         },
         {

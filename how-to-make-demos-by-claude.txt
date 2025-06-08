@@ -1,0 +1,140 @@
+# How to Make Demos by Claude
+
+## Demo Creation Guidelines
+
+### 1. Demo Structure
+- Create demo folder: `src/routes/app/demos/{demo-name}/+page.svelte`
+- Use SvelteFlow as the main component with standard imports
+- Include control panels (header, controls, info) for professional UI
+- Add EmailSignup component for user engagement
+
+### 2. Node Architecture Patterns
+
+#### Official Nodes
+- Use existing nodes when possible: `type: 'node'` with `nid: 'node_name'`
+- Common official nodes: `fetch_url`, `image_loader`, `text_editor`
+- Data structure: `{ nid: 'node_name', input: {}, output: {} }`
+
+#### Custom Dummy Nodes
+- Create in `src/routes/app/demos/dummynodes/`
+- Follow naming: `{NodeName}.svelte`
+- Use proper TypeScript types with script module pattern:
+  ```typescript
+  <script module lang="ts">
+    export type NodeNameType = Node<{
+      input: { ... };
+      output: { ... };
+    }, 'node-type'>;
+  </script>
+  ```
+
+#### RawTextEditor Pattern
+- Data structure: `{ input: { text: '' }, currentText: 'content', output: { text: '' } }`
+- Handle IDs: `input` (target), `output` (source)
+- Use for user-editable text inputs
+
+#### TextTemplate Pattern  
+- Dynamic socket generation based on template variables
+- Template: `'Text with @variable placeholders'`
+- Variable names become target handle IDs
+- Output handle: `output`
+
+#### Image Nodes
+- Use proper data types: `image/jimp` or `image/base64`
+- ImageNode handles: `image` (target), `output` (source)
+- Always include Jimp imports for image processing
+
+### 3. Edge Connection Rules
+
+#### Handle ID Mapping
+- **RawTextEditor**: `output` (source), `input` (target)
+- **TextTemplate**: variable names (targets), `output` (source)  
+- **ImageNode**: `image` (target), `output` (source)
+- **Official nodes**: Check existing implementations for handle names
+- **Custom nodes**: Use `socket_id` from SocketStem components
+
+#### Edge Timing Issues
+- TextTemplate generates dynamic sockets after mount
+- Use delayed edge loading pattern:
+  ```javascript
+  let edges = $state.raw<Edge[]>([]);
+  const targetEdges: Edge[] = [...];
+  
+  onMount(() => {
+    setTimeout(() => {
+      edges = targetEdges;
+    }, 1000);
+  });
+  ```
+
+### 4. Data Type Standards
+- **Images**: Use `image/jimp` for processing, `image/base64` for display
+- **Text**: Use `string` type consistently
+- **Objects**: Use `object` for complex data structures
+- **Socket Types**: Must match between connected nodes
+
+### 5. Node Wrapper Requirements
+- Always include `label` prop: `<NodeWrapper label="Node Name">`
+- Provide meaningful `title` and `description`
+- Use proper socket structure with SocketStem components
+
+### 6. ELK.js Auto-Layout
+- Import ELK and Position from respective packages
+- Define elkOptions with proper spacing and direction
+- Create getLayoutedElements function for graph layout
+- Add auto-layout button and onMount initialization
+
+### 7. Demo Content Guidelines
+- Create realistic, educational workflows
+- Use creative examples that showcase platform capabilities
+- Include processing animations and status indicators
+- Provide helpful info panels with quick start guides
+
+### 8. Common Patterns
+
+#### Mock Processing
+- Add realistic delays with setTimeout
+- Show progress indicators and status changes
+- Create visually interesting mock outputs
+- Include error handling states
+
+#### Edge Data Flow
+- URL Input → Fetch → Convert → Process → Display
+- Text Components → Template → LLM → Format → Render
+- User Input → Validation → Processing → Output → Actions
+
+#### UI Consistency
+- Use gradient backgrounds and glassmorphism effects
+- Include control buttons (Run, Reset, Export, Back)
+- Maintain consistent spacing and typography
+- Add responsive design considerations
+
+### 9. Testing Checklist
+- [ ] All nodes display proper labels
+- [ ] Edges connect without handle errors  
+- [ ] Text content appears in RawTextEditor nodes
+- [ ] Template variables generate correct sockets
+- [ ] Image data flows through proper types
+- [ ] Auto-layout positions nodes correctly
+- [ ] Control buttons function properly
+- [ ] EmailSignup component renders
+- [ ] Mobile responsiveness works
+
+### 10. File Organization
+```
+demos/
+├── {demo-name}/
+│   └── +page.svelte
+├── dummynodes/
+│   ├── {NodeName}.svelte
+│   └── ...
+└── +page.svelte (index)
+```
+
+## Key Lessons Learned
+1. Always match edge handle IDs exactly to node socket IDs
+2. Use delayed edge loading for dynamic socket generation
+3. Follow proper data type conventions (image/jimp, not generic 'image')
+4. Implement realistic processing simulations with status indicators
+5. Include proper error handling and user feedback
+6. Maintain consistent UI patterns across all demos
