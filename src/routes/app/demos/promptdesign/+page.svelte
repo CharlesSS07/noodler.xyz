@@ -173,15 +173,16 @@
 <div style="height: 100vh;">
 <!--    <button on:click={() => {console.log(nodes, edges);}}>Print Node State</button>-->
     <SvelteFlow bind:nodes bind:edges {nodeTypes} {colorMode} fitView bind:this={svelteFlowInstance}>
-        <Logo></Logo>
         <Controls/>
         <Background variant={BackgroundVariant.Dots}/>
         <MiniMap/>
 
         <!-- Header Panel -->
-        <Panel position="top-center">
+        <Panel position="top-left">
             <div class="header-panel">
                 <div class="header-content">
+                    <Logo></Logo>
+
                     <h1>Prompt Design Studio</h1>
                     <p>Visual prompt engineering and template composition</p>
                 </div>
@@ -204,7 +205,7 @@
                     onclick={runWorkflow}
                     class="control-btn run-btn"
                     class:processing={isProcessing}
-                    disabled={isProcessing}
+                    disabled={true || isProcessing}
                     title="Run Complete Workflow"
                 >
                     <Play class="btn-icon" />
@@ -219,36 +220,17 @@
                     <RefreshCw class="btn-icon" />
                     Reset
                 </button>
-                
-                <button 
-                    onclick={exportResult}
-                    class="control-btn export-btn"
-                    title="Export Result"
-                >
-                    <Download class="btn-icon" />
-                    Export
-                </button>
-            </div>
-        </Panel>
-
-        <!-- Info Panel -->
-        <Panel position="bottom-left">
-            <div class="info-panel">
-                <div class="info-content">
-                    <h3>🎯 Quick Start</h3>
-                    <ol>
-                        <li>Edit text inputs to customize prompt components</li>
-                        <li>Watch the template engine combine elements</li>
-                        <li>Adjust LLM transformation parameters</li>
-                        <li>Click "Run Workflow" to process the pipeline</li>
-                        <li>View the optimized prompt results</li>
-                    </ol>
-                </div>
             </div>
         </Panel>
     </SvelteFlow>
-    <div style="position: fixed;top: 0;left: 0;scale: 0.5">
-        <EmailSignup></EmailSignup>
+
+    <!-- Email Signup -->
+    <div class="email-signup-container">
+        <EmailSignup
+                title="Get Early Access"
+                subtitle="Be the first to access our prompt design tools"
+                buttonText="Join Waitlist"
+        />
     </div>
 </div>
 
@@ -260,6 +242,15 @@
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         backdrop-filter: blur(10px);
         border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .email-signup-container {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000;
+        transform: scale(0.8);
+        transform-origin: bottom right;
     }
 
     .header-content {

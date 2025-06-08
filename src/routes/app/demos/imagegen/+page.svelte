@@ -418,7 +418,7 @@ Each step uses state-of-the-art AI models for professional-quality results.
                     onclick={runWorkflow}
                     class="control-btn run-btn"
                     class:processing={isProcessing}
-                    disabled={isProcessing}
+                    disabled={true || isProcessing}
                     title="Run Complete Workflow"
                 >
                     <Play class="btn-icon" />
@@ -442,15 +442,7 @@ Each step uses state-of-the-art AI models for professional-quality results.
                     <Layout class="btn-icon" />
                     Auto Layout
                 </button>
-                
-                <button 
-                    onclick={exportResult}
-                    class="control-btn export-btn"
-                    title="Export Result"
-                >
-                    <Download class="btn-icon" />
-                    Export
-                </button>
+
             </div>
         </Panel>
 
@@ -462,7 +454,6 @@ Each step uses state-of-the-art AI models for professional-quality results.
             title="Get Early Access"
             subtitle="Be the first to access our advanced AI image tools"
             buttonText="Join Waitlist"
-            scale={0.8}
         />
     </div>
 </div>

@@ -352,8 +352,12 @@
 	</div>
 
 	<!-- Email Signup -->
-	<div class="signup-section">
-		<EmailSignup />
+	<div class="email-signup-container">
+		<EmailSignup
+				title="Get Early Access"
+				subtitle="Be the first to access our prompt design tools"
+				buttonText="Join Waitlist"
+		/>
 	</div>
 </div>
 
@@ -372,6 +376,15 @@
 		border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 		padding: 1rem 2rem;
 		z-index: 10;
+	}
+
+	.email-signup-container {
+		position: fixed;
+		bottom: 20px;
+		right: 20px;
+		z-index: 1000;
+		transform: scale(0.8);
+		transform-origin: bottom right;
 	}
 
 	.header-content {
