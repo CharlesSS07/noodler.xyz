@@ -25,6 +25,7 @@
     import {edgesVersion2, nodesVersion0, nodesVersion2} from "./projectVersions";
     import Logo from "../../../../components/Logo.svelte";
     import EmailSignup from "../../../../components/EmailSignup.svelte";
+    import BugReportButton from "../../../../components/BugReportButton.svelte";
     import { Play, RefreshCw, Download, ArrowLeft } from "lucide-svelte";
     import { Panel } from "@xyflow/svelte";
 
@@ -192,6 +193,8 @@
         <!-- Control Panel -->
         <Panel position="top-right">
             <div class="controls-panel">
+                <BugReportButton size="md" />
+                
                 <button 
                     onclick={goBack}
                     class="control-btn back-btn"

@@ -6,48 +6,11 @@ import type {
 } from './SocketModels.js';
 import {OutputSocketAsyncReturner} from "./Interpreter";
 
-// to claude: the comments here are just thoughts. please do not change anything here (ask if it seems pertinent to your task at hand). just focus on the spec data you need.
-export interface NodeBluePrintModel {
-    readonly nid: string; // should now be dynamically generated {node_id}/{user_id}/{created_at: second in epoch}/{all the data}
-    readonly predecessor_node: string; // reference to another node
-    version: number; // should no longer be needed
-    title: string;
-    author_uid: string; // should be dynamically filled in
-
-    last_updated_at: Date; // should no longer be needed
-    created_at: Date; // should be dynamically filled in
-
-    // everything after here is the data of the blueprint
-    documentation: string;
-
-    input_sockets: { [socket_key: SocketID]: InputSocketModel<never> }; // this is set once. the only way to change it is to derive a new node and alter that
-    input_socket_order: SocketID[]; // this can easily be reshuffled in any manner
-    output_sockets: { [socket_key: SocketID]: OutputSocketModel }; // this is set once, like input_sockets
-    output_socket_order: SocketID[]; // this can easily be reshuffled in any manner.
-    // 1. we can have multiple sockets with the same label
-    // 2. sockets that are deleted in the config are still stored in the instance, but not displayed
-    //    so if they are restored, the links still exist; good consistency
-    // 3. sockets have a defined, unambiguous order.
-
-    user_defined_code: string;
-
-    trust_level:
-        | 'Official'
-        | 'Trusted'
-        | 'New'
-        | 'Flagged'
-        | 'Untrusted'
-        | 'Possibly Malicious'
-        | 'Malicious';
-
-    official_notes: string; // this is for adding warnings for users. from official team
-}
-
 export interface NodeBluePrintControllerFactoryInterface {
     initNewNodeBluePrint(
         author_uid: string,
         hint?: string | undefined
-    ): Promise<NodeBluePrintControllerInterface>;
+    ): Promise<NodeBluePrint>;
 
     /**
      * This creates an official, verified operator.
@@ -55,44 +18,91 @@ export interface NodeBluePrintControllerFactoryInterface {
      */
     initOfficialNodeBluePrint(
         uniqueFunctionName: string
-    ): Promise<NodeBluePrintControllerInterface>;
+    ): Promise<NodeBluePrint>;
 }
 
-export interface NodeBluePrintControllerInterface {
-    readonly nid: string;
+export abstract class NodeBluePrint {
 
-    call(
-        inputs: Map<SocketID, unknown>,
+    abstract call(
+        inputs: Record<string, unknown>,
         outputs: OutputSocketAsyncReturner
     ): Promise<void>;
+
+    abstract get author_uid(): string;
+    /**
+     * Make a new node and set's author to author_uid.
+     */
+    abstract set author_uid(author_uid: string);
+
+    abstract get node_key(): string;
+    abstract set node_key(node_key: string);
+
+    abstract get created_at(): Date;
+    abstract set created_at(date: Date);
+
+    get nid(): string {
+        return `${this.node_key}/versions/${this.author_uid}:${this.created_at.getTime()}`;
+    }
+
+    set nid(nid: string) {
+        const [node_key, author_uid, created_at_second]= nid.split('/');
+        this.node_key = node_key;
+        this.author_uid = author_uid;
+        this.created_at = new Date(parseInt(created_at_second));
+    }
+
+    /**
+     * The nid of the code this was forked from, for tracking version.
+     */
+    abstract get predecessor_nid(): string;
 
     /**
      * This is not just copying all the logic and sockets, but specifies and gives credit to the node
      * which is being spun-off by referencing that node in the predecessor_nid. Kinda like forking a
-     * git repo.
-     * @param newAuthor
+     * git repo. This should probably be done in a cloud function but this should work.
+     * @param author_uid
      */
-    spinOffNode(newAuthor: string): Promise<NodeBluePrintControllerInterface>;
+    abstract spinOffNode(author_uid: string): Promise<NodeBluePrint>;
 
-    newInputSocket(
+    abstract newInputSocket(
         socket_key: SocketID,
         socket: InputSocketModel<InputSocketParams>
     ): Promise<void>;
-    getInputSocketKeysInOrder(): Promise<Array<SocketID>>;
-    newOutputSocket(
+    abstract get inputSocketKeys(): Array<SocketID>;
+    abstract get inputSockets(): Array<InputSocketModel<InputSocketParams>>;
+    // abstract migrateInputSocket(socket_key: SocketID, new_socket_key: SocketID): Promise<void>;
+    // abstract retireInputSocket(socket_key: SocketID): Promise<void>;
+    // abstract unretireInputSocket(socket_key: SocketID): Promise<void>;
+
+    abstract newOutputSocket(
         socket_key: SocketID,
         socket: OutputSocketModel
     ): Promise<void>;
-    getOutputSocketKeysInOrder(): Promise<string[]>;
-    setDocumentation(documentation: string): Promise<void>;
-    getDocumentation(): Promise<string>;
-    setTitle(title: string): Promise<void>;
-    getTitle(): Promise<string>;
-    setCode(user_defined_code_snippet: string): Promise<void>;
-    getCode(): Promise<string>;
-    markAsUpdated(): Promise<void>;
-    getLastUpdatedTimestamp(): Promise<Date>;
-    bumpVersion(): Promise<void>;
-    getVersion(): Promise<number>;
-    updated(): Promise<void>;
+    abstract get outputSocketKeys(): string[];
+    abstract get outputSockets(): Array<OutputSocketModel>;
+    // abstract migrateOutputSocket(socket_key: SocketID, new_socket_key: SocketID): Promise<void>;
+    // abstract retireOutputSocket(socket_key: SocketID): Promise<void>;
+    // abstract unretireOutputSocket(socket_key: SocketID): Promise<void>;
+
+    abstract set documentation(documentation: string);
+    abstract get documentation(): string;
+
+    abstract set title(title: string);
+    abstract get title(): string;
+
+    abstract get code(): string;
+    abstract set code(code: string);
+    initializeCode(newCode: string): void {
+        const code = this.code;
+        if (code && code.length>0) {
+            throw new Error('NodeBluePrint code can only be set one time.');
+        }
+        this.code = newCode;
+    }
+
+    abstract get trust_level(): string;
+    abstract set trust_level(trust_level: string);
+
+    abstract get official_note(): string;
+    abstract set official_note(note: string);
 }

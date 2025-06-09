@@ -34,6 +34,7 @@
     $effect(() => {
         if (!data.input) data.input = {};
         if (!data.output) data.output = {};
+        if (!data.nid) data.nid = 'demo_string_to_image_converter';
     });
 
     // Access input values

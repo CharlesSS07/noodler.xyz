@@ -19,6 +19,14 @@
 
     let { id, data }: NodeProps<MagicTextTransformNodeType> = $props();
 
+    // Initialize data structure if needed
+    $effect(() => {
+        if (!data.input) data.input = {text: ''};
+        if (!data.output) data.output = {text: ''};
+        if (!data.transformPrompt) data.transformPrompt = '';
+        if (!data.nid) data.nid = 'demo_text_formatter_llm';
+    });
+
     let inputSocketStyle = $state('');
     let outputSocketStyle = $state('');
     getSocketDataTypeByName('string').then((datatype) => {

@@ -2,6 +2,7 @@
     import { onMount } from 'svelte';
     import Logo from "../components/Logo.svelte";
     import EmailSignup from "../components/EmailSignup.svelte";
+    import BugReportButton from "../components/BugReportButton.svelte";
     import {goto} from "$app/navigation";
 
     let heroTitle: HTMLElement | undefined = undefined;
@@ -41,12 +42,15 @@
                         <a href="/fridge" class="text-gray-300 hover:text-blue-400 transition-colors duration-200">Fridge</a>
                     </div>
                 </div>
-                <button on:click={goto('/login')} class="hidden md:flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-lg transition-all duration-200 transform hover:scale-105">
-                    <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                    </svg>
-                    Login
-                </button>
+                <div class="flex items-center space-x-4">
+                    <BugReportButton size="md" />
+                    <button on:click={goto('/login')} class="hidden md:flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-lg transition-all duration-200 transform hover:scale-105">
+                        <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                        Login
+                    </button>
+                </div>
             </nav>
         </header>
 

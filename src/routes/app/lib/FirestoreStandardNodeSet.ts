@@ -17,8 +17,8 @@ const nodeBluePrintController: NodeBluePrintControllerFactoryInterface =
 async function simpleImageModificationNodes() {
     const imageLoader =
         await nodeBluePrintController.initOfficialNodeBluePrint('image_loader');
-    await imageLoader.setTitle('Image Loader');
-    await imageLoader.setDocumentation('Read in an image from a socket/file.');
+    imageLoader.title = 'Image Loader';
+    imageLoader.documentation= 'Read in an image from a socket/file.';
 
     await imageLoader.newInputSocket('img', {
         label: 'Upload Image',
@@ -33,36 +33,35 @@ async function simpleImageModificationNodes() {
         type: 'image/jimp',
     });
 
-    await imageLoader.setCode(`
-    console.log(inputs);
-    const file = inputs.img;
-    console.log("[image_loader] received file:", typeof file);
-    
-    const arrayBuffer = await file.arrayBuffer();
+    imageLoader.code = `
+console.log(inputs);
+const file = inputs.img;
+console.log("[image_loader] received file:", typeof file);
 
-    // read image using Jimp
-    const img = await utils.Jimp.read(arrayBuffer);
+const arrayBuffer = await file.arrayBuffer();
 
-    outputs.set('img', img);
+// read image using Jimp
+const img = await utils.Jimp.read(arrayBuffer);
 
-  
-    // if (typeof input === 'string' && input.startsWith('data:image')) {
-    //   const base64 = input.split(',')[1];
-    //   console.log("[image_loader] decoding base64...");
-    //   const arrayBuffer = await file.arrayBuffer();
-    //   const img = await utils.Jimp.read(arrayBuffer);
-    //   const outputBase64 = await img.getBase64Async(utils.Jimp.MIME_PNG);
-    //   outputs.set('img', outputBase64);
-    // } else {
-    //   console.log("[image_loader] passthrough input:", input);
-    //   outputs.set('img', input); // fallback
-    // }
-  `);
+outputs.set('img', img);
+
+// if (typeof input === 'string' && input.startsWith('data:image')) {
+//   const base64 = input.split(',')[1];
+//   console.log("[image_loader] decoding base64...");
+//   const arrayBuffer = await file.arrayBuffer();
+//   const img = await utils.Jimp.read(arrayBuffer);
+//   const outputBase64 = await img.getBase64Async(utils.Jimp.MIME_PNG);
+//   outputs.set('img', outputBase64);
+// } else {
+//   console.log("[image_loader] passthrough input:", input);
+//   outputs.set('img', input); // fallback
+// }
+`;
 
     const imageViewer =
         await nodeBluePrintController.initOfficialNodeBluePrint('image_viewer');
-    await imageViewer.setTitle('Image Viewer');
-    await imageViewer.setDocumentation('Display an image from a socket.');
+    imageViewer.title = 'Image Viewer';
+    imageViewer.documentation = 'Display an image from a socket.';
 
     await imageViewer.newInputSocket('img', {
         label: 'Image',
@@ -77,9 +76,9 @@ async function simpleImageModificationNodes() {
         type: 'image/jimp',
     });
 
-    await imageViewer.setCode(`
+    imageViewer.code = `
     outputs.set('img', inputs.img);
-  `);
+  `;
 
     // Use it to convert the base64 to jimp for supporting subsequent operations
     // const base64ToJimp = await nodeBluePrintController.initOfficialNodeBluePrint("base64_to_jimp");
@@ -116,8 +115,8 @@ async function simpleImageModificationNodes() {
 
     const grayscale =
         await nodeBluePrintController.initOfficialNodeBluePrint('greyscale');
-    await grayscale.setTitle('Greyscale');
-    await grayscale.setDocumentation('Greyscales an image.');
+    grayscale.title = 'Greyscale';
+    grayscale.documentation = 'Greyscales an image.';
 
     await grayscale.newInputSocket('img', {
         label: 'Color Image',
@@ -132,17 +131,15 @@ async function simpleImageModificationNodes() {
         type: 'image/jimp',
     });
 
-    await grayscale.setCode(`
+    grayscale.code = `
 const img = inputs.img.clone();
 img.greyscale();
 outputs.set('img', img);
-`);
+`;
 
     const hsv = await nodeBluePrintController.initOfficialNodeBluePrint('hsv');
-    await hsv.setTitle('HSV Shift Change');
-    await hsv.setDocumentation(
-        'Shift hue, saturation, or value of the input image.'
-    );
+    hsv.title = 'HSV Shift Change';
+    hsv.documentation = 'Shift hue, saturation, or value of the input image.';
 
     await hsv.newInputSocket('img', {
         label: 'Input Image',
@@ -187,7 +184,7 @@ outputs.set('img', img);
         type: 'image/jimp',
     });
 
-    await hsv.setCode(
+    hsv.code = 
         'const img = inputs.img.clone();\n' +
             'const hue = inputs.hue;\n' +
             'const saturation = inputs.saturation;\n' +
@@ -201,15 +198,14 @@ outputs.set('img', img);
             '// Adjust value (0 to 100)\n' +
             'if (value) img.color([{ apply: "brighten", params: [value.valueOf()] }]);\n' +
             '\n' +
-            "outputs.set('img', img);\n"
-    );
+            "outputs.set('img', img);\n";
 }
 
 async function fileLoadingNodes() {
     const loadExcel =
         await nodeBluePrintController.initOfficialNodeBluePrint('load_excel');
-    await loadExcel.setTitle('Load Excel Spreadsheet');
-    await loadExcel.setDocumentation('Display Excel Spreadsheet');
+    loadExcel.title = 'Load Excel Spreadsheet';
+    loadExcel.documentation = 'Display Excel Spreadsheet';
 
     await loadExcel.newInputSocket('xlsx_file', {
         label: '.xlsx',
@@ -224,14 +220,14 @@ async function fileLoadingNodes() {
         type: 'json',
     });
 
-    await loadExcel.setCode("console.error('Not Implemented');");
+    loadExcel.code = "console.error('Not Implemented');";
 }
 
 async function dropboxNodes() {
     const saveDropbox =
         await nodeBluePrintController.initOfficialNodeBluePrint('save_dropbox');
-    await saveDropbox.setTitle('Save to Dropbox');
-    await saveDropbox.setDocumentation('Saves the image to Dropbox');
+    saveDropbox.title = 'Save to Dropbox';
+    saveDropbox.documentation = 'Saves the image to Dropbox';
 
     await saveDropbox.newInputSocket('image_file', {
         label: 'Image',
@@ -240,12 +236,12 @@ async function dropboxNodes() {
         params: new JIMPImageSocketParamsBuilder().build(),
     });
 
-    await saveDropbox.setCode("console.error('Not Implemented');");
+    saveDropbox.code = "console.error('Not Implemented');";
 
     const loadDropbox =
         await nodeBluePrintController.initOfficialNodeBluePrint('load_dropbox');
-    await loadDropbox.setTitle('Load from Dropbox');
-    await loadDropbox.setDocumentation('Loads the Image from Dropbox');
+    loadDropbox.title = 'Load from Dropbox';
+    loadDropbox.documentation = 'Loads the Image from Dropbox';
 
     await loadDropbox.newOutputSocket('image_file', {
         label: 'Image',
@@ -253,7 +249,7 @@ async function dropboxNodes() {
         type: 'image/jimp',
     });
 
-    await loadDropbox.setCode("console.error('Not Implemented');");
+    loadDropbox.code = "console.error('Not Implemented');";
 }
 
 async function timeRelatedNodes() {
@@ -261,8 +257,8 @@ async function timeRelatedNodes() {
         await nodeBluePrintController.initOfficialNodeBluePrint(
             'datetime_parser'
         );
-    await dateTimeParser.setTitle('Date & Time Constructor');
-    await dateTimeParser.setDocumentation('Parses a datetime object.');
+    dateTimeParser.title = 'Date & Time Constructor';
+    dateTimeParser.documentation = 'Parses a datetime object.';
 
     await dateTimeParser.newInputSocket('date_time', {
         label: 'Date & Time',
@@ -351,7 +347,7 @@ async function timeRelatedNodes() {
         // params: { defaultValue: 0, min: 0, max: null, step: 1 }
     });
 
-    await dateTimeParser.setCode(`
+    dateTimeParser.code = `
 const dateStr = inputs.date_time;
 const lang = inputs.lang || 'en-US';
 const locale = inputs.locale || 'en-US';
@@ -396,14 +392,14 @@ outputs.set('month', monthIndex);
 outputs.set('month_name', monthName);
 outputs.set('year', year);
 outputs.set('second_in_epoch', epochSeconds);
-`);
+`;
 
     const dateTimeConstructor =
         await nodeBluePrintController.initOfficialNodeBluePrint(
             'datetime_constructor'
         );
-    await dateTimeConstructor.setTitle('Date & Time Parser');
-    await dateTimeConstructor.setDocumentation('Parses a datetime object.');
+    dateTimeConstructor.title = 'Date & Time Parser';
+    dateTimeConstructor.documentation = 'Parses a datetime object.';
 
     await dateTimeConstructor.newOutputSocket('date_time', {
         label: 'Date & Time',
@@ -526,7 +522,7 @@ outputs.set('second_in_epoch', epochSeconds);
             .build(),
     });
 
-    await dateTimeConstructor.setCode(`
+    dateTimeConstructor.code = `
 const lang = inputs.lang || 'en-US';
 const locale = inputs.locale || 'en-US';
 
@@ -544,16 +540,14 @@ const date = new Date(Date.UTC(year, month, day, hour, minute, second));
 const dateStr = date.toLocaleString(lang, { timeZone: locale, hour12: false });
 
 outputs.set('date_time', dateStr);
-`);
+`;
 }
 
 async function worldStateDataNodes() {
     const weather =
         await nodeBluePrintController.initOfficialNodeBluePrint('weather');
-    await weather.setTitle('Weather at GPS Coordinate (Approximate)');
-    await weather.setDocumentation(
-        'Returns the weather at a given GPS Coordinate'
-    );
+    weather.title = 'Weather at GPS Coordinate (Approximate)';
+    weather.documentation = 'Returns the weather at a given GPS Coordinate';
 
     await weather.newInputSocket('lat', {
         label: 'GPS Latitude',
@@ -620,9 +614,9 @@ async function worldStateDataNodes() {
         type: 'number',
     });
 
-    await weather.setCode(`
+    weather.code = `
   throw new Error("Weather Node is a Work In Progress. Please Check Back Later or Implement your Own.");
-`);
+`;
 }
 
 async function huggingfaceNodes() {
@@ -632,8 +626,8 @@ async function huggingfaceNodes() {
 
     const llm =
         await nodeBluePrintController.initOfficialNodeBluePrint('promptdesign');
-    await llm.setTitle('Large Language Model (Huggingface)');
-    await llm.setDocumentation('Return output of LLM.');
+    llm.title = 'Large Language Model (Huggingface)';
+    llm.documentation = 'Return output of LLM.';
 
     await llm.newInputSocket('hf_token', {
         label: 'Huggingface Login',
@@ -684,7 +678,7 @@ async function huggingfaceNodes() {
         type: 'number',
     });
 
-    await llm.setCode(`
+    llm.code = `
 const hf_token = inputs.hf_token;
 const inference = await utils.APIConnectionManager.getConnector("huggingface-inference").getAPI();
 const output = await inference.textGeneration({
@@ -694,7 +688,7 @@ const output = await inference.textGeneration({
 
 outputs.set('output_text', output.generated_text);
 outputs.set('output_text_no_prompt', output.generated_text);
-`);
+`;
 
     // 	await promptdesign.setUnitTest(`
     // const inputs = new Map();
@@ -718,8 +712,8 @@ outputs.set('output_text_no_prompt', output.generated_text);
         await nodeBluePrintController.initOfficialNodeBluePrint(
             'text_to_image'
         );
-    await text_to_image.setTitle('Text to Image (Huggingface)');
-    await text_to_image.setDocumentation('Generates Image Given Text');
+    text_to_image.title = 'Text to Image (Huggingface)';
+    text_to_image.documentation = 'Generates Image Given Text';
 
     await text_to_image.newInputSocket('hf_token', {
         label: 'Huggingface Login',
@@ -765,7 +759,7 @@ outputs.set('output_text_no_prompt', output.generated_text);
         type: 'image/jimp',
     });
 
-    await text_to_image.setCode(`
+    text_to_image.code = `
 // inputs, outputs, utils
 const hf_token = inputs.hf_token;
 const inference = await utils.APIConnectionManager.getConnector("huggingface-inference").getAPI();
@@ -778,14 +772,14 @@ const buffer = await new Response(blob).arrayBuffer();
 const image = await utils.Jimp.read(buffer);
 
 outputs.set('image', image);
-`);
+`;
 }
 
 async function aiDemoNodes() {
     const colorize =
         await nodeBluePrintController.initOfficialNodeBluePrint('colorize');
-    await colorize.setTitle('Colorize');
-    await colorize.setDocumentation('Colorize a grayscale image.');
+    colorize.title = 'Colorize';
+    colorize.documentation = 'Colorize a grayscale image.';
 
     await colorize.newInputSocket('img', {
         label: 'Greyscale Image',
@@ -800,16 +794,16 @@ async function aiDemoNodes() {
         type: 'image/jimp',
     });
 
-    await colorize.setCode(`
+    colorize.code = `
   throw new Error("Colorizer Node is a Work In Progress. Please Check Back Later or Implement your Own.");
-`);
+`;
 
     const superResolution =
         await nodeBluePrintController.initOfficialNodeBluePrint(
             'super_resolution'
         );
-    await superResolution.setTitle('Super Resolution / "Enhance"');
-    await superResolution.setDocumentation('Increase the resolution image.');
+    superResolution.title = 'Super Resolution / "Enhance"';
+    superResolution.documentation = 'Increase the resolution image.';
 
     await superResolution.newInputSocket('img', {
         label: 'Low-res Image',
@@ -824,7 +818,7 @@ async function aiDemoNodes() {
         type: 'image/jimp',
     });
 
-    await superResolution.setCode(`
+    superResolution.code = `
 throw new Error("Super resolution Node is a Work In Progress. Please Check Back Later or Implement your Own.");
 const upscaler = await pipeline('image-to-image', 'Xenova/swin2SR-classical-sr-x2-64');
 const url = 'https://huggingface.co/datasets/Xenova/transformers.js-docs/resolve/main/butterfly.jpg';
@@ -835,18 +829,14 @@ const output = await upscaler(url);
 //   height: 512,
 //   channels: 3
 // }
-`);
+`;
 
     const objectBackgroundSeperation =
         await nodeBluePrintController.initOfficialNodeBluePrint(
             'object_background_seperation'
         );
-    await objectBackgroundSeperation.setTitle(
-        'Separate Background & Foreground Object'
-    );
-    await objectBackgroundSeperation.setDocumentation(
-        'Separate a foreground object and infill the background, storing them in seperate images.'
-    );
+    objectBackgroundSeperation.title = 'Separate Background & Foreground Object';
+    objectBackgroundSeperation.documentation = 'Separate a foreground object and infill the background, storing them in seperate images.';
 
     await objectBackgroundSeperation.newInputSocket('img', {
         label: 'Image',
@@ -873,17 +863,17 @@ const output = await upscaler(url);
         type: 'image/jimp',
     });
 
-    await objectBackgroundSeperation.setCode(`
+    objectBackgroundSeperation.code = `
 inputs.img.greyscale();
 outputs.set('img', inputs.img);
-`);
+`;
 }
 
 async function promptDesignNodes() {
     const joinText =
         await nodeBluePrintController.initOfficialNodeBluePrint('join_text');
-    await joinText.setTitle('Join Text (4)');
-    await joinText.setDocumentation("Join text. 'A'+'B'='AB'");
+    joinText.title = 'Join Text (4)';
+    joinText.documentation = "Join text. 'A'+'B'='AB'";
 
     await joinText.newInputSocket('text1', {
         label: 'Text',
@@ -916,14 +906,12 @@ async function promptDesignNodes() {
         type: 'string',
     });
 
-    await joinText.setCode(
-        "outputs.set('text', inputs.text1+inputs.text2+inputs.text3+inputs.text4);"
-    );
+    joinText.code = "outputs.set('text', inputs.text1+inputs.text2+inputs.text3+inputs.text4);";
 
     const splitText =
         await nodeBluePrintController.initOfficialNodeBluePrint('split_text');
-    await splitText.setTitle('Split Text');
-    await splitText.setDocumentation('Splits text by seperator (sep).');
+    splitText.title = 'Split Text';
+    splitText.documentation = 'Splits text by seperator (sep).';
 
     await splitText.newInputSocket('text', {
         label: 'Text',
@@ -944,9 +932,7 @@ async function promptDesignNodes() {
         type: 'unknown[]',
     });
 
-    await splitText.setCode(
-        "outputs.set('splitText', inputs.text.split(inputs.sep));"
-    );
+    splitText.code = "outputs.set('splitText', inputs.text.split(inputs.sep));";
 
 }
 
@@ -954,10 +940,8 @@ async function googleDriveNodes() {
     const googleDrive = await nodeBluePrintController.initOfficialNodeBluePrint(
         'get_file_from_google_drive'
     );
-    await googleDrive.setTitle('Google Drive');
-    await googleDrive.setDocumentation(
-        'Retrieves a file from a google drive. Requires access to the google drive.'
-    );
+    googleDrive.title = 'Google Drive';
+    googleDrive.documentation = 'Retrieves a file from a google drive. Requires access to the google drive.';
 
     await googleDrive.newInputSocket('account', {
         label: 'Google Account',
@@ -979,19 +963,17 @@ async function googleDriveNodes() {
         type: 'string',
     });
 
-    await googleDrive.setCode(`
+    googleDrive.code = `
 inputs.img.greyscale();
 outputs.set('img', inputs.img);
-`);
+`;
 
     const sendEmail =
         await nodeBluePrintController.initOfficialNodeBluePrint(
             'send_email_google'
         );
-    await sendEmail.setTitle('Send Email');
-    await sendEmail.setDocumentation(
-        'Retrieves a file from a google drive. Requires access to the google drive.'
-    );
+    sendEmail.title = 'Send Email';
+    sendEmail.documentation = 'Retrieves a file from a google drive. Requires access to the google drive.';
 
     await sendEmail.newInputSocket('account', {
         label: 'From Google Account',
@@ -1035,10 +1017,10 @@ outputs.set('img', inputs.img);
         params: new StringSocketParamsBuilder('').asParagraph().build(),
     });
 
-    await sendEmail.setCode(`
+    sendEmail.code = `
 inputs.img.greyscale();
 outputs.set('img', inputs.img);
-`);
+`;
 }
 
 async function jimpNodes() {
@@ -1046,10 +1028,8 @@ async function jimpNodes() {
         await nodeBluePrintController.initOfficialNodeBluePrint(
             'jimp_new_blank_image'
         );
-    await newBlankImage.setTitle('New Image');
-    await newBlankImage.setDocumentation(
-        'Generates a new image from parameters.'
-    );
+    newBlankImage.title = 'New Image';
+    newBlankImage.documentation = 'Generates a new image from parameters.';
 
     await newBlankImage.newInputSocket('color', {
         label: 'Color',
@@ -1078,16 +1058,14 @@ async function jimpNodes() {
         type: 'image/jimp',
     });
 
-    await newBlankImage.setCode(
-        "outputs.set('image', new Jimp({ width: inputs.width, height: inputs.height, color: inputs.color }));"
-    );
+    newBlankImage.code = "outputs.set('image', new Jimp({ width: inputs.width, height: inputs.height, color: inputs.color }));";
 
     const resize =
         await nodeBluePrintController.initOfficialNodeBluePrint(
             'jimp_resize_image'
         );
-    await resize.setTitle('Resize Image');
-    await resize.setDocumentation('Resizes a Jimp Image');
+    resize.title = 'Resize Image';
+    resize.documentation = 'Resizes a Jimp Image';
 
     await resize.newInputSocket('image', {
         label: 'Image (JIMP)',
@@ -1122,23 +1100,20 @@ async function jimpNodes() {
         type: 'image/jimp',
     });
 
-    await resize.setCode(
+    resize.code = 
         'const img2 = inputs.image.clone();' +
             'img2.resize({\n' +
             '  w: Math.floor(inputs.width,\n' +
             '  h: Math.floor(inputs.height\n' +
             '});\n' +
-            "outputs.set('image', img2);"
-    );
+            "outputs.set('image', img2);";
 }
 
 async function jsonNodes() {
     const jsonEditorAndViewer =
         await nodeBluePrintController.initOfficialNodeBluePrint('json_editor');
-    await jsonEditorAndViewer.setTitle('JSON');
-    await jsonEditorAndViewer.setDocumentation(
-        'Create, or view a single instance of a JSON object.'
-    );
+    jsonEditorAndViewer.title = 'JSON';
+    jsonEditorAndViewer.documentation = 'Create, or view a single instance of a JSON object.';
 
     await jsonEditorAndViewer.newInputSocket('jsonObject', {
         label: 'JSON',
@@ -1153,20 +1128,18 @@ async function jsonNodes() {
         type: 'unknown',
     });
 
-    await jsonEditorAndViewer.setCode(
-        `
+    jsonEditorAndViewer.code = `
     const jsonObject = JSON.parse(inputs.jsonObject);
     outputs.set('jsonObject', jsonObject);
     console.log('jsonObject', jsonObject, typeof jsonObject);
-    `
-    );
+    `;
 
     const jsonToString =
         await nodeBluePrintController.initOfficialNodeBluePrint(
             'json_to_string'
         );
-    await jsonToString.setTitle('JSON to Text');
-    await jsonToString.setDocumentation('Stringify a JSON object.');
+    jsonToString.title = 'JSON to Text';
+    jsonToString.documentation = 'Stringify a JSON object.';
 
     await jsonToString.newInputSocket('jsonObject', {
         label: 'Object',
@@ -1181,16 +1154,14 @@ async function jsonNodes() {
         type: 'string',
     });
 
-    await jsonToString.setCode(
-        "outputs.set('jsonString', JSON.stringify(inputs.jsonObject));"
-    );
+    jsonToString.code = "outputs.set('jsonString', JSON.stringify(inputs.jsonObject));";
 }
 
 async function htmlNodes() {
     const htmlViewer =
         await nodeBluePrintController.initOfficialNodeBluePrint('html_viewer');
-    await htmlViewer.setTitle('Render HTML');
-    await htmlViewer.setDocumentation('Display HTML from text.');
+    htmlViewer.title = 'Render HTML';
+    htmlViewer.documentation = 'Display HTML from text.';
 
     await htmlViewer.newInputSocket('html', {
         label: 'HTML',
@@ -1199,16 +1170,14 @@ async function htmlNodes() {
         params: new StringSocketParamsBuilder('').asParagraph().build(),
     });
 
-    await htmlViewer.setCode("console.log('Rendered HTML');");
+    htmlViewer.code = "console.log('Rendered HTML');";
 
     const htmlElement =
         await nodeBluePrintController.initOfficialNodeBluePrint(
             'html_elementify'
         );
-    await htmlElement.setTitle('HTML Elementify');
-    await htmlElement.setDocumentation(
-        'Wrap text in html element tags and unpack args into html tags.'
-    );
+    htmlElement.title = 'HTML Elementify';
+    htmlElement.documentation = 'Wrap text in html element tags and unpack args into html tags.';
 
     await htmlElement.newInputSocket('tag', {
         label: 'Tag',
@@ -1239,7 +1208,7 @@ async function htmlNodes() {
         type: 'string',
     });
 
-    await htmlElement.setCode(
+    htmlElement.code = 
         // TODO: implement attributes, hope and pray this parses valid html
         `
 let d = '<'+inputs.tag;
@@ -1258,15 +1227,12 @@ if (inputs.attributes) {
 }
 d += '>'+inputs.innerHTML+'</'+inputs.tag+'>'
 outputs.set('html', d);
-`
-    );
+`;
 
     const fetchURL =
         await nodeBluePrintController.initOfficialNodeBluePrint('fetch_url');
-    await fetchURL.setTitle('Fetch URL');
-    await fetchURL.setDocumentation(
-        'Fetches content from a given URL and returns it as plain text.'
-    );
+    fetchURL.title = 'Fetch URL';
+    fetchURL.documentation = 'Fetches content from a given URL and returns it as plain text.';
 
     await fetchURL.newInputSocket('url', {
         label: 'URL',
@@ -1281,19 +1247,17 @@ outputs.set('html', d);
         type: 'string',
     });
 
-    await fetchURL.setCode(`
+    fetchURL.code = `
   outputs.set('text', inputs.url);
-`);
+`;
 }
 
 async function fileNodes() {
     const loadCSV =
         await nodeBluePrintController.initOfficialNodeBluePrint('load_csv');
 
-    await loadCSV.setTitle('CSV Loader');
-    await loadCSV.setDocumentation(
-        'Reads a CSV file and returns its raw content as plain text.'
-    );
+    loadCSV.title = 'CSV Loader';
+    loadCSV.documentation = 'Reads a CSV file and returns its raw content as plain text.';
 
     await loadCSV.newInputSocket('file', {
         label: 'CSV File',
@@ -1308,17 +1272,15 @@ async function fileNodes() {
         type: 'string',
     });
 
-    await loadCSV.setCode(`
+    loadCSV.code = `
     outputs.set('text', inputs.file.text);
-  `);
+  `;
 
     const loadTSV =
         await nodeBluePrintController.initOfficialNodeBluePrint('load_tsv');
 
-    await loadTSV.setTitle('TSV Loader');
-    await loadTSV.setDocumentation(
-        'Reads a TSV (Tab-Separated Values) file and returns its raw content as plain text.'
-    );
+    loadTSV.title = 'TSV Loader';
+    loadTSV.documentation = 'Reads a TSV (Tab-Separated Values) file and returns its raw content as plain text.';
 
     await loadTSV.newInputSocket('file', {
         label: 'TSV File',
@@ -1333,9 +1295,9 @@ async function fileNodes() {
         type: 'string',
     });
 
-    await loadTSV.setCode(`
+    loadTSV.code = `
     outputs.set('text', inputs.file.text);
-  `);
+  `;
 }
 
 async function rank3Nodes() {
@@ -1344,10 +1306,8 @@ async function rank3Nodes() {
             'image_cropper'
         );
 
-    await imageCropper.setTitle('Image Cropper');
-    await imageCropper.setDocumentation(
-        'Crop a region from an uploaded image.'
-    );
+    imageCropper.title = 'Image Cropper';
+    imageCropper.documentation = 'Crop a region from an uploaded image.';
 
     await imageCropper.newInputSocket('img', {
         label: 'Image',
@@ -1369,7 +1329,7 @@ async function rank3Nodes() {
         type: 'image/jimp',
     });
 
-    await imageCropper.setCode(`
+    imageCropper.code = `
   const { x, y, width, height } = inputs.crop;
 
   console.log("[image_cropper] Received crop params:", inputs.crop);
@@ -1386,7 +1346,140 @@ async function rank3Nodes() {
   console.log("[image_cropper] Cropped preview (base64):", base64.substring(0, 100) + "...");
 
   outputs.set("img", cropped);
-`);
+`;
+}
+
+async function basicMathNodes() {
+    // Add node
+    const addNode = await nodeBluePrintController.initOfficialNodeBluePrint('add');
+    addNode.title = 'Add Numbers';
+    addNode.documentation = 'Adds two numbers together';
+    
+    await addNode.newInputSocket('a', {
+        label: 'Number A',
+        documentation: 'First number to add',
+        type: 'number',
+        params: new NumberSocketParamsBuilder(0).build(),
+    });
+    
+    await addNode.newInputSocket('b', {
+        label: 'Number B', 
+        documentation: 'Second number to add',
+        type: 'number',
+        params: new NumberSocketParamsBuilder(0).build(),
+    });
+    
+    await addNode.newOutputSocket('result', {
+        label: 'Sum',
+        documentation: 'The sum of A + B',
+        type: 'number',
+    });
+    
+    addNode.code = `
+        const a = inputs.a || 0;
+        const b = inputs.b || 0;
+        const result = a + b;
+        outputs.set('result', result);
+    `;
+
+    // Subtract node
+    const subtractNode = await nodeBluePrintController.initOfficialNodeBluePrint('subtract');
+    subtractNode.title = 'Subtract Numbers';
+    subtractNode.documentation = 'Subtracts second number from first number';
+    
+    await subtractNode.newInputSocket('a', {
+        label: 'Number A',
+        documentation: 'Number to subtract from',
+        type: 'number',
+        params: new NumberSocketParamsBuilder(0).build(),
+    });
+    
+    await subtractNode.newInputSocket('b', {
+        label: 'Number B',
+        documentation: 'Number to subtract',
+        type: 'number', 
+        params: new NumberSocketParamsBuilder(0).build(),
+    });
+    
+    await subtractNode.newOutputSocket('result', {
+        label: 'Difference',
+        documentation: 'The result of A - B',
+        type: 'number',
+    });
+    
+    subtractNode.code = `
+        const a = inputs.a || 0;
+        const b = inputs.b || 0;
+        const result = a - b;
+        outputs.set('result', result);
+    `;
+
+    // Multiply node
+    const multiplyNode = await nodeBluePrintController.initOfficialNodeBluePrint('multiply');
+    multiplyNode.title = 'Multiply Numbers';
+    multiplyNode.documentation = 'Multiplies two numbers together';
+    
+    await multiplyNode.newInputSocket('a', {
+        label: 'Number A',
+        documentation: 'First number to multiply',
+        type: 'number',
+        params: new NumberSocketParamsBuilder(1).build(),
+    });
+    
+    await multiplyNode.newInputSocket('b', {
+        label: 'Number B',
+        documentation: 'Second number to multiply', 
+        type: 'number',
+        params: new NumberSocketParamsBuilder(1).build(),
+    });
+    
+    await multiplyNode.newOutputSocket('result', {
+        label: 'Product',
+        documentation: 'The product of A * B',
+        type: 'number',
+    });
+    
+    multiplyNode.code = `
+        const a = inputs.a || 1;
+        const b = inputs.b || 1;
+        const result = a * b;
+        outputs.set('result', result);
+    `;
+
+    // Divide node  
+    const divideNode = await nodeBluePrintController.initOfficialNodeBluePrint('divide');
+    divideNode.title = 'Divide Numbers';
+    divideNode.documentation = 'Divides first number by second number';
+    
+    await divideNode.newInputSocket('a', {
+        label: 'Dividend',
+        documentation: 'Number to be divided',
+        type: 'number',
+        params: new NumberSocketParamsBuilder(1).build(),
+    });
+    
+    await divideNode.newInputSocket('b', {
+        label: 'Divisor',
+        documentation: 'Number to divide by',
+        type: 'number',
+        params: new NumberSocketParamsBuilder(1).build(),
+    });
+    
+    await divideNode.newOutputSocket('result', {
+        label: 'Quotient',
+        documentation: 'The result of A / B',
+        type: 'number',
+    });
+    
+    divideNode.code = `
+        const a = inputs.a || 1;
+        const b = inputs.b || 1;
+        if (b === 0) {
+            throw new Error('Division by zero is not allowed');
+        }
+        const result = a / b;
+        outputs.set('result', result);
+    `;
 }
 
 export async function generateStandardNodeSuite() {
@@ -1403,6 +1496,7 @@ export async function generateStandardNodeSuite() {
         jimpNodes(),
         jsonNodes(),
         htmlNodes(),
+        basicMathNodes(),
         // fileNodes(),
         // rank3Nodes()
         // buildAllChatGPTNodes()

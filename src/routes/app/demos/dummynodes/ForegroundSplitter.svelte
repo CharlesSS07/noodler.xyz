@@ -39,6 +39,7 @@
     $effect(() => {
         if (!data.input) data.input = {};
         if (!data.output) data.output = {};
+        if (!data.nid) data.nid = 'demo_foreground_splitter';
     });
 
     // Access input values

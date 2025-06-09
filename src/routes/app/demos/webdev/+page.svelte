@@ -12,6 +12,7 @@
 	import LlmContentGenerator from '../dummynodes/LlmContentGenerator.svelte';
 	import StemNode from "$lib/components/StemNode.svelte";
 	import EmailSignup from "../../../../components/EmailSignup.svelte";
+	import BugReportButton from "../../../../components/BugReportButton.svelte";
 
 	const nodeTypes = {
 		'stem-node': StemNode,
@@ -301,6 +302,7 @@
 
 	<!-- Controls Panel -->
 	<div class="controls-panel">
+		<BugReportButton size="md" />
 		<button onclick={runWorkflow} class="control-btn run">▶️ Generate Website</button>
 		<button onclick={resetDemo} class="control-btn reset">🔄 Reset</button>
 		<button onclick={onLayout} class="control-btn layout">📐 Auto Layout</button>

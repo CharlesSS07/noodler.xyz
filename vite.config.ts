@@ -8,5 +8,10 @@ export default defineConfig({
         watch: {
             ignored: ['**/examplesAndDocs/**']
         }
+    },
+    test: {
+        environment: 'jsdom',
+        globals: true,
+        setupFiles: []
     }
 });

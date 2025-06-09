@@ -25,6 +25,7 @@
     import {onMount} from "svelte";
     import Logo from "../../components/Logo.svelte";
     import NodeSearch from "./NodeSearch.svelte";
+    import BugReportButton from "../../components/BugReportButton.svelte";
     import { Plus, Play, X, ChevronDown } from "lucide-svelte";
     import {projectState, projectActions, projectSync} from "$lib/stores/ProjectState";
     import { FirestoreNodeBluePrintController } from "../../routes/app/lib/FirestoreNodeBluePrint";
@@ -533,6 +534,8 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
 
         <Panel position="top-right">
             <div class="controls-panel">
+                <BugReportButton size="md" />
+                
                 <button
                     onclick={executeFromSelectedNode}
                     class="control-btn execution-btn"

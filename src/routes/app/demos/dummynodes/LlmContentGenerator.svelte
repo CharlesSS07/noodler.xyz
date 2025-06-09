@@ -67,6 +67,7 @@
     $effect(() => {
         if (!data.input) data.input = {};
         if (!data.output) data.output = {};
+        if (!data.nid) data.nid = 'demo_llm_content_generator';
     });
 
     // Access input values

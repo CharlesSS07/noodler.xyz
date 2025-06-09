@@ -1,6 +1,7 @@
 <script lang="ts">
     import { onMount } from 'svelte';
     import Logo from '../../../components/Logo.svelte';
+    import BugReportButton from '../../../components/BugReportButton.svelte';
     import { Play, Image, MessageSquare, Wand2, Sparkles, Globe } from 'lucide-svelte';
 
     interface Demo {
@@ -97,12 +98,19 @@
 <div class="demos-container">
     <header class="demos-header">
         <div class="header-content">
-            <Logo size={4} />
-            <h1>Demo Gallery</h1>
-            <p class="subtitle">
-                Explore interactive demonstrations of noodler.xyz's visual programming capabilities.
-                Each demo showcases different aspects of node-based AI workflows.
-            </p>
+            <div class="header-main">
+                <Logo size={4} />
+                <div class="header-text">
+                    <h1>Demo Gallery</h1>
+                    <p class="subtitle">
+                        Explore interactive demonstrations of noodler.xyz's visual programming capabilities.
+                        Each demo showcases different aspects of node-based AI workflows.
+                    </p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <BugReportButton size="md" />
+            </div>
         </div>
     </header>
 
@@ -181,7 +189,26 @@
         backdrop-filter: blur(10px);
     }
 
-    .header-content h1 {
+    .header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .header-main {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        flex: 1;
+    }
+
+    .header-text {
+        flex: 1;
+    }
+
+    .header-text h1 {
         font-size: 3rem;
         font-weight: 700;
         margin: 1rem 0;
@@ -189,6 +216,11 @@
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
+    }
+
+    .header-actions {
+        display: flex;
+        align-items: center;
     }
 
     .subtitle {

@@ -19,13 +19,13 @@
     import TextEditorNode from "../../nodes/text/TextEditorNode.svelte";
 
     // Import our custom demo nodes
-    import ImagePromptComposer from "../dummynodes/ImagePromptComposer.svelte";
     import ForegroundSplitter from "../dummynodes/ForegroundSplitter.svelte";
     import BackgroundGenerator from "../dummynodes/BackgroundGenerator.svelte";
     import SmartCompositor from "../dummynodes/SmartCompositor.svelte";
     import CompositeGenerator from "../dummynodes/CompositeGenerator.svelte";
     import StringToImageConverter from "../dummynodes/StringToImageConverter.svelte";
     import EmailSignup from "../../../../components/EmailSignup.svelte";
+    import BugReportButton from "../../../../components/BugReportButton.svelte";
     
     import "../../nodes.css";
     import { onMount } from "svelte";
@@ -405,6 +405,8 @@ Each step uses state-of-the-art AI models for professional-quality results.
         <!-- Control Panel -->
         <Panel position="top-right">
             <div class="controls-panel">
+                <BugReportButton size="md" />
+                
                 <button 
                     onclick={goBack}
                     class="control-btn back-btn"

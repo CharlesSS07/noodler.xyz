@@ -1,7 +1,25 @@
-<script>
+<script lang="ts">
     import NodeWrapper from "$lib/components/NodeWrapper.svelte";
-    import {Handle, Position} from "@xyflow/svelte";
+    import {Handle, Position, type NodeProps} from "@xyflow/svelte";
     import {getSocketDataTypeByName} from "../../lib/DataTypes.ts";
+    import { type Node } from '@xyflow/svelte';
+
+    export type SplitStringNodeType = Node<
+        {
+            input: {text?: string; sep?: string};
+            output: {result?: string[]};
+        },
+        'node-split-string'
+    >;
+
+    let { id, data }: NodeProps<SplitStringNodeType> = $props();
+
+    // Initialize data structure if needed
+    $effect(() => {
+        if (!data.input) data.input = {};
+        if (!data.output) data.output = {};
+        if (!data.nid) data.nid = 'demo_split_string';
+    });
 
     let inputSocketStyle = $state('');
     let outputSocketStyle = $state('');

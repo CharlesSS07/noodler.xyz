@@ -1,4 +1,5 @@
 import {type Node, type Edge} from "@xyflow/svelte";
+import { FirestoreNodeBluePrintController } from "./FirestoreNodeBluePrint";
 
 function socketInstanceKey(node_id: string, socket_id: string) {
     return `${node_id}:${socket_id}`;
@@ -8,6 +9,8 @@ function parseSocketInstanceKey(socketInstanceKey: string) {
     const [node_id, socket_id] = socketInstanceKey.split(":");
     return {node_id: node_id, socket_id: socket_id};
 }
+
+class CyclicDependencyException extends Error {}
 
 export class OutputSocketDataCache {
 
@@ -77,11 +80,61 @@ export class OutputSocketAsyncReturner {
 
 }
 
-async function execute(input: Record<string, unknown>, output: OutputSocketAsyncReturner, error: (error: Error) => void): Promise<void> {
+async function execute(input: Record<string, unknown>, output: OutputSocketAsyncReturner, error: (error: Error) => void, node: Node): Promise<void> {
     /**
-     * This executes a node
-     * Do not implement this. I will take care of it
+     * This executes a node using the code stored in its blueprint
      */
+    try {
+        if (!node?.data?.nid) {
+            // For nodes without NID, treat them as pass-through nodes
+            console.warn(`Node ${node.id} has no NID, treating as pass-through`);
+            // Just pass the first input as output
+            const firstInput = Object.values(input)[0];
+            await output.set('output', firstInput);
+            return;
+        }
+
+        // For now, implement basic math operations directly
+        // TODO: Replace with dynamic code execution from blueprints
+        switch (node.data.nid) {
+            case 'add':
+                const addA = input.a ?? 0;
+                const addB = input.b ?? 0;
+                const addResult = addA + addB;
+                await output.set('result', addResult);
+                break;
+                
+            case 'subtract':
+                const subA = input.a ?? 0;
+                const subB = input.b ?? 0;
+                const subResult = subA - subB;
+                await output.set('result', subResult);
+                break;
+                
+            case 'multiply':
+                const mulA = input.a ?? 1;
+                const mulB = input.b ?? 1;
+                const mulResult = mulA * mulB;
+                await output.set('result', mulResult);
+                break;
+                
+            case 'divide':
+                const divA = input.a ?? 1;
+                const divB = input.b ?? 1;
+                if (divB === 0) {
+                    throw new Error('Division by zero is not allowed');
+                }
+                const divResult = divA / divB;
+                await output.set('result', divResult);
+                break;
+                
+            default:
+                throw new Error(`Unknown node type: ${node.data.nid}`);
+        }
+    } catch (err) {
+        error(err instanceof Error ? err : new Error(String(err)));
+        throw err;
+    }
 }
 
 
@@ -152,10 +205,10 @@ export async function executeFlowGraph(node_id: string, nodes: Node[], edges: Ed
         
         try {
             // Get input data for this node
-            const inputData = await getNodeInputData(nodeId, edges, dataCache);
+            const inputData = await getNodeInputData(nodeId, nodes, edges, dataCache);
             
             // Get output socket definitions for this node
-            const outputSockets = getNodeOutputSockets(node);
+            const outputSockets = await getNodeOutputSockets(node);
             
             // Create output handler
             const outputHandler = new OutputSocketAsyncReturner(dataCache, nodeId, outputSockets);
@@ -164,7 +217,18 @@ export async function executeFlowGraph(node_id: string, nodes: Node[], edges: Ed
             await execute(inputData, outputHandler, (error: Error) => {
                 console.error(`Error executing node ${nodeId}:`, error);
                 throw error;
-            });
+            }, node);
+            
+            // Store results in node's data for easy access
+            if (!node.data.output) node.data.output = {};
+            for (const socketId of outputSockets) {
+                try {
+                    const value = await dataCache.get(nodeId, socketId);
+                    node.data.output[socketId] = value;
+                } catch (error) {
+                    // Socket may not have been set
+                }
+            }
             
             console.log(`Node ${nodeId} completed successfully`);
             nodeStates.set(nodeId, 'completed');
@@ -226,15 +290,23 @@ function buildDependencyGraph(targetNodeId: string, nodes: Node[], edges: Edge[]
     return dependencyGraph;
 }
 
-async function getNodeInputData(nodeId: string, edges: Edge[], dataCache: OutputSocketDataCache): Promise<Record<string, unknown>> {
+async function getNodeInputData(nodeId: string, nodes: Node[], edges: Edge[], dataCache: OutputSocketDataCache): Promise<Record<string, unknown>> {
     /**
-     * Collect all input data for a node from connected output sockets
+     * Collect all input data for a node from connected output sockets and node's internal data
      */
     const inputData: Record<string, unknown> = {};
     
+    // Find the node
+    const node = nodes.find(n => n.id === nodeId);
+    if (!node) {
+        throw new Error(`Node ${nodeId} not found`);
+    }
+    
     // Find all edges that target this node
     const incomingEdges = edges.filter(edge => edge.target === nodeId);
+    const connectedInputs = new Set(incomingEdges.map(edge => edge.targetHandle).filter(Boolean));
     
+    // Get data from connected edges
     for (const edge of incomingEdges) {
         if (edge.targetHandle && edge.sourceHandle) {
             try {
@@ -247,39 +319,57 @@ async function getNodeInputData(nodeId: string, edges: Edge[], dataCache: Output
         }
     }
     
+    // For unconnected inputs, use node's internal data
+    if (node.data?.input) {
+        for (const [inputKey, inputValue] of Object.entries(node.data.input)) {
+            if (!connectedInputs.has(inputKey)) {
+                inputData[inputKey] = inputValue;
+            }
+        }
+    }
+    
     return inputData;
 }
 
-function getNodeOutputSockets(node: Node): Set<string> {
+async function getNodeOutputSockets(node: Node): Promise<Set<string>> {
     /**
-     * Extract output socket IDs from a node
-     * This is a placeholder - in a real implementation, this would inspect the node definition
+     * Extract output socket IDs from a node using its blueprint
      */
     const outputSockets = new Set<string>();
     
-    // For now, assume common output socket names based on node type
-    if (node.type === 'stem-node') {
-        if (node.data?.nid === 'text_editor') {
-            outputSockets.add('output');
-        } else if (node.data?.nid === 'html_renderer') {
-            // HTML renderer typically doesn't have outputs
-        } else if (node.data?.nid === 'fetch_url') {
-            outputSockets.add('output');
-        }
-    } else if (node.type === 'llm-content-generator') {
-        outputSockets.add('generatedContent');
-        outputSockets.add('metadata');
-    } else if (node.type === 'html-tag') {
-        outputSockets.add('htmlOutput');
-    } else if (node.type === 'html-boilerplate') {
-        outputSockets.add('fullHtml');
-    } else if (node.type === 'web-navbar') {
-        outputSockets.add('navbarHtml');
+    if (!node.data?.nid) {
+        console.warn(`Node ${node.id} has no NID, using fallback output socket`);
+        outputSockets.add('output');
+        return outputSockets;
     }
     
-    // Default fallback
-    if (outputSockets.size === 0) {
-        outputSockets.add('output');
+    try {
+        // For other nodes, try to get from blueprint system
+        const controller = new FirestoreNodeBluePrintController(node.data.nid);
+        const outputSocketKeys = await controller.outputSocketKeys();
+        if (outputSocketKeys && outputSocketKeys.length > 0) {
+            outputSocketKeys.forEach(socketKey => {
+                outputSockets.add(socketKey);
+            });
+        } else {
+            console.warn(`No output sockets found for node blueprint ${node.data.nid}, using fallback`);
+            outputSockets.add('output');
+        }
+    } catch (error) {
+        console.error(`Failed to get blueprint for node ${node.data.nid}:`, error);
+        // Fallback for custom nodes that might not have blueprints yet
+        if (node.type === 'llm-content-generator') {
+            outputSockets.add('generatedContent');
+            outputSockets.add('metadata');
+        } else if (node.type === 'html-tag') {
+            outputSockets.add('htmlOutput');
+        } else if (node.type === 'html-boilerplate') {
+            outputSockets.add('fullHtml');
+        } else if (node.type === 'web-navbar') {
+            outputSockets.add('navbarHtml');
+        } else {
+            outputSockets.add('output');
+        }
     }
     
     return outputSockets;
