@@ -21,34 +21,43 @@ export interface NodeBluePrintControllerFactoryInterface {
     ): Promise<NodeBluePrint>;
 }
 
-export abstract class NodeBluePrint {
+export class NodeBluePrintVersionSpecifier {
+    _node_key: string;
+    _author_uid: string;
+    _created_at: Date;
+
+    constructor(node_key: string, author_uid: string, created_at: Date) {
+        this._node_key = node_key;
+        this._author_uid = author_uid;
+        this._created_at = created_at;
+    }
+
+    toString() {
+        return `${this._node_key}/${this._author_uid}:${this._created_at.getTime()}`;
+    }
+
+    get author_uid(): string {
+        return this._author_uid;
+    }
+
+    get node_key(): string {
+        return this._node_key;
+    }
+
+    get created_at(): Date {
+        return this._created_at;
+    }
+}
+
+export abstract class NodeBluePrint extends NodeBluePrintVersionSpecifier {
 
     abstract call(
         inputs: Record<string, unknown>,
         outputs: OutputSocketAsyncReturner
     ): Promise<void>;
 
-    abstract get author_uid(): string;
-    /**
-     * Make a new node and set's author to author_uid.
-     */
-    abstract set author_uid(author_uid: string);
-
-    abstract get node_key(): string;
-    abstract set node_key(node_key: string);
-
-    abstract get created_at(): Date;
-    abstract set created_at(date: Date);
-
     get nid(): string {
-        return `${this.node_key}/versions/${this.author_uid}:${this.created_at.getTime()}`;
-    }
-
-    set nid(nid: string) {
-        const [node_key, author_uid, created_at_second]= nid.split('/');
-        this.node_key = node_key;
-        this.author_uid = author_uid;
-        this.created_at = new Date(parseInt(created_at_second));
+        return this.toString();
     }
 
     /**
@@ -78,7 +87,7 @@ export abstract class NodeBluePrint {
         socket_key: SocketID,
         socket: OutputSocketModel
     ): Promise<void>;
-    abstract get outputSocketKeys(): string[];
+    abstract outputSocketKeys(): Promise<string[]>;
     abstract get outputSockets(): Array<OutputSocketModel>;
     // abstract migrateOutputSocket(socket_key: SocketID, new_socket_key: SocketID): Promise<void>;
     // abstract retireOutputSocket(socket_key: SocketID): Promise<void>;

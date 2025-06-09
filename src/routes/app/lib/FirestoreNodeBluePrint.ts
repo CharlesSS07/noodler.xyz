@@ -6,13 +6,14 @@ import {
     increment,
     setDoc,
     updateDoc,
+    onSnapshot,
+    type Unsubscribe,
 } from 'firebase/firestore';
 import { firestore } from '../../../firebase';
 import type {
     NodeBluePrintControllerFactoryInterface,
-    NodeBluePrint,
-    NodeBluePrintModel,
 } from './NodeBluePrint.js';
+import { NodeBluePrint } from './NodeBluePrint.js';
 import { v4 as uuidv4 } from 'uuid';
 import type {
     InputSocketModel,
@@ -32,34 +33,32 @@ export class FirestoreNodeBluePrintControllerFactoryInterface
     async initOfficialNodeBluePrint(
         uniqueFunctionName: string
     ): Promise<FirestoreNodeBluePrintController> {
-        const nodeBluePrint = {
-            nid: `official_node_${uniqueFunctionName}`,
-            predecessor_node: 'root',
-            author_uid: 'wedjat',
-            title: `Untitled Operation`,
-            version: 0,
-            created_at: new Date(),
-            last_updated_at: new Date(),
+        const nodeKey = `official_node_${uniqueFunctionName}`;
+        const authorUid = 'official';
+        const createdAt = new Date();
 
-            documentation: '',
+        const nodeBluePrintController = new FirestoreNodeBluePrintController(nodeKey, authorUid, createdAt);
+        
+        // Set the initial metadata
+        nodeBluePrintController.title = 'Untitled Operation';
+        nodeBluePrintController.documentation = '';
 
+        // Set version-specific data
+        const versionData = {
+            author_uid: authorUid,
+            created_at: createdAt,
+            predecessor_nid: 'root',
+            trust_level: 'Official',
+            official_note: '',
             input_sockets: {},
             input_socket_order: [],
             output_sockets: {},
             output_socket_order: [],
-
             user_defined_code_snippet: 'console.log("Hello World");',
-            trust_level: 'Official',
-        } as unknown as NodeBluePrintModel;
+            last_updated_at: createdAt
+        };
 
-        const nodeBluePrintController = new FirestoreNodeBluePrintController(
-            nodeBluePrint.nid
-        );
-
-        await setDoc(
-            nodeBluePrintController.getNodeBluePrintRef(),
-            nodeBluePrint
-        );
+        await setDoc(nodeBluePrintController.getVersionRef(), versionData);
 
         console.log(`STD lib node saved: ${uniqueFunctionName}`);
 
@@ -70,275 +69,360 @@ export class FirestoreNodeBluePrintControllerFactoryInterface
         author_uid: string,
         hint?: string | undefined
     ): Promise<FirestoreNodeBluePrintController> {
-        const nid = `node_${hint}` + uuidv4();
-        const nodeBluePrint = {
-            nid: nid,
-            predecessor_node: 'root',
+        const nodeKey = `node_${hint || 'custom'}_${uuidv4()}`;
+        const createdAt = new Date();
+
+        const nodeBluePrintController = new FirestoreNodeBluePrintController(nodeKey, author_uid, createdAt);
+        
+        // Set the initial metadata
+        nodeBluePrintController.title = 'Untitled Operation';
+        nodeBluePrintController.documentation = '';
+
+        // Set version-specific data
+        const versionData = {
             author_uid: author_uid,
-            title: `Untitled Operation`,
-            version: 0,
-            created_at: new Date(),
-            last_updated_at: new Date(),
-
-            documentation: '',
-
+            created_at: createdAt,
+            predecessor_nid: 'root',
+            trust_level: 'New',
+            official_note: '',
             input_sockets: {},
             input_socket_order: [],
             output_sockets: {},
             output_socket_order: [],
-
             user_defined_code_snippet: 'console.log("Hello World");',
-            trust_level: 'New',
-        } as unknown as NodeBluePrintModel;
+            last_updated_at: createdAt
+        };
 
-        const nodeBluePrintController = new FirestoreNodeBluePrintController(
-            nodeBluePrint.nid
-        );
+        await setDoc(nodeBluePrintController.getVersionRef(), versionData);
 
-        await setDoc(
-            nodeBluePrintController.getNodeBluePrintRef(),
-            nodeBluePrint
-        );
-
-        console.log(`Created new Op: ${nodeBluePrint.title}`);
+        console.log(`Created new Op: Untitled Operation`);
 
         return nodeBluePrintController;
     }
 }
-//
-// export class FirestoreNodeBluePrintController
-//     implements NodeBluePrint
-// {
-//     nid: string;
-//
-//     constructor(nid: string) {
-//         this.nid = nid;
-//     }
-//
-//     getNodeBluePrintRef() {
-//         return doc(nodeBluePrintsRef, this.nid as string);
-//     }
-//
-//     async spinOffNode(
-//         newAuthor: string
-//     ): Promise<FirestoreNodeBluePrintController> {
-//         const newNid = 'spinnoff_node' + uuidv4();
-//         const nodeBluePrint = (
-//             await getDoc(this.getNodeBluePrintRef())
-//         ).data() as NodeBluePrintModel;
-//         let trust_level = nodeBluePrint.trust_level;
-//         if (trust_level === 'Official' || trust_level === 'Trusted') {
-//             // reduce trust level to new
-//             // if it's lower than new, reduced it further
-//             trust_level = 'New';
-//         }
-//         const spinnoffNodeBluePrint = {
-//             nid: newNid,
-//             predecessor_node: this.nid,
-//             author_uid: newAuthor,
-//             title: `Spinnoff of ${nodeBluePrint.title}`,
-//             version: 0,
-//             created_at: new Date(),
-//             last_updated_at: new Date(),
-//
-//             documentation: nodeBluePrint.documentation,
-//
-//             input_sockets: nodeBluePrint.input_sockets,
-//             input_socket_order: nodeBluePrint.input_socket_order,
-//             output_sockets: nodeBluePrint.output_sockets,
-//             output_socket_order: nodeBluePrint.output_socket_order,
-//
-//             user_defined_code_snippet: nodeBluePrint.user_defined_code,
-//             trust_level: 'New',
-//         } as unknown as NodeBluePrintModel;
-//
-//         const nodeBluePrintController = new FirestoreNodeBluePrintController(
-//             spinnoffNodeBluePrint.nid
-//         );
-//
-//         await setDoc(
-//             nodeBluePrintController.getNodeBluePrintRef(),
-//             spinnoffNodeBluePrint
-//         );
-//
-//         return nodeBluePrintController;
-//     }
-//
-//     async newInputSocket(
-//         socket_key: SocketID,
-//         socket: InputSocketModel<InputSocketParams>
-//     ) {
-//         await updateDoc(
-//             this.getNodeBluePrintRef(),
-//             `input_sockets.${socket_key}`,
-//             socket
-//         );
-//         await updateDoc(
-//             this.getNodeBluePrintRef(),
-//             'input_socket_order',
-//             arrayUnion(socket_key)
-//         );
-//         await this.updated();
-//     }
-//
-//     getInputSocketKeysInOrder(): Promise<Array<SocketID>> {
-//         return getDoc(this.getNodeBluePrintRef()).then(async (snapshot) => {
-//             return await snapshot.get('input_socket_order');
-//         });
-//     }
-//
-//     async newOutputSocket(socket_key: SocketID, socket: OutputSocketModel) {
-//         await updateDoc(
-//             this.getNodeBluePrintRef(),
-//             `output_sockets.${socket_key}`,
-//             socket
-//         );
-//         await updateDoc(
-//             this.getNodeBluePrintRef(),
-//             'output_socket_order',
-//             arrayUnion(socket_key)
-//         );
-//         await this.updated();
-//     }
-//
-//     outputSocketKeys() {
-//         return getDoc(this.getNodeBluePrintRef()).then(async (snapshot) => {
-//             return snapshot.get('output_socket_order');
-//         });
-//     }
-//
-//     async documentation(documentation: string) {
-//         await updateDoc(
-//             this.getNodeBluePrintRef(),
-//             'documentation',
-//             documentation
-//         );
-//         // this.updated(); // this will not change the functionality or flow
-//     }
-//
-//     async getDocumentation() {
-//         return await getDoc(this.getNodeBluePrintRef()).then(
-//             async (snapshot) => {
-//                 return await snapshot.get('documentation');
-//             }
-//         );
-//     }
-//
-//     async title(title: string) {
-//         await updateDoc(this.getNodeBluePrintRef(), 'title', title);
-//         await this.updated(); // this will not change the functionality or flow
-//     }
-//
-//     async getTitle() {
-//         return await getDoc(this.getNodeBluePrintRef()).then(
-//             async (snapshot) => {
-//                 return await snapshot.get('title');
-//             }
-//         );
-//     }
-//
-//     async code(user_defined_code_snippet: string) {
-//         await updateDoc(
-//             this.getNodeBluePrintRef(),
-//             'user_defined_code_snippet',
-//             user_defined_code_snippet
-//         );
-//         await this.updated();
-//     }
-//
-//     async getCode() {
-//         return await getDoc(this.getNodeBluePrintRef()).then(
-//             async (snapshot) => {
-//                 return await snapshot.get('user_defined_code_snippet');
-//             }
-//         );
-//     }
-//
-//     async markAsUpdated() {
-//         await updateDoc(
-//             this.getNodeBluePrintRef(),
-//             'last_updated_at',
-//             new Date()
-//         );
-//     }
-//
-//     async getLastUpdatedTimestamp() {
-//         return await getDoc(this.getNodeBluePrintRef()).then(
-//             async (snapshot) => {
-//                 return await snapshot.get('last_updated_at');
-//             }
-//         );
-//     }
-//
-//     async bumpVersion() {
-//         await updateDoc(this.getNodeBluePrintRef(), 'version', increment(1));
-//     }
-//
-//     async getVersion() {
-//         return await getDoc(this.getNodeBluePrintRef()).then(
-//             async (snapshot) => {
-//                 return await snapshot.get('version');
-//             }
-//         );
-//     }
-//
-//     async updated() {
-//         this.markAsUpdated();
-//         this.bumpVersion();
-//     }
-//
-//     async call(inputs: Map<SocketID, unknown>, outputs: OutputSocketAsyncReturner): Promise<void> {
-//         try {
-//             // Get the node blueprint data from Firestore
-//             const doc = await getDoc(this.getNodeBluePrintRef());
-//             if (!doc.exists()) {
-//                 throw new Error(`Node blueprint not found: ${this.nid}`);
-//             }
-//
-//             const nodeData = doc.data() as NodeBluePrintModel;
-//             const code = nodeData.user_defined_code;
-//
-//             if (!code || code.trim() === '') {
-//                 throw new Error(`No code defined for node: ${this.nid}`);
-//             }
-//
-//             // Create execution context
-//             const executionContext = {
-//                 inputs: Object.fromEntries(inputs),
-//                 outputs,
-//                 utils: {
-//                     // Add utility functions that nodes might need
-//                     Jimp: (globalThis as any).Jimp || null,
-//                     APIConnectionManager: (globalThis as any).APIConnectionManager || null,
-//                     console: console
-//                 },
-//                 console: console
-//             };
-//
-//             // Create async function from the code
-//             const asyncFunction = new Function(
-//                 'inputs',
-//                 'outputs',
-//                 'utils',
-//                 'console',
-//                 `
-//                 return (async function() {
-//                     ${code}
-//                 })();
-//                 `
-//             );
-//
-//             // Execute the code with the context
-//             await asyncFunction(
-//                 executionContext.inputs,
-//                 executionContext.outputs,
-//                 executionContext.utils,
-//                 executionContext.console
-//             );
-//
-//         } catch (error) {
-//             console.error(`Error executing node ${this.nid}:`, error);
-//             throw new Error(`Node execution failed: ${error.message}`);
-//         }
-//     }
-// }
+export class FirestoreNodeBluePrintController extends NodeBluePrint {
+    private _predecessor_nid: string;
+    private _trust_level: string;
+    private _official_note: string;
+    
+    // Internal reactive model
+    private _metadataModel: {
+        title: string;
+        documentation: string;
+    } = {
+        title: 'Untitled Operation',
+        documentation: ''
+    };
+    
+    private _versionModel: {
+        user_defined_code_snippet: string;
+        input_sockets: Record<string, InputSocketModel<InputSocketParams>>;
+        input_socket_order: Array<SocketID>;
+        output_sockets: Record<string, OutputSocketModel>;
+        output_socket_order: Array<string>;
+        author_uid: string;
+        created_at: Date;
+        predecessor_nid: string;
+        trust_level: string;
+        official_note: string;
+        last_updated_at: Date;
+    } = {
+        user_defined_code_snippet: 'console.log("Hello World");',
+        input_sockets: {},
+        input_socket_order: [],
+        output_sockets: {},
+        output_socket_order: [],
+        author_uid: '',
+        created_at: new Date(),
+        predecessor_nid: 'root',
+        trust_level: 'New',
+        official_note: '',
+        last_updated_at: new Date()
+    };
+    
+    // Firestore subscriptions
+    private _metadataUnsubscribe: Unsubscribe | null = null;
+    private _versionUnsubscribe: Unsubscribe | null = null;
+    
+    constructor(node_key: string, author_uid: string, created_at: Date) {
+        super(node_key, author_uid, created_at);
+        this._predecessor_nid = 'root';
+        this._trust_level = 'New';
+        this._official_note = '';
+        
+        // Update version model with constructor values
+        this._versionModel.author_uid = this._author_uid;
+        this._versionModel.created_at = this._created_at;
+        this._versionModel.predecessor_nid = this._predecessor_nid;
+        this._versionModel.trust_level = this._trust_level;
+        this._versionModel.official_note = this._official_note;
+        
+        // Initialize reactive subscriptions
+        this._initializeSubscriptions();
+    }
+    
+    private _initializeSubscriptions() {
+        // Subscribe to metadata changes
+        this._metadataUnsubscribe = onSnapshot(this.getMetadataRef(), (doc) => {
+            if (doc.exists()) {
+                const data = doc.data();
+                this._metadataModel.title = data.title || 'Untitled Operation';
+                this._metadataModel.documentation = data.documentation || '';
+            }
+        });
+        
+        // Subscribe to version changes
+        this._versionUnsubscribe = onSnapshot(this.getVersionRef(), (doc) => {
+            if (doc.exists()) {
+                const data = doc.data();
+                this._versionModel = {
+                    user_defined_code_snippet: data.user_defined_code_snippet || 'console.log("Hello World");',
+                    input_sockets: data.input_sockets || {},
+                    input_socket_order: data.input_socket_order || [],
+                    output_sockets: data.output_sockets || {},
+                    output_socket_order: data.output_socket_order || [],
+                    author_uid: data.author_uid || '',
+                    created_at: data.created_at?.toDate() || new Date(),
+                    predecessor_nid: data.predecessor_nid || 'root',
+                    trust_level: data.trust_level || 'New',
+                    official_note: data.official_note || '',
+                    last_updated_at: data.last_updated_at?.toDate() || new Date()
+                };
+            }
+        });
+    }
+    
+    // Clean up subscriptions
+    destroy() {
+        if (this._metadataUnsubscribe) {
+            this._metadataUnsubscribe();
+            this._metadataUnsubscribe = null;
+        }
+        if (this._versionUnsubscribe) {
+            this._versionUnsubscribe();
+            this._versionUnsubscribe = null;
+        }
+    }
+
+    // NodeBluePrint implementation
+    get author_uid(): string {
+        return this._author_uid;
+    }
+
+    set author_uid(author_uid: string) {
+        this._author_uid = author_uid;
+    }
+
+    get node_key(): string {
+        return this._node_key;
+    }
+
+    set node_key(node_key: string) {
+        this._node_key = node_key;
+    }
+
+    get created_at(): Date {
+        return this._created_at;
+    }
+
+    set created_at(date: Date) {
+        this._created_at = date;
+    }
+
+    get predecessor_nid(): string {
+        return this._predecessor_nid;
+    }
+
+    get trust_level(): string {
+        return this._trust_level;
+    }
+
+    set trust_level(trust_level: string) {
+        this._trust_level = trust_level;
+    }
+
+    get official_note(): string {
+        return this._official_note;
+    }
+
+    set official_note(note: string) {
+        this._official_note = note;
+    }
+
+    // Storage reference methods
+    getVersionRef() {
+        return doc(nodeBluePrintsRef, this.nid);
+    }
+
+    private getMetadataRef() {
+        // Use subcollection: nodes/{node_key}/metadata/main
+        return doc(collection(doc(nodeBluePrintsRef, this.node_key), 'metadata'), 'main');
+    }
+
+    private getNodeBaseRef() {
+        return doc(nodeBluePrintsRef, this.node_key);
+    }
+
+    // Title and Documentation (stored at metadata level)
+    get title(): string {
+        return this._metadataModel.title;
+    }
+
+    set title(title: string) {
+        this._metadataModel.title = title;
+        // Update Firestore reactively
+        setDoc(this.getMetadataRef(), { title }, { merge: true });
+    }
+
+    get documentation(): string {
+        return this._metadataModel.documentation;
+    }
+
+    set documentation(documentation: string) {
+        this._metadataModel.documentation = documentation;
+        // Update Firestore reactively
+        setDoc(this.getMetadataRef(), { documentation }, { merge: true });
+    }
+
+    // Code (stored at version level)
+    get code(): string {
+        return this._versionModel.user_defined_code_snippet;
+    }
+
+    set code(code: string) {
+        this._versionModel.user_defined_code_snippet = code;
+        this._versionModel.last_updated_at = new Date();
+        // Update Firestore reactively
+        this._updateVersionInFirestore();
+    }
+
+    private async _updateVersionInFirestore(): Promise<void> {
+        const versionData = {
+            user_defined_code_snippet: this._versionModel.user_defined_code_snippet,
+            input_sockets: this._versionModel.input_sockets,
+            input_socket_order: this._versionModel.input_socket_order,
+            output_sockets: this._versionModel.output_sockets,
+            output_socket_order: this._versionModel.output_socket_order,
+            author_uid: this._versionModel.author_uid,
+            created_at: this._versionModel.created_at,
+            predecessor_nid: this._versionModel.predecessor_nid,
+            trust_level: this._versionModel.trust_level,
+            official_note: this._versionModel.official_note,
+            last_updated_at: this._versionModel.last_updated_at
+        };
+        await setDoc(this.getVersionRef(), versionData);
+    }
+
+    // Socket management (stored at version level)
+    async newInputSocket(socket_key: SocketID, socket: InputSocketModel<InputSocketParams>): Promise<void> {
+        // Update local model
+        this._versionModel.input_sockets[socket_key] = socket;
+        if (!this._versionModel.input_socket_order.includes(socket_key)) {
+            this._versionModel.input_socket_order.push(socket_key);
+        }
+        this._versionModel.last_updated_at = new Date();
+        
+        // Update Firestore
+        await this._updateVersionInFirestore();
+    }
+
+    get inputSocketKeys(): Array<SocketID> {
+        return this._versionModel.input_socket_order;
+    }
+
+    get inputSockets(): Array<InputSocketModel<InputSocketParams>> {
+        return this._versionModel.input_socket_order.map(key => this._versionModel.input_sockets[key]).filter(Boolean);
+    }
+
+    async newOutputSocket(socket_key: SocketID, socket: OutputSocketModel): Promise<void> {
+        // Update local model
+        this._versionModel.output_sockets[socket_key] = socket;
+        if (!this._versionModel.output_socket_order.includes(socket_key)) {
+            this._versionModel.output_socket_order.push(socket_key);
+        }
+        this._versionModel.last_updated_at = new Date();
+        
+        // Update Firestore
+        await this._updateVersionInFirestore();
+    }
+
+    get outputSockets(): Array<OutputSocketModel> {
+        return this._versionModel.output_socket_order.map(key => this._versionModel.output_sockets[key]).filter(Boolean);
+    }
+
+    // Synchronous version using cached model
+    async outputSocketKeys(): Promise<string[]> {
+        return this._versionModel.output_socket_order;
+    }
+
+    // Spin off functionality
+    async spinOffNode(author_uid: string): Promise<NodeBluePrint> {
+        // Create new nid with new timestamp
+        const newCreatedAt = new Date();
+        const newController = new FirestoreNodeBluePrintController(this.node_key, author_uid, newCreatedAt);
+
+        // Copy metadata (title and documentation)
+        newController.title = `Spinnoff of ${this.title}`;
+        newController.documentation = this.documentation;
+
+        // Copy version data with updated trust level and predecessor
+        const spinnoffData = {
+            ...this._versionModel,
+            author_uid,
+            created_at: newCreatedAt,
+            predecessor_nid: this.nid,
+            trust_level: 'New', // Reduce trust level for spinnoffs
+            last_updated_at: newCreatedAt
+        };
+
+        await setDoc(newController.getVersionRef(), spinnoffData);
+
+        return newController;
+    }
+
+    // Execution
+    async call(inputs: Record<string, unknown>, outputs: OutputSocketAsyncReturner): Promise<void> {
+        try {
+            const code = this._versionModel.user_defined_code_snippet;
+
+            if (!code || code.trim() === '') {
+                throw new Error(`No code defined for node: ${this.nid}`);
+            }
+
+            // Create execution context
+            const executionContext = {
+                inputs,
+                outputs,
+                utils: {
+                    // Add utility functions that nodes might need
+                    Jimp: (globalThis as any).Jimp || null,
+                    APIConnectionManager: (globalThis as any).APIConnectionManager || null,
+                },
+                console: console
+            };
+
+            // Create async function from the code
+            const asyncFunction = new Function(
+                'inputs',
+                'outputs',
+                'utils',
+                'console',
+                `return (async function() {
+    ${code}
+})();`
+            );
+
+            // Execute the code with the context
+            await asyncFunction(
+                executionContext.inputs,
+                executionContext.outputs,
+                executionContext.utils,
+                executionContext.console
+            );
+
+        } catch (error) {
+            console.error(`Error executing node ${this.nid}:`, error);
+            throw new Error(`Node execution failed: ${error.message}`);
+        }
+    }
+}

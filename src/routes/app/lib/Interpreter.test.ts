@@ -25,7 +25,7 @@ describe("Interpreter Flow Graph Tests", () => {
         type: 'node',
         position: { x: 0, y: 0 },
         data: {
-          nid: 'official_node_add',
+          nid: 'official_node_add/versions/official:1749481786062',
           input: { a: 9, b: 6 },
           output: {}
         }
@@ -217,7 +217,7 @@ describe("Interpreter Flow Graph Tests", () => {
         type: 'node',
         position: { x: 0, y: 0 },
         data: {
-          nid: 'add',
+          nid: 'official_node_add',
           input: { a: 3, b: 4 },
           output: {}
         }
@@ -227,7 +227,7 @@ describe("Interpreter Flow Graph Tests", () => {
         type: 'node',
         position: { x: 0, y: 100 },
         data: {
-          nid: 'add',
+          nid: 'official_node_add',
           input: { a: 10, b: 20 },
           output: {}
         }

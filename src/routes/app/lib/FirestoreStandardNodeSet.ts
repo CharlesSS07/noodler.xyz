@@ -33,7 +33,7 @@ async function simpleImageModificationNodes() {
         type: 'image/jimp',
     });
 
-    imageLoader.code = `
+    imageLoader.initializeCode(`
 console.log(inputs);
 const file = inputs.img;
 console.log("[image_loader] received file:", typeof file);
@@ -56,7 +56,7 @@ outputs.set('img', img);
 //   console.log("[image_loader] passthrough input:", input);
 //   outputs.set('img', input); // fallback
 // }
-`;
+`);
 
     const imageViewer =
         await nodeBluePrintController.initOfficialNodeBluePrint('image_viewer');
@@ -76,9 +76,9 @@ outputs.set('img', img);
         type: 'image/jimp',
     });
 
-    imageViewer.code = `
+    imageViewer.initializeCode(`
     outputs.set('img', inputs.img);
-  `;
+  `);
 
     // Use it to convert the base64 to jimp for supporting subsequent operations
     // const base64ToJimp = await nodeBluePrintController.initOfficialNodeBluePrint("base64_to_jimp");
@@ -131,11 +131,11 @@ outputs.set('img', img);
         type: 'image/jimp',
     });
 
-    grayscale.code = `
+    grayscale.initializeCode(`
 const img = inputs.img.clone();
 img.greyscale();
 outputs.set('img', img);
-`;
+`);
 
     const hsv = await nodeBluePrintController.initOfficialNodeBluePrint('hsv');
     hsv.title = 'HSV Shift Change';
@@ -184,7 +184,7 @@ outputs.set('img', img);
         type: 'image/jimp',
     });
 
-    hsv.code = 
+    hsv.initializeCode(
         'const img = inputs.img.clone();\n' +
             'const hue = inputs.hue;\n' +
             'const saturation = inputs.saturation;\n' +
@@ -198,7 +198,7 @@ outputs.set('img', img);
             '// Adjust value (0 to 100)\n' +
             'if (value) img.color([{ apply: "brighten", params: [value.valueOf()] }]);\n' +
             '\n' +
-            "outputs.set('img', img);\n";
+            "outputs.set('img', img);\n");
 }
 
 async function fileLoadingNodes() {
@@ -220,7 +220,7 @@ async function fileLoadingNodes() {
         type: 'json',
     });
 
-    loadExcel.code = "console.error('Not Implemented');";
+    loadExcel.initializeCode("console.error('Not Implemented');");
 }
 
 async function dropboxNodes() {
@@ -236,7 +236,7 @@ async function dropboxNodes() {
         params: new JIMPImageSocketParamsBuilder().build(),
     });
 
-    saveDropbox.code = "console.error('Not Implemented');";
+    saveDropbox.initializeCode("console.error('Not Implemented');");
 
     const loadDropbox =
         await nodeBluePrintController.initOfficialNodeBluePrint('load_dropbox');
@@ -249,7 +249,7 @@ async function dropboxNodes() {
         type: 'image/jimp',
     });
 
-    loadDropbox.code = "console.error('Not Implemented');";
+    loadDropbox.initializeCode("console.error('Not Implemented');");
 }
 
 async function timeRelatedNodes() {
@@ -347,7 +347,7 @@ async function timeRelatedNodes() {
         // params: { defaultValue: 0, min: 0, max: null, step: 1 }
     });
 
-    dateTimeParser.code = `
+    dateTimeParser.initializeCode(`
 const dateStr = inputs.date_time;
 const lang = inputs.lang || 'en-US';
 const locale = inputs.locale || 'en-US';
@@ -392,7 +392,7 @@ outputs.set('month', monthIndex);
 outputs.set('month_name', monthName);
 outputs.set('year', year);
 outputs.set('second_in_epoch', epochSeconds);
-`;
+`);
 
     const dateTimeConstructor =
         await nodeBluePrintController.initOfficialNodeBluePrint(
@@ -522,7 +522,7 @@ outputs.set('second_in_epoch', epochSeconds);
             .build(),
     });
 
-    dateTimeConstructor.code = `
+    dateTimeConstructor.initializeCode(`
 const lang = inputs.lang || 'en-US';
 const locale = inputs.locale || 'en-US';
 
@@ -540,7 +540,7 @@ const date = new Date(Date.UTC(year, month, day, hour, minute, second));
 const dateStr = date.toLocaleString(lang, { timeZone: locale, hour12: false });
 
 outputs.set('date_time', dateStr);
-`;
+`);
 }
 
 async function worldStateDataNodes() {
@@ -614,9 +614,9 @@ async function worldStateDataNodes() {
         type: 'number',
     });
 
-    weather.code = `
+    weather.initializeCode(`
   throw new Error("Weather Node is a Work In Progress. Please Check Back Later or Implement your Own.");
-`;
+`);
 }
 
 async function huggingfaceNodes() {
@@ -678,7 +678,7 @@ async function huggingfaceNodes() {
         type: 'number',
     });
 
-    llm.code = `
+    llm.initializeCode(`
 const hf_token = inputs.hf_token;
 const inference = await utils.APIConnectionManager.getConnector("huggingface-inference").getAPI();
 const output = await inference.textGeneration({
@@ -688,7 +688,7 @@ const output = await inference.textGeneration({
 
 outputs.set('output_text', output.generated_text);
 outputs.set('output_text_no_prompt', output.generated_text);
-`;
+`);
 
     // 	await promptdesign.setUnitTest(`
     // const inputs = new Map();
@@ -759,7 +759,7 @@ outputs.set('output_text_no_prompt', output.generated_text);
         type: 'image/jimp',
     });
 
-    text_to_image.code = `
+    text_to_image.initializeCode(`
 // inputs, outputs, utils
 const hf_token = inputs.hf_token;
 const inference = await utils.APIConnectionManager.getConnector("huggingface-inference").getAPI();
@@ -772,7 +772,7 @@ const buffer = await new Response(blob).arrayBuffer();
 const image = await utils.Jimp.read(buffer);
 
 outputs.set('image', image);
-`;
+`);
 }
 
 async function aiDemoNodes() {
@@ -794,9 +794,9 @@ async function aiDemoNodes() {
         type: 'image/jimp',
     });
 
-    colorize.code = `
+    colorize.initializeCode(`
   throw new Error("Colorizer Node is a Work In Progress. Please Check Back Later or Implement your Own.");
-`;
+`);
 
     const superResolution =
         await nodeBluePrintController.initOfficialNodeBluePrint(
@@ -818,7 +818,7 @@ async function aiDemoNodes() {
         type: 'image/jimp',
     });
 
-    superResolution.code = `
+    superResolution.initializeCode(`
 throw new Error("Super resolution Node is a Work In Progress. Please Check Back Later or Implement your Own.");
 const upscaler = await pipeline('image-to-image', 'Xenova/swin2SR-classical-sr-x2-64');
 const url = 'https://huggingface.co/datasets/Xenova/transformers.js-docs/resolve/main/butterfly.jpg';
@@ -829,7 +829,7 @@ const output = await upscaler(url);
 //   height: 512,
 //   channels: 3
 // }
-`;
+`);
 
     const objectBackgroundSeperation =
         await nodeBluePrintController.initOfficialNodeBluePrint(
@@ -863,10 +863,10 @@ const output = await upscaler(url);
         type: 'image/jimp',
     });
 
-    objectBackgroundSeperation.code = `
+    objectBackgroundSeperation.initializeCode(`
 inputs.img.greyscale();
 outputs.set('img', inputs.img);
-`;
+`);
 }
 
 async function promptDesignNodes() {
@@ -906,7 +906,7 @@ async function promptDesignNodes() {
         type: 'string',
     });
 
-    joinText.code = "outputs.set('text', inputs.text1+inputs.text2+inputs.text3+inputs.text4);";
+    joinText.initializeCode("outputs.set('text', inputs.text1+inputs.text2+inputs.text3+inputs.text4);");
 
     const splitText =
         await nodeBluePrintController.initOfficialNodeBluePrint('split_text');
@@ -932,7 +932,7 @@ async function promptDesignNodes() {
         type: 'unknown[]',
     });
 
-    splitText.code = "outputs.set('splitText', inputs.text.split(inputs.sep));";
+    splitText.initializeCode("outputs.set('splitText', inputs.text.split(inputs.sep));");
 
 }
 
@@ -963,10 +963,10 @@ async function googleDriveNodes() {
         type: 'string',
     });
 
-    googleDrive.code = `
+    googleDrive.initializeCode(`
 inputs.img.greyscale();
 outputs.set('img', inputs.img);
-`;
+`);
 
     const sendEmail =
         await nodeBluePrintController.initOfficialNodeBluePrint(
@@ -1017,10 +1017,10 @@ outputs.set('img', inputs.img);
         params: new StringSocketParamsBuilder('').asParagraph().build(),
     });
 
-    sendEmail.code = `
+    sendEmail.initializeCode(`
 inputs.img.greyscale();
 outputs.set('img', inputs.img);
-`;
+`);
 }
 
 async function jimpNodes() {
@@ -1058,7 +1058,7 @@ async function jimpNodes() {
         type: 'image/jimp',
     });
 
-    newBlankImage.code = "outputs.set('image', new Jimp({ width: inputs.width, height: inputs.height, color: inputs.color }));";
+    newBlankImage.initializeCode("outputs.set('image', new Jimp({ width: inputs.width, height: inputs.height, color: inputs.color }));");
 
     const resize =
         await nodeBluePrintController.initOfficialNodeBluePrint(
@@ -1100,13 +1100,13 @@ async function jimpNodes() {
         type: 'image/jimp',
     });
 
-    resize.code = 
+    resize.initializeCode(
         'const img2 = inputs.image.clone();' +
             'img2.resize({\n' +
             '  w: Math.floor(inputs.width,\n' +
             '  h: Math.floor(inputs.height\n' +
             '});\n' +
-            "outputs.set('image', img2);";
+            "outputs.set('image', img2);");
 }
 
 async function jsonNodes() {
@@ -1128,11 +1128,11 @@ async function jsonNodes() {
         type: 'unknown',
     });
 
-    jsonEditorAndViewer.code = `
+    jsonEditorAndViewer.initializeCode(`
     const jsonObject = JSON.parse(inputs.jsonObject);
     outputs.set('jsonObject', jsonObject);
     console.log('jsonObject', jsonObject, typeof jsonObject);
-    `;
+    `);
 
     const jsonToString =
         await nodeBluePrintController.initOfficialNodeBluePrint(
@@ -1154,7 +1154,7 @@ async function jsonNodes() {
         type: 'string',
     });
 
-    jsonToString.code = "outputs.set('jsonString', JSON.stringify(inputs.jsonObject));";
+    jsonToString.initializeCode("outputs.set('jsonString', JSON.stringify(inputs.jsonObject));");
 }
 
 async function htmlNodes() {
@@ -1170,7 +1170,7 @@ async function htmlNodes() {
         params: new StringSocketParamsBuilder('').asParagraph().build(),
     });
 
-    htmlViewer.code = "console.log('Rendered HTML');";
+    htmlViewer.initializeCode("console.log('Rendered HTML');");
 
     const htmlElement =
         await nodeBluePrintController.initOfficialNodeBluePrint(
@@ -1208,7 +1208,7 @@ async function htmlNodes() {
         type: 'string',
     });
 
-    htmlElement.code = 
+    htmlElement.initializeCode(
         // TODO: implement attributes, hope and pray this parses valid html
         `
 let d = '<'+inputs.tag;
@@ -1227,7 +1227,7 @@ if (inputs.attributes) {
 }
 d += '>'+inputs.innerHTML+'</'+inputs.tag+'>'
 outputs.set('html', d);
-`;
+`);
 
     const fetchURL =
         await nodeBluePrintController.initOfficialNodeBluePrint('fetch_url');
@@ -1247,9 +1247,9 @@ outputs.set('html', d);
         type: 'string',
     });
 
-    fetchURL.code = `
+    fetchURL.initializeCode(`
   outputs.set('text', inputs.url);
-`;
+`);
 }
 
 async function fileNodes() {
@@ -1272,9 +1272,9 @@ async function fileNodes() {
         type: 'string',
     });
 
-    loadCSV.code = `
+    loadCSV.initializeCode(`
     outputs.set('text', inputs.file.text);
-  `;
+  `);
 
     const loadTSV =
         await nodeBluePrintController.initOfficialNodeBluePrint('load_tsv');
@@ -1295,9 +1295,9 @@ async function fileNodes() {
         type: 'string',
     });
 
-    loadTSV.code = `
+    loadTSV.initializeCode(`
     outputs.set('text', inputs.file.text);
-  `;
+  `);
 }
 
 async function rank3Nodes() {
@@ -1329,7 +1329,7 @@ async function rank3Nodes() {
         type: 'image/jimp',
     });
 
-    imageCropper.code = `
+    imageCropper.initializeCode(`
   const { x, y, width, height } = inputs.crop;
 
   console.log("[image_cropper] Received crop params:", inputs.crop);
@@ -1346,7 +1346,7 @@ async function rank3Nodes() {
   console.log("[image_cropper] Cropped preview (base64):", base64.substring(0, 100) + "...");
 
   outputs.set("img", cropped);
-`;
+`);
 }
 
 async function basicMathNodes() {
@@ -1375,12 +1375,12 @@ async function basicMathNodes() {
         type: 'number',
     });
     
-    addNode.code = `
+    addNode.initializeCode(`
         const a = inputs.a || 0;
         const b = inputs.b || 0;
         const result = a + b;
         outputs.set('result', result);
-    `;
+    `);
 
     // Subtract node
     const subtractNode = await nodeBluePrintController.initOfficialNodeBluePrint('subtract');
@@ -1407,12 +1407,12 @@ async function basicMathNodes() {
         type: 'number',
     });
     
-    subtractNode.code = `
+    subtractNode.initializeCode(`
         const a = inputs.a || 0;
         const b = inputs.b || 0;
         const result = a - b;
         outputs.set('result', result);
-    `;
+    `);
 
     // Multiply node
     const multiplyNode = await nodeBluePrintController.initOfficialNodeBluePrint('multiply');
@@ -1439,12 +1439,12 @@ async function basicMathNodes() {
         type: 'number',
     });
     
-    multiplyNode.code = `
+    multiplyNode.initializeCode(`
         const a = inputs.a || 1;
         const b = inputs.b || 1;
         const result = a * b;
         outputs.set('result', result);
-    `;
+    `);
 
     // Divide node  
     const divideNode = await nodeBluePrintController.initOfficialNodeBluePrint('divide');
@@ -1471,7 +1471,7 @@ async function basicMathNodes() {
         type: 'number',
     });
     
-    divideNode.code = `
+    divideNode.initializeCode(`
         const a = inputs.a || 1;
         const b = inputs.b || 1;
         if (b === 0) {
@@ -1479,7 +1479,7 @@ async function basicMathNodes() {
         }
         const result = a / b;
         outputs.set('result', result);
-    `;
+    `);
 }
 
 export async function generateStandardNodeSuite() {
