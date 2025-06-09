@@ -105,6 +105,7 @@ export class FirestoreNodeBluePrintControllerFactoryInterface
         return nodeBluePrintController;
     }
 }
+
 export class FirestoreNodeBluePrintController
     implements NodeBluePrintControllerInterface
 {
@@ -147,8 +148,8 @@ export class FirestoreNodeBluePrintController
             output_sockets: nodeBluePrint.output_sockets,
             output_socket_order: nodeBluePrint.output_socket_order,
 
-            user_defined_code_snippet: nodeBluePrint.user_defined_code_snippet,
-            trust_level: 'Official',
+            user_defined_code_snippet: nodeBluePrint.user_defined_code,
+            trust_level: 'New',
         } as unknown as NodeBluePrintModel;
 
         const nodeBluePrintController = new FirestoreNodeBluePrintController(
@@ -295,7 +296,7 @@ export class FirestoreNodeBluePrintController
             }
 
             const nodeData = doc.data() as NodeBluePrintModel;
-            const code = nodeData.user_defined_code_snippet;
+            const code = nodeData.user_defined_code;
 
             if (!code || code.trim() === '') {
                 throw new Error(`No code defined for node: ${this.nid}`);

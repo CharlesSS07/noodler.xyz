@@ -3,4 +3,4 @@
     export let size: number = 5;
 </script>
 
-<ChrommaticAbberationDefocusText textSize={size} font="monaco">noodler</ChrommaticAbberationDefocusText>
+<ChrommaticAbberationDefocusText textSize={size} font="monaco">NOODLER</ChrommaticAbberationDefocusText>
