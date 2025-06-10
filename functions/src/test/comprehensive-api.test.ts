@@ -3,6 +3,12 @@
  * Tests every function with proper authentication and error cases
  */
 
+// IMPORTANT: Set environment variables BEFORE importing any Firebase modules
+process.env.FIRESTORE_EMULATOR_HOST = "localhost:8080";
+process.env.FIREBASE_AUTH_EMULATOR_HOST = "localhost:9099";
+process.env.GCLOUD_PROJECT = "demo-project";
+process.env.FIREBASE_PROJECT_ID = "demo-project";
+
 import { describe, it, before } from 'mocha';
 const { expect } = require('chai');
 import fetch from 'node-fetch';
@@ -36,6 +42,10 @@ const callFunction = async (functionName: string, data: any, uid: string = 'test
     const result = await functions[functionName].run(request);
     return result;
   } catch (error) {
+    // Preserve HttpsError structure for proper test validation
+    if (error.code && error.message) {
+      throw error; // Re-throw HttpsError as-is
+    }
     throw new Error(`${functionName} failed: ${error.message}`);
   }
 };
@@ -70,6 +80,14 @@ describe('Node Blueprint API - Comprehensive Test Suite', () => {
   let testNodeId: string;
   let testNodeKey: string;
   let deployedNodeId: string;
+
+  // Set up test data before all tests
+  before(async () => {
+    // Create a test node that can be used by multiple test suites
+    const result = await callFunction('createNodeBlueprint', { hint: 'shared_test' });
+    testNodeId = result.nodeId;
+    testNodeKey = result.nodeId.split('/')[0];
+  });
 
   describe('Authentication Tests', () => {
     it('should reject unauthenticated requests to createNodeBlueprint', async () => {

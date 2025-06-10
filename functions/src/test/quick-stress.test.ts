@@ -51,7 +51,6 @@ describe('Quick Stress Test - Node Blueprint API', function() {
   let createdNodes: Array<{ nodeId: string, nodeKey: string, hint: string }> = [];
 
   it('should create 50 random nodes quickly', async () => {
-    console.log('\n🚀 Creating 50 random nodes...');
     
     const nodePromises = [];
     for (let i = 0; i < 50; i++) {
@@ -67,11 +66,9 @@ describe('Quick Stress Test - Node Blueprint API', function() {
     createdNodes = await Promise.all(nodePromises);
     
     expect(createdNodes).to.have.length(50);
-    console.log(`✅ Successfully created ${createdNodes.length} nodes`);
   });
 
   it('should update documentation for all nodes', async () => {
-    console.log('\n📝 Updating documentation for all nodes...');
     
     const updatePromises = createdNodes.map((node, index) => {
       return callFunction('updateNodeBlueprintDocs', {
@@ -84,11 +81,9 @@ describe('Quick Stress Test - Node Blueprint API', function() {
     const results = await Promise.all(updatePromises);
     
     expect(results.every(r => r.success)).to.be.true;
-    console.log(`✅ Successfully updated documentation for ${results.length} nodes`);
   });
 
   it('should update code for all nodes', async () => {
-    console.log('\n💻 Updating code for all nodes...');
     
     const updatePromises = createdNodes.map(node => {
       return callFunction('updateNodeBlueprintSpec', {
@@ -100,11 +95,9 @@ describe('Quick Stress Test - Node Blueprint API', function() {
     const results = await Promise.all(updatePromises);
     
     expect(results.every(r => r.success)).to.be.true;
-    console.log(`✅ Successfully updated code for ${results.length} nodes`);
   });
 
   it('should deploy 15 random nodes', async () => {
-    console.log('\n🚀 Deploying 15 random nodes...');
     
     // Select 15 random nodes to deploy
     const nodesToDeploy = [];
@@ -119,11 +112,9 @@ describe('Quick Stress Test - Node Blueprint API', function() {
     const results = await Promise.all(deployPromises);
     
     expect(results.every(r => r.success)).to.be.true;
-    console.log(`✅ Successfully deployed ${results.length} nodes`);
   });
 
   it('should fork 20 random nodes', async () => {
-    console.log('\n🍴 Forking 20 random nodes...');
     
     const nodesToFork = [];
     for (let i = 0; i < 20; i++) {
@@ -137,11 +128,9 @@ describe('Quick Stress Test - Node Blueprint API', function() {
     const results = await Promise.all(forkPromises);
     
     expect(results.every(r => r.nodeId)).to.be.true;
-    console.log(`✅ Successfully forked ${results.length} nodes`);
   });
 
   it('should search for nodes with various terms', async () => {
-    console.log('\n🔍 Searching for nodes...');
     
     const searchTerms = ['calculator', 'processor', 'filter', 'node', 'test'];
     const searchPromises = searchTerms.map(term => {
@@ -153,16 +142,11 @@ describe('Quick Stress Test - Node Blueprint API', function() {
 
     const searchResults = await Promise.all(searchPromises);
     
-    searchResults.forEach(result => {
-      console.log(`  🔍 "${result.term}": ${result.count} results`);
-    });
 
     expect(searchResults.every(r => r.count >= 0)).to.be.true;
-    console.log(`✅ Successfully completed ${searchResults.length} searches`);
   });
 
   it('should verify random sampling of created nodes', async () => {
-    console.log('\n✅ Verifying random node samples...');
     
     // Test 10 random nodes
     const samplePromises = [];
@@ -177,12 +161,10 @@ describe('Quick Stress Test - Node Blueprint API', function() {
     const samples = await Promise.all(samplePromises);
     const successCount = samples.filter(s => s.success).length;
     
-    console.log(`✅ Successfully verified ${successCount}/${samples.length} random nodes`);
     expect(successCount).to.be.greaterThan(8); // Allow for some variance
   });
 
   it('should perform concurrent operations stress test', async () => {
-    console.log('\n⚡ Performing concurrent operations...');
     
     const concurrentTasks = [
       // Create 5 new nodes
@@ -203,19 +185,11 @@ describe('Quick Stress Test - Node Blueprint API', function() {
       })
     ];
 
-    const startTime = Date.now();
     const results = await Promise.allSettled(concurrentTasks);
-    const endTime = Date.now();
 
     const successful = results.filter(r => r.status === 'fulfilled').length;
-    const failed = results.filter(r => r.status === 'rejected').length;
 
-    console.log(`  Concurrent operations: ${concurrentTasks.length}`);
-    console.log(`  Successful: ${successful}`);
-    console.log(`  Failed: ${failed}`);
-    console.log(`  Total time: ${endTime - startTime}ms`);
 
     expect(successful).to.be.greaterThan(concurrentTasks.length * 0.8); // 80% success rate
-    console.log(`✅ Concurrent operations test passed`);
   });
 });

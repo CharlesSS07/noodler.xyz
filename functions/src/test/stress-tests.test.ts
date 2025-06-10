@@ -183,7 +183,6 @@ describe('Node Blueprint API - Stress Tests', function() {
 
   describe('Mass Node Creation', () => {
     it(`should create ${STRESS_TEST_CONFIG.totalNodes} nodes in batches`, async () => {
-      console.log(`\n🚀 Creating ${STRESS_TEST_CONFIG.totalNodes} random nodes...`);
       
       const nodeSpecs = Array.from({ length: STRESS_TEST_CONFIG.totalNodes }, (_, i) => 
         generateRandomNode(i + 1)
@@ -228,7 +227,6 @@ describe('Node Blueprint API - Stress Tests', function() {
       );
 
       expect(createdNodes).to.have.length(STRESS_TEST_CONFIG.totalNodes);
-      console.log(`✅ Successfully created ${createdNodes.length} nodes`);
     });
 
     it('should verify random sampling of created nodes', async () => {
@@ -249,7 +247,6 @@ describe('Node Blueprint API - Stress Tests', function() {
         expect(retrieved.user_defined_code_snippet.trim()).to.equal(node.data.code.trim());
       }
 
-      console.log(`✅ Verified ${sampleSize} randomly sampled nodes`);
     });
   });
 
@@ -259,7 +256,6 @@ describe('Node Blueprint API - Stress Tests', function() {
         Math.floor(createdNodes.length * STRESS_TEST_CONFIG.deploymentsPercentage)
       );
 
-      console.log(`\n🚀 Deploying ${nodesToDeploy.length} nodes...`);
 
       const deployNode = async (node: any, index: number) => {
         try {
@@ -289,7 +285,6 @@ describe('Node Blueprint API - Stress Tests', function() {
       );
 
       expect(deployedNodes).to.have.length(nodesToDeploy.length);
-      console.log(`✅ Successfully deployed ${deployedNodes.length} nodes`);
     });
 
     it('should verify deployed nodes are read-only', async () => {
@@ -315,7 +310,6 @@ describe('Node Blueprint API - Stress Tests', function() {
         }
       }
 
-      console.log(`✅ Verified ${sampleSize} deployed nodes are read-only`);
     });
   });
 
@@ -332,7 +326,6 @@ describe('Node Blueprint API - Stress Tests', function() {
         }
       }
 
-      console.log(`\n🚀 Creating ${forkTasks.length} forks from ${nodesToFork.length} nodes...`);
 
       const forkNode = async (task: any, index: number) => {
         try {
@@ -358,7 +351,6 @@ describe('Node Blueprint API - Stress Tests', function() {
       );
 
       expect(forkedNodes).to.have.length(forkTasks.length);
-      console.log(`✅ Successfully created ${forkedNodes.length} forks`);
     });
 
     it('should verify fork relationships', async () => {
@@ -376,13 +368,11 @@ describe('Node Blueprint API - Stress Tests', function() {
         expect(forkData.trust_level).to.equal('New');
       }
 
-      console.log(`✅ Verified ${sampleSize} fork relationships`);
     });
   });
 
   describe('Mass Search Operations', () => {
     it('should perform searches with known substrings', async () => {
-      console.log(`\n🔍 Performing search tests with known terms...`);
       
       const searchResults: Array<{ term: string, count: number, time: number }> = [];
 
@@ -403,7 +393,6 @@ describe('Node Blueprint API - Stress Tests', function() {
           time: searchTime
         });
 
-        console.log(`  🔍 "${term}": ${result.results.length} results (${searchTime}ms)`);
       }
 
       // Verify that searches return reasonable results
@@ -411,10 +400,6 @@ describe('Node Blueprint API - Stress Tests', function() {
       const searchesWithResults = searchResults.filter(r => r.count > 0).length;
       const averageSearchTime = searchResults.reduce((sum, r) => sum + r.time, 0) / totalSearches;
 
-      console.log(`\n📊 Search Statistics:`);
-      console.log(`  Total searches: ${totalSearches}`);
-      console.log(`  Searches with results: ${searchesWithResults}`);
-      console.log(`  Average search time: ${averageSearchTime.toFixed(2)}ms`);
 
       expect(averageSearchTime).to.be.lessThan(2000); // Should be under 2 seconds
       expect(searchesWithResults).to.be.greaterThan(0); // At least some searches should return results
@@ -432,7 +417,6 @@ describe('Node Blueprint API - Stress Tests', function() {
         
         expect(result).to.have.property('results');
         expect(result.results).to.be.an('array');
-        console.log(`  🔍 "${term}": ${result.results.length} results`);
       }
     });
 
@@ -462,17 +446,9 @@ describe('Node Blueprint API - Stress Tests', function() {
 
   describe('Performance Analysis', () => {
     it('should analyze overall system performance', async () => {
-      console.log(`\n📊 Performance Analysis Summary:`);
-      console.log(`  Total nodes created: ${createdNodes.length}`);
-      console.log(`  Total nodes deployed: ${deployedNodes.length}`);
-      console.log(`  Total forks created: ${forkedNodes.length}`);
-      
-      const totalOperations = createdNodes.length + deployedNodes.length + forkedNodes.length;
-      console.log(`  Total operations: ${totalOperations}`);
 
       // Verify data integrity with random sampling
       const sampleSize = Math.min(20, createdNodes.length);
-      console.log(`\n🔍 Performing data integrity check on ${sampleSize} random nodes...`);
       
       let successfulReads = 0;
       for (let i = 0; i < sampleSize; i++) {
@@ -488,13 +464,11 @@ describe('Node Blueprint API - Stress Tests', function() {
       }
 
       const integrityRate = (successfulReads / sampleSize) * 100;
-      console.log(`  Data integrity rate: ${integrityRate.toFixed(1)}%`);
       
       expect(integrityRate).to.be.greaterThan(95); // 95% integrity threshold
     });
 
     it('should test concurrent operations', async () => {
-      console.log(`\n⚡ Testing concurrent operations...`);
       
       // Perform multiple different operations concurrently
       const concurrentTasks = [
@@ -516,19 +490,10 @@ describe('Node Blueprint API - Stress Tests', function() {
         })
       ];
 
-      const startTime = Date.now();
       const results = await Promise.allSettled(concurrentTasks);
-      const endTime = Date.now();
 
       const successful = results.filter(r => r.status === 'fulfilled').length;
-      const failed = results.filter(r => r.status === 'rejected').length;
-      const totalTime = endTime - startTime;
 
-      console.log(`  Concurrent operations: ${concurrentTasks.length}`);
-      console.log(`  Successful: ${successful}`);
-      console.log(`  Failed: ${failed}`);
-      console.log(`  Total time: ${totalTime}ms`);
-      console.log(`  Average time per operation: ${(totalTime / concurrentTasks.length).toFixed(2)}ms`);
 
       expect(successful).to.be.greaterThan(concurrentTasks.length * 0.8); // 80% success rate
     });

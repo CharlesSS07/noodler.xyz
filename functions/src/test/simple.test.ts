@@ -26,7 +26,6 @@ describe("Function Exports", () => {
       expect(functions).to.have.property("searchNodeBlueprintsByText");
       expect(functions).to.have.property("healthCheck");
       
-      console.log("✓ All functions exported successfully");
     } catch (error) {
       console.error("Import error:", error);
       throw error;
@@ -45,7 +44,6 @@ describe("Function Exports", () => {
     expect(functions.deployNodeBlueprint).to.have.property("run");
     expect(functions.searchNodeBlueprintsByText).to.have.property("run");
     
-    console.log("✓ All functions have proper callable structure");
   });
 
   it("should create and retrieve official_node_add", async () => {
@@ -59,7 +57,6 @@ describe("Function Exports", () => {
       };
 
       // First create the official_node_add node blueprint
-      console.log("Creating official_node_add node blueprint...");
       const createRequest = {
         auth: mockAuth,
         data: { hint: "add" },
@@ -67,7 +64,6 @@ describe("Function Exports", () => {
       };
 
       const createResult = await functions.createNodeBlueprint.run(createRequest);
-      console.log("Created node:", createResult.nodeId);
 
       // Update the node to match the add node from FirestoreStandardNodeSet
       const updateDocsRequest = {
@@ -81,7 +77,6 @@ describe("Function Exports", () => {
       };
 
       await functions.updateNodeBlueprintDocs.run(updateDocsRequest);
-      console.log("Updated node documentation");
 
       // Update the node specification
       const updateSpecRequest = {
@@ -122,9 +117,8 @@ describe("Function Exports", () => {
       };
 
       await functions.updateNodeBlueprintSpec.run(updateSpecRequest);
-      console.log("Updated node specification");
 
-      // Now retrieve and display the complete node data
+      // Now retrieve and verify the complete node data
       const getNodeRequest = {
         auth: mockAuth,
         data: { nodeId: createResult.nodeId },
@@ -132,8 +126,11 @@ describe("Function Exports", () => {
       };
 
       const nodeData = await functions.getNodeBlueprint.run(getNodeRequest);
-      console.log("\n=== OFFICIAL_NODE_ADD DATA ===");
-      console.log(JSON.stringify(nodeData, null, 2));
+      
+      // Verify the node was created correctly
+      expect(nodeData).to.have.property('node_key');
+      expect(nodeData).to.have.property('title', 'Add Numbers');
+      expect(nodeData).to.have.property('documentation', 'Adds two numbers together');
 
     } catch (error) {
       console.error("Error in test:", error);
@@ -151,7 +148,6 @@ describe("Function Exports", () => {
       };
 
       // Create multiply node
-      console.log("\n=== Creating multiply node ===");
       const multiplyResult = await functions.createNodeBlueprint.run({
         auth: mockAuth,
         data: { hint: "multiply" },
@@ -193,10 +189,7 @@ describe("Function Exports", () => {
         rawRequest: {}
       });
 
-      console.log("Created multiply node:", multiplyResult.nodeId);
-
       // Create greyscale image node
-      console.log("\n=== Creating greyscale node ===");
       const greyscaleResult = await functions.createNodeBlueprint.run({
         auth: mockAuth,
         data: { hint: "greyscale" },
@@ -236,17 +229,12 @@ describe("Function Exports", () => {
         rawRequest: {}
       });
 
-      console.log("Created greyscale node:", greyscaleResult.nodeId);
-
       // Fork the multiply node
-      console.log("\n=== Forking multiply node ===");
       const forkResult = await functions.forkNodeBlueprint.run({
         auth: mockAuth,
         data: { nodeId: multiplyResult.nodeId },
         rawRequest: {}
       });
-
-      console.log("Forked node:", forkResult.nodeId);
 
       // Update the forked node
       await functions.updateNodeBlueprintDocs.run({
@@ -277,57 +265,40 @@ describe("Function Exports", () => {
         rawRequest: {}
       });
 
-      console.log("Updated forked node");
-
       // Deploy the original multiply node
-      console.log("\n=== Deploying multiply node ===");
       await functions.deployNodeBlueprint.run({
         auth: mockAuth,
         data: { nodeId: multiplyResult.nodeId },
         rawRequest: {}
       });
 
-      console.log("Deployed multiply node");
-
-      // Test search functionality
-      console.log("\n=== Testing search functionality ===");
-      
-      // Search for "multiply"
+      // Test search functionality - verify the search finds our created nodes
       const searchMultiply = await functions.searchNodeBlueprintsByText.run({
         auth: mockAuth,
         data: { substring: "multiply" },
         rawRequest: {}
       });
       
-      console.log("Search results for 'multiply':");
-      console.log(JSON.stringify(searchMultiply, null, 2));
-      // check that we got the right node back
       expect(searchMultiply).to.have.property('results');
       expect(searchMultiply.results).to.be.an('array');
       expect(searchMultiply.results.length).to.be.greaterThan(0);
 
-      // Search for "image"
       const searchImage = await functions.searchNodeBlueprintsByText.run({
         auth: mockAuth,
         data: { substring: "image" },
         rawRequest: {}
       });
       
-      console.log("\nSearch results for 'image':");
-      console.log(JSON.stringify(searchImage, null, 2));
       expect(searchImage).to.have.property('results');
       expect(searchImage.results).to.be.an('array');
       expect(searchImage.results.length).to.be.greaterThan(0);
 
-      // Search for "number"
       const searchNumber = await functions.searchNodeBlueprintsByText.run({
         auth: mockAuth,
         data: { substring: "number" },
         rawRequest: {}
       });
       
-      console.log("\nSearch results for 'number':");
-      console.log(JSON.stringify(searchNumber, null, 2));
       expect(searchNumber).to.have.property('results');
       expect(searchNumber.results).to.be.an('array');
       expect(searchNumber.results.length).to.be.greaterThan(0);
@@ -347,10 +318,8 @@ describe("Function Exports", () => {
         token: {}
       };
 
-      console.log("\n=== NODE LIFECYCLE TEST ===");
 
       // 1. Create initial node
-      console.log("1. Creating text processing node...");
       const createResult = await functions.createNodeBlueprint.run({
         auth: mockAuth,
         data: { hint: "text_processor" },
@@ -358,10 +327,8 @@ describe("Function Exports", () => {
       });
 
       const originalNodeId = createResult.nodeId;
-      console.log("Created:", originalNodeId);
 
-      // 2. Update documentation 
-      console.log("2. Updating documentation...");
+      // 2. Update documentation
       await functions.updateNodeBlueprintDocs.run({
         auth: mockAuth,
         data: {
@@ -373,7 +340,6 @@ describe("Function Exports", () => {
       });
 
       // 3. Update specification
-      console.log("3. Updating specification...");
       await functions.updateNodeBlueprintSpec.run({
         auth: mockAuth,
         data: {
@@ -400,7 +366,6 @@ describe("Function Exports", () => {
       });
 
       // 4. Fork the node
-      console.log("4. Forking node...");
       const forkResult = await functions.forkNodeBlueprint.run({
         auth: mockAuth,
         data: { nodeId: originalNodeId },
@@ -408,10 +373,8 @@ describe("Function Exports", () => {
       });
 
       const forkedNodeId = forkResult.nodeId;
-      console.log("Forked:", forkedNodeId);
 
       // 5. Update the fork
-      console.log("5. Updating forked node...");
       await functions.updateNodeBlueprintDocs.run({
         auth: mockAuth,
         data: {
@@ -440,7 +403,6 @@ describe("Function Exports", () => {
       });
 
       // 6. Deploy original node
-      console.log("6. Deploying original node...");
       await functions.deployNodeBlueprint.run({
         auth: mockAuth,
         data: { nodeId: originalNodeId },
@@ -448,18 +410,17 @@ describe("Function Exports", () => {
       });
 
       // 7. Search for nodes
-      console.log("7. Testing search...");
       const searchResults = await functions.searchNodeBlueprintsByText.run({
         auth: mockAuth,
         data: { substring: "text processor" },
         rawRequest: {}
       });
 
-      console.log("Search results for 'text processor':");
-      console.log(JSON.stringify(searchResults, null, 2));
+      // Verify search results
+      expect(searchResults).to.have.property('results');
+      expect(searchResults.results).to.be.an('array');
 
       // 8. Verify we can't update deployed node
-      console.log("8. Verifying deployed node protection...");
       try {
         await functions.updateNodeBlueprintSpec.run({
           auth: mockAuth,
@@ -469,13 +430,13 @@ describe("Function Exports", () => {
           },
           rawRequest: {}
         });
-        console.log("ERROR: Should not be able to update deployed node!");
+        expect.fail("Should not be able to update deployed node!");
       } catch (error) {
-        console.log("✓ Correctly prevented updating deployed node:", error.code);
+        // Expected - deployed nodes should be read-only
+        expect(error.code).to.be.a('string');
       }
 
       // 9. Get final state of both nodes
-      console.log("9. Final node states...");
       const originalData = await functions.getNodeBlueprint.run({
         auth: mockAuth,
         data: { nodeId: originalNodeId },
@@ -488,18 +449,15 @@ describe("Function Exports", () => {
         rawRequest: {}
       });
 
-      console.log("\nOriginal node (deployed):");
-      console.log("- Title:", originalData.title);
-      console.log("- Deployed:", originalData.is_deployed);
-      console.log("- Trust Level:", originalData.trust_level);
-
-      console.log("\nForked node (development):");
-      console.log("- Title:", forkedData.title);
-      console.log("- Deployed:", forkedData.is_deployed);
-      console.log("- Trust Level:", forkedData.trust_level);
-      console.log("- Predecessor:", forkedData.predecessor_nid);
-
-      console.log("\n✓ Lifecycle test completed successfully!");
+      // Verify final node states
+      expect(originalData).to.have.property('title');
+      expect(originalData).to.have.property('is_deployed', true);
+      expect(originalData).to.have.property('trust_level');
+      
+      expect(forkedData).to.have.property('title');
+      expect(forkedData).to.have.property('is_deployed', false);
+      expect(forkedData).to.have.property('trust_level');
+      expect(forkedData).to.have.property('predecessor_nid', originalNodeId);
 
     } catch (error) {
       console.error("Error in lifecycle test:", error);
@@ -519,8 +477,6 @@ describe("Function Exports", () => {
     
     const db = getFirestore();
     
-    console.log("\\n=== FIRESTORE EMULATOR VERIFICATION ===");
-    console.log("Firestore emulator host:", process.env.FIRESTORE_EMULATOR_HOST);
     
     try {
       // Write test data directly to Firestore
@@ -535,49 +491,33 @@ describe("Function Exports", () => {
         }
       });
       
-      console.log("✓ Successfully wrote test data to Firestore");
       
       // Read it back
       const docSnapshot = await testDoc.get();
       if (docSnapshot.exists) {
-        console.log("✓ Successfully read test data from Firestore:");
-        console.log(JSON.stringify(docSnapshot.data(), null, 2));
+        const data = docSnapshot.data();
+        expect(data).to.have.property('message', 'Direct write to Firestore emulator');
+        expect(data).to.have.property('test_data');
       } else {
         throw new Error("Test document not found in Firestore");
       }
       
-      // List all collections to see what's there
-      console.log("\\n--- Firestore Collections ---");
+      // List all collections to verify they exist
       const collections = await db.listCollections();
-      for (const collection of collections) {
-        console.log(`Collection: ${collection.id}`);
-        
-        // Show some documents in each collection
-        const docs = await collection.limit(3).get();
-        docs.forEach(doc => {
-          console.log(`  Document: ${doc.id}`);
-          const data = doc.data();
-          console.log(`    Keys: ${Object.keys(data).join(', ')}`);
-        });
-      }
+      expect(collections.length).to.be.greaterThan(0);
       
       // Check metadata collections specifically
-      console.log("\\n--- Checking Metadata Collections ---");
       const nodesCollection = db.collection("nodes");
       const nodesDocs = await nodesCollection.limit(3).get();
       
-      for (const nodeDoc of nodesDocs.docs) {
-        console.log(`Node: ${nodeDoc.id}`);
-        const metadataCollection = nodeDoc.ref.collection("metadata");
+      // Verify we can access node metadata
+      if (nodesDocs.size > 0) {
+        const firstNode = nodesDocs.docs[0];
+        const metadataCollection = firstNode.ref.collection("metadata");
         const metadataDocs = await metadataCollection.get();
-        
-        console.log(`  Metadata docs: ${metadataDocs.size}`);
-        metadataDocs.forEach(metaDoc => {
-          console.log(`    ${metaDoc.id}:`, metaDoc.data());
-        });
+        // Metadata collection may or may not exist depending on test order
+        expect(metadataDocs).to.be.an('object');
       }
-
-      console.log("\\n✓ Firestore emulator verification completed!");
       
     } catch (error) {
       console.error("ERROR: Firestore emulator verification failed:", error);

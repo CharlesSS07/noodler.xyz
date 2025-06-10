@@ -81,6 +81,28 @@ export const nodeBlueprintManipulationAPI = {
       }
 
       const data = nodeDoc.data() as NodeBlueprintData;
+      
+      // Also get metadata which may contain updated title and documentation
+      const nodeKey = nodeId.split('/')[0];
+      try {
+        const metadataRef = db.collection(NODES_COLLECTION).doc(nodeKey).collection("metadata").doc("main");
+        const metadataDoc = await metadataRef.get();
+        
+        if (metadataDoc.exists) {
+          const metadataData = metadataDoc.data();
+          // Merge metadata into the main data, prioritizing metadata values
+          if (metadataData?.title) {
+            data.title = metadataData.title;
+          }
+          if (metadataData?.documentation) {
+            data.documentation = metadataData.documentation;
+          }
+        }
+      } catch (error) {
+        logger.warn(`Error getting metadata for node ${nodeKey}:`, error);
+        // Continue without metadata if it fails
+      }
+      
       return data;
     } catch (error) {
       logger.error("Error getting node blueprint:", error);

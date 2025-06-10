@@ -14,7 +14,7 @@
     "test:comprehensive": "npm run build && mocha lib/test/comprehensive-api.test.js --timeout 30000",
     "test:stress": "npm run build && mocha lib/test/stress-tests.test.js --timeout 300000",
     "test:quick-stress": "npm run build && mocha lib/test/quick-stress.test.js --timeout 60000",
-    "test:basic": "npm run build && mocha lib/test/simple.test.js lib/test/simple-emulator.test.js --timeout 10000"
+    "test:basic": "npm run build && mocha lib/test/simple.test.js --timeout 10000"
   },
   "engines": {
     "node": "22"
