@@ -40,12 +40,6 @@ interface NodeBlueprintData {
 
 // Helper function to validate authentication
 function validateAuth(request: CallableRequest): string {
-  // For emulator testing, allow bypass of auth
-  if (process.env.FUNCTIONS_EMULATOR && (!request.auth || !request.auth.uid)) {
-    logger.info("Emulator mode: using test user ID");
-    return "test-user-emulator";
-  }
-  
   if (!request.auth || !request.auth.uid) {
     throw new HttpsError("unauthenticated", "User must be authenticated");
   }

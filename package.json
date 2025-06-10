@@ -12,6 +12,10 @@
         "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
         "test": "vitest run",
         "test:watch": "vitest",
+        "test:api": "vitest run src/tests/NodeBlueprintAPI.test.ts",
+        "test:stress": "vitest run src/tests/NodeBlueprintStress.test.ts",
+        "test:quick": "vitest run src/tests/QuickAPITest.test.ts",
+        "test:all-api": "vitest run src/tests/",
         "emulators": "firebase emulators:start",
         "deploy": "yarn run build; firebase deploy",
         "format": "prettier --write '{src/**/*,*}.{js,ts,vue,json}'"

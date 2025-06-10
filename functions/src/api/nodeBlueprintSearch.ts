@@ -32,12 +32,6 @@ interface SearchResult {
 
 // Helper function to validate authentication
 function validateAuth(request: CallableRequest): string {
-  // For emulator testing, allow bypass of auth
-  if (process.env.FUNCTIONS_EMULATOR && (!request.auth || !request.auth.uid)) {
-    logger.info("Emulator mode: using test user ID");
-    return "test-user-emulator";
-  }
-  
   if (!request.auth || !request.auth.uid) {
     throw new HttpsError("unauthenticated", "User must be authenticated");
   }
@@ -70,36 +64,41 @@ async function searchInCollection(collectionName: string, searchTerm: string, li
     }
   });
 
-  // Get the latest version for each matching node_key
+  if (nodeKeys.size === 0) {
+    logger.info(`No matching node keys found for "${searchTerm}"`);
+    return results;
+  }
+
+  // The documents are stored in subcollections under each node key
+  // We need to search in the "versions" subcollection for each node key
   for (const nodeKey of nodeKeys) {
     try {
-      const versionsQuery = db.collection(collectionName)
-        .where("node_key", "==", nodeKey)
-        .orderBy("created_at", "desc")
-        .limit(1);
-
-      const versionsSnapshot = await versionsQuery.get();
+      const versionsCollection = db.collection(collectionName).doc(nodeKey).collection("versions");
+      const versionsSnapshot = await versionsCollection.get();
       
-      if (!versionsSnapshot.empty) {
-        const versionDoc = versionsSnapshot.docs[0];
-        const versionData = versionDoc.data();
-        
+      // Get the metadata for this node to get the current title and documentation
+      const metadataRef = db.collection(collectionName).doc(nodeKey).collection("metadata").doc("main");
+      const metadataDoc = await metadataRef.get();
+      const metadataData = metadataDoc.exists ? metadataDoc.data() : {};
+      
+      versionsSnapshot.forEach(versionDoc => {
+        const data = versionDoc.data();
         results.push({
-          nodeId: versionDoc.id,
-          nodeKey: versionData.node_key,
-          title: versionData.title || "",
-          documentation: versionData.documentation || "",
-          authorUid: versionData.author_uid,
-          createdAt: versionData.created_at?.toDate() || new Date(),
-          isDeployed: versionData.is_deployed || false,
-          trustLevel: versionData.trust_level || "New"
+          nodeId: `${nodeKey}/versions/${versionDoc.id}`,
+          nodeKey: data.node_key,
+          title: metadataData.title || data.title || "",
+          documentation: metadataData.documentation || data.documentation || "",
+          authorUid: data.author_uid,
+          createdAt: data.created_at?.toDate() || new Date(),
+          isDeployed: data.is_deployed || false,
+          trustLevel: data.trust_level || "New"
         });
-      }
+      });
     } catch (error) {
       logger.warn(`Error getting versions for node_key ${nodeKey}:`, error);
     }
   }
-
+  
   return results;
 }
 
@@ -202,32 +201,34 @@ export const nodeBlueprintSearchAPI = {
 
       logger.info(`Getting recommended version for node key: ${nodeKey}`);
 
-      // First, try to find the latest deployed version
-      const deployedQuery = db.collection(DEPLOYED_NODES_COLLECTION)
-        .where("node_key", "==", nodeKey)
-        .orderBy("created_at", "desc")
-        .limit(1);
+      // First, try to find the latest deployed version in the deployed collection
+      try {
+        const deployedVersionsCollection = db.collection(DEPLOYED_NODES_COLLECTION).doc(nodeKey).collection("versions");
+        const deployedVersionsSnapshot = await deployedVersionsCollection.orderBy("created_at", "desc").limit(1).get();
 
-      const deployedSnapshot = await deployedQuery.get();
-
-      if (!deployedSnapshot.empty) {
-        const deployedDoc = deployedSnapshot.docs[0];
-        logger.info(`Found deployed version: ${deployedDoc.id}`);
-        return { nodeId: deployedDoc.id };
+        if (!deployedVersionsSnapshot.empty) {
+          const deployedDoc = deployedVersionsSnapshot.docs[0];
+          const nodeId = `${nodeKey}/versions/${deployedDoc.id}`;
+          logger.info(`Found deployed version: ${nodeId}`);
+          return { nodeId };
+        }
+      } catch (error) {
+        logger.warn(`Error getting deployed versions for node_key ${nodeKey}:`, error);
       }
 
       // If no deployed version, get the latest development version
-      const devQuery = db.collection(NODES_COLLECTION)
-        .where("node_key", "==", nodeKey)
-        .orderBy("created_at", "desc")
-        .limit(1);
+      try {
+        const devVersionsCollection = db.collection(NODES_COLLECTION).doc(nodeKey).collection("versions");
+        const devVersionsSnapshot = await devVersionsCollection.orderBy("created_at", "desc").limit(1).get();
 
-      const devSnapshot = await devQuery.get();
-
-      if (!devSnapshot.empty) {
-        const devDoc = devSnapshot.docs[0];
-        logger.info(`Found development version: ${devDoc.id}`);
-        return { nodeId: devDoc.id };
+        if (!devVersionsSnapshot.empty) {
+          const devDoc = devVersionsSnapshot.docs[0];
+          const nodeId = `${nodeKey}/versions/${devDoc.id}`;
+          logger.info(`Found development version: ${nodeId}`);
+          return { nodeId };
+        }
+      } catch (error) {
+        logger.warn(`Error getting development versions for node_key ${nodeKey}:`, error);
       }
 
       logger.info(`No version found for node key: ${nodeKey}`);

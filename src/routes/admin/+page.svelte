@@ -3,22 +3,66 @@
 	import '../../app.css'; // Assuming this provides some base styles
 	import { auth } from '../../firebase';
 	import { SignedIn, SignedOut } from 'sveltefire'; // Import SignedOut for a better user experience
+	import NodeBlueprintManager from './NodeBlueprintManager.svelte';
+	
+	let activeTab = 'dashboard';
 </script>
 
-<div class="container">
+<div class="admin-container">
 	<SignedIn let:user={userData}>
-		<div class="welcome-card">
-			{#if userData}
-				<h1>Welcome to the Admin Area, {userData.displayName || userData.email}!</h1>
-				<p>You are signed in.</p>
-				<button on:click={generateStandardNodeSuite} class="action-button">
-					Generate Standard Node Suite
+		{#if userData}
+			<!-- Admin Navigation -->
+			<nav class="admin-nav">
+				<h1>Admin Panel</h1>
+				<div class="user-info">
+					{userData.displayName || userData.email}
+					<button on:click={() => auth.signOut()} class="sign-out-button">Sign Out</button>
+				</div>
+			</nav>
+
+			<!-- Tab Navigation -->
+			<div class="tab-nav">
+				<button 
+					class="tab-button" 
+					class:active={activeTab === 'dashboard'}
+					on:click={() => activeTab = 'dashboard'}
+				>
+					Dashboard
 				</button>
-				<button on:click={() => auth.signOut()} class="sign-out-button"> Sign Out </button>
-			{:else}
+				<button 
+					class="tab-button" 
+					class:active={activeTab === 'node-manager'}
+					on:click={() => activeTab = 'node-manager'}
+				>
+					Node Blueprint Manager
+				</button>
+			</div>
+
+			<!-- Tab Content -->
+			<main class="admin-content">
+				{#if activeTab === 'dashboard'}
+					<div class="dashboard">
+						<h2>Admin Dashboard</h2>
+						<p>Welcome to the admin area! Use the tabs above to navigate.</p>
+						
+						<div class="dashboard-actions">
+							<button on:click={generateStandardNodeSuite} class="action-button">
+								Generate Standard Node Suite
+							</button>
+							<p class="action-description">
+								Creates the default set of node blueprints in Firestore
+							</p>
+						</div>
+					</div>
+				{:else if activeTab === 'node-manager'}
+					<NodeBlueprintManager />
+				{/if}
+			</main>
+		{:else}
+			<div class="loading">
 				<p>Loading user data...</p>
-			{/if}
-		</div>
+			</div>
+		{/if}
 	</SignedIn>
 
 	<SignedOut>
@@ -31,101 +75,192 @@
 </div>
 
 <style>
-	/* Basic styling for a more appealing look */
-	.container {
-		display: flex;
-		justify-content: center;
-		align-items: center;
+	.admin-container {
 		min-height: 100vh;
-		background-color: #f0f2f5; /* Light gray background */
+		background-color: #f8f9fa;
 		font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 	}
 
-	.welcome-card,
-	.not-signed-in-card {
-		background-color: #ffffff;
-		padding: 30px;
-		border-radius: 10px;
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-		text-align: center;
-		max-width: 450px;
-		width: 90%;
+	.admin-nav {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		background: white;
+		padding: 1rem 2rem;
+		border-bottom: 1px solid #e9ecef;
+		box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 	}
 
-	h1 {
+	.admin-nav h1 {
+		margin: 0;
 		color: #333;
-		margin-bottom: 15px;
-		font-size: 2em;
+		font-size: 1.5rem;
 	}
 
-	h2 {
-		color: #555;
-		margin-bottom: 15px;
-		font-size: 1.8em;
-	}
-
-	p {
+	.user-info {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
 		color: #666;
-		margin-bottom: 25px;
+	}
+
+	.tab-nav {
+		display: flex;
+		background: white;
+		border-bottom: 1px solid #e9ecef;
+		padding: 0 2rem;
+	}
+
+	.tab-button {
+		background: none;
+		border: none;
+		padding: 1rem 1.5rem;
+		cursor: pointer;
+		border-bottom: 3px solid transparent;
+		color: #666;
+		font-size: 1rem;
+		transition: all 0.2s;
+	}
+
+	.tab-button:hover {
+		color: #333;
+		background: #f8f9fa;
+	}
+
+	.tab-button.active {
+		color: #0066cc;
+		border-bottom-color: #0066cc;
+		background: #f8f9fa;
+	}
+
+	.admin-content {
+		padding: 2rem;
+	}
+
+	.dashboard {
+		max-width: 800px;
+		margin: 0 auto;
+	}
+
+	.dashboard h2 {
+		color: #333;
+		margin-bottom: 1rem;
+	}
+
+	.dashboard p {
+		color: #666;
+		margin-bottom: 2rem;
 		line-height: 1.6;
 	}
 
-	.action-button,
-	.sign-out-button {
-		background-color: #007bff; /* Primary blue */
+	.dashboard-actions {
+		background: white;
+		border-radius: 8px;
+		padding: 2rem;
+		box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+	}
+
+	.action-button {
+		background-color: #007bff;
 		color: white;
 		border: none;
-		padding: 12px 25px;
-		border-radius: 5px;
+		padding: 12px 24px;
+		border-radius: 6px;
 		cursor: pointer;
-		font-size: 1em;
+		font-size: 1rem;
 		transition: background-color 0.3s ease;
-		margin: 10px; /* Add some margin between buttons */
+		margin-bottom: 1rem;
+		display: block;
 	}
 
 	.action-button:hover {
-		background-color: #0056b3; /* Darker blue on hover */
+		background-color: #0056b3;
+	}
+
+	.action-description {
+		color: #666;
+		font-size: 0.9rem;
+		margin: 0;
 	}
 
 	.sign-out-button {
-		background-color: #dc3545; /* Red for sign out */
+		background-color: #dc3545;
+		color: white;
+		border: none;
+		padding: 8px 16px;
+		border-radius: 4px;
+		cursor: pointer;
+		font-size: 0.9rem;
+		transition: background-color 0.3s ease;
 	}
 
 	.sign-out-button:hover {
-		background-color: #c82333; /* Darker red on hover */
+		background-color: #c82333;
+	}
+
+	.loading {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		min-height: 50vh;
+	}
+
+	.not-signed-in-card {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		min-height: 100vh;
+		text-align: center;
+		padding: 2rem;
+	}
+
+	.not-signed-in-card h2 {
+		color: #333;
+		margin-bottom: 1rem;
+	}
+
+	.not-signed-in-card p {
+		color: #666;
+		margin-bottom: 2rem;
+		line-height: 1.6;
 	}
 
 	.signin-link {
 		display: inline-block;
-		margin-top: 20px;
-		color: #007bff;
+		background: #007bff;
+		color: white;
 		text-decoration: none;
-		font-weight: bold;
+		padding: 12px 24px;
+		border-radius: 6px;
+		font-weight: 500;
+		transition: background-color 0.3s ease;
 	}
 
 	.signin-link:hover {
-		text-decoration: underline;
+		background: #0056b3;
+		text-decoration: none;
 	}
 
-	/* Responsive adjustments */
-	@media (max-width: 600px) {
-		.welcome-card,
-		.not-signed-in-card {
-			padding: 20px;
+	@media (max-width: 768px) {
+		.admin-nav {
+			flex-direction: column;
+			gap: 1rem;
+			padding: 1rem;
 		}
 
-		h1 {
-			font-size: 1.8em;
+		.tab-nav {
+			padding: 0 1rem;
+			overflow-x: auto;
 		}
 
-		h2 {
-			font-size: 1.6em;
+		.admin-content {
+			padding: 1rem;
 		}
 
-		.action-button,
-		.sign-out-button {
-			padding: 10px 20px;
-			font-size: 0.9em;
+		.user-info {
+			flex-direction: column;
+			gap: 0.5rem;
 		}
 	}
 </style>

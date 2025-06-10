@@ -27,9 +27,8 @@ blueprints for nodes represent what the node does computationally, and it's func
 
 node blueprints are stored as {node id}={node key}/{author id}/{created_at second} so there are lots of version for one node_key, but all node_keys have one title and documentation.
 
- * title or docs contains (substring, auth) --> node id iterable stream
-   * only non-anonymous users can search
- * query (query, auth, [llm augment, project]) --> node id iterable stream
+ * title or docs contains (substring) --> node id iterable stream
+ * query (query, [llm augment, project]) --> node id iterable stream
    * uses vector db to find nearest neighbors and returns their node id's
    * llm augment means to use an LLM to augment the search terms after parsing the project for extra context (a stretch feature, don't implement yet)
  * get reccommended version (node key) --> node id

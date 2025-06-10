@@ -10,7 +10,11 @@
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log",
     "test": "npm run build && mocha lib/test/**/*.js --timeout 10000",
-    "test:watch": "npm run build:watch & mocha lib/test/**/*.js --watch --timeout 10000"
+    "test:watch": "npm run build:watch & mocha lib/test/**/*.js --watch --timeout 10000",
+    "test:comprehensive": "npm run build && mocha lib/test/comprehensive-api.test.js --timeout 30000",
+    "test:stress": "npm run build && mocha lib/test/stress-tests.test.js --timeout 300000",
+    "test:quick-stress": "npm run build && mocha lib/test/quick-stress.test.js --timeout 60000",
+    "test:basic": "npm run build && mocha lib/test/simple.test.js lib/test/simple-emulator.test.js --timeout 10000"
   },
   "engines": {
     "node": "22"

@@ -301,6 +301,10 @@ describe("Function Exports", () => {
       
       console.log("Search results for 'multiply':");
       console.log(JSON.stringify(searchMultiply, null, 2));
+      // check that we got the right node back
+      expect(searchMultiply).to.have.property('results');
+      expect(searchMultiply.results).to.be.an('array');
+      expect(searchMultiply.results.length).to.be.greaterThan(0);
 
       // Search for "image"
       const searchImage = await functions.searchNodeBlueprintsByText.run({
@@ -311,6 +315,9 @@ describe("Function Exports", () => {
       
       console.log("\nSearch results for 'image':");
       console.log(JSON.stringify(searchImage, null, 2));
+      expect(searchImage).to.have.property('results');
+      expect(searchImage.results).to.be.an('array');
+      expect(searchImage.results.length).to.be.greaterThan(0);
 
       // Search for "number"
       const searchNumber = await functions.searchNodeBlueprintsByText.run({
@@ -321,6 +328,9 @@ describe("Function Exports", () => {
       
       console.log("\nSearch results for 'number':");
       console.log(JSON.stringify(searchNumber, null, 2));
+      expect(searchNumber).to.have.property('results');
+      expect(searchNumber.results).to.be.an('array');
+      expect(searchNumber.results.length).to.be.greaterThan(0);
 
     } catch (error) {
       console.error("Error in comprehensive test:", error);
