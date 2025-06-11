@@ -59,6 +59,7 @@ export abstract class NodeBluePrint {
     abstract get last_updated_at(): Date;
     protected abstract update(): void;
     abstract get is_frozen(): boolean;
+    abstract freeze(): void;
 
     abstract get nid(): string
 

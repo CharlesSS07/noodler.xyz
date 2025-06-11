@@ -6,7 +6,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { nodeBlueprintAPI, type NodeBlueprintData, type SearchResult } from '$lib/services/NodeBlueprintAPI.js';
-  import { user } from '$lib/stores/AppState.js';
+  import { currentUser } from '$lib/stores/AppState.js';
 
   // Component state
   let loading = false;
@@ -35,7 +35,7 @@
   });
 
   async function loadNodes() {
-    if (!$user) return;
+    if (!$currentUser) return;
     
     loading = true;
     error = '';
@@ -59,7 +59,7 @@
   }
 
   async function createNode() {
-    if (!$user) {
+    if (!$currentUser) {
       error = 'You must be logged in to create nodes';
       return;
     }
@@ -147,7 +147,7 @@
   }
 
   async function forkNode(nodeId: string) {
-    if (!$user) return;
+    if (!$currentUser) return;
 
     loading = true;
     error = '';
@@ -170,7 +170,7 @@
   }
 
   async function deployNode(nodeId: string) {
-    if (!$user) return;
+    if (!$currentUser) return;
 
     if (!confirm('Are you sure you want to deploy this node? Deployed nodes cannot be modified.')) {
       return;
@@ -208,7 +208,7 @@
 <div class="node-blueprint-manager">
   <h2>Node Blueprint Manager</h2>
   
-  {#if !$user}
+  {#if !$currentUser}
     <div class="auth-warning">
       <p>Please log in to manage node blueprints.</p>
     </div>
@@ -319,7 +319,7 @@
               <button on:click={() => forkNode(node.nodeId)} class="btn-secondary">
                 Fork
               </button>
-              {#if !node.isDeployed && $user?.uid === node.authorUid}
+              {#if !node.isDeployed && $currentUser?.uid === node.authorUid}
                 <button on:click={() => deployNode(node.nodeId)} class="btn-warning">
                   Deploy
                 </button>

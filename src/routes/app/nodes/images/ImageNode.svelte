@@ -6,21 +6,32 @@
     import { type Node } from '@xyflow/svelte';
     import type {JimpInstance} from "jimp";
 
+    // Official NIDs for this node: 
+    // - node_official_image_loader (when loading files)
+    // - node_official_image_viewer (when viewing/passing through images)
     export type ImageNodeType = Node<
         {
             output: {image: JimpInstance};
             input: {image: JimpInstance};
+            nid?: string; // Should be 'node_official_image_loader' or 'node_official_image_viewer' when using official blueprint
         },
         'node-dna'
     >;
 </script>
 
 <script lang="ts">
-    import { Handle, Position, type NodeProps } from '@xyflow/svelte';
+    import { Handle, Position, type NodeProps, useSvelteFlow } from '@xyflow/svelte';
     import { Jimp } from "jimp";
     import {getSocketDataTypeByName} from "../../lib/DataTypes";
 
     let { id, data }: NodeProps<ImageNodeType> = $props();
+    
+    const { updateNodeData } = useSvelteFlow();
+    
+    // Set the official NID if not already set (default to image_viewer)
+    if (!data.nid) {
+        updateNodeData(id, { nid: 'node_official_image_viewer' });
+    }
 
     // State for image handling
     let inputImage: JimpInstance | null = $state(null);

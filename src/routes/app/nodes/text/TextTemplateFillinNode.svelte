@@ -1,11 +1,13 @@
 <script module lang="ts">
     import { type Node } from '@xyflow/svelte';
 
+    // Official NID for this node: node_official_template
     export type TemplateFillinNodeType = Node<
         {
             input: Record<string, string>; // Stores connected input values for variables
             template: string; // The user-defined template string
             output: { text: string };
+            nid?: string; // Should be set to 'node_official_template' when using official blueprint
         },
         'node-template-fillin'
     >;
@@ -27,6 +29,11 @@
     let { id, data }: NodeProps<TemplateFillinNodeType> = $props();
 
     const { updateNodeData } = useSvelteFlow();
+    
+    // Set the official NID if not already set
+    if (!data.nid) {
+        updateNodeData(id, { nid: 'node_official_template' });
+    }
     const connections = useNodeConnections();
 
     // State for template handling

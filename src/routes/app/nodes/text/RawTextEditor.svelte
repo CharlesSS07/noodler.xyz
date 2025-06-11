@@ -1,11 +1,13 @@
 <script module lang="ts">
     import type { Node } from '@xyflow/svelte';
 
+    // Official NID for this node: node_official_raw_text_editor
     export type PlainTextNodeType = Node<
         {
             input: { text: string };
             currentText: string;
             output: { text: string };
+            nid?: string; // Should be set to 'node_official_raw_text_editor' when using official blueprint
         },
         'node-plain-text'
     >;
@@ -26,6 +28,11 @@
     let { id, data }: NodeProps<PlainTextNodeType> = $props();
 
     const { updateNodeData } = useSvelteFlow();
+    
+    // Set the official NID if not already set
+    if (!data.nid) {
+        updateNodeData(id, { nid: 'node_official_raw_text_editor' });
+    }
     const connections = useNodeConnections();
     let socketStyle = $state('');
 

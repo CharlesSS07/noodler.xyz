@@ -33,6 +33,11 @@
     
     // Import the existing nodes
     import CompleteTextLLM from "../../routes/app/nodes/huggingface/CompleteTextLLM.svelte";
+    
+    // Import the new input nodes
+    import KnobNode from "../../routes/app/nodes/inputs/KnobNode.svelte";
+    import NumberInputNode from "../../routes/app/nodes/inputs/NumberInputNode.svelte";
+    import SliderNode from "../../routes/app/nodes/inputs/SliderNode.svelte";
 
     let nodes = $state.raw<Node[]>([]);
 
@@ -208,10 +213,12 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
         textTemplate: TextTemplateFillinNode,
         textEditor: TextEditorNode,
         textEditorRaw: RawTextEditor,
-        huggingfaceLLM: CompleteTextLLM
+        huggingfaceLLM: CompleteTextLLM,
+        'knob-input': KnobNode,
+        'number-input': NumberInputNode,
+        'slider-input': SliderNode
     };
 
-    let selectedNodeNID = $state('official_node_fetch_url');
     let colorMode: ColorMode = $state('light');
 
     // Node search state
@@ -289,6 +296,30 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
             description: 'Text completion using HuggingFace models',
             category: 'AI',
             defaultData: { input: '', output: '', model: 'gpt2' }
+        },
+        {
+            id: 'knob-input',
+            type: 'knob-input',
+            title: 'Knob Input',
+            description: 'Analog knob for numeric input with configurable range',
+            category: 'Input',
+            defaultData: { value: 50, min: 0, max: 100, step: 1, output: { value: 50 } }
+        },
+        {
+            id: 'number-input',
+            type: 'number-input',
+            title: 'Number Input',
+            description: 'Number input with increment/decrement controls',
+            category: 'Input',
+            defaultData: { value: 0, step: 1, label: 'Number', output: { value: 0 } }
+        },
+        {
+            id: 'slider-input',
+            type: 'slider-input',
+            title: 'Slider Input',
+            description: 'Slider for values between 0 and 1',
+            category: 'Input',
+            defaultData: { value: 0.5, label: 'Slider', precision: 2, output: { value: 0.5 } }
         }
     ];
 
@@ -496,7 +527,6 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
         });
     });
 
-
 </script>
 
 
@@ -507,6 +537,7 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
         bind:nodes
         bind:edges
         {nodeTypes}
+        {colorMode}
         onconnect={onConnect}
         onpaneclick={handlePaneClick}
         oninit={() => console.log('SvelteFlow initialized')}

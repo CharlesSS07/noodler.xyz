@@ -1,9 +1,12 @@
 <script module lang="ts">
 	import { type Node } from '@xyflow/svelte';
 
+	// Note: This is a custom note/sticky note component
+	// No official NID - remains as custom node for annotations
 	export type NoteNodeType = Node<
 			{
 				markdown: string;
+				nid?: string; // Optional - this node typically doesn't use official blueprints
 			},
 			'node-dna'
 	>;

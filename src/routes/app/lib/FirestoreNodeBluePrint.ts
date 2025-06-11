@@ -4,7 +4,6 @@ import {NodeBluePrint, type NodeBluePrintControllerFactoryInterface,} from './No
 import {v4 as uuidv4} from 'uuid';
 import type {InputSocketModel, InputSocketParams, OutputSocketModel, SocketID,} from './SocketModels';
 import {OutputSocketAsyncReturner} from './Interpreter';
-import * as console from "node:console";
 
 export interface FirestoreNodeBluePrintModel {
     title: string;
@@ -65,7 +64,7 @@ export class FirestoreNodeBluePrintControllerFactoryInterface
             created_at: createdAt,
             last_updated_at: createdAt,
             predecessor_nid: 'root',
-            is_frozen: true,
+            is_frozen: false,
 
             user_defined_code: '',
             input_sockets: {},
@@ -361,5 +360,8 @@ export class NodeBluePrintInFirestore extends NodeBluePrint {
         if (! this.current) throw new Error("Node not initialized");
         this.current.last_updated_at = new Date();
         await setDoc(this.getDoc(), this.current);
+    }
+
+    freeze(): void {
     }
 }

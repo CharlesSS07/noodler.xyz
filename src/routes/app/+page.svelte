@@ -8,7 +8,6 @@
 
 	import { FirebaseRTDBProjectCollection, type FirebaseRTDBProjectKey } from './lib/FirebaseRTDBProjectController.js';
 	import type { ProjectCollectionInterface } from './lib/ProjectInterfaces.js';
-	import { appActions, currentUser } from '../../lib/stores/AppState.js';
 	import { onMount } from "svelte";
 
 	export const ACTIVE_PROJECT_COLLECTION: ProjectCollectionInterface<FirebaseRTDBProjectKey> =
