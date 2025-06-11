@@ -5,6 +5,7 @@ import type {
     SocketID,
 } from './SocketModels.js';
 import {OutputSocketAsyncReturner} from "./Interpreter";
+import {writable, type Writable} from "svelte/store";
 
 export interface NodeBluePrintControllerFactoryInterface {
     initNewNodeBluePrint(
@@ -19,51 +20,6 @@ export interface NodeBluePrintControllerFactoryInterface {
     initOfficialNodeBluePrint(
         uniqueFunctionName: string
     ): Promise<NodeBluePrint>;
-}
-
-export class NodeBluePrintVersionSpecifier {
-    _node_key: string;
-    _author_uid: string;
-    _created_at: Date;
-
-    constructor(node_key: string, author_uid: string, created_at: Date) {
-        this._node_key = node_key;
-        this._author_uid = author_uid;
-        this._created_at = created_at;
-    }
-
-    toString() {
-        return `${this._node_key}/${this._author_uid}:${this._created_at.getTime()}`;
-    }
-
-    get author_uid(): string {
-        return this._author_uid;
-    }
-
-    get node_key(): string {
-        return this._node_key;
-    }
-
-    get created_at(): Date {
-        return this._created_at;
-    }
-}
-
-export abstract class NodeBluePrint extends NodeBluePrintVersionSpecifier {
-
-    abstract call(
-        inputs: Record<string, unknown>,
-        outputs: OutputSocketAsyncReturner
-    ): Promise<void>;
-
-    get nid(): string {
-        return this.toString();
-    }
-
-    /**
-     * The nid of the code this was forked from, for tracking version.
-     */
-    abstract get predecessor_nid(): string;
 
     /**
      * This is not just copying all the logic and sockets, but specifies and gives credit to the node
@@ -71,12 +27,50 @@ export abstract class NodeBluePrint extends NodeBluePrintVersionSpecifier {
      * git repo. This should probably be done in a cloud function but this should work.
      * @param author_uid
      */
-    abstract spinOffNode(author_uid: string): Promise<NodeBluePrint>;
+    forkNode(nid: string, author_uid: string): Promise<NodeBluePrint>;
+
+    getNodeBluePrintFromNID(nid: string): Promise<NodeBluePrint>;
+
+}
+
+
+/**
+ * The NodeBluePrint is used in three areas:
+ *
+ * 1. displaying nodes in FlowGraph
+ * 2. executing nodes
+ * 3. node design studio
+ */
+
+export abstract class NodeBluePrint {
+
+    /**
+     * Does whatever it is to call the executable part of this node. Takes inputs, and sets the outputs.
+     * @param inputs
+     */
+    abstract call(
+        inputs: Record<string, unknown>,
+        outputs: OutputSocketAsyncReturner
+    ): Promise<void>;
+
+    abstract get author_uid(): string
+
+    abstract get created_at(): Date
+    abstract get last_updated_at(): Date;
+    protected abstract update(): void;
+    abstract get is_frozen(): boolean;
+
+    abstract get nid(): string
+
+    /**
+     * The nid of the code this was forked from, for tracking version.
+     */
+    abstract get predecessor_nid(): string | undefined;
 
     abstract newInputSocket(
         socket_key: SocketID,
         socket: InputSocketModel<InputSocketParams>
-    ): Promise<void>;
+    ): void;
     abstract get inputSocketKeys(): Array<SocketID>;
     abstract get inputSockets(): Array<InputSocketModel<InputSocketParams>>;
     // abstract migrateInputSocket(socket_key: SocketID, new_socket_key: SocketID): Promise<void>;
@@ -86,8 +80,8 @@ export abstract class NodeBluePrint extends NodeBluePrintVersionSpecifier {
     abstract newOutputSocket(
         socket_key: SocketID,
         socket: OutputSocketModel
-    ): Promise<void>;
-    abstract outputSocketKeys(): Promise<string[]>;
+    ): void;
+    abstract outputSocketKeys(): Array<SocketID>;
     abstract get outputSockets(): Array<OutputSocketModel>;
     // abstract migrateOutputSocket(socket_key: SocketID, new_socket_key: SocketID): Promise<void>;
     // abstract retireOutputSocket(socket_key: SocketID): Promise<void>;
@@ -99,19 +93,33 @@ export abstract class NodeBluePrint extends NodeBluePrintVersionSpecifier {
     abstract set title(title: string);
     abstract get title(): string;
 
+    abstract set code(title: string);
     abstract get code(): string;
-    abstract set code(code: string);
-    initializeCode(newCode: string): void {
-        const code = this.code;
-        if (code && code.length>0) {
-            throw new Error('NodeBluePrint code can only be set one time.');
-        }
-        this.code = newCode;
-    }
 
     abstract get trust_level(): string;
     abstract set trust_level(trust_level: string);
 
     abstract get official_note(): string;
     abstract set official_note(note: string);
+
+
+}
+
+// Wrapper function to create a reactive store
+export function createNodeBluePrintStore(nodeBluePrint: NodeBluePrint): Writable<NodeBluePrint> {
+    return writable(nodeBluePrint);
+}
+
+// Helper function to trigger store updates after mutations
+export function updateNodeBluePrintStore(store: Writable<NodeBluePrint>, updateFn: (node: NodeBluePrint) => void | Promise<void>) {
+    store.update(node => {
+        const result = updateFn(node);
+
+        // Handle async updates
+        if (result instanceof Promise) {
+            result.then(() => store.set(node));
+        }
+
+        return node;
+    });
 }

@@ -1,5 +1,5 @@
 import {type Node, type Edge} from "@xyflow/svelte";
-import { FirestoreNodeBluePrintController } from "./FirestoreNodeBluePrint";
+import { NodeBluePrintInFirestore } from "./FirestoreNodeBluePrint";
 
 function socketInstanceKey(node_id: string, socket_id: string) {
     return `${node_id}:${socket_id}`;
@@ -93,44 +93,6 @@ async function execute(input: Record<string, unknown>, output: OutputSocketAsync
             await output.set('output', firstInput);
             return;
         }
-
-        // For now, implement basic math operations directly
-        // TODO: Replace with dynamic code execution from blueprints
-        switch (node.data.nid) {
-            case 'add':
-                const addA = input.a ?? 0;
-                const addB = input.b ?? 0;
-                const addResult = addA + addB;
-                await output.set('result', addResult);
-                break;
-                
-            case 'subtract':
-                const subA = input.a ?? 0;
-                const subB = input.b ?? 0;
-                const subResult = subA - subB;
-                await output.set('result', subResult);
-                break;
-                
-            case 'multiply':
-                const mulA = input.a ?? 1;
-                const mulB = input.b ?? 1;
-                const mulResult = mulA * mulB;
-                await output.set('result', mulResult);
-                break;
-                
-            case 'divide':
-                const divA = input.a ?? 1;
-                const divB = input.b ?? 1;
-                if (divB === 0) {
-                    throw new Error('Division by zero is not allowed');
-                }
-                const divResult = divA / divB;
-                await output.set('result', divResult);
-                break;
-                
-            default:
-                throw new Error(`Unknown node type: ${node.data.nid}`);
-        }
     } catch (err) {
         error(err instanceof Error ? err : new Error(String(err)));
         throw err;
@@ -138,9 +100,9 @@ async function execute(input: Record<string, unknown>, output: OutputSocketAsync
 }
 
 
-export async function executeFlowGraph(node_id: string, nodes: Node[], edges: Edge[]): Promise<void> {
+export async function executeFlowGraph(start_node_id: string, nodes: Node[], edges: Edge[]): Promise<void> {
     /**
-     * 1. Build a dependency graph of nodes that node_id depends on (ignore all others)
+     * 1. Build a dependency graph of nodes that start_node_id depends on (ignore all others)
      * 2. Begin executing the source nodes, i.e. the nodes that everything depends on
      * 3. When a socket yields it's output, this should be final
      * 4. When all the sockets for a node are ready, execute that node.
@@ -149,13 +111,13 @@ export async function executeFlowGraph(node_id: string, nodes: Node[], edges: Ed
      * 7. Nodes are executed by calling the execute function. I will fill it in later.
      */
     
-    console.log(`Executing flow graph starting from node: ${node_id}`);
+    console.log(`Executing flow graph starting from node: ${start_node_id}`);
     
     // Initialize global cache
     const dataCache = new OutputSocketDataCache();
     
     // 1. Build dependency graph
-    const dependencyGraph = buildDependencyGraph(node_id, nodes, edges);
+    const dependencyGraph = buildDependencyGraph(start_node_id, nodes, edges);
     const relevantNodes = Array.from(dependencyGraph.keys());
     
     console.log(`Found ${relevantNodes.length} nodes in dependency chain:`, relevantNodes);
@@ -259,7 +221,7 @@ export async function executeFlowGraph(node_id: string, nodes: Node[], edges: Ed
     // Start execution with source nodes
     await processReadyNodes();
     
-    console.log(`Flow graph execution completed for node: ${node_id}`);
+    console.log(`Flow graph execution completed for node: ${start_node_id}`);
 }
 
 function buildDependencyGraph(targetNodeId: string, nodes: Node[], edges: Edge[]): Map<string, string[]> {
@@ -345,7 +307,7 @@ async function getNodeOutputSockets(node: Node): Promise<Set<string>> {
     
     try {
         // For other nodes, try to get from blueprint system
-        const controller = new FirestoreNodeBluePrintController(node.data.nid);
+        const controller = new NodeBluePrintInFirestore(node.data.nid);
         const outputSocketKeys = await controller.outputSocketKeys();
         if (outputSocketKeys && outputSocketKeys.length > 0) {
             outputSocketKeys.forEach(socketKey => {

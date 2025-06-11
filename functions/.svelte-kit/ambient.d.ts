@@ -53,6 +53,7 @@ declare module '$env/static/private' {
 	export const NVM_DIR: string;
 	export const LC_CTYPE: string;
 	export const CONDA_SHLVL: string;
+	export const IJ_RESTARTER_LOG: string;
 	export const CONDA_EXE: string;
 	export const npm_config_color: string;
 	export const SSH_AUTH_SOCK: string;
@@ -129,6 +130,7 @@ declare module '$env/dynamic/private' {
 		NVM_DIR: string;
 		LC_CTYPE: string;
 		CONDA_SHLVL: string;
+		IJ_RESTARTER_LOG: string;
 		CONDA_EXE: string;
 		npm_config_color: string;
 		SSH_AUTH_SOCK: string;

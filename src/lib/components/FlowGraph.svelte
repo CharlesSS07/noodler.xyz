@@ -28,7 +28,7 @@
     import BugReportButton from "../../components/BugReportButton.svelte";
     import { Plus, Play, X, ChevronDown } from "lucide-svelte";
     import {projectState, projectActions, projectSync} from "$lib/stores/ProjectState";
-    import { FirestoreNodeBluePrintController } from "../../routes/app/lib/FirestoreNodeBluePrint";
+    import { NodeBluePrintInFirestore } from "../../routes/app/lib/FirestoreNodeBluePrint";
     import { executeFlowGraph } from "../../routes/app/lib/Interpreter";
     
     // Import the existing nodes

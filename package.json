@@ -13,10 +13,12 @@
         "test": "vitest run",
         "test:watch": "vitest",
         "test:api": "vitest run src/tests/NodeBlueprintAPI.test.ts",
-        "test:stress": "vitest run src/tests/NodeBlueprintStress.test.ts",
+        "test:nodeblueprint": "vitest run src/routes/app/lib/FirestoreNodeBluePrint.test.ts",
+        "test:nodeblueprintstress": "vitest run src/tests/NodeBlueprintStress.test.ts",
         "test:quick": "vitest run src/tests/QuickAPITest.test.ts",
         "test:all-api": "vitest run src/tests/",
         "emulators": "firebase emulators:start",
+        "kill-emulators": "node scripts/kill-emulators.js",
         "deploy": "yarn run build; firebase deploy",
         "format": "prettier --write '{src/**/*,*}.{js,ts,vue,json}'"
     },
@@ -64,7 +66,7 @@
         "lucide-svelte": "^0.511.0",
         "marked": "^15.0.12",
         "pubsub-js": "^1.9.5",
-        "sveltefire": "^0.5.0",
+        "sveltefire": "^0.4.5",
         "uuid": "^11.1.0"
     },
     "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"

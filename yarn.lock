@@ -4118,7 +4118,7 @@ svelte@^5.0.0:
     magic-string "^0.30.11"
     zimmerframe "^1.1.2"
 
-sveltefire@^0.5.0:
+sveltefire@^0.4.5:
   version "0.4.5"
   resolved "https://registry.yarnpkg.com/sveltefire/-/sveltefire-0.4.5.tgz#2088bc05592e5c803939cb183dab5e472a8b6702"
   integrity sha512-sNvDr4SadW1m5BF6Id7JIky3vOvTLOrP9w6vtcpvBo8TKvO4RqnohiRYGsFB2eK6RRKkA1H8ccuGd7sdbIrhFQ==
