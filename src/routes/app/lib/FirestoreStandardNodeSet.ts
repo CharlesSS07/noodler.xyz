@@ -14,28 +14,122 @@ import {
 const nodeBluePrintController: NodeBluePrintControllerFactoryInterface =
     new FirestoreNodeBluePrintControllerFactoryInterface();
 
-async function simpleImageModificationNodes() {
+async function specialtyDataInputDataNodes() {
+    const rawTextEditor =
+        await nodeBluePrintController.initOfficialNodeBluePrint('raw_text_editor');
+    rawTextEditor.title = 'Raw Text Editor';
+    rawTextEditor.documentation = 'Displays or intakes text data.';
+
+    rawTextEditor.newInputSocket('text', {
+        label: 'Text',
+        documentation: '',
+        type: 'string',
+        params: new StringSocketParamsBuilder("").build(),
+    });
+
+    rawTextEditor.newOutputSocket('text', {
+        label: 'Text',
+        documentation: '',
+        type: 'string',
+    });
+
+    rawTextEditor.code = `outputs.set("text", inputs.text);`;
+
+    const completeTextHuggingfaceLLM =
+        await nodeBluePrintController.initOfficialNodeBluePrint('huggingface_complete_text');
+    completeTextHuggingfaceLLM.title = 'Raw Text Editor';
+    completeTextHuggingfaceLLM.documentation = 'Displays or intakes text data.';
+
+    completeTextHuggingfaceLLM.newInputSocket('text', {
+        label: 'Text',
+        documentation: 'Text to complete.',
+        type: 'string',
+        params: new StringSocketParamsBuilder("").build(),
+    });
+
+    completeTextHuggingfaceLLM.newInputSocket('modelId', {
+        label: 'Model ID',
+        documentation: 'Hugginface Model ID',
+        type: 'string',
+        params: new StringSocketParamsBuilder("").build(),
+    });
+
+    completeTextHuggingfaceLLM.newInputSocket('maxTokens', {
+        label: 'Max Tokens',
+        documentation: 'Largest number of tokens to allocate.',
+        type: 'number',
+        params: new NumberSocketParamsBuilder(1000).build(),
+    });
+
+    completeTextHuggingfaceLLM.newOutputSocket('completed_text', {
+        label: 'Completed Text',
+        documentation: 'The prediced next tokens.',
+        type: 'string',
+    });
+
+    completeTextHuggingfaceLLM.code = `console.error("completeTextHuggingfaceLLM node not implemented")`;
+
+    const mdTextEditor =
+        await nodeBluePrintController.initOfficialNodeBluePrint('md_text_editor');
+    mdTextEditor.title = 'Markdown Text Editor';
+    mdTextEditor.documentation = 'Displays or intakes text data, rendered as markdown.';
+
+    mdTextEditor.newInputSocket('text', {
+        label: 'Text',
+        documentation: '',
+        type: 'string',
+        params: new StringSocketParamsBuilder("").build(),
+    });
+
+    mdTextEditor.newOutputSocket('text', {
+        label: 'Text',
+        documentation: '',
+        type: 'string',
+    });
+
+    mdTextEditor.code = `outputs.set("text", inputs.text);`;
+
+    const textTemplateFillin =
+        await nodeBluePrintController.initOfficialNodeBluePrint('template');
+    textTemplateFillin.title = 'Template Text';
+    textTemplateFillin.documentation = 'Replaces @x with the value of x, a string value. Filled in during computation.';
+
+    textTemplateFillin.newInputSocket('text', {
+        label: 'Text',
+        documentation: '',
+        type: 'unknown',
+        params: new StringSocketParamsBuilder("").build(),
+    });
+
+    textTemplateFillin.newOutputSocket('text', {
+        label: 'Filled in Template',
+        documentation: '',
+        type: 'string',
+    });
+
+    textTemplateFillin.code = `outputs.set("text", inputs.text);`;
+
     const imageLoader =
         await nodeBluePrintController.initOfficialNodeBluePrint('image_loader');
     imageLoader.title = 'Image Loader';
     imageLoader.documentation= 'Read in an image from a socket/file.';
 
-    await imageLoader.newInputSocket('img', {
+    imageLoader.newInputSocket('image', {
         label: 'Upload Image',
         documentation: 'Image uploaded from file.',
         type: 'file',
         params: new JIMPImageSocketParamsBuilder().build(),
     });
 
-    await imageLoader.newOutputSocket('img', {
+    imageLoader.newOutputSocket('image', {
         label: 'Image',
         documentation: 'The image you viewed.',
         type: 'image/jimp',
     });
 
-    imageLoader.initializeCode(`
+    imageLoader.code = `
 console.log(inputs);
-const file = inputs.img;
+const file = inputs.image;
 console.log("[image_loader] received file:", typeof file);
 
 const arrayBuffer = await file.arrayBuffer();
@@ -43,42 +137,58 @@ const arrayBuffer = await file.arrayBuffer();
 // read image using Jimp
 const img = await utils.Jimp.read(arrayBuffer);
 
-outputs.set('img', img);
+outputs.set('image', img);
+`;
 
-// if (typeof input === 'string' && input.startsWith('data:image')) {
-//   const base64 = input.split(',')[1];
-//   console.log("[image_loader] decoding base64...");
-//   const arrayBuffer = await file.arrayBuffer();
-//   const img = await utils.Jimp.read(arrayBuffer);
-//   const outputBase64 = await img.getBase64Async(utils.Jimp.MIME_PNG);
-//   outputs.set('img', outputBase64);
-// } else {
-//   console.log("[image_loader] passthrough input:", input);
-//   outputs.set('img', input); // fallback
-// }
-`);
+    const htmlRenderer =
+        await nodeBluePrintController.initOfficialNodeBluePrint('html_renderer');
+    htmlRenderer.title = 'HTML Renderer';
+    htmlRenderer.documentation= 'Display arbitrary html in iframe.';
+
+    htmlRenderer.newInputSocket('html', {
+        label: 'HTML',
+        documentation: 'HTML to display in iframe.',
+        type: 'string',
+        params: new StringSocketParamsBuilder("").build(),
+    });
+
+    htmlRenderer.code = `
+console.log(inputs);
+const file = inputs.image;
+console.log("[image_loader] received file:", typeof file);
+
+const arrayBuffer = await file.arrayBuffer();
+
+// read image using Jimp
+const img = await utils.Jimp.read(arrayBuffer);
+
+outputs.set('image', img);
+`;
+}
+
+async function simpleImageModificationNodes() {
 
     const imageViewer =
         await nodeBluePrintController.initOfficialNodeBluePrint('image_viewer');
     imageViewer.title = 'Image Viewer';
     imageViewer.documentation = 'Display an image from a socket.';
 
-    await imageViewer.newInputSocket('img', {
+    imageViewer.newInputSocket('img', {
         label: 'Image',
         documentation: 'Image to view.',
         type: 'image/jimp',
         params: new JIMPImageSocketParamsBuilder().build(),
     });
 
-    await imageViewer.newOutputSocket('img', {
+    imageViewer.newOutputSocket('img', {
         label: 'Image',
         documentation: 'The image you viewed.',
         type: 'image/jimp',
     });
 
-    imageViewer.initializeCode(`
+    imageViewer.code = `
     outputs.set('img', inputs.img);
-  `);
+  `;
 
     // Use it to convert the base64 to jimp for supporting subsequent operations
     // const base64ToJimp = await nodeBluePrintController.initOfficialNodeBluePrint("base64_to_jimp");
@@ -131,11 +241,11 @@ outputs.set('img', img);
         type: 'image/jimp',
     });
 
-    grayscale.initializeCode(`
+    grayscale.code = `
 const img = inputs.img.clone();
 img.greyscale();
 outputs.set('img', img);
-`);
+`;
 
     const hsv = await nodeBluePrintController.initOfficialNodeBluePrint('hsv');
     hsv.title = 'HSV Shift Change';
@@ -184,7 +294,7 @@ outputs.set('img', img);
         type: 'image/jimp',
     });
 
-    hsv.initializeCode(
+    hsv.code = 
         'const img = inputs.img.clone();\n' +
             'const hue = inputs.hue;\n' +
             'const saturation = inputs.saturation;\n' +
@@ -198,7 +308,7 @@ outputs.set('img', img);
             '// Adjust value (0 to 100)\n' +
             'if (value) img.color([{ apply: "brighten", params: [value.valueOf()] }]);\n' +
             '\n' +
-            "outputs.set('img', img);\n");
+            "outputs.set('img', img);\n";
 }
 
 async function fileLoadingNodes() {
@@ -220,7 +330,7 @@ async function fileLoadingNodes() {
         type: 'json',
     });
 
-    loadExcel.initializeCode("console.error('Not Implemented');");
+    loadExcel.code = "console.error('Not Implemented');";
 }
 
 async function dropboxNodes() {
@@ -236,7 +346,7 @@ async function dropboxNodes() {
         params: new JIMPImageSocketParamsBuilder().build(),
     });
 
-    saveDropbox.initializeCode("console.error('Not Implemented');");
+    saveDropbox.code = "console.error('Not Implemented');";
 
     const loadDropbox =
         await nodeBluePrintController.initOfficialNodeBluePrint('load_dropbox');
@@ -249,7 +359,7 @@ async function dropboxNodes() {
         type: 'image/jimp',
     });
 
-    loadDropbox.initializeCode("console.error('Not Implemented');");
+    loadDropbox.code = "console.error('Not Implemented');";
 }
 
 async function timeRelatedNodes() {
@@ -347,7 +457,7 @@ async function timeRelatedNodes() {
         // params: { defaultValue: 0, min: 0, max: null, step: 1 }
     });
 
-    dateTimeParser.initializeCode(`
+    dateTimeParser.code = `
 const dateStr = inputs.date_time;
 const lang = inputs.lang || 'en-US';
 const locale = inputs.locale || 'en-US';
@@ -392,7 +502,7 @@ outputs.set('month', monthIndex);
 outputs.set('month_name', monthName);
 outputs.set('year', year);
 outputs.set('second_in_epoch', epochSeconds);
-`);
+`;
 
     const dateTimeConstructor =
         await nodeBluePrintController.initOfficialNodeBluePrint(
@@ -522,7 +632,7 @@ outputs.set('second_in_epoch', epochSeconds);
             .build(),
     });
 
-    dateTimeConstructor.initializeCode(`
+    dateTimeConstructor.code = `
 const lang = inputs.lang || 'en-US';
 const locale = inputs.locale || 'en-US';
 
@@ -540,7 +650,7 @@ const date = new Date(Date.UTC(year, month, day, hour, minute, second));
 const dateStr = date.toLocaleString(lang, { timeZone: locale, hour12: false });
 
 outputs.set('date_time', dateStr);
-`);
+`;
 }
 
 async function worldStateDataNodes() {
@@ -614,9 +724,9 @@ async function worldStateDataNodes() {
         type: 'number',
     });
 
-    weather.initializeCode(`
+    weather.code = `
   throw new Error("Weather Node is a Work In Progress. Please Check Back Later or Implement your Own.");
-`);
+`;
 }
 
 async function huggingfaceNodes() {
@@ -678,7 +788,7 @@ async function huggingfaceNodes() {
         type: 'number',
     });
 
-    llm.initializeCode(`
+    llm.code = `
 const hf_token = inputs.hf_token;
 const inference = await utils.APIConnectionManager.getConnector("huggingface-inference").getAPI();
 const output = await inference.textGeneration({
@@ -688,7 +798,7 @@ const output = await inference.textGeneration({
 
 outputs.set('output_text', output.generated_text);
 outputs.set('output_text_no_prompt', output.generated_text);
-`);
+`;
 
     // 	await promptdesign.setUnitTest(`
     // const inputs = new Map();
@@ -759,7 +869,7 @@ outputs.set('output_text_no_prompt', output.generated_text);
         type: 'image/jimp',
     });
 
-    text_to_image.initializeCode(`
+    text_to_image.code = `
 // inputs, outputs, utils
 const hf_token = inputs.hf_token;
 const inference = await utils.APIConnectionManager.getConnector("huggingface-inference").getAPI();
@@ -772,7 +882,7 @@ const buffer = await new Response(blob).arrayBuffer();
 const image = await utils.Jimp.read(buffer);
 
 outputs.set('image', image);
-`);
+`;
 }
 
 async function aiDemoNodes() {
@@ -794,9 +904,9 @@ async function aiDemoNodes() {
         type: 'image/jimp',
     });
 
-    colorize.initializeCode(`
+    colorize.code = `
   throw new Error("Colorizer Node is a Work In Progress. Please Check Back Later or Implement your Own.");
-`);
+`;
 
     const superResolution =
         await nodeBluePrintController.initOfficialNodeBluePrint(
@@ -818,7 +928,7 @@ async function aiDemoNodes() {
         type: 'image/jimp',
     });
 
-    superResolution.initializeCode(`
+    superResolution.code = `
 throw new Error("Super resolution Node is a Work In Progress. Please Check Back Later or Implement your Own.");
 const upscaler = await pipeline('image-to-image', 'Xenova/swin2SR-classical-sr-x2-64');
 const url = 'https://huggingface.co/datasets/Xenova/transformers.js-docs/resolve/main/butterfly.jpg';
@@ -829,7 +939,7 @@ const output = await upscaler(url);
 //   height: 512,
 //   channels: 3
 // }
-`);
+`;
 
     const objectBackgroundSeperation =
         await nodeBluePrintController.initOfficialNodeBluePrint(
@@ -863,10 +973,10 @@ const output = await upscaler(url);
         type: 'image/jimp',
     });
 
-    objectBackgroundSeperation.initializeCode(`
+    objectBackgroundSeperation.code = `
 inputs.img.greyscale();
 outputs.set('img', inputs.img);
-`);
+`;
 }
 
 async function promptDesignNodes() {
@@ -906,7 +1016,7 @@ async function promptDesignNodes() {
         type: 'string',
     });
 
-    joinText.initializeCode("outputs.set('text', inputs.text1+inputs.text2+inputs.text3+inputs.text4);");
+    joinText.code = "outputs.set('text', inputs.text1+inputs.text2+inputs.text3+inputs.text4);";
 
     const splitText =
         await nodeBluePrintController.initOfficialNodeBluePrint('split_text');
@@ -932,7 +1042,7 @@ async function promptDesignNodes() {
         type: 'unknown[]',
     });
 
-    splitText.initializeCode("outputs.set('splitText', inputs.text.split(inputs.sep));");
+    splitText.code = "outputs.set('splitText', inputs.text.split(inputs.sep));";
 
 }
 
@@ -963,10 +1073,10 @@ async function googleDriveNodes() {
         type: 'string',
     });
 
-    googleDrive.initializeCode(`
+    googleDrive.code = `
 inputs.img.greyscale();
 outputs.set('img', inputs.img);
-`);
+`;
 
     const sendEmail =
         await nodeBluePrintController.initOfficialNodeBluePrint(
@@ -1017,10 +1127,10 @@ outputs.set('img', inputs.img);
         params: new StringSocketParamsBuilder('').asParagraph().build(),
     });
 
-    sendEmail.initializeCode(`
+    sendEmail.code = `
 inputs.img.greyscale();
 outputs.set('img', inputs.img);
-`);
+`;
 }
 
 async function jimpNodes() {
@@ -1058,7 +1168,7 @@ async function jimpNodes() {
         type: 'image/jimp',
     });
 
-    newBlankImage.initializeCode("outputs.set('image', new Jimp({ width: inputs.width, height: inputs.height, color: inputs.color }));");
+    newBlankImage.code = "outputs.set('image', new Jimp({ width: inputs.width, height: inputs.height, color: inputs.color }));";
 
     const resize =
         await nodeBluePrintController.initOfficialNodeBluePrint(
@@ -1100,13 +1210,13 @@ async function jimpNodes() {
         type: 'image/jimp',
     });
 
-    resize.initializeCode(
+    resize.code = 
         'const img2 = inputs.image.clone();' +
             'img2.resize({\n' +
             '  w: Math.floor(inputs.width,\n' +
             '  h: Math.floor(inputs.height\n' +
             '});\n' +
-            "outputs.set('image', img2);");
+            "outputs.set('image', img2);";
 }
 
 async function jsonNodes() {
@@ -1128,11 +1238,11 @@ async function jsonNodes() {
         type: 'unknown',
     });
 
-    jsonEditorAndViewer.initializeCode(`
+    jsonEditorAndViewer.code = `
     const jsonObject = JSON.parse(inputs.jsonObject);
     outputs.set('jsonObject', jsonObject);
     console.log('jsonObject', jsonObject, typeof jsonObject);
-    `);
+    `;
 
     const jsonToString =
         await nodeBluePrintController.initOfficialNodeBluePrint(
@@ -1154,7 +1264,7 @@ async function jsonNodes() {
         type: 'string',
     });
 
-    jsonToString.initializeCode("outputs.set('jsonString', JSON.stringify(inputs.jsonObject));");
+    jsonToString.code = "outputs.set('jsonString', JSON.stringify(inputs.jsonObject));";
 }
 
 async function htmlNodes() {
@@ -1170,7 +1280,7 @@ async function htmlNodes() {
         params: new StringSocketParamsBuilder('').asParagraph().build(),
     });
 
-    htmlViewer.initializeCode("console.log('Rendered HTML');");
+    htmlViewer.code = "console.log('Rendered HTML');";
 
     const htmlElement =
         await nodeBluePrintController.initOfficialNodeBluePrint(
@@ -1208,7 +1318,7 @@ async function htmlNodes() {
         type: 'string',
     });
 
-    htmlElement.initializeCode(
+    htmlElement.code = 
         // TODO: implement attributes, hope and pray this parses valid html
         `
 let d = '<'+inputs.tag;
@@ -1227,7 +1337,7 @@ if (inputs.attributes) {
 }
 d += '>'+inputs.innerHTML+'</'+inputs.tag+'>'
 outputs.set('html', d);
-`);
+`;
 
     const fetchURL =
         await nodeBluePrintController.initOfficialNodeBluePrint('fetch_url');
@@ -1247,9 +1357,9 @@ outputs.set('html', d);
         type: 'string',
     });
 
-    fetchURL.initializeCode(`
+    fetchURL.code = `
   outputs.set('text', inputs.url);
-`);
+`;
 }
 
 async function fileNodes() {
@@ -1272,9 +1382,9 @@ async function fileNodes() {
         type: 'string',
     });
 
-    loadCSV.initializeCode(`
+    loadCSV.code = `
     outputs.set('text', inputs.file.text);
-  `);
+  `;
 
     const loadTSV =
         await nodeBluePrintController.initOfficialNodeBluePrint('load_tsv');
@@ -1295,9 +1405,9 @@ async function fileNodes() {
         type: 'string',
     });
 
-    loadTSV.initializeCode(`
+    loadTSV.code = `
     outputs.set('text', inputs.file.text);
-  `);
+  `;
 }
 
 async function rank3Nodes() {
@@ -1329,7 +1439,7 @@ async function rank3Nodes() {
         type: 'image/jimp',
     });
 
-    imageCropper.initializeCode(`
+    imageCropper.code = `
   const { x, y, width, height } = inputs.crop;
 
   console.log("[image_cropper] Received crop params:", inputs.crop);
@@ -1346,7 +1456,7 @@ async function rank3Nodes() {
   console.log("[image_cropper] Cropped preview (base64):", base64.substring(0, 100) + "...");
 
   outputs.set("img", cropped);
-`);
+`;
 }
 
 async function basicMathNodes() {
@@ -1375,12 +1485,12 @@ async function basicMathNodes() {
         type: 'number',
     });
     
-    addNode.initializeCode(`
+    addNode.code = `
         const a = inputs.a || 0;
         const b = inputs.b || 0;
         const result = a + b;
         outputs.set('result', result);
-    `);
+    `;
 
     // Subtract node
     const subtractNode = await nodeBluePrintController.initOfficialNodeBluePrint('subtract');
@@ -1407,12 +1517,12 @@ async function basicMathNodes() {
         type: 'number',
     });
     
-    subtractNode.initializeCode(`
+    subtractNode.code = `
         const a = inputs.a || 0;
         const b = inputs.b || 0;
         const result = a - b;
         outputs.set('result', result);
-    `);
+    `;
 
     // Multiply node
     const multiplyNode = await nodeBluePrintController.initOfficialNodeBluePrint('multiply');
@@ -1439,12 +1549,12 @@ async function basicMathNodes() {
         type: 'number',
     });
     
-    multiplyNode.initializeCode(`
+    multiplyNode.code = `
         const a = inputs.a || 1;
         const b = inputs.b || 1;
         const result = a * b;
         outputs.set('result', result);
-    `);
+    `;
 
     // Divide node  
     const divideNode = await nodeBluePrintController.initOfficialNodeBluePrint('divide');
@@ -1471,7 +1581,7 @@ async function basicMathNodes() {
         type: 'number',
     });
     
-    divideNode.initializeCode(`
+    divideNode.code = `
         const a = inputs.a || 1;
         const b = inputs.b || 1;
         if (b === 0) {
@@ -1479,11 +1589,12 @@ async function basicMathNodes() {
         }
         const result = a / b;
         outputs.set('result', result);
-    `);
+    `;
 }
 
 export async function generateStandardNodeSuite() {
     const opBuilders = [
+        specialtyDataInputDataNodes(),
         simpleImageModificationNodes(),
         // timeRelatedNodes(),
         // worldStateDataNodes(),
