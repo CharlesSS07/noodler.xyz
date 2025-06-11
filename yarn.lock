@@ -1828,6 +1828,11 @@
   dependencies:
     undici-types "~6.21.0"
 
+"@types/pubsub-js@^1.8.6":
+  version "1.8.6"
+  resolved "https://registry.yarnpkg.com/@types/pubsub-js/-/pubsub-js-1.8.6.tgz#2492cca3a25431d29df8235f57ef5090e1b501b1"
+  integrity sha512-Kwug5cwV0paUDm/NfwDx1sp9xI0bGIvmWJjJWCU8NngkCCMt3EIC7oPDvb6fV7BR8kPpFyyBu4D11bda/2MdPA==
+
 "@types/resolve@1.20.2":
   version "1.20.2"
   resolved "https://registry.yarnpkg.com/@types/resolve/-/resolve-1.20.2.tgz#97d26e00cd4a0423b4af620abecf3e6f442b7975"

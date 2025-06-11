@@ -20,16 +20,13 @@
     import SocketStem from '$lib/components/SocketStem.svelte';
     import NodeWrapper from '$lib/components/NodeWrapper.svelte';
     import { getInputComponentForDataType, canDataTypeHaveInput } from '$lib/components/socket-inputs/SocketInputMapping';
-    import {FirestoreNodeBluePrintControllerFactoryInterface} from "../../routes/app/lib/FirestoreNodeBluePrint";
+    import {
+        type FirestoreNodeBluePrintModel
+    } from "../../routes/app/lib/FirestoreNodeBluePrint";
 
     let {id, data}: NodeProps<StemNodeType> = $props();
 
-    const factory = new FirestoreNodeBluePrintControllerFactoryInterface();
-
-    // let nodeBluePrint = docStore<NodeBluePrintModel>(firestore, `nodes/${data.nid}`);
-    let nodeBluePrint = $derived(
-        factory.getNodeBluePrintFromNID(data.nid)
-    );
+    let nodeBluePrint = docStore<FirestoreNodeBluePrintModel>(firestore, `nodes/${data.nid}`);
 
     let nodeState: 'idle' | 'running' | 'success' | 'error' = 'idle';
     let executionTime: number = 0;

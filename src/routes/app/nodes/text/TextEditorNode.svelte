@@ -6,10 +6,9 @@
         {
             input: { text: string };
             currentText: string;
-            output: { text: string };
             nid?: string; // Should be set to 'node_official_md_text_editor' when using official blueprint
         },
-        'node-plain-text'
+        'node-markdown-text'
     >;
 </script>
 
@@ -49,19 +48,6 @@
         () => connections.current.some((conn) => conn.target === id && conn.targetHandle === 'input')
     );
 
-    // Sync data.output.text depending on connection
-    $effect(() => {
-        if (hasInputConnection()) {
-            updateNodeData(id, {
-                output: { text: untrack(() => data.input.text) }
-            });
-        } else {
-            updateNodeData(id, {
-                output: { text: untrack(() => data.currentText) ?? '' }
-            });
-        }
-    });
-
     // Handle manual input
     function handleManualInput(event: Event) {
         const text = (event.target as HTMLTextAreaElement).value;
@@ -71,22 +57,16 @@
     }
 
     // Auto-resizing textarea
-    let textareaRef: HTMLTextAreaElement;
     function autoResize(textarea: HTMLTextAreaElement) {
         textarea.style.height = 'auto';
         textarea.style.height = Math.max(40, textarea.scrollHeight) + 'px';
     }
-    $effect(() => {
-        if (textareaRef) autoResize(textareaRef);
-    });
 
-    // Focus textarea when isFocused becomes true
-    $effect(() => {
-        if (isFocused && textareaRef) {
-            textareaRef.focus();
-            autoResize(textareaRef);
+    let displayValue = $derived(
+        if (hasInputConnection()) {
+            connections.current[0].
         }
-    });
+    )
 </script>
 
 <div class="w-full h-fit relative">
@@ -106,7 +86,6 @@
     >
         {#if isFocused && !hasInputConnection()}
 			<textarea
-                    bind:this={textareaRef}
                     value={data.currentText ?? ''}
                     oninput={(e) => {
 					handleManualInput(e);
@@ -133,7 +112,7 @@
 					}
 				}}
             >
-                {@html marked.parse(hasInputConnection() ? data.input.text : data.currentText ?? '')}
+                {@html marked.parse(hasInputConnection() ? data.input?.text ?? '' : data.currentText ?? '')}
             </div>
         {/if}
     </div>

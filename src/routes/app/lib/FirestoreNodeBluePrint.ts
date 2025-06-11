@@ -1,4 +1,4 @@
-import {collection, doc, onSnapshot, getDoc, setDoc, type Unsubscribe,} from 'firebase/firestore';
+import {collection, doc, getDoc, onSnapshot, setDoc, type Unsubscribe,} from 'firebase/firestore';
 import {firestore} from '../../../firebase';
 import {NodeBluePrint, type NodeBluePrintControllerFactoryInterface,} from './NodeBluePrint.js';
 import {v4 as uuidv4} from 'uuid';
@@ -142,7 +142,6 @@ export class NodeBluePrintInFirestore extends NodeBluePrint {
 
     private current: FirestoreNodeBluePrintModel = DEFAULT_FIRESTORE_NODE_BLUEPRINT_MODEL;
     readonly nid: string;
-    onReady: Promise<void>;
 
     // Firestore subscriptions
     private unsubscribeFirestore: Unsubscribe | null = null;
@@ -161,7 +160,7 @@ export class NodeBluePrintInFirestore extends NodeBluePrint {
     private _initializeSubscriptions() {
         // Subscribe to metadata changes
         const nodeRef = this.getDoc();
-        const initialized = new Promise<void>(resolve => {
+        return new Promise<void>(resolve => {
             this.unsubscribeFirestore = onSnapshot(nodeRef, (doc) => {
                 if (doc.exists()) {
                     const data = doc.data();
@@ -185,7 +184,6 @@ export class NodeBluePrintInFirestore extends NodeBluePrint {
                 }
             });
         });
-        return initialized;
     }
 
     private assertNotFrozen() {

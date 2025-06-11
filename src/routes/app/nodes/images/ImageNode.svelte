@@ -11,12 +11,13 @@
     // - node_official_image_viewer (when viewing/passing through images)
     export type ImageNodeType = Node<
         {
-            output: {image: JimpInstance};
-            input: {image: JimpInstance};
+            input: {image: JimpInstance | File};
             nid?: string; // Should be 'node_official_image_loader' or 'node_official_image_viewer' when using official blueprint
         },
-        'node-dna'
+        'node-image'
     >;
+
+    console.log("module run")
 </script>
 
 <script lang="ts">
@@ -33,72 +34,11 @@
         updateNodeData(id, { nid: 'node_official_image_viewer' });
     }
 
-    // State for image handling
-    let inputImage: JimpInstance | null = $state(null);
-    let loadedImage: JimpInstance | null = $state(null);
-    let loadImageBase64: string | null = $state(null);
-    let inputImageBase64: string | null = $state(null);
-    let fileInput: HTMLInputElement;
-
     let socketStyle = $state('');
     getSocketDataTypeByName('image/jimp').then((datatype) => {
         socketStyle = datatype?.style || '';
     });
 
-    $effect(() => {
-        if (loadedImage)
-            loadedImage.getBase64("image/png").then((base64: string) => {
-                loadImageBase64 = base64;
-            });
-    });
-    $effect(() => {
-        if (inputImage)
-            inputImage.getBase64("image/png").then((base64: string) => {
-                inputImageBase64 = base64;
-            });
-    });
-
-    // Computed values
-    let hasInputImage = $derived(inputImage !== null);
-    let currentImage = $derived(hasInputImage ? inputImageBase64 : loadImageBase64);
-    let showImageLoader = $derived(!hasInputImage);
-
-    // Handle file input
-    async function handleFileSelect(event: Event) {
-        const target = event.target as HTMLInputElement;
-        const file = target.files?.[0];
-
-        if (file) {
-            try {
-                loadedImage = null; // delete last image so data does not build up in ram
-                const arrayBuffer = await file.arrayBuffer();
-                console.log(arrayBuffer);
-                //@ts-ignore
-                loadedImage = await Jimp.fromBuffer(arrayBuffer);
-                console.log(loadedImage);
-
-                // Output the loaded image
-                //@ts-ignore
-                data.output.image = loadedImage;
-            } catch (error) {
-                console.error('Error loading image:', error);
-            }
-        }
-    }
-
-    // Handle input image changes (from connected nodes)
-    $effect(() => {
-        if (data.input?.image) {
-            inputImage = data.input?.image;
-            // Pass through the input image
-            data.output.image = inputImage;
-        } else {
-            inputImage = null;
-            // Output loaded image if available
-            //@ts-ignore
-            data.output.image = loadedImage;
-        }
-    });
 </script>
 
 <!--<NodeWrapper label='Image'>-->

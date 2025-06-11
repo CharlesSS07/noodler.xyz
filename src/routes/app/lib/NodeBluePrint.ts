@@ -44,9 +44,12 @@ export interface NodeBluePrintControllerFactoryInterface {
 
 export abstract class NodeBluePrint {
 
+    onReady: Promise<void> = Promise.resolve();
+
     /**
      * Does whatever it is to call the executable part of this node. Takes inputs, and sets the outputs.
      * @param inputs
+     * @param outputs
      */
     abstract call(
         inputs: Record<string, unknown>,
