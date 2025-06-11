@@ -12,20 +12,24 @@
 </script>
 
 <script lang="ts">
-    import {type NodeProps, useSvelteFlow} from '@xyflow/svelte';
+    import {type NodeProps} from '@xyflow/svelte';
     import {Spinner} from 'flowbite-svelte';
     import {untrack} from 'svelte';
     import {docStore} from 'sveltefire';
     import {firestore} from '../../firebase';
-    import type {NodeBluePrintModel} from '../../routes/app/lib/NodeBluePrint.js';
     import SocketStem from '$lib/components/SocketStem.svelte';
     import NodeWrapper from '$lib/components/NodeWrapper.svelte';
     import { getInputComponentForDataType, canDataTypeHaveInput } from '$lib/components/socket-inputs/SocketInputMapping';
-    // import {OutputSocketDataCollection, type UserFunction, userFunctionAllowedModules} from "./lib/Execution";
+    import {FirestoreNodeBluePrintControllerFactoryInterface} from "../../routes/app/lib/FirestoreNodeBluePrint";
 
     let {id, data}: NodeProps<StemNodeType> = $props();
 
-    let nodeBluePrint = docStore<NodeBluePrintModel>(firestore, `nodes/${data.nid}`);
+    const factory = new FirestoreNodeBluePrintControllerFactoryInterface();
+
+    // let nodeBluePrint = docStore<NodeBluePrintModel>(firestore, `nodes/${data.nid}`);
+    let nodeBluePrint = $derived(
+        factory.getNodeBluePrintFromNID(data.nid)
+    );
 
     let nodeState: 'idle' | 'running' | 'success' | 'error' = 'idle';
     let executionTime: number = 0;
