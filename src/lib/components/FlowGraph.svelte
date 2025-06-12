@@ -1,5 +1,4 @@
 <script lang="ts">
-    import HTMLRendererNode from "../../routes/app/nodes/html/HTMLRendererNode.svelte";
 
     let {project_key = 'project_key_not_assigned'} = $props<{ project_key?: string }>();
 
@@ -11,24 +10,24 @@
         MiniMap, Panel,
         type Node,
         type Edge,
-        type ColorMode
+        type ColorMode,
+        type Viewport, getViewportForBounds
     } from '@xyflow/svelte';
     import '@xyflow/svelte/dist/style.css';
 
+
     import NoteNode from '../../routes/app/nodes/NoteNode.svelte';
-    import {auth} from '../../firebase';
     import StemNode from '$lib/components/StemNode.svelte';
     import TextTemplateFillinNode from "../../routes/app/nodes/text/TextTemplateFillinNode.svelte";
     import ImageNode from "../../routes/app/nodes/images/ImageNode.svelte";
     import TextEditorNode from "../../routes/app/nodes/text/TextEditorMarkdownNode.svelte";
-    import RawTextEditor from "../../routes/app/nodes/text/RawTextEditor.svelte";
-    import {onMount} from "svelte";
+    import HTMLRendererNode from "../../routes/app/nodes/html/HTMLRendererNode.svelte";
+
     import Logo from "../../components/Logo.svelte";
     import NodeSearch from "./NodeSearch.svelte";
     import BugReportButton from "../../components/BugReportButton.svelte";
     import { Plus, Play, X, ChevronDown } from "lucide-svelte";
-    import {projectState, projectActions, projectSync} from "$lib/stores/ProjectState";
-    import { NodeBluePrintInFirestore } from "../../routes/app/lib/FirestoreNodeBluePrint";
+    import { projectState, projectActions, projectSync } from "$lib/stores/ProjectState";
     import { executeFlowGraph } from "../../routes/app/lib/Interpreter";
     
     // Import the existing nodes
@@ -141,18 +140,6 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
         }
     }
 
-    export function updateNode(nodeId: string, updates: Partial<Node>): void {
-        if (!nodeId || !updates) return;
-
-        try {
-            nodes = nodes.map(node =>
-                node && node.id === nodeId ? {...node, ...updates} : node
-            );
-        } catch (error) {
-            console.error('Error updating node:', error);
-        }
-    }
-
     // Helper functions for manual edge operations
     export function addEdge(edge: Omit<Edge, 'id'> | Edge): void {
         try {
@@ -182,7 +169,10 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
 
     // Node search state
     let showNodeSearch = $state(false);
-    let searchPosition = $state({ x: 0, y: 0 });
+
+    // Add a variable to store the viewport
+    let viewport: Viewport = $state({ x: 0, y: 0, zoom: 1 });
+
     let flowContainer: HTMLDivElement;
 
     // Execution state
@@ -264,7 +254,7 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
         //     title: 'HuggingFace LLM',
         //     description: 'Text completion using HuggingFace models',
         //     category: 'AI',
-        //     defaultData: { input: '', output: '', model: 'gpt2' }
+        //     defaultData: { input: '', model: 'gpt2' }
         // }
     ];
 
@@ -272,10 +262,6 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
     function openNodeSearch(event?: KeyboardEvent | MouseEvent): void {
         if (flowContainer) {
             const rect = flowContainer.getBoundingClientRect();
-            searchPosition = {
-                x: rect.width / 2,
-                y: rect.height / 3
-            };
         }
         showNodeSearch = true;
     }
@@ -291,17 +277,20 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
 
     // Add a node to the flow from blueprint
     async function addNodeFromBlueprint(blueprintId: string, title: string): Promise<void> {
+        console.log(viewport)
+        const centerX = (-viewport.x + (typeof window !== 'undefined' ? window.innerWidth : 800) / 2) / viewport.zoom;
+        const centerY = (-viewport.y + (typeof window !== 'undefined' ? window.innerHeight : 600) / 2) / viewport.zoom;
+
         const newNode: Node = {
-            id: `node_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            id: `node_${Date.now()}_${Math.random().toString(36).substring(2, 2+9)}`,
             type: 'node', // Use StemNode for blueprint-based nodes
             position: {
-                x: searchPosition.x - 100, // Center the node around search position
-                y: searchPosition.y - 25
+                x: centerX - 100, // Offset slightly from center
+                y: centerY - 25
             },
             data: {
                 nid: blueprintId,
                 input: {},
-                output: {},
                 title: title
             }
         };
@@ -331,33 +320,6 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
                 showNodeDropdown = false;
             }
         }
-    }
-
-    // Handle pane click to open node search
-    function handlePaneClick({ event }: { event: MouseEvent }): void {
-        // // Only open search if clicking on empty space (not on nodes/edges)
-        // const target = event.target as HTMLElement;
-        // if (target.classList.contains('react-flow__pane')) {
-        //     const rect = flowContainer.getBoundingClientRect();
-        //     searchPosition = {
-        //         x: event.clientX - rect.left,
-        //         y: event.clientY - rect.top
-        //     };
-        //     openNodeSearch();
-        // }
-    }
-
-    // Handle connection creation
-    function onConnect(params: any): void {
-        // const newEdge: Edge = {
-        //     id: `edge-${Date.now()}`,
-        //     source: params.source,
-        //     target: params.target,
-        //     sourceHandle: params.sourceHandle,
-        //     targetHandle: params.targetHandle
-        // };
-        //
-        // addEdge(newEdge);
     }
 
     // Execution functions
@@ -410,12 +372,17 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
 
     // Dropdown functions
     function addNodeFromDropdown(nodeConfig: typeof availableNodes[0]): void {
+        console.log(viewport)
+        const centerX = (-viewport.x + (typeof window !== 'undefined' ? window.innerWidth : 800) / 2) / viewport.zoom;
+        const centerY = (-viewport.y + (typeof window !== 'undefined' ? window.innerHeight : 600) / 2) / viewport.zoom;
+
+        console.log(flowContainer);
         const newNode: Node = {
             id: `${nodeConfig.id}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
             type: nodeConfig.type,
             position: {
-                x: Math.random() * 400 + 100, // Random position
-                y: Math.random() * 400 + 100
+                x: centerX + 100, // Random position
+                y: centerY + 100
             },
             data: nodeConfig.defaultData
         };
@@ -436,14 +403,11 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
         return grouped;
     });
 
-    onMount(() => {
-        auth.authStateReady().then(() => {
-            setTimeout(() => {
-                const introNodeId = 'defaultIntroNodeId';
-                // Don't add default node here - will be handled by reactive effect
-            }, 500);
-        });
-    });
+    // onMount(() => {
+    //     auth.authStateReady().then(() => {
+    //
+    //     });
+    // });
 
 </script>
 
@@ -454,10 +418,9 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
     <SvelteFlow
         bind:nodes
         bind:edges
+        bind:viewport
         {nodeTypes}
         {colorMode}
-        onconnect={onConnect}
-        onpaneclick={handlePaneClick}
         oninit={() => {}}
         fitView
     >
@@ -537,7 +500,7 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
                     title="Search all nodes (Tab)"
                 >
                     <Plus class="w-4 h-4" />
-                    Search Nodes
+                    Search Nodes <small>(Tab)</small>
                 </button>
                 
                 {#if showExecutionPanel}
@@ -557,9 +520,9 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
     <!-- Node Search Modal -->
     <NodeSearch
         bind:isOpen={showNodeSearch}
-        position={searchPosition}
         on:nodeSelected={handleNodeSelected}
         on:close={() => showNodeSearch = false}
+        position={{x: '50vw', y: '20vw'}}
     />
 
     <!-- Execution Panel -->

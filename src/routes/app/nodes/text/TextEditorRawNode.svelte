@@ -7,7 +7,7 @@
             input: { inputText: string };
             nid?: string; // Should be set to 'node_official_raw_text_editor' when using official blueprint
         },
-        'node-plain-text'
+        'node-raw-text-editor'
     >;
 </script>
 
@@ -16,17 +16,17 @@
 
     const {updateNodeData} = useSvelteFlow();
     import {getSocketDataTypeByName} from "../../lib/DataTypes";
-    import {createNodeBluePrintStore, NodeBluePrint} from "../../lib/NodeBluePrint";
-    import {
-        FirestoreNodeBluePrintControllerFactoryInterface,
-    } from "../../lib/FirestoreNodeBluePrint";
-    import type {Unsubscriber, Writable} from "svelte/store";
+    // import {createNodeBluePrintStore, NodeBluePrint} from "../../lib/NodeBluePrint";
+    // import {
+    //     FirestoreNodeBluePrintControllerFactoryInterface,
+    // } from "../../lib/FirestoreNodeBluePrint";
     import {projectOutputDataCache} from "$lib/stores/ProjectState";
     import {untrack} from "svelte";
 
     let {id, data}: NodeProps<PlainTextNodeType> = $props();
 
     let inputText = $state(data.input.inputText || '');
+    let textarea: HTMLTextAreaElement;
     $effect(() => {
         console.log('inputText', inputText);
         updateNodeData(untrack(() => id), {input: {inputText: inputText}});
@@ -41,24 +41,27 @@
     const inputConnections = useNodeConnections({id, handleType: 'target'});
     let hasInputConnection = $derived(inputConnections.current.length > 0);
 
+    function autoResize(textarea: HTMLTextAreaElement) {
+        textarea.style.height = 'auto';
+        textarea.style.height = textarea.scrollHeight + 'px';
+        textarea.style.width = 'auto';
+        textarea.style.width = Math.min(textarea.scrollWidth, 400) + 'px';
+    }
+
+    // Update display value when
     let displayValue = $state('');
-    let unsubscribeSocket: Unsubscriber | undefined = undefined;
     $effect(() => {
-        untrack(() => {
-            if (unsubscribeSocket) {
-                unsubscribeSocket()
-            }
-        });
         if (hasInputConnection) {
             const source = inputConnections.current[0].source;
             const sourceHandle = inputConnections.current[0].sourceHandle || 'input';
-            unsubscribeSocket = projectOutputDataCache.getSocketStore(
+            const unsubscribeSocket = projectOutputDataCache.getSocketStore(
                 source,
                 sourceHandle
             ).subscribe((socketData) => {
                 console.log('output socket data updated:', socketData, id)
                 displayValue = socketData as string;
             });
+            return unsubscribeSocket;
         }
     });
 
@@ -67,31 +70,48 @@
         socketStyle = datatype?.style || 'background: red';
     });
 
+    // Auto-resize effect
+    $effect(() => {
+        if (textarea) {
+            autoResize(textarea);
+        }
+    });
+
+    // Resize when displayValue changes
+    $effect(() => {
+        if (textarea && displayValue) {
+            autoResize(textarea);
+        }
+    });
+
 
 </script>
 
-<div class="w-full h-fit relative">
+<div class="relative">
     <!-- Main textarea -->
-    <div class="w-full border-2 border-gray-300 rounded-lg bg-white overflow-hidden">
-        {id}
+    <div class="border-2 border-gray-300 rounded-lg bg-white overflow-hidden">
+        <!--{id}-->
         {#if hasInputConnection}
             <textarea
+                    bind:this={textarea}
                     value={displayValue}
-                    class="w-full p-3 border-0 outline-none resize-none font-mono text-sm bg-white}"
+                    class="w-fit p-3 border-0 outline-none font-mono text-sm resize-none overflow-hidden"
                     placeholder='No data supplied by link.'
                     disabled
+                    onchange={(e) => autoResize(e.target)}
             ></textarea>
         {:else }
             <textarea
+                    bind:this={textarea}
                     value={inputText}
-                    class="w-full p-3 border-0 outline-none resize-none font-mono text-sm bg-white}"
+                    class="w-fit p-3 border-0 outline-none font-mono text-sm resize-none overflow-hidden"
                     placeholder='Enter plain text...'
                     oninput={(e) => {
                         const value = e.target.value;
                         inputText = value;
+                        autoResize(e.target);
                     }}
             ></textarea>
-            {inputText}
         {/if}
     </div>
 
@@ -114,11 +134,6 @@
 </div>
 
 <style>
-    .socket-handle {
-        width: 8px;
-        height: 8px;
-    }
-
     textarea::placeholder {
         color: #9ca3af;
         font-style: italic;

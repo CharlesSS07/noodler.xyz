@@ -4,8 +4,9 @@
 
 /* Base node container - defines size constraints and prevents text selection */
 .node-container {
-    min-width: 200px;
-    max-width: 350px;
+    min-width: 100px !important;
+    max-width: 400px !important;
+    width: auto !important;
     transition: all 0.2s ease;
     user-select: none;
 }
@@ -49,6 +50,9 @@
     background: #ffffff;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     transition: all 0.2s ease;
+    width: auto !important;
+    min-width: inherit;
+    max-width: inherit;
 }
 
 /* Loading card - dashed border to indicate loading state */
@@ -156,12 +160,14 @@
 /* Node body - container for main content, no padding */
 .node-body {
     padding: 0;
+    width: 100%;
 }
 
 /* Node content - vertical layout for socket sections */
 .node-content {
     display: flex;
     flex-direction: column;
+    width: 100%;
 }
 
 /* Socket section - container for groups of sockets with padding */

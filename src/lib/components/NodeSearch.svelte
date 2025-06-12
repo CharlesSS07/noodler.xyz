@@ -9,7 +9,7 @@
     }>();
 
     export let isOpen: boolean = false;
-    export let position: { x: number; y: number } = { x: 0, y: 0 };
+    export let position: { x: unknown; y: unknown } = { x: 0, y: 0 };
 
     let searchTerm: string = '';
     let searchResults: NodeSearchResult[] = [];
@@ -141,7 +141,7 @@
     <!-- Search Modal -->
     <div 
         class="fixed z-50 bg-white rounded-lg shadow-xl border border-gray-200 w-96 max-h-96"
-        style="left: {position.x}px; top: {position.y}px; transform: translate(-50%, 0);"
+        style="left: {position.x}; top: {position.y}; transform: translate(-50%, 0);"
     >
         <!-- Header -->
         <div class="p-4 border-b border-gray-200">
@@ -152,7 +152,7 @@
                     onclick={closeModal}
                     class="ml-auto text-gray-400 hover:text-gray-600 text-xl leading-none"
                 >
-                    ×
+                    <small>(esc)</small> ×
                 </button>
             </div>
 
