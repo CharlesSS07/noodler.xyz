@@ -72,7 +72,6 @@ class FirebaseStateSync {
         
         const unsubscribe = onValue(projectsRef, (snapshot) => {
             // This could be extended to store projects list in state
-            console.log('User projects updated:', snapshot.val());
         });
 
         this.listeners.set(`userProjects_${userId}`, projectsRef);
@@ -84,7 +83,6 @@ class FirebaseStateSync {
         
         const unsubscribe = onValue(projectRef, (snapshot) => {
             // This could be extended to store project data in state
-            console.log('Project data updated:', snapshot.val());
         });
 
         this.listeners.set(`project_${projectId}`, projectRef);

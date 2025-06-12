@@ -6,7 +6,6 @@
         {
             input: Record<string, string>; // Stores connected input values for variables
             template: string; // The user-defined template string
-            output: { text: string };
             nid?: string; // Should be set to 'node_official_template' when using official blueprint
         },
         'node-template-fillin'

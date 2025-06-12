@@ -28,7 +28,6 @@
 
     // Auto-focus search input when opened
     $: if (isOpen && searchInput) {
-        console.log('NodeSearch opened, focusing input');
         setTimeout(() => searchInput.focus(), 100);
     }
 
@@ -43,7 +42,6 @@
     }
 
     onMount(() => {
-        console.log('NodeSearch component mounted');
         loadPopularNodes();
     });
 

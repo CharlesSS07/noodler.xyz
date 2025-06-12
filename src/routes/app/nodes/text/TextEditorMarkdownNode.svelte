@@ -62,11 +62,11 @@
         textarea.style.height = Math.max(40, textarea.scrollHeight) + 'px';
     }
 
-    let displayValue = $derived(
-        if (hasInputConnection()) {
-            connections.current[0].
-        }
-    )
+    // let displayValue = $derived(
+    //     if (hasInputConnection()) {
+    //         connections.current[0].
+    //     }
+    // )
 </script>
 
 <div class="w-full h-fit relative">

@@ -106,10 +106,8 @@ export class NodeBlueprintAPI {
       import('firebase/functions').then(({ connectFunctionsEmulator }) => {
         try {
           connectFunctionsEmulator(this.functions, 'localhost', 5001);
-          console.log('Connected to Functions emulator');
         } catch (error) {
           // Emulator already connected or not available
-          console.log('Functions emulator connection:', error);
         }
       });
     }

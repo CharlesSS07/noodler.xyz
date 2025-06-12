@@ -210,7 +210,6 @@ export class NodeSearchService {
             const snapshot = await getDocs(query(this.nodesCollection, limit(1)));
             
             if (snapshot.empty) {
-                console.log('No nodes found in Firestore. Consider running generateStandardNodeSuite() to populate with initial nodes.');
                 // In a real app, you might want to automatically populate some basic nodes here
             }
         } catch (error) {

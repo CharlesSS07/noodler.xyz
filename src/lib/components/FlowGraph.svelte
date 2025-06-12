@@ -20,7 +20,7 @@
     import StemNode from '$lib/components/StemNode.svelte';
     import TextTemplateFillinNode from "../../routes/app/nodes/text/TextTemplateFillinNode.svelte";
     import ImageNode from "../../routes/app/nodes/images/ImageNode.svelte";
-    import TextEditorNode from "../../routes/app/nodes/text/TextEditorNode.svelte";
+    import TextEditorNode from "../../routes/app/nodes/text/TextEditorMarkdownNode.svelte";
     import RawTextEditor from "../../routes/app/nodes/text/RawTextEditor.svelte";
     import {onMount} from "svelte";
     import Logo from "../../components/Logo.svelte";
@@ -33,6 +33,7 @@
     
     // Import the existing nodes
     import CompleteTextLLM from "../../routes/app/nodes/huggingface/CompleteTextLLM.svelte";
+    import TextEditorRaw from "../../routes/app/nodes/text/TextEditorRawNode.svelte";
 
     let nodes = $state.raw<Node[]>([]);
 
@@ -45,7 +46,6 @@
     // Initialize project sync when project_key changes
     $effect(() => {
         if (project_key && project_key !== 'project_key_not_assigned') {
-            console.log('Initializing project sync for:', project_key);
             projectSync.syncProject(project_key);
             isInitialized = true;
         }
@@ -61,22 +61,13 @@
 
     // Sync local nodes/edges with ProjectState
     $effect(() => {
-        console.log('Nodes sync effect triggered:', { 
-            isInitialized, 
-            hasLoadedFromFirebase, 
-            nodesLength: nodes.length 
-        });
         if (isInitialized) {
-            console.log('Syncing nodes to ProjectState:', nodes);
             projectActions.setNodes(nodes);
-        } else {
-            console.log('Not syncing nodes - not initialized');
         }
     });
 
     $effect(() => {
         if (isInitialized) {
-            console.log('Syncing edges to ProjectState:', edges);
             projectActions.setEdges(edges);
         }
     });
@@ -91,23 +82,18 @@
                     // Update local nodes if they differ (ensure arrays)
                     const stateNodes = Array.isArray(state.nodes) ? state.nodes : [];
                     if (JSON.stringify(nodes) !== JSON.stringify(stateNodes)) {
-                        console.log('Updating local nodes from ProjectState:', { from: nodes, to: stateNodes });
                         nodes = [...stateNodes];
                     }
                     // Update local edges if they differ (ensure arrays)
                     const stateEdges = Array.isArray(state.edges) ? state.edges : [];
                     if (JSON.stringify(edges) !== JSON.stringify(stateEdges)) {
-                        console.log('Updating local edges from ProjectState:', { from: edges, to: stateEdges });
                         edges = [...stateEdges];
                     }
                     
                     // Mark that we've loaded data from Firebase
                     if (!hasLoadedFromFirebase) {
                         hasLoadedFromFirebase = true;
-                        console.log('Marked as loaded from Firebase');
                     }
-                } else {
-                    console.log('Skipping ProjectState update - local changes are pending');
                 }
             }
         });
@@ -118,7 +104,6 @@
     // Add default intro node when appropriate
     $effect(() => {
         if (isInitialized && hasLoadedFromFirebase && nodes.length === 0) {
-            console.log('Adding default intro node reactively');
             const introNodeId = 'defaultIntroNodeId';
             addNode({
                 type: 'note',
@@ -150,14 +135,7 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
                 ...node
             };
 
-            console.log('addNode called:', { 
-                newNode, 
-                currentNodesLength: nodes.length,
-                isInitialized,
-                hasLoadedFromFirebase 
-            });
             nodes = [...nodes, newNode];
-            console.log('After adding node, nodes length:', nodes.length);
         } catch (error) {
             console.error('Error adding node:', error);
         }
@@ -175,16 +153,6 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
         }
     }
 
-    export function deleteNode(nodeId: string): void {
-        if (!nodeId) return;
-
-        try {
-            nodes = nodes.filter(node => node && node.id !== nodeId);
-        } catch (error) {
-            console.error('Error deleting node:', error);
-        }
-    }
-
     // Helper functions for manual edge operations
     export function addEdge(edge: Omit<Edge, 'id'> | Edge): void {
         try {
@@ -193,7 +161,6 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
                 ...edge
             };
 
-            console.log('Adding edge to local state:', newEdge);
             edges = [...edges, newEdge];
         } catch (error) {
             console.error('Error adding edge:', error);
@@ -206,9 +173,9 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
         image: ImageNode,
         html: HTMLRendererNode,
         textTemplate: TextTemplateFillinNode,
-        textEditor: TextEditorNode,
-        textEditorRaw: RawTextEditor,
-        huggingfaceLLM: CompleteTextLLM
+        textEditorMd: TextEditorNode,
+        huggingfaceLLM: CompleteTextLLM,
+        textEditorRaw: TextEditorRaw
     };
 
     let colorMode: ColorMode = $state('light');
@@ -235,7 +202,9 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
             title: 'Note',
             description: 'Markdown note with editing capabilities',
             category: 'Basic',
-            defaultData: { markdown: '# New Note\n\nWrite your markdown here...' }
+            defaultData: {
+                markdown: '# New Note\n\nWrite your markdown here...'
+            }
         },
         {
             id: 'textEditorRaw',
@@ -243,57 +212,64 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
             title: 'Raw Text Editor',
             description: 'Simple text input/output editor',
             category: 'Text',
-            defaultData: { 
-                input: { text: '' }, 
-                currentText: 'Enter text here...', 
-                output: { text: '' } 
+            defaultData: {
+                input: { text: '' },
+                nid: 'node_official_raw_text_editor'
             }
         },
-        {
-            id: 'textEditor',
-            type: 'textEditor',
-            title: 'Text Editor',
-            description: 'Advanced text editor with formatting',
-            category: 'Text',
-            defaultData: { content: '' }
-        },
-        {
-            id: 'textTemplate',
-            type: 'textTemplate',
-            title: 'Text Template',
-            description: 'Template with variable substitution',
-            category: 'Text',
-            defaultData: { template: 'Hello @name!', variables: {} }
-        },
-        {
-            id: 'html',
-            type: 'html',
-            title: 'HTML Renderer',
-            description: 'Renders HTML content in iframe',
-            category: 'Display',
-            defaultData: { input: { html: '' } }
-        },
-        {
-            id: 'image',
-            type: 'image',
-            title: 'Image',
-            description: 'Image display and processing',
-            category: 'Media',
-            defaultData: { src: '', alt: 'Image' }
-        },
-        {
-            id: 'huggingfaceLLM',
-            type: 'huggingfaceLLM',
-            title: 'HuggingFace LLM',
-            description: 'Text completion using HuggingFace models',
-            category: 'AI',
-            defaultData: { input: '', output: '', model: 'gpt2' }
-        }
+        // {
+        //     id: 'textEditor',
+        //     type: 'textEditor',
+        //     title: 'Text Editor',
+        //     description: 'Advanced text editor with formatting',
+        //     category: 'Text',
+        //     defaultData: {
+        //         input: { text: '' },
+        //         nid: 'node_official_md_text_editor'
+        //     }
+        // },
+        // {
+        //     id: 'textTemplate',
+        //     type: 'textTemplate',
+        //     title: 'Text Template',
+        //     description: 'Template with variable substitution',
+        //     category: 'Text',
+        //     defaultData: {
+        //         template: 'Hello @name!',
+        //         inputs: { name: 'noodler' },
+        //         nid: 'node_official_template'
+        //     }
+        // },
+        // {
+        //     id: 'html',
+        //     type: 'html',
+        //     title: 'HTML Renderer',
+        //     description: 'Renders HTML content in iframe',
+        //     category: 'Display',
+        //     defaultData: {
+        //         html: ''
+        //     }
+        // },
+        // {
+        //     id: 'image',
+        //     type: 'image',
+        //     title: 'Image',
+        //     description: 'Image display and processing',
+        //     category: 'Media',
+        //     defaultData: { src: '', alt: 'Image' }
+        // },
+        // {
+        //     id: 'huggingfaceLLM',
+        //     type: 'huggingfaceLLM',
+        //     title: 'HuggingFace LLM',
+        //     description: 'Text completion using HuggingFace models',
+        //     category: 'AI',
+        //     defaultData: { input: '', output: '', model: 'gpt2' }
+        // }
     ];
 
     // Node search functions
     function openNodeSearch(event?: KeyboardEvent | MouseEvent): void {
-        console.log('openNodeSearch called');
         if (flowContainer) {
             const rect = flowContainer.getBoundingClientRect();
             searchPosition = {
@@ -302,7 +278,6 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
             };
         }
         showNodeSearch = true;
-        console.log('showNodeSearch set to:', showNodeSearch);
     }
 
     // Handle node selection from search
@@ -336,9 +311,7 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
 
     // Handle keyboard events
     function handleKeydown(event: KeyboardEvent): void {
-        if (event.key === 'Delete' || event.key === 'Backspace') {
-            deleteSelectedElements();
-        } else if (event.key === 'Tab' && !event.shiftKey) {
+        if (event.key === 'Tab' && !event.shiftKey) {
             event.preventDefault();
             openNodeSearch(event);
         } else if (event.key === 'Escape') {
@@ -360,48 +333,31 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
         }
     }
 
-    // Delete selected elements
-    function deleteSelectedElements(): void {
-        const selectedNodes = nodes.filter(node => node.selected);
-        const selectedEdges = edges.filter(edge => edge.selected);
-        
-        if (selectedNodes.length > 0 || selectedEdges.length > 0) {
-            // Remove selected nodes
-            selectedNodes.forEach(node => deleteNode(node.id));
-            
-            // Remove selected edges  
-            selectedEdges.forEach(edge => {
-                edges = edges.filter(e => e.id !== edge.id);
-            });
-        }
-    }
-
     // Handle pane click to open node search
     function handlePaneClick({ event }: { event: MouseEvent }): void {
-        // Only open search if clicking on empty space (not on nodes/edges)
-        const target = event.target as HTMLElement;
-        if (target.classList.contains('react-flow__pane')) {
-            const rect = flowContainer.getBoundingClientRect();
-            searchPosition = {
-                x: event.clientX - rect.left,
-                y: event.clientY - rect.top
-            };
-            openNodeSearch();
-        }
+        // // Only open search if clicking on empty space (not on nodes/edges)
+        // const target = event.target as HTMLElement;
+        // if (target.classList.contains('react-flow__pane')) {
+        //     const rect = flowContainer.getBoundingClientRect();
+        //     searchPosition = {
+        //         x: event.clientX - rect.left,
+        //         y: event.clientY - rect.top
+        //     };
+        //     openNodeSearch();
+        // }
     }
 
     // Handle connection creation
     function onConnect(params: any): void {
-        const newEdge: Edge = {
-            id: `edge-${Date.now()}`,
-            source: params.source,
-            target: params.target,
-            sourceHandle: params.sourceHandle,
-            targetHandle: params.targetHandle
-        };
-        
-        console.log('Creating new edge:', newEdge);
-        addEdge(newEdge);
+        // const newEdge: Edge = {
+        //     id: `edge-${Date.now()}`,
+        //     source: params.source,
+        //     target: params.target,
+        //     sourceHandle: params.sourceHandle,
+        //     targetHandle: params.targetHandle
+        // };
+        //
+        // addEdge(newEdge);
     }
 
     // Execution functions
@@ -484,13 +440,7 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
         auth.authStateReady().then(() => {
             setTimeout(() => {
                 const introNodeId = 'defaultIntroNodeId';
-                console.log('onMount: Checking if should add default node', { 
-                    nodesLength: nodes.length, 
-                    isInitialized, 
-                    hasLoadedFromFirebase 
-                });
                 // Don't add default node here - will be handled by reactive effect
-                console.log('onMount: Ready, will let reactive effect handle default node');
             }, 500);
         });
     });
@@ -508,7 +458,7 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
         {colorMode}
         onconnect={onConnect}
         onpaneclick={handlePaneClick}
-        oninit={() => console.log('SvelteFlow initialized')}
+        oninit={() => {}}
         fitView
     >
         <Background variant={BackgroundVariant.Dots} />

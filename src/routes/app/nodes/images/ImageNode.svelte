@@ -17,7 +17,6 @@
         'node-image'
     >;
 
-    console.log("module run")
 </script>
 
 <script lang="ts">

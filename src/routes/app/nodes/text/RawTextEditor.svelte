@@ -60,7 +60,6 @@
                 output: { text: currentText }
             }));
         }
-        console.log('rawtexteditor')
     });
 
     // Whether to show input socket (only if input is empty and not connected)

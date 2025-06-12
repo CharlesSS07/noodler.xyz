@@ -16,7 +16,7 @@
     import ImageNode from "../../nodes/images/ImageNode.svelte";
     import HTMLRendererNode from "../../nodes/html/HTMLRendererNode.svelte";
     import TextTemplateFillinNode from "../../nodes/text/TextTemplateFillinNode.svelte";
-    import TextEditorNode from "../../nodes/text/TextEditorNode.svelte";
+    import TextEditorNode from "../../nodes/text/TextEditorMarkdownNode.svelte";
 
     // Import our custom demo nodes
     import ForegroundSplitter from "../dummynodes/ForegroundSplitter.svelte";

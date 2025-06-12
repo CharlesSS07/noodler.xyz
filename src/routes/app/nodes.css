@@ -321,7 +321,10 @@
 
 /* Socket handle hover - enlarges and enhances shadow */
 .socket-handle:hover {
-    transform: translate(-6px, -6px) scale(1.2);
+    width: 14px !important;
+    height: 14px !important;
+    margin-top: -1px;
+    margin-left: -1px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 }
 

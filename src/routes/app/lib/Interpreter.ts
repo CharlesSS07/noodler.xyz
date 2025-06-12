@@ -2,6 +2,7 @@ import {type Node, type Edge} from "@xyflow/svelte";
 import { NodeBluePrintInFirestore } from "./FirestoreNodeBluePrint";
 import type {NodeBluePrint} from "./NodeBluePrint";
 import {OutputSocketDataCache} from "./OutputSocketDataCache";
+import {projectOutputDataCache} from "$lib/stores/ProjectState";
 
 function socketInstanceKey(node_id: string, socket_id: string) {
     return `${node_id}:${socket_id}`;
@@ -51,13 +52,12 @@ export async function executeFlowGraph(start_node_id: string, nodes: Node[], edg
      */
     
     console.log(`Executing flow graph starting from node: ${start_node_id}`);
-    
-    // Initialize global cache
-    const dataCache = new OutputSocketDataCache();
-    
+
     // 1. Build dependency graph
     const dependencyGraph = buildDependencyGraph(start_node_id, nodes, edges);
     const relevantNodes = Array.from(dependencyGraph.keys());
+
+    console.log(`Relevant nodes: ${JSON.stringify(relevantNodes)}`);
 
     console.log(`Found ${relevantNodes.length} nodes in dependency chain:`, relevantNodes);
 
@@ -100,11 +100,12 @@ export async function executeFlowGraph(start_node_id: string, nodes: Node[], edg
         }
         
         executingNodes.add(nodeId);
-        console.log(`Executing node: ${nodeId}`);
         
         try {
+            console.log(nodeId, nodes);
             const node = nodes.find(n => n.id === nodeId);
             if (!node || !node.data?.nid) {
+                console.log('node', node);
                 throw new Error(`Node ${nodeId} not found or missing nid`);
             }
             
@@ -115,16 +116,24 @@ export async function executeFlowGraph(start_node_id: string, nodes: Node[], edg
             await nodeBlueprint.onReady;
             
             // Get input data for the node
-            const inputData = await getNodeInputData(nodeId, nodes, edges, dataCache);
+            const inputData = await getNodeInputData(nodeId, nodes, edges, projectOutputDataCache);
             
             // Create output returner
-            const outputSocketIds = new Set(Object.keys(nodeBlueprint.outputSockets || {}));
-            const outputReturner = new OutputSocketAsyncReturner(dataCache, nodeId, outputSocketIds);
+            const outputSocketIds = new Set(nodeBlueprint.outputSocketKeys());
+            console.log('using socket keys:', outputSocketIds);
+            const outputReturner = new OutputSocketAsyncReturner(projectOutputDataCache, nodeId, outputSocketIds);
             
             // Execute the node (this would be implemented by each node type)
             // For now, we'll simulate execution
             // console.log(`Node ${nodeId} would execute with inputs:`, inputData);
-            nodeBlueprint.call(inputData, outputReturner);
+            nodeBlueprint.call(inputData, outputReturner).then(() => {
+                console.log(`Executed node ${nodeId} successfully!`);
+            }).catch((err) => {
+                console.log(`Executing node ${nodeId} failed!`);
+                console.error(err);
+            }).finally(() => {
+
+            });
 
             // Mark as executed
             executedNodes.add(nodeId);
@@ -149,7 +158,9 @@ export async function executeFlowGraph(start_node_id: string, nodes: Node[], edg
     
     // Start execution with sink nodes
     await Promise.all(sinkNodes.map(executeNode));
-    
+
+    console.log('dataCache', projectOutputDataCache)
+
     console.log(`Flow graph execution completed for node: ${start_node_id}`);
 }
 
@@ -218,6 +229,8 @@ async function getNodeInputData(nodeId: string, nodes: Node[], edges: Edge[], da
             }
         }
     }
+
+    console.log('inputData', nodeId, inputData);
     
     return inputData;
 }

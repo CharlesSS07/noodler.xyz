@@ -20,20 +20,20 @@ async function specialtyDataInputDataNodes() {
     rawTextEditor.title = 'Raw Text Editor';
     rawTextEditor.documentation = 'Displays or intakes text data.';
 
-    rawTextEditor.newInputSocket('text', {
+    rawTextEditor.newInputSocket('inputText', {
         label: 'Text',
         documentation: '',
         type: 'string',
         params: new StringSocketParamsBuilder("").build(),
     });
 
-    rawTextEditor.newOutputSocket('text', {
+    rawTextEditor.newOutputSocket('outputText', {
         label: 'Text',
         documentation: '',
         type: 'string',
     });
 
-    rawTextEditor.code = `outputs.set("text", inputs.text);`;
+    rawTextEditor.code = `outputs.set("outputText", inputs.inputText);`;
 
     const completeTextHuggingfaceLLM =
         await nodeBluePrintController.initOfficialNodeBluePrint('huggingface_complete_text');

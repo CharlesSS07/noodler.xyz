@@ -36,7 +36,8 @@ export const projectState: Writable<ProjectState> = writable(initialProjectState
 // Derived stores
 export const projectNodes: Readable<Node[]> = derived(projectState, $state => $state.nodes);
 export const projectEdges: Readable<Edge[]> = derived(projectState, $state => $state.edges);
-export const projectOutput: Readable<OutputSocketDataCache> = derived(projectState, $state => $state.outputs);
+export const projectOutputDataCache: OutputSocketDataCache = new OutputSocketDataCache();
+    // = derived(projectState, $state => $state.outputs);
 export const projectTitle: Readable<string> = derived(projectState, $state => $state.title);
 export const isDirty: Readable<boolean> = derived(projectState, $state => $state.isDirty);
 export const isSyncing: Readable<boolean> = derived(projectState, $state => $state.isSyncing);
@@ -134,40 +135,33 @@ class ProjectFirebaseSync {
 
     // Helper method to convert Firebase objects to arrays
     private convertFirebaseDataToArray(data: any): any[] {
-        console.log('convertFirebaseDataToArray called with:', data);
-        
+
         if (!data) {
-            console.log('No data provided, returning empty array');
             return [];
         }
         
         if (Array.isArray(data)) {
-            console.log('Data is already array, returning as-is');
             return data;
         }
         
         // If it's an object, convert to array of objects with id property
         if (typeof data === 'object') {
             const result = Object.entries(data).map(([id, item]: [string, any]) => {
-                console.log('Processing entry:', { id, item });
                 if (item && typeof item === 'object' && !item.id) {
                     return { id, ...item };
                 }
                 return item;
             }).filter(Boolean);
             
-            console.log('Converting Firebase object to array:', { input: data, output: result });
             return result;
         }
         
-        console.log('Data is not object or array, returning empty array');
         return [];
     }
 
     // Helper method to convert arrays to Firebase objects
     private convertArrayToFirebaseObject(array: any[]): Record<string, any> {
         if (!array || !Array.isArray(array)) {
-            console.log('convertArrayToFirebaseObject: Invalid input', array);
             return {};
         }
         
@@ -179,13 +173,11 @@ class ProjectFirebaseSync {
             }
         });
         
-        console.log('Converting array to Firebase object:', { input: array, output: result });
         return result;
     }
 
     // Start syncing a project
     syncProject(projectId: string): void {
-        console.log('Starting sync for project:', projectId);
         
         // Clean up previous listener
         this.cleanup();
@@ -196,11 +188,9 @@ class ProjectFirebaseSync {
 
         onValue(this.projectListener, (snapshot) => {
             const projectData = snapshot.val();
-            console.log('Firebase RTDB data received:', projectData);
             
             // Skip updates if we're in the middle of a local update
             if (this.isLocalUpdate) {
-                console.log('Skipping Firebase update - local update in progress');
                 return;
             }
             
@@ -212,18 +202,13 @@ class ProjectFirebaseSync {
             unsubscribe();
             
             if (currentState!.isDirty) {
-                console.log('Skipping Firebase update - local changes are pending save');
                 return;
             }
             
             if (projectData) {
-                console.log('Updating project state with Firebase data');
-                
                 // Convert Firebase objects to arrays if needed
-                console.log('Raw Firebase data - nodes:', projectData.nodes, 'edges:', projectData.edges);
                 const nodes = this.convertFirebaseDataToArray(projectData.nodes);
                 const edges = this.convertFirebaseDataToArray(projectData.edges);
-                console.log('Converted arrays - nodes:', nodes, 'edges:', edges);
                 
                 projectState.update(state => ({
                     ...state,
@@ -239,10 +224,8 @@ class ProjectFirebaseSync {
                 // Mark that we've completed the initial load
                 if (!this.hasInitialLoad) {
                     this.hasInitialLoad = true;
-                    console.log('Initial load completed');
                 }
             } else {
-                console.log('No project data found - initializing empty project');
                 projectState.update(state => ({
                     ...state,
                     projectId,
@@ -257,7 +240,6 @@ class ProjectFirebaseSync {
                 // Mark that we've completed the initial load
                 if (!this.hasInitialLoad) {
                     this.hasInitialLoad = true;
-                    console.log('Initial load completed (new project)');
                 }
             }
         });
@@ -280,7 +262,6 @@ class ProjectFirebaseSync {
             throw new Error('No project ID set');
         }
 
-        console.log('Saving project to Firebase RTDB:', currentState!.projectId);
         this.isLocalUpdate = true; // Set flag to prevent Firebase listener from overwriting
         projectActions.setSyncing(true);
 
@@ -288,19 +269,15 @@ class ProjectFirebaseSync {
             const projectRef = ref(rtdb, `fridge/${currentState!.projectId}`);
             
             // Convert arrays to objects for Firebase storage
-            console.log('Current state before save - nodes:', currentState!.nodes, 'edges:', currentState!.edges);
             const nodesToSave = this.convertArrayToFirebaseObject(currentState!.nodes);
             const edgesToSave = this.convertArrayToFirebaseObject(currentState!.edges);
-            console.log('Converted for save - nodes:', nodesToSave, 'edges:', edgesToSave);
             
             // Prevent accidental deletion of existing data when saving empty arrays
             if (Object.keys(nodesToSave).length === 0 && currentState!.nodes.length === 0) {
-                console.warn('Attempted to save empty nodes array - this might delete existing data');
                 // For extra safety, don't include nodes field in the save if it's empty
                 // This prevents overwriting existing nodes with empty data
             }
             if (Object.keys(edgesToSave).length === 0 && currentState!.edges.length === 0) {
-                console.warn('Attempted to save empty edges array - this might delete existing data');
                 // For extra safety, don't include edges field in the save if it's empty
                 // This prevents overwriting existing edges with empty data
             }
@@ -316,9 +293,7 @@ class ProjectFirebaseSync {
             saveData.nodes = nodesToSave;
             saveData.edges = edgesToSave;
             
-            console.log('Saving data:', saveData);
             await update(projectRef, saveData);
-            console.log('Project saved successfully');
 
             projectActions.markClean();
         } catch (error) {
@@ -356,14 +331,8 @@ projectState.subscribe(state => {
         // Don't auto-save empty arrays immediately after initial load
         // This prevents overwriting existing data with empty arrays during initialization
         if (!projectSync.isInitialLoadComplete()) {
-            console.log('Skipping auto-save - initial load not complete yet');
             return;
         }
-
-        console.log('Project is dirty, scheduling auto-save...', { 
-            nodes: state.nodes.length, 
-            edges: state.edges.length 
-        });
         
         // Clear existing timeout
         if (saveTimeout) {
@@ -375,10 +344,6 @@ projectState.subscribe(state => {
 
         // Set new timeout for auto-save
         saveTimeout = setTimeout(() => {
-            console.log('Auto-saving project...', {
-                nodes: state.nodes.length,
-                edges: state.edges.length
-            });
             projectSync.saveProject().catch(console.error);
         }, debounceTime);
     }

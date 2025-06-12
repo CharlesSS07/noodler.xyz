@@ -9,9 +9,7 @@ export abstract class NodeLib<T extends object> {
     abstract setupConnection(): Promise<void>;
 
     async connect(): Promise<void> {
-        console.info(`Attempting to connect API: ${this.name}`);
         await this.setupConnection();
-        console.info(`Connected API: ${this.name}`);
     }
 
     disconnect() {
@@ -34,7 +32,6 @@ export class NodeAPIConnectorManager {
 
     static registerAPIConnector<T extends object>(connector: NodeLib<T>): NodeLib<T> {
         NodeAPIConnectorManager.connections.set(connector.name, connector);
-        console.log(connector);
         return connector;
     }
 

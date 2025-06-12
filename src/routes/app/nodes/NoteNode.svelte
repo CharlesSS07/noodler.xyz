@@ -38,12 +38,10 @@
 	}
 
 	function handleClick() {
-		console.log('handleClick')
 		isEditing = true;
 	}
 
 	function handleBlur() {
-		console.log('handleBlur')
 		isEditing = false;
 	}
 

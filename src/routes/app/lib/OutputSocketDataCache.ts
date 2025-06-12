@@ -91,9 +91,9 @@ export class OutputSocketDataCache {
     async cache(node_key: string, socket_id: string, data: unknown): Promise<void> {
         const key = socketInstanceKey(node_key, socket_id);
 
-        if (this.data.has(key)) {
-            throw new Error(`Socket ${key} already cached. This would overwrite the socket data. The whole node should have been dumped first.`);
-        }
+        // if (this.data.has(key)) {
+        //     throw new Error(`Socket ${key} already cached. This would overwrite the socket data. The whole node should have been dumped first.`);
+        // }
 
         this.data.set(key, data);
         this.updateStores();
