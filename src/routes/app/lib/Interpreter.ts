@@ -1,17 +1,9 @@
 import {type Node, type Edge} from "@xyflow/svelte";
-import { NodeBluePrintInFirestore } from "./FirestoreNodeBluePrint";
+import {FirestoreNodeBluePrintControllerFactoryInterface, NodeBluePrintInFirestore} from "./FirestoreNodeBluePrint";
 import type {NodeBluePrint} from "./NodeBluePrint";
 import {OutputSocketDataCache} from "./OutputSocketDataCache";
 import {projectOutputDataCache} from "$lib/stores/ProjectState";
-
-function socketInstanceKey(node_id: string, socket_id: string) {
-    return `${node_id}:${socket_id}`;
-}
-
-function parseSocketInstanceKey(socketInstanceKey: string) {
-    const [node_id, socket_id] = socketInstanceKey.split(":");
-    return {node_id: node_id, socket_id: socket_id};
-}
+import {getBigData, type BigDataRef} from "./BigData";
 
 class CyclicDependencyException extends Error {}
 
@@ -71,9 +63,17 @@ export async function executeFlowGraph(start_node_id: string, nodes: Node[], edg
         }
     });
 
-    const relevantNodeBluePrintsLookup = new Map<string, NodeBluePrint>(
-        relevantNids.map((nid) => [nid, new NodeBluePrintInFirestore(nid)])
-    );
+    const factory = new FirestoreNodeBluePrintControllerFactoryInterface();
+
+    // Load all node blueprints in parallel
+    const relevantNodeBluePrintsLookup = new Map<string, NodeBluePrint>();
+    const blueprintPromises = relevantNids.map(nid => factory.getNodeBluePrintFromNID(nid));
+    const blueprints = await Promise.all(blueprintPromises);
+    
+    // Build the lookup map
+    for (let i = 0; i < relevantNids.length; i++) {
+        relevantNodeBluePrintsLookup.set(relevantNids[i], blueprints[i]);
+    }
 
     // Find sink nodes (nodes with no dependencies)
     const sinkNodes = relevantNodes.filter(nodeId => {
@@ -95,6 +95,7 @@ export async function executeFlowGraph(start_node_id: string, nodes: Node[], edg
     
     // Function to execute a single node
     const executeNode = async (nodeId: string): Promise<void> => {
+        console.log(`Executing node: ${nodeId}`);
         if (executedNodes.has(nodeId) || executingNodes.has(nodeId)) {
             return;
         }
@@ -113,27 +114,25 @@ export async function executeFlowGraph(start_node_id: string, nodes: Node[], edg
             if (!nodeBlueprint) {
                 throw new Error(`NodeBlueprint not found for nid: ${node.data.nid}`);
             }
-            await nodeBlueprint.onReady;
+            console.log('nodeBlueprint loaded for', node.data.nid);
             
             // Get input data for the node
             const inputData = await getNodeInputData(nodeId, nodes, edges, projectOutputDataCache);
+            console.log('inputData', Object.keys(inputData));
             
             // Create output returner
             const outputSocketIds = new Set(nodeBlueprint.outputSocketKeys());
-            console.log('using socket keys:', outputSocketIds);
             const outputReturner = new OutputSocketAsyncReturner(projectOutputDataCache, nodeId, outputSocketIds);
             
-            // Execute the node (this would be implemented by each node type)
-            // For now, we'll simulate execution
-            // console.log(`Node ${nodeId} would execute with inputs:`, inputData);
-            nodeBlueprint.call(inputData, outputReturner).then(() => {
-                console.log(`Executed node ${nodeId} successfully!`);
-            }).catch((err) => {
-                console.log(`Executing node ${nodeId} failed!`);
-                console.error(err);
-            }).finally(() => {
-
-            });
+            // Execute the node
+            await nodeBlueprint.call(inputData, outputReturner).then(() => {
+                console.log(`Node ${nodeId} successfully resolved`);
+                console.log(outputReturner.dataCache);
+            }).catch(
+                console.error // should call outputReturner.set('__error__', ...)\
+                // so the node can reflect the error state, and execution is set to stop at
+                // next break points
+            );
 
             // Mark as executed
             executedNodes.add(nodeId);
@@ -227,6 +226,14 @@ async function getNodeInputData(nodeId: string, nodes: Node[], edges: Edge[], da
             if (!connectedInputs.has(inputKey)) {
                 inputData[inputKey] = inputValue;
             }
+        }
+    }
+
+    for (const key in inputData) {
+        console.log(typeof inputData[key]);
+        // @ts-ignore
+        if (inputData[key].hasOwnProperty('_type') && inputData[key]._type=='bigdata_ref') {
+            inputData[key] = await getBigData(inputData[key] as BigDataRef);
         }
     }
 

@@ -79,10 +79,6 @@
                 result = result.replaceAll(placeholder, value || ''); // Replaced with empty string if value is falsy
             });
 
-            // Only update if the output has actually changed
-            if (result !== data.output.text) {
-                updateNodeData(id, {output: {text: result}});
-            }
         }
     });
 

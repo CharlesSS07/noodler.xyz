@@ -1,423 +1,5 @@
 const edgeStyle = 'stroke:#D2D2D2; stroke-width:4;';
 
-export const nodesVersion0 = [
-    {
-        id: 'product_name',
-        type: 'textEditorRaw',
-        data: {
-            input: { text: '' },
-            currentText: 'noodler.xyz',
-            output: { text: '' },
-        },
-        position: { x: -600, y: 0 },
-        // Add dimensions for accurate layout
-        width: 200,
-        height: 50,
-    },
-    {
-        id: 'target_audience',
-        type: 'textEditorRaw',
-        data: {
-            input: { text: '' },
-            currentText: 'Artists, Gen AI Ops, and AI Engineers',
-            output: { text: '' },
-        },
-        position: { x: 0, y: 0 },
-        // Add dimensions for accurate layout
-        width: 250,
-        height: 50,
-    },
-    {
-        id: 'campaign_goal',
-        type: 'textEditorRaw',
-        data: {
-            input: { text: '' },
-            currentText:
-                'Entertain, demonstrate product potential, build connections',
-            output: { text: '' },
-        },
-        position: { x: 0, y: 0 },
-        // Add dimensions for accurate layout
-        width: 300,
-        height: 50,
-    },
-    {
-        id: 'key_features',
-        type: 'textEditorRaw',
-        data: {
-            input: { text: '' },
-            currentText:
-                'Flow-designer, no-code, no setup, plug-n-play interface, explainable, extendable',
-            output: { text: '' },
-        },
-        position: { x: 0, y: 0 },
-        // Add dimensions for accurate layout
-        width: 400,
-        height: 50,
-    },
-    {
-        id: 'call_to_action',
-        type: 'textEditorRaw',
-        data: {
-            input: { text: '' },
-            currentText:
-                'build with me, democratize AI design, create art, visualize your code',
-            output: { text: '' },
-        },
-        position: { x: 0, y: 0 },
-        // Add dimensions for accurate layout
-        width: 350,
-        height: 50,
-    },
-    {
-        id: 'tone_and_style',
-        type: 'textEditorRaw',
-        data: {
-            input: { text: '' },
-            currentText: 'engaging, informative, slightly humorous',
-            output: { text: '' },
-        },
-        position: { x: 0, y: 0 },
-        // Add dimensions for accurate layout
-        width: 280,
-        height: 50,
-    },
-    {
-        id: 'word_count_range',
-        type: 'textEditorRaw',
-        data: {
-            input: { text: '' },
-            currentText: '250-300 words',
-            output: { text: '' },
-        },
-        position: { x: 0, y: 0 },
-        // Add dimensions for accurate layout
-        width: 180,
-        height: 50,
-    },
-    {
-        id: 'output_format',
-        type: 'textEditorRaw',
-        data: {
-            input: { text: '' },
-            currentText: 'linkedin connection request',
-            output: { text: '' },
-        },
-        position: { x: 0, y: 0 },
-        // Add dimensions for accurate layout
-        width: 250,
-        height: 50,
-    },
-    {
-        id: 'role_instruction',
-        type: 'textEditorRaw',
-        data: {
-            input: { text: '' },
-            currentText:
-                'You are an expert marketing content creator specializing in persuasive and engaging copy. Your task is to craft compelling content for a specific product launch.',
-            output: { text: '' },
-        },
-        position: { x: 0, y: 0 },
-        // Add dimensions for accurate layout
-        width: 500,
-        height: 80,
-    },
-    {
-        id: 'context_instruction',
-        type: 'textTemplate',
-        data: {
-            input: { text: '' },
-            template:
-                'We are launching a new product called "@product_name". The primary goal of this campaign is to @campaign_goal. Our target audience is: @target_audience.',
-            output: { text: '' },
-        },
-        position: { x: -300, y: 0 },
-        // Add dimensions for accurate layout
-        width: 400,
-        height: 100,
-    },
-    {
-        id: 'task_instruction',
-        type: 'textTemplate',
-        data: {
-            input: { text: '' },
-            template:
-                'Your main objective is to write a detailed and persuasive @output_format that highlights the benefits of "@product_name".',
-            output: { text: '' },
-        },
-        position: { x: -300, y: 200 },
-        // Add dimensions for accurate layout
-        width: 400,
-        height: 80,
-    },
-    {
-        id: 'constraints_instruction',
-        type: 'textTemplate',
-        data: {
-            input: { text: '' },
-            template: `Please adhere to the following guidelines:
-The tone should be @tone_and_style.
-The content should be approximately @word_count_range long.
-Focus on explaining *how* the product solves a problem for the target audience.
-Integrate the following key features/benefits seamlessly:`,
-            output: { text: '' },
-        },
-        position: { x: 0, y: 0 },
-        // Add dimensions for accurate layout
-        width: 450,
-        height: 150,
-    },
-    {
-        id: 'key_features_to_list',
-        type: 'textTransformLLM',
-        data: {
-            input: { text: '' },
-            currentText: ``,
-            output: { text: '' },
-        },
-        position: { x: 300, y: 200 },
-        // Add dimensions for accurate layout
-        width: 200,
-        height: 50,
-    },
-    {
-        id: 'constraints_instruction_join_text_key_features_to_list',
-        type: 'node',
-        data: {
-            nid: 'official_node_join_text',
-            input: { text1: '', text2: '', text3: '', text4: '' },
-            currentText: ``,
-            output: { text: '' },
-        },
-        position: { x: 300, y: 200 },
-        // Add dimensions for accurate layout
-        width: 200,
-        height: 50,
-    },
-    {
-        id: 'inclusion_instruction',
-        type: 'textTemplate',
-        data: {
-            input: { text: '' },
-            template: `- Ensure the call to action is prominent: '@call_to_action'.
-- Avoid jargon where possible, or explain it clearly if necessary.
-- Emphasize value proposition over just features.`,
-            output: { text: '' },
-        },
-        position: { x: 300, y: 200 },
-        // Add dimensions for accurate layout
-        width: 400,
-        height: 100,
-    },
-    {
-        id: 'format_specification',
-        type: 'textTemplate',
-        data: {
-            input: { text: '' },
-            template: `The output must be a well-structured @output_format with a catchy title, an engaging introduction, several body paragraphs, and a strong conclusion.`,
-            output: { text: '' },
-        },
-        position: { x: 300, y: 200 },
-        // Add dimensions for accurate layout
-        width: 400,
-        height: 100,
-    },
-    {
-        id: 'full_prompt',
-        type: 'textTemplate',
-        data: {
-            input: { text: '' },
-            template: `### Role:
-@role_instruction
-
-
-### Context:@context_instruction
-
-
-### Task:
-
-
-@task_instruction
-
-
-### Guidelines & Constraints:
-@constraints_instruction}
-
-@inclusion_instruction
-
-### Output Format:
-@format_specification
-
-
-### BEGIN CONTENT GENERATION ###
-`,
-            output: { text: '' },
-        },
-        position: { x: 300, y: 200 },
-        // Add dimensions for accurate layout
-        width: 500,
-        height: 300,
-    },
-    {
-        id: 'note',
-        type: 'note',
-        data: {
-            markdown: `# Welcome to the Noodle Board! 🍜
-
----
-
-Here's what you can do on the Noodle Board:
-
-* Describe your project to get better AI assistance (comments help! 💡).
-* This is a **procedural flow language** (Functional Paradigm). Take the output of one function and **pipe it into another** ➡️.
-* Login to your service 🔑, noodle the credentials into their API Node, then access data using the sockets. *Iterate*! 🔄
-* Build & test your **own** nodes 🛠️ and deploy them to your **own** API for autoscaling! 🚀
-* Be creative. Think different**ly**! ✨`,
-        },
-        position: { x: 0, y: 100 },
-        // Add dimensions for accurate layout
-        width: 350,
-        height: 250,
-    },
-];
-
-export const edgesVersion0 = [
-    {
-        id: '1',
-        source: 'product_name',
-        target: 'context_instruction',
-        targetHandle: 'product_name',
-        style: edgeStyle,
-    },
-    {
-        id: '2',
-        source: 'product_name',
-        target: 'task_instruction',
-        targetHandle: 'product_name',
-        style: edgeStyle,
-    },
-    {
-        id: '3',
-        source: 'target_audience',
-        target: 'context_instruction',
-        targetHandle: 'target_audience',
-        style: edgeStyle,
-    },
-    {
-        id: '4',
-        source: 'campaign_goal',
-        target: 'context_instruction',
-        targetHandle: 'campaign_goal',
-        style: edgeStyle,
-    },
-    {
-        id: '5',
-        source: 'key_features',
-        target: 'key_features_to_list',
-        targetHandle: 'messy_text',
-        style: edgeStyle,
-    },
-    {
-        id: '6',
-        source: 'key_features_to_list',
-        sourceHandle: 'formatted_text',
-        target: 'constraints_instruction_join_text_key_features_to_list',
-        targetHandle: 'text2',
-        style: edgeStyle,
-    },
-    {
-        id: '7',
-        source: 'call_to_action',
-        target: 'inclusion_instruction',
-        style: edgeStyle,
-    },
-    {
-        id: '8',
-        source: 'tone_and_style',
-        target: 'constraints_instruction',
-        targetHandle: 'tone_and_style',
-        style: edgeStyle,
-    },
-    {
-        id: '9',
-        source: 'word_count_range',
-        target: 'constraints_instruction',
-        targetHandle: 'word_count_range',
-        style: edgeStyle,
-    },
-    {
-        id: '9b',
-        source: 'constraints_instruction',
-        target: 'constraints_instruction_join_text_key_features_to_list',
-        targetHandle: 'text1',
-        style: edgeStyle,
-    },
-    {
-        id: '10',
-        source: 'output_format',
-        target: 'task_instruction',
-        targetHandle: 'output_format',
-        style: edgeStyle,
-    },
-    {
-        id: '11',
-        source: 'output_format',
-        target: 'format_specification',
-        targetHandle: 'output_format',
-        style: edgeStyle,
-    },
-    {
-        id: '12',
-        source: 'output_format',
-        target: 'format_specification',
-        targetHandle: 'output_format',
-        style: edgeStyle,
-    },
-    {
-        id: 'c',
-        source: 'role_instruction',
-        target: 'full_prompt',
-        targetHandle: 'role_instruction',
-        style: edgeStyle,
-    },
-    {
-        id: 'd',
-        source: 'context_instruction',
-        target: 'full_prompt',
-        targetHandle: 'context_instruction',
-        style: edgeStyle,
-    },
-    {
-        id: 'e',
-        source: 'task_instruction',
-        target: 'full_prompt',
-        targetHandle: 'task_instruction',
-        style: edgeStyle,
-    },
-    {
-        id: 'f',
-        source: 'constraints_instruction_join_text_key_features_to_list',
-        sourceHandle: 'text',
-        target: 'full_prompt',
-        targetHandle: 'constraints_instruction',
-        style: edgeStyle,
-    },
-    {
-        id: 'g',
-        source: 'inclusion_instruction',
-        target: 'full_prompt',
-        targetHandle: 'inclusion_instruction',
-        style: edgeStyle,
-    },
-    {
-        id: 'h',
-        source: 'format_specification',
-        target: 'full_prompt',
-        targetHandle: 'format_specification',
-        style: edgeStyle,
-    },
-];
-
 export const nodesVersion2 = [
     {
         id: 'constraints_instruction_join_text_key_features_to_list',
@@ -459,11 +41,7 @@ export const nodesVersion2 = [
         type: 'textEditorRaw',
         data: {
             input: {
-                text: '',
-            },
-            currentText: 'noodler.xyz',
-            output: {
-                text: 'noodler.xyz',
+                inputText: 'noodler.xyz',
             },
         },
         position: {
@@ -489,11 +67,7 @@ export const nodesVersion2 = [
         type: 'textEditorRaw',
         data: {
             input: {
-                text: '',
-            },
-            currentText: 'Artists, Gen AI Ops, and AI Engineers',
-            output: {
-                text: 'Artists, Gen AI Ops, and AI Engineers',
+                inputText: 'Artists, Gen AI Ops, and AI Engineers',
             },
         },
         position: {
@@ -519,12 +93,7 @@ export const nodesVersion2 = [
         type: 'textEditorRaw',
         data: {
             input: {
-                text: '',
-            },
-            currentText:
-                'Entertain, demonstrate product potential, build connections',
-            output: {
-                text: 'Entertain, demonstrate product potential, build connections',
+                inputText: 'Entertain, demonstrate product potential, build connections',
             },
         },
         position: {
@@ -550,12 +119,7 @@ export const nodesVersion2 = [
         type: 'textEditorRaw',
         data: {
             input: {
-                text: '',
-            },
-            currentText:
-                'Flow-designer, no-code, no setup, plug-n-play interface, explainable, extendable',
-            output: {
-                text: 'Flow-designer, no-code, no setup, plug-n-play interface, explainable, extendable',
+                inputText: 'Flow-designer, no-code, no setup, plug-n-play interface, explainable, extendable',
             },
         },
         position: {
@@ -581,12 +145,7 @@ export const nodesVersion2 = [
         type: 'textEditorRaw',
         data: {
             input: {
-                text: '',
-            },
-            currentText:
-                'build with me, democratize AI design, create art, visualize your code',
-            output: {
-                text: 'build with me, democratize AI design, create art, visualize your code',
+                inputText: 'build with me, democratize AI design, create art, visualize your code',
             },
         },
         position: {
@@ -612,11 +171,7 @@ export const nodesVersion2 = [
         type: 'textEditorRaw',
         data: {
             input: {
-                text: '',
-            },
-            currentText: 'engaging, informative, slightly humorous',
-            output: {
-                text: 'engaging, informative, slightly humorous',
+                inputText: 'engaging, informative, slightly humorous',
             },
         },
         position: {
@@ -642,11 +197,7 @@ export const nodesVersion2 = [
         type: 'textEditorRaw',
         data: {
             input: {
-                text: '',
-            },
-            currentText: '250-300 words',
-            output: {
-                text: '250-300 words',
+                inputText: '250-300 words',
             },
         },
         position: {
@@ -672,11 +223,7 @@ export const nodesVersion2 = [
         type: 'textEditorRaw',
         data: {
             input: {
-                text: '',
-            },
-            currentText: 'linkedin connection request',
-            output: {
-                text: 'linkedin connection request',
+                inputText: 'linkedin connection request',
             },
         },
         position: {
@@ -702,12 +249,7 @@ export const nodesVersion2 = [
         type: 'textEditorRaw',
         data: {
             input: {
-                text: '',
-            },
-            currentText:
-                'You are an expert marketing content creator specializing in persuasive and engaging copy. Your task is to craft compelling content for a specific product launch.',
-            output: {
-                text: 'You are an expert marketing content creator specializing in persuasive and engaging copy. Your task is to craft compelling content for a specific product launch.',
+                inputText: 'You are an expert marketing content creator specializing in persuasive and engaging copy. Your task is to craft compelling content for a specific product launch.',
             },
         },
         position: {

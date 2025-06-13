@@ -17,17 +17,17 @@
     import HTMLRendererNode from "../../nodes/html/HTMLRendererNode.svelte";
     import TextTemplateFillinNode from "../../nodes/text/TextTemplateFillinNode.svelte";
     import TextEditorNode from "../../nodes/text/TextEditorMarkdownNode.svelte";
-    import RawTextEditor from "../../nodes/text/RawTextEditor.svelte";
     import MagicTextTransformLLM from "../dummynodes/TextFormatterLLM.svelte";
     import "../../nodes.css";
     import ELK from 'elkjs/lib/elk.bundled.js';
     import { onMount } from "svelte";
-    import {edgesVersion2, nodesVersion0, nodesVersion2} from "./projectVersions";
+    import {edgesVersion2, nodesVersion2} from "./projectVersions";
     import Logo from "../../../../components/Logo.svelte";
     import EmailSignup from "../../../../components/EmailSignup.svelte";
     import BugReportButton from "../../../../components/BugReportButton.svelte";
     import { Play, RefreshCw, Download, ArrowLeft } from "lucide-svelte";
     import { Panel } from "@xyflow/svelte";
+    import TextEditorRawNode from "../../nodes/text/TextEditorRawNode.svelte";
 
     let nodes = $state.raw<Node[]>(nodesVersion2);
 
@@ -40,7 +40,7 @@
         html: HTMLRendererNode,
         textTemplate: TextTemplateFillinNode,
         textEditor: TextEditorNode,
-        textEditorRaw: RawTextEditor,
+        textEditorRaw: TextEditorRawNode,
         textTransformLLM: MagicTextTransformLLM
     };
 

@@ -218,36 +218,39 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
         //         nid: 'node_official_md_text_editor'
         //     }
         // },
-        // {
-        //     id: 'textTemplate',
-        //     type: 'textTemplate',
-        //     title: 'Text Template',
-        //     description: 'Template with variable substitution',
-        //     category: 'Text',
-        //     defaultData: {
-        //         template: 'Hello @name!',
-        //         inputs: { name: 'noodler' },
-        //         nid: 'node_official_template'
-        //     }
-        // },
-        // {
-        //     id: 'html',
-        //     type: 'html',
-        //     title: 'HTML Renderer',
-        //     description: 'Renders HTML content in iframe',
-        //     category: 'Display',
-        //     defaultData: {
-        //         html: ''
-        //     }
-        // },
-        // {
-        //     id: 'image',
-        //     type: 'image',
-        //     title: 'Image',
-        //     description: 'Image display and processing',
-        //     category: 'Media',
-        //     defaultData: { src: '', alt: 'Image' }
-        // },
+        {
+            id: 'textTemplate',
+            type: 'textTemplate',
+            title: 'Text Template',
+            description: 'Template with variable substitution',
+            category: 'Text',
+            defaultData: {
+                template: 'Hello @name!',
+                inputs: { name: 'noodler' },
+                nid: 'node_official_template'
+            }
+        },
+        {
+            id: 'html',
+            type: 'html',
+            title: 'HTML Renderer',
+            description: 'Renders HTML content in iframe',
+            category: 'Display',
+            defaultData: {
+                html: ''
+            }
+        },
+        {
+            id: 'image',
+            type: 'image',
+            title: 'Image',
+            description: 'Image display and processing',
+            category: 'Media',
+            defaultData: {
+                input: { },
+                nid: 'node_official_image_loader'
+            }
+        },
         // {
         //     id: 'huggingfaceLLM',
         //     type: 'huggingfaceLLM',

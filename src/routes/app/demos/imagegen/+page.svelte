@@ -31,9 +31,9 @@
     import { onMount } from "svelte";
     import Logo from "../../../../components/Logo.svelte";
     import { Play, RefreshCw, Download, ArrowLeft, Layout } from "lucide-svelte";
-    import RawTextEditor from "../../nodes/text/RawTextEditor.svelte";
     import ELK from 'elkjs/lib/elk.bundled.js';
     import { Position } from "@xyflow/svelte";
+    import TextEditorRawNode from "../../nodes/text/TextEditorRawNode.svelte";
 
     // Demo workflow nodes
     let nodes = $state.raw<Node[]>([
@@ -62,9 +62,7 @@ This demo showcases real-world AI image processing capabilities!`
             type: 'textEditorRaw',
             position: { x: 50, y: 300 },
             data: {
-                input: { text: '' },
-                currentText: 'https://example.com/sample-photo.jpg',
-                output: { text: '' }
+                input: { inputText: 'https://example.com/sample-photo.jpg' }
             },
             width: 200,
             height: 100
@@ -75,8 +73,7 @@ This demo showcases real-world AI image processing capabilities!`
             position: { x: 300, y: 280 },
             data: {
                 nid: 'official_node_fetch_url',
-                input: {},
-                output: {}
+                input: {}
             },
             width: 200,
             height: 150
@@ -94,7 +91,6 @@ This demo showcases real-world AI image processing capabilities!`
             type: 'image',
             position: { x: 850, y: 240 },
             data: {
-                output: { image: null },
                 input: { image: null }
             },
             width: 200,
@@ -105,9 +101,7 @@ This demo showcases real-world AI image processing capabilities!`
             type: 'textEditorRaw',
             position: { x: 50, y: 450 },
             data: {
-                input: { text: '' },
-                currentText: 'person, subject, main focus',
-                output: { text: '' }
+                input: { inputText: 'person, subject, main focus' }
             },
             width: 200,
             height: 100
@@ -125,9 +119,7 @@ This demo showcases real-world AI image processing capabilities!`
             type: 'textEditorRaw',
             position: { x: 50, y: 600 },
             data: {
-                input: { text: '' },
-                currentText: 'futuristic cyberpunk cityscape',
-                output: { text: '' }
+                input: { inputText: 'futuristic cyberpunk cityscape' }
             },
             width: 200,
             height: 100
@@ -137,9 +129,7 @@ This demo showcases real-world AI image processing capabilities!`
             type: 'textEditorRaw',
             position: { x: 50, y: 750 },
             data: {
-                input: { text: '' },
-                currentText: 'neon lights, rain, night atmosphere',
-                output: { text: '' }
+                input: { inputText: 'neon lights, rain, night atmosphere' }
             },
             width: 200,
             height: 100
@@ -149,9 +139,8 @@ This demo showcases real-world AI image processing capabilities!`
             type: 'textTemplate',
             position: { x: 300, y: 600 },
             data: {
-                input: { text: '' },
+                input: { },
                 template: 'A detailed @backgroundstyle with @backgrounddetails, @qualitysettings, professional photography',
-                output: { text: '' }
             },
             width: 300,
             height: 150
@@ -161,9 +150,7 @@ This demo showcases real-world AI image processing capabilities!`
             type: 'textEditorRaw',
             position: { x: 50, y: 900 },
             data: {
-                input: { text: '' },
-                currentText: '8k resolution, dramatic lighting',
-                output: { text: '' }
+                input: { inputText: '8k resolution, dramatic lighting' }
             },
             width: 200,
             height: 100
@@ -181,9 +168,7 @@ This demo showcases real-world AI image processing capabilities!`
             type: 'textEditorRaw',
             position: { x: 50, y: 1050 },
             data: {
-                input: { text: '' },
-                currentText: 'realistic lighting, natural shadows, seamless integration',
-                output: { text: '' }
+                input: { inputText: 'realistic lighting, natural shadows, seamless integration' }
             },
             width: 200,
             height: 100
@@ -201,7 +186,6 @@ This demo showcases real-world AI image processing capabilities!`
             type: 'image',
             position: { x: 1890, y: 400 },
             data: {
-                output: { image: null },
                 input: { image: null }
             },
             width: 250,
@@ -242,10 +226,10 @@ Each step uses state-of-the-art AI models for professional-quality results.
         { id: 'e2', source: 'fetch-url-node', target: 'string-to-image-converter', sourceHandle: 'text', targetHandle: 'imageString' },
         
         // Connect converter to image preview
-        { id: 'e3', source: 'string-to-image-converter', target: 'loaded-image-preview', sourceHandle: 'jimpImage', targetHandle: 'image' },
+        { id: 'e3', source: 'string-to-image-converter', target: 'loaded-image-preview', sourceHandle: 'jimpImage', targetHandle: 'imageData' },
         
         // Connect to foreground splitter
-        { id: 'e4', source: 'string-to-image-converter', target: 'foreground-splitter', sourceHandle: 'jimpImage', targetHandle: 'sourceImage' },
+        { id: 'e4', source: 'string-to-image-converter', target: 'foreground-splitter', sourceHandle: 'jimpImage', targetHandle: 'imageData' },
         { id: 'e5', source: 'mask-prompt', target: 'foreground-splitter', sourceHandle: 'output', targetHandle: 'maskPrompt' },
         
         // Connect background prompt composition
@@ -273,7 +257,7 @@ Each step uses state-of-the-art AI models for professional-quality results.
         html: HTMLRendererNode,
         textTemplate: TextTemplateFillinNode,
         markdownTextEditor: TextEditorNode,
-        textEditorRaw: RawTextEditor,
+        textEditorRaw: TextEditorRawNode,
         stringToImageConverter: StringToImageConverter,
         foregroundSplitter: ForegroundSplitter,
         backgroundGenerator: BackgroundGenerator,

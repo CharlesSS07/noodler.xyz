@@ -16,10 +16,6 @@
 
     const {updateNodeData} = useSvelteFlow();
     import {getSocketDataTypeByName} from "../../lib/DataTypes";
-    // import {createNodeBluePrintStore, NodeBluePrint} from "../../lib/NodeBluePrint";
-    // import {
-    //     FirestoreNodeBluePrintControllerFactoryInterface,
-    // } from "../../lib/FirestoreNodeBluePrint";
     import {projectOutputDataCache} from "$lib/stores/ProjectState";
     import {untrack} from "svelte";
 
@@ -28,7 +24,6 @@
     let inputText = $state(data.input.inputText || '');
     let textarea: HTMLTextAreaElement;
     $effect(() => {
-        console.log('inputText', inputText);
         updateNodeData(untrack(() => id), {input: {inputText: inputText}});
     });
 
@@ -42,10 +37,10 @@
     let hasInputConnection = $derived(inputConnections.current.length > 0);
 
     function autoResize(textarea: HTMLTextAreaElement) {
+        textarea.style.width = 'auto';
+        // textarea.style.width = Math.min(textarea.style.width, 400) + 'px';
         textarea.style.height = 'auto';
         textarea.style.height = textarea.scrollHeight + 'px';
-        textarea.style.width = 'auto';
-        textarea.style.width = Math.min(textarea.scrollWidth, 400) + 'px';
     }
 
     // Update display value when
@@ -54,7 +49,7 @@
         if (hasInputConnection) {
             const source = inputConnections.current[0].source;
             const sourceHandle = inputConnections.current[0].sourceHandle || 'input';
-            const unsubscribeSocket = projectOutputDataCache.getSocketStore(
+            const unsubscribeSocket = projectOutputDataCache.useSocketStore(
                 source,
                 sourceHandle
             ).subscribe((socketData) => {

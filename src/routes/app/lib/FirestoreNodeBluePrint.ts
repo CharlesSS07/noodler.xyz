@@ -4,6 +4,8 @@ import {NodeBluePrint, type NodeBluePrintControllerFactoryInterface,} from './No
 import {v4 as uuidv4} from 'uuid';
 import type {InputSocketModel, InputSocketParams, OutputSocketModel, SocketID,} from './SocketModels';
 import {OutputSocketAsyncReturner} from './Interpreter';
+import {Jimp} from "jimp";
+import {NodeAPIConnectorManager} from "./NodeAPIConnector/NodeAPIConnectorManager";
 
 export interface FirestoreNodeBluePrintModel {
     title: string;
@@ -133,7 +135,7 @@ export class FirestoreNodeBluePrintControllerFactoryInterface
 
     async getNodeBluePrintFromNID(nid: string): Promise<NodeBluePrint> {
         const nbp = new NodeBluePrintInFirestore(nid);
-        await nbp.onReady;
+        await nbp.loadFromFirestore();
         return nbp;
     }
 }
@@ -149,41 +151,37 @@ export class NodeBluePrintInFirestore extends NodeBluePrint {
     constructor(nid: string) {
         super();
         this.nid = nid;
-        // Initialize reactive subscriptions
-        this.onReady = this._initializeSubscriptions();
     }
     
     private getDoc() {
         return doc(NODE_BLUEPRINTS_REF, this.nid)
     }
     
-    private _initializeSubscriptions() {
-        // Subscribe to metadata changes
+    async loadFromFirestore(): Promise<void> {
         const nodeRef = this.getDoc();
-        return new Promise<void>(resolve => {
-            this.unsubscribeFirestore = onSnapshot(nodeRef, (doc) => {
-                if (doc.exists()) {
-                    const data = doc.data();
-                    this.current = {
-                        title: data.title || 'Untitled Operation',
-                        documentation: data.documentation || '',
-                        user_defined_code: data.user_defined_code || `console.error("Code not defined in ${this.nid}");`,
-                        input_sockets: data.input_sockets || {},
-                        input_socket_order: data.input_socket_order || [],
-                        output_sockets: data.output_sockets || {},
-                        output_socket_order: data.output_socket_order || [],
-                        author_uid: data.author_uid || '',
-                        created_at: data.created_at?.toDate() || new Date(),
-                        predecessor_nid: data.predecessor_nid || 'root',
-                        is_frozen: data.is_frozen as boolean,
-                        trust_level: data.trust_level || 'New',
-                        official_note: data.official_note || '',
-                        last_updated_at: data.last_updated_at?.toDate() || new Date()
-                    };
-                    resolve();
-                }
-            });
-        });
+        const docSnapshot = await getDoc(nodeRef);
+        
+        if (!docSnapshot.exists()) {
+            throw new Error(`NodeBlueprint document not found in Firestore: ${this.nid}`);
+        }
+        
+        const data = docSnapshot.data();
+        this.current = {
+            title: data.title || 'Untitled Operation',
+            documentation: data.documentation || '',
+            user_defined_code: data.user_defined_code || `console.error("Code not defined in ${this.nid}");`,
+            input_sockets: data.input_sockets || {},
+            input_socket_order: data.input_socket_order || [],
+            output_sockets: data.output_sockets || {},
+            output_socket_order: data.output_socket_order || [],
+            author_uid: data.author_uid || '',
+            created_at: data.created_at?.toDate() || new Date(),
+            predecessor_nid: data.predecessor_nid || 'root',
+            is_frozen: data.is_frozen as boolean,
+            trust_level: data.trust_level || 'New',
+            official_note: data.official_note || '',
+            last_updated_at: data.last_updated_at?.toDate() || new Date()
+        };
     }
 
     private assertNotFrozen() {
@@ -314,8 +312,8 @@ export class NodeBluePrintInFirestore extends NodeBluePrint {
                 outputs,
                 utils: {
                     // Add utility functions that nodes might need
-                    Jimp: (globalThis as any).Jimp || null,
-                    APIConnectionManager: (globalThis as any).APIConnectionManager || null,
+                    Jimp: Jimp,
+                    APIConnectionManager: NodeAPIConnectorManager,
                 },
                 console: console
             };

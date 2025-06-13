@@ -41,7 +41,7 @@ export class OutputSocketDataCache {
     /**
      * Get a reactive store for a specific socket's data
      */
-    getSocketStore(node_key: string, socket_id: string): Readable<unknown | null> {
+    useSocketStore(node_key: string, socket_id: string): Readable<unknown | null> {
         const key = socketInstanceKey(node_key, socket_id);
 
         return derived(this.dataStore, ($data) => {
@@ -95,15 +95,6 @@ export class OutputSocketDataCache {
         //     throw new Error(`Socket ${key} already cached. This would overwrite the socket data. The whole node should have been dumped first.`);
         // }
 
-        this.data.set(key, data);
-        this.updateStores();
-    }
-
-    /**
-     * Update existing socket data (useful for modifications)
-     */
-    async update(node_key: string, socket_id: string, data: unknown): Promise<void> {
-        const key = socketInstanceKey(node_key, socket_id);
         this.data.set(key, data);
         this.updateStores();
     }
@@ -165,19 +156,4 @@ export class OutputSocketDataCache {
         this.updateStores();
     }
 
-    /**
-     * Get all socket keys for a node (non-reactive)
-     */
-    getNodeSocketKeys(node_key: string): string[] {
-        const socketIds: string[] = [];
-
-        for (const key of this.data.keys()) {
-            const parsed = parseSocketInstanceKey(key);
-            if (parsed.node_key === node_key) {
-                socketIds.push(parsed.socket_id);
-            }
-        }
-
-        return socketIds;
-    }
 }

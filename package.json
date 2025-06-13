@@ -15,6 +15,7 @@
         "test:api": "vitest run src/tests/NodeBlueprintAPI.test.ts",
         "test:nodeblueprint": "vitest run src/routes/app/lib/FirestoreNodeBluePrint.test.ts",
         "test:nodeblueprintstress": "vitest run src/tests/NodeBlueprintStress.test.ts",
+        "test:bigdata": "vitest run src/routes/app/lib/BigData.test.ts src/routes/app/lib/BigDataCleanup.test.ts",
         "test:quick": "vitest run src/tests/QuickAPITest.test.ts",
         "test:all-api": "vitest run src/tests/",
         "emulators": "firebase emulators:start",

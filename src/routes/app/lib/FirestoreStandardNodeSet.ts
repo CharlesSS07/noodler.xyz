@@ -114,7 +114,7 @@ async function specialtyDataInputDataNodes() {
     imageLoader.title = 'Image Loader';
     imageLoader.documentation= 'Read in an image from a socket/file.';
 
-    imageLoader.newInputSocket('image', {
+    imageLoader.newInputSocket('imageOrFileOrString', {
         label: 'Upload Image',
         documentation: 'Image uploaded from file.',
         type: 'file',
@@ -128,16 +128,25 @@ async function specialtyDataInputDataNodes() {
     });
 
     imageLoader.code = `
-console.log(inputs);
-const file = inputs.image;
-console.log("[image_loader] received file:", typeof file);
-
-const arrayBuffer = await file.arrayBuffer();
-
-// read image using Jimp
-const img = await utils.Jimp.read(arrayBuffer);
-
-outputs.set('image', img);
+console.log('inputs', inputs);
+const imageOrFileOrString = inputs.imageOrFileOrString;
+console.log(typeof imageOrFileOrString);
+if (typeof imageOrFileOrString === 'string') {
+    // assume this is a base64 string
+    const buffer = Buffer.from(imageOrFileOrString, 'base64');
+    outputs.set('image', await utils.Jimp.read(arrayBuffer));
+} else if (imageOrFileOrString instanceof File) {
+    console.log('file:', imageOrFileOrString);
+    const arrayBuffer = await imageOrFileOrString.arrayBuffer();
+    console.log('arrayBuffer', arrayBuffer);
+    console.log(utils);
+    console.log(utils.Jimp);
+    console.log(utils.Jimp.read);
+    outputs.set('image', await utils.Jimp.read(arrayBuffer));
+} else {
+    // assume this is a jimp already
+    outputs.set('image', imageOrFileOrString);
+}
 `;
 
     const htmlRenderer =
