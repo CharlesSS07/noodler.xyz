@@ -47,8 +47,8 @@
 
     // Handle connected input data with loop prevention
     let lastProcessedSocketData: any = Symbol('initial');
-    let sourceNode = $derived(inputConnections.current[0].source);
-    let sourceSocket = $derived(inputConnections.current[0].sourceHandle || 'input');
+    let sourceNode = $derived(inputConnections.current[0]?.source);
+    let sourceSocket = $derived(inputConnections.current[0]?.sourceHandle || 'input');
     $effect(() => {
         if (hasInputConnection) {
             const unsubscribeSocket = projectOutputDataCache.useSocketStore(

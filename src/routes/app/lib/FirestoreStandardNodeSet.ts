@@ -462,8 +462,8 @@ async function timeRelatedNodes() {
 
     dateTimeParser.code = `
 const dateStr = inputs.date_time;
-const lang = inputs.lang || 'en-US';
-const locale = inputs.locale || 'en-US';
+const lang = inputs.lang ?? 'en-US';
+const locale = inputs.locale ?? 'en-US';
 
 // Try to parse the date using Date constructor
 let date = new Date();
@@ -481,7 +481,7 @@ const partMap = Object.fromEntries(parts.map(p => [p.type, p.value]));
 
 // Extract date components
 const hour24 = date.getHours();
-const hourAMPM = hour24 % 12 || 12;
+const hourAMPM = hour24 % 12 ?? 12;
 const minute = date.getMinutes();
 const second = date.getSeconds();
 const dayOfWeek = date.toLocaleString(lang, { weekday: 'long', timeZone: locale });
@@ -636,8 +636,8 @@ outputs.set('second_in_epoch', epochSeconds);
     });
 
     dateTimeConstructor.code = `
-const lang = inputs.lang || 'en-US';
-const locale = inputs.locale || 'en-US';
+const lang = inputs.lang ?? 'en-US';
+const locale = inputs.locale ?? 'en-US';
 
 const year = inputs.year ?? 2000;
 const month = (inputs.month ?? 1) - 1; // JavaScript months are 0-based
@@ -1171,7 +1171,7 @@ async function jimpNodes() {
         type: 'image/jimp',
     });
 
-    newBlankImage.code = "outputs.set('image', new Jimp({ width: inputs.width, height: inputs.height, color: inputs.color }));";
+    newBlankImage.code = "outputs.set('image', new utils.Jimp({ width: inputs.width, height: inputs.height, color: inputs.color }));";
 
     const resize =
         await nodeBluePrintController.initOfficialNodeBluePrint(
@@ -1489,8 +1489,8 @@ async function basicMathNodes() {
     });
     
     addNode.code = `
-        const a = inputs.a || 0;
-        const b = inputs.b || 0;
+        const a = inputs.a ?? 0;
+        const b = inputs.b ?? 0;
         const result = a + b;
         outputs.set('result', result);
     `;
@@ -1521,8 +1521,8 @@ async function basicMathNodes() {
     });
     
     subtractNode.code = `
-        const a = inputs.a || 0;
-        const b = inputs.b || 0;
+        const a = inputs.a ?? 0;
+        const b = inputs.b ?? 0;
         const result = a - b;
         outputs.set('result', result);
     `;
@@ -1553,8 +1553,8 @@ async function basicMathNodes() {
     });
     
     multiplyNode.code = `
-        const a = inputs.a || 1;
-        const b = inputs.b || 1;
+        const a = inputs.a ?? 1;
+        const b = inputs.b ?? 1;
         const result = a * b;
         outputs.set('result', result);
     `;
@@ -1585,8 +1585,8 @@ async function basicMathNodes() {
     });
     
     divideNode.code = `
-        const a = inputs.a || 1;
-        const b = inputs.b || 1;
+        const a = inputs.a ?? 1;
+        const b = inputs.b ?? 1;
         if (b === 0) {
             throw new Error('Division by zero is not allowed');
         }

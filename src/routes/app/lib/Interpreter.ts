@@ -56,7 +56,7 @@ export async function executeFlowGraph(start_node_id: string, nodes: Node[], edg
     const relevantNids: Array<string> = [];
     relevantNodes.forEach(node_key => {
         const idx = nodeLookup.get(node_key);
-        if (idx && nodes[idx].data.nid) {
+        if (idx !== undefined && nodes[idx].data.nid) {
             relevantNids.push(nodes[idx].data.nid as string);
         }
     });
@@ -121,11 +121,17 @@ export async function executeFlowGraph(start_node_id: string, nodes: Node[], edg
                 // Check that input data and node blueprint spec inputs align
                 const inputDataSocketKeys = new Set(Object.keys(inputData));
                 const inputSocketKeysSpec = new Set(nodeBlueprint.inputSocketKeys);
-                if (inputSocketKeysSpec.union(inputDataSocketKeys).size > inputSocketKeysSpec.size) {
-                    throw new Error(`Extra socket keys supplied to input of node ${nodeId}: ${inputDataSocketKeys.difference(inputSocketKeysSpec)}`);
+                
+                // Check for extra socket keys (inputDataSocketKeys - inputSocketKeysSpec)
+                const extraKeys = Array.from(inputDataSocketKeys).filter(key => !inputSocketKeysSpec.has(key));
+                if (extraKeys.length > 0) {
+                    throw new Error(`Extra socket keys supplied to input of node ${nodeId}: ${extraKeys.join(',')}`);
                 }
-                if (inputSocketKeysSpec.intersection(inputDataSocketKeys).size < inputSocketKeysSpec.size) {
-                    throw new Error(`Missing socket keys to input of node ${nodeId}: ${inputSocketKeysSpec.difference(inputDataSocketKeys)}`);
+                
+                // Check for missing socket keys (inputSocketKeysSpec - inputDataSocketKeys)
+                const missingKeys = Array.from(inputSocketKeysSpec).filter(key => !inputDataSocketKeys.has(key));
+                if (missingKeys.length > 0) {
+                    throw new Error(`Missing socket keys to input of node ${nodeId}: ${missingKeys.join('.')}`);
                 }
                 // TODO: input socket data type checking
 

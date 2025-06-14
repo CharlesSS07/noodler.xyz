@@ -330,27 +330,22 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
         if (isExecuting) return;
         
         isExecuting = true;
-        showExecutionPanel = true;
+        // showExecutionPanel = true; // DISABLED: Don't show execution panel anymore
         selectedExecutionNode = nodeId;
-        executionLogs = [`Starting execution from node: ${nodeId}`];
+        // executionLogs = [`Starting execution from node: ${nodeId}`]; // DISABLED: No longer logging
         
         try {
-            // Capture console.log for execution logs
-            const originalLog = console.log;
-            console.log = (...args: any[]) => {
-                executionLogs = [...executionLogs, args.join(' ')];
-                originalLog(...args);
-            };
+            // NOTE: Console.log capture has been removed since we're not showing the execution panel
+            // The execution logger was not particularly helpful and just clogged up the screen.
+            // Execution still works fine - we just don't capture/display the logs anymore.
             
             await executeFlowGraph(nodeId, nodes, edges);
             
-            // Restore original console.log
-            console.log = originalLog;
-            
-            executionLogs = [...executionLogs, `✅ Execution completed successfully`];
+            // executionLogs = [...executionLogs, `✅ Execution completed successfully`]; // DISABLED
+            console.log('✅ Execution completed successfully');
         } catch (error) {
             console.error('Execution failed:', error);
-            executionLogs = [...executionLogs, `❌ Execution failed: ${error}`];
+            // executionLogs = [...executionLogs, `❌ Execution failed: ${error}`]; // DISABLED
         } finally {
             isExecuting = false;
         }
@@ -506,6 +501,7 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
                     Search Nodes <small>(Tab)</small>
                 </button>
                 
+                <!-- DISABLED: Clear button removed since execution panel is disabled
                 {#if showExecutionPanel}
                     <button
                         onclick={clearExecutionLogs}
@@ -516,6 +512,7 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
                         Clear
                     </button>
                 {/if}
+                -->
             </div>
         </Panel>
     </SvelteFlow>
@@ -528,7 +525,16 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
         position={{x: '50vw', y: '20vw'}}
     />
 
-    <!-- Execution Panel -->
+    <!-- 
+        EXECUTION PANEL DISABLED:
+        The execution console/logger has been removed because it's not particularly helpful 
+        right now and just clogs up the screen with verbose output. The execution still 
+        works fine - we just don't show the logging panel anymore.
+        
+        When execution logging becomes more useful (e.g. with better structured output,
+        error highlighting, step-by-step debugging, etc.), we can re-enable this panel.
+    -->
+    <!--
     {#if showExecutionPanel}
         <div class="execution-panel">
             <div class="execution-header">
@@ -566,6 +572,7 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
             </div>
         </div>
     {/if}
+    -->
 </div>
 
 <style>

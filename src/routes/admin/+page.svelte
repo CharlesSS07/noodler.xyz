@@ -3,9 +3,24 @@
 	import '../../app.css'; // Assuming this provides some base styles
 	import { auth } from '../../firebase';
 	import { SignedIn, SignedOut } from 'sveltefire'; // Import SignedOut for a better user experience
-	import NodeBlueprintManager from './NodeBlueprintManager.svelte';
-	
+
 	let activeTab = 'dashboard';
+	let isGenerating = false;
+	let generationComplete = false;
+
+	async function handleGenerateNodes() {
+		isGenerating = true;
+		generationComplete = false;
+		
+		try {
+			await generateStandardNodeSuite();
+			generationComplete = true;
+		} catch (error) {
+			console.error('Error generating node suite:', error);
+		} finally {
+			isGenerating = false;
+		}
+	}
 </script>
 
 <div class="admin-container">
@@ -46,8 +61,20 @@
 						<p>Welcome to the admin area! Use the tabs above to navigate.</p>
 						
 						<div class="dashboard-actions">
-							<button on:click={generateStandardNodeSuite} class="action-button">
-								Generate Standard Node Suite
+							<button 
+								on:click={handleGenerateNodes} 
+								class="action-button"
+								class:generating={isGenerating}
+								class:complete={generationComplete}
+								disabled={isGenerating}
+							>
+								{#if isGenerating}
+									Generating...
+								{:else if generationComplete}
+									✓ Generation Complete
+								{:else}
+									Generate Standard Node Suite
+								{/if}
 							</button>
 							<p class="action-description">
 								Creates the default set of node blueprints in Firestore
@@ -55,7 +82,7 @@
 						</div>
 					</div>
 				{:else if activeTab === 'node-manager'}
-					<NodeBlueprintManager />
+					<div>Comming Soon</div>
 				{/if}
 			</main>
 		{:else}
@@ -173,8 +200,31 @@
 		display: block;
 	}
 
-	.action-button:hover {
+	.action-button:hover:not(:disabled) {
 		background-color: #0056b3;
+	}
+
+	.action-button:disabled {
+		cursor: not-allowed;
+		opacity: 0.6;
+	}
+
+	.action-button.generating {
+		background-color: #ffc107;
+		color: #212529;
+	}
+
+	.action-button.generating:hover {
+		background-color: #e0a800;
+	}
+
+	.action-button.complete {
+		background-color: #28a745;
+		color: white;
+	}
+
+	.action-button.complete:hover {
+		background-color: #218838;
 	}
 
 	.action-description {

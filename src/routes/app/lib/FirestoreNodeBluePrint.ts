@@ -166,6 +166,16 @@ export class NodeBluePrintInFirestore extends NodeBluePrint {
         }
         
         const data = docSnapshot.data();
+        
+        // Debug: Log what we're loading from Firestore
+        console.log(`[DEBUG] Loading node ${this.nid} from Firestore:`, {
+            code: data.user_defined_code,
+            lastUpdated: data.last_updated_at,
+            docRef: nodeRef.path,
+            projectId: nodeRef.firestore.app.options.projectId,
+            host: nodeRef.firestore._settings?.host,
+            credentials: nodeRef.firestore._settings?.credentials
+        });
         this.current = {
             title: data.title || 'Untitled Operation',
             documentation: data.documentation || '',
@@ -305,6 +315,9 @@ export class NodeBluePrintInFirestore extends NodeBluePrint {
             if (!code || code.trim() === '') {
                 throw new Error(`No code defined for node: ${this.nid}`);
             }
+
+            // Debug: Log the actual code being executed
+            console.log(`[DEBUG] Executing code for ${this.nid}:`, code);
 
             // Create execution context
             const executionContext = {
