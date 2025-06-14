@@ -4,8 +4,10 @@
  */
 
 import { beforeEach, describe, expect, test } from "vitest";
-import { executeFlowGraph, OutputSocketDataCache } from "./Interpreter";
+import { executeFlowGraph } from "./Interpreter";
 import type { Node, Edge } from "@xyflow/svelte";
+import {projectOutputDataCache} from "$lib/stores/ProjectState";
+import {get} from "svelte/store";
 
 describe("Interpreter Flow Graph Tests", () => {
   let mockNodes: Node[];
@@ -25,9 +27,8 @@ describe("Interpreter Flow Graph Tests", () => {
         type: 'node',
         position: { x: 0, y: 0 },
         data: {
-          nid: 'official_node_add/versions/official:1749481786062',
+          nid: 'node_official_add',
           input: { a: 9, b: 6 },
-          output: {}
         }
       }
     ];
@@ -35,11 +36,13 @@ describe("Interpreter Flow Graph Tests", () => {
     // No edges needed for a single node with internal inputs
     mockEdges = [];
 
+    console.log()
+
     // Execute the flow graph
     await executeFlowGraph('const-9', mockNodes, mockEdges);
 
     // The result should be computed and stored in the node's output
-    expect(mockNodes[0].data.output.result).toBe(15);
+    expect(get(projectOutputDataCache.useSocketStore('const-9', 'result'))).toBe(15);
   });
 
   test("Chained addition: 9 + (5 + 6) = 20", async () => {
@@ -50,7 +53,7 @@ describe("Interpreter Flow Graph Tests", () => {
         type: 'node',
         position: { x: 0, y: 0 },
         data: {
-          nid: 'official_node_add',
+          nid: 'node_official_add',
           input: { a: 5, b: 6 },
           output: {}
         }
@@ -60,7 +63,7 @@ describe("Interpreter Flow Graph Tests", () => {
         type: 'node',
         position: { x: 100, y: 0 },
         data: {
-          nid: 'official_node_add',
+          nid: 'node_official_add',
           input: { a: 9 },
           output: {}
         }
@@ -95,7 +98,7 @@ describe("Interpreter Flow Graph Tests", () => {
         type: 'node',
         position: { x: 0, y: 0 },
         data: {
-          nid: 'official_node_add',
+          nid: 'node_official_add',
           input: { a: 5, b: 6 },
           output: {}
         }
@@ -105,7 +108,7 @@ describe("Interpreter Flow Graph Tests", () => {
         type: 'node',
         position: { x: 100, y: 0 },
         data: {
-          nid: 'official_node_add',
+          nid: 'node_official_add',
           input: { a: 9 },
           output: {}
         }
@@ -217,7 +220,7 @@ describe("Interpreter Flow Graph Tests", () => {
         type: 'node',
         position: { x: 0, y: 0 },
         data: {
-          nid: 'official_node_add',
+          nid: 'node_official_add',
           input: { a: 3, b: 4 },
           output: {}
         }
@@ -227,7 +230,7 @@ describe("Interpreter Flow Graph Tests", () => {
         type: 'node',
         position: { x: 0, y: 100 },
         data: {
-          nid: 'official_node_add',
+          nid: 'node_official_add',
           input: { a: 10, b: 20 },
           output: {}
         }
@@ -280,7 +283,7 @@ describe("Interpreter Flow Graph Tests", () => {
         type: 'node',
         position: { x: 0, y: 0 },
         data: {
-          nid: 'official_node_add',
+          nid: 'node_official_add',
           input: { a: 1, b: 1 },
           output: {}
         }

@@ -1,5 +1,5 @@
 import {type Node, type Edge} from "@xyflow/svelte";
-import {FirestoreNodeBluePrintControllerFactoryInterface, NodeBluePrintInFirestore} from "./FirestoreNodeBluePrint";
+import {FirestoreNodeBluePrintControllerFactoryInterface } from "./FirestoreNodeBluePrint";
 import type {NodeBluePrint} from "./NodeBluePrint";
 import {OutputSocketDataCache} from "./OutputSocketDataCache";
 import {projectOutputDataCache} from "$lib/stores/ProjectState";
@@ -29,6 +29,10 @@ export class OutputSocketAsyncReturner {
         }
     }
 
+    async error(error: unknown) {
+        this.dataCache.cache(this.node_id, '__error__', error);
+    }
+
 }
 
 
@@ -43,15 +47,9 @@ export async function executeFlowGraph(start_node_id: string, nodes: Node[], edg
      * 7. Nodes are executed by calling the execute function. I will fill it in later.
      */
     
-    console.log(`Executing flow graph starting from node: ${start_node_id}`);
-
     // 1. Build dependency graph
     const dependencyGraph = buildDependencyGraph(start_node_id, nodes, edges);
     const relevantNodes = Array.from(dependencyGraph.keys());
-
-    console.log(`Relevant nodes: ${JSON.stringify(relevantNodes)}`);
-
-    console.log(`Found ${relevantNodes.length} nodes in dependency chain:`, relevantNodes);
 
     const nodeLookup = new Map<string, number>(nodes.map((node, index) => [node.id, index]));
 
@@ -74,14 +72,13 @@ export async function executeFlowGraph(start_node_id: string, nodes: Node[], edg
     for (let i = 0; i < relevantNids.length; i++) {
         relevantNodeBluePrintsLookup.set(relevantNids[i], blueprints[i]);
     }
+    console.log(nodes, edges, relevantNids, relevantNodeBluePrintsLookup);
 
     // Find sink nodes (nodes with no dependencies)
     const sinkNodes = relevantNodes.filter(nodeId => {
         const dependencies = dependencyGraph.get(nodeId) || [];
         return dependencies.length === 0;
     });
-    
-    console.log(`Found ${sinkNodes.length} sink nodes:`, sinkNodes);
     
     // Track which nodes have been executed
     const executedNodes = new Set<string>();
@@ -95,18 +92,15 @@ export async function executeFlowGraph(start_node_id: string, nodes: Node[], edg
     
     // Function to execute a single node
     const executeNode = async (nodeId: string): Promise<void> => {
-        console.log(`Executing node: ${nodeId}`);
         if (executedNodes.has(nodeId) || executingNodes.has(nodeId)) {
             return;
         }
         
         executingNodes.add(nodeId);
-        
+
         try {
-            console.log(nodeId, nodes);
             const node = nodes.find(n => n.id === nodeId);
             if (!node || !node.data?.nid) {
-                console.log('node', node);
                 throw new Error(`Node ${nodeId} not found or missing nid`);
             }
             
@@ -114,39 +108,53 @@ export async function executeFlowGraph(start_node_id: string, nodes: Node[], edg
             if (!nodeBlueprint) {
                 throw new Error(`NodeBlueprint not found for nid: ${node.data.nid}`);
             }
-            console.log('nodeBlueprint loaded for', node.data.nid);
-            
-            // Get input data for the node
-            const inputData = await getNodeInputData(nodeId, nodes, edges, projectOutputDataCache);
-            console.log('inputData', Object.keys(inputData));
-            
+
             // Create output returner
             const outputSocketIds = new Set(nodeBlueprint.outputSocketKeys());
+            // set up return data & error handling
             const outputReturner = new OutputSocketAsyncReturner(projectOutputDataCache, nodeId, outputSocketIds);
-            
-            // Execute the node
-            await nodeBlueprint.call(inputData, outputReturner).then(() => {
-                console.log(`Node ${nodeId} successfully resolved`);
-                console.log(outputReturner.dataCache);
-            }).catch(
-                console.error // should call outputReturner.set('__error__', ...)\
-                // so the node can reflect the error state, and execution is set to stop at
-                // next break points
-            );
 
-            // Mark as executed
-            executedNodes.add(nodeId);
-            executingNodes.delete(nodeId);
-            
-            // Check if any other nodes are now ready for execution
-            const readyNodes = relevantNodes.filter(id => 
-                !executedNodes.has(id) && 
-                !executingNodes.has(id) && 
-                isNodeReady(id)
-            );
-            
-            // Execute ready nodes concurrently
-            await Promise.all(readyNodes.map(executeNode));
+            try {
+                // Get input data for the node
+                const inputData = await getNodeInputData(nodeId, nodes, edges, projectOutputDataCache);
+
+                // Check that input data and node blueprint spec inputs align
+                const inputDataSocketKeys = new Set(Object.keys(inputData));
+                const inputSocketKeysSpec = new Set(nodeBlueprint.inputSocketKeys);
+                if (inputSocketKeysSpec.union(inputDataSocketKeys).size > inputSocketKeysSpec.size) {
+                    throw new Error(`Extra socket keys supplied to input of node ${nodeId}: ${inputDataSocketKeys.difference(inputSocketKeysSpec)}`);
+                }
+                if (inputSocketKeysSpec.intersection(inputDataSocketKeys).size < inputSocketKeysSpec.size) {
+                    throw new Error(`Missing socket keys to input of node ${nodeId}: ${inputSocketKeysSpec.difference(inputDataSocketKeys)}`);
+                }
+                // TODO: input socket data type checking
+
+                // Execute the node
+                await nodeBlueprint.call(inputData, outputReturner).then(() => {
+                    console.log(`Successfully resolved output socket for node ${nodeId}`);
+                    console.log(outputReturner);
+                });
+
+                // Mark as executed
+                executedNodes.add(nodeId);
+                executingNodes.delete(nodeId);
+
+                // Check if any other nodes are now ready for execution
+                const readyNodes = relevantNodes.filter(id =>
+                    !executedNodes.has(id) &&
+                    !executingNodes.has(id) &&
+                    isNodeReady(id)
+                );
+
+                // Execute ready nodes concurrently
+                await Promise.all(readyNodes.map(executeNode));
+
+            } catch (error) {
+                console.error("Error while executing node");
+                console.error(error);
+                outputReturner.error(error);
+                throw error;
+            }
             
         } catch (error) {
             executingNodes.delete(nodeId);
@@ -157,10 +165,6 @@ export async function executeFlowGraph(start_node_id: string, nodes: Node[], edg
     
     // Start execution with sink nodes
     await Promise.all(sinkNodes.map(executeNode));
-
-    console.log('dataCache', projectOutputDataCache)
-
-    console.log(`Flow graph execution completed for node: ${start_node_id}`);
 }
 
 function buildDependencyGraph(targetNodeId: string, nodes: Node[], edges: Edge[]): Map<string, string[]> {
@@ -214,7 +218,6 @@ async function getNodeInputData(nodeId: string, nodes: Node[], edges: Edge[], da
                 const data = await dataCache.get(edge.source, edge.sourceHandle);
                 inputData[edge.targetHandle] = data;
             } catch (error) {
-                console.warn(`Failed to get data for edge ${edge.source}:${edge.sourceHandle} -> ${edge.target}:${edge.targetHandle}:`, error);
                 // Input not available yet - this shouldn't happen if dependencies are tracked correctly
             }
         }
@@ -229,15 +232,13 @@ async function getNodeInputData(nodeId: string, nodes: Node[], edges: Edge[], da
         }
     }
 
+    // Temporary. This replaces every BigDataRef with the value in the database
     for (const key in inputData) {
-        console.log(typeof inputData[key]);
         // @ts-ignore
         if (inputData[key].hasOwnProperty('_type') && inputData[key]._type=='bigdata_ref') {
             inputData[key] = await getBigData(inputData[key] as BigDataRef);
         }
     }
-
-    console.log('inputData', nodeId, inputData);
     
     return inputData;
 }

@@ -4,10 +4,11 @@ import {
     NodeBluePrintInFirestore,
 } from './FirestoreNodeBluePrint.js';
 import {createNodeBluePrintStore, NodeBluePrint, updateNodeBluePrintStore} from './NodeBluePrint.js';
-import { OutputSocketAsyncReturner, OutputSocketDataCache } from './Interpreter.js';
+import { OutputSocketAsyncReturner } from './Interpreter.js';
 import type { InputSocketModel, InputSocketParams, OutputSocketModel } from './SocketModels.js';
 import { getAuth, signInAnonymously, type User } from 'firebase/auth';
 import { app } from '../../../firebase';
+import {OutputSocketDataCache} from "./OutputSocketDataCache";
 
 // Test configuration
 const TEST_CONFIG = {
@@ -47,7 +48,7 @@ describe('FirestoreNodeBluePrint Test Suite', () => {
             expect(node.title).toBe(uniqueName);
             expect(node.author_uid).toBe('official');
             expect(node.trust_level).toBe('Official');
-            expect(node.is_frozen).toBe(true);
+            expect(node.is_frozen).toBe(false);
             expect(node.predecessor_nid).toBe('root');
             
             createdNodes.push(node.nid);
@@ -620,6 +621,7 @@ describe('FirestoreNodeBluePrint Test Suite', () => {
         it('should fail execution on frozen node', async () => {
             // Create an official (frozen) node
             const frozenNode = await factory.initOfficialNodeBluePrint(`frozen_test_${Date.now()}`);
+            await frozenNode.freeze();
             createdNodes.push(frozenNode.nid);
             
             await new Promise(resolve => setTimeout(resolve, 1000));

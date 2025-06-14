@@ -358,6 +358,9 @@ export class NodeBluePrintInFirestore extends NodeBluePrint {
         await setDoc(this.getDoc(), this.current);
     }
 
-    freeze(): void {
+    async freeze(): Promise<void> {
+        this.current.is_frozen = true;
+        this.current.last_updated_at = new Date();
+        await setDoc(this.getDoc(), this.current);
     }
 }

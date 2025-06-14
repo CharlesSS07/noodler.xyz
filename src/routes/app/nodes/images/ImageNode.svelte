@@ -51,9 +51,6 @@
     let sourceSocket = $derived(inputConnections.current[0].sourceHandle || 'input');
     $effect(() => {
         if (hasInputConnection) {
-            
-            console.log('ImageNode subscribing to socket:', sourceNode, sourceSocket);
-
             const unsubscribeSocket = projectOutputDataCache.useSocketStore(
                 sourceNode,
                 sourceSocket
@@ -62,19 +59,16 @@
                 const previousValue = untrack(() => lastProcessedSocketData);
 
                 // Prevent infinite loops by checking if data actually changed
-                // if (socketData === previousValue) {
-                //     console.log('cancelling input socket data update')
-                //     return;
-                // }
+                if (socketData === previousValue) {
+                    return;
+                }
                 
-                console.log('input socket data updated:', socketData, id);
                 lastProcessedSocketData = socketData;
                 
                 try {
                     if (socketData) {
                         await handleImageData(socketData);
                     } else {
-                        console.log('no socket data found');
                         // Handle null/empty data
                         displayImageUrl = '';
                     }

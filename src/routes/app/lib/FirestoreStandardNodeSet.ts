@@ -128,20 +128,14 @@ async function specialtyDataInputDataNodes() {
     });
 
     imageLoader.code = `
-console.log('inputs', inputs);
 const imageOrFileOrString = inputs.imageOrFileOrString;
-console.log(typeof imageOrFileOrString);
+
 if (typeof imageOrFileOrString === 'string') {
     // assume this is a base64 string
     const buffer = Buffer.from(imageOrFileOrString, 'base64');
     outputs.set('image', await utils.Jimp.read(arrayBuffer));
 } else if (imageOrFileOrString instanceof File) {
-    console.log('file:', imageOrFileOrString);
     const arrayBuffer = await imageOrFileOrString.arrayBuffer();
-    console.log('arrayBuffer', arrayBuffer);
-    console.log(utils);
-    console.log(utils.Jimp);
-    console.log(utils.Jimp.read);
     outputs.set('image', await utils.Jimp.read(arrayBuffer));
 } else {
     // assume this is a jimp already

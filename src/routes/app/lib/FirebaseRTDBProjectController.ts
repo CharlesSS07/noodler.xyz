@@ -33,7 +33,7 @@ export class FirebaseRTDBProjectCollection
             throw new Error('Project must be named and have a description');
 
         try {
-            console.log(auth.currentUser);
+            // console.log(auth.currentUser);
             if (auth.currentUser && auth.currentUser.uid !== null) {
                 // logged in
                 const invitedUsers = { [auth.currentUser.uid]: true }; // Updated invited_users format
