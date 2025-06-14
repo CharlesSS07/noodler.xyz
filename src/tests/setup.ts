@@ -7,22 +7,22 @@ import { beforeAll } from 'vitest';
 
 // Configure Firebase emulators before any tests run
 beforeAll(() => {
-  // Set emulator environment variables
-  if (typeof window !== 'undefined') {
-    // Browser environment - Firebase SDK will auto-detect emulators in dev mode
-    console.log('🔧 Running in browser environment - Firebase emulators will auto-connect');
-  } else {
-    // Node environment - use 127.0.0.1 to match browser config
-    process.env.FIRESTORE_EMULATOR_HOST = '127.0.0.1:8080';
-    process.env.FIREBASE_AUTH_EMULATOR_HOST = '127.0.0.1:9099';
-    process.env.FIREBASE_FUNCTIONS_EMULATOR_HOST = '127.0.0.1:5001';
-    console.log('🔧 Configured Firebase emulator hosts for Node environment');
-    console.log('[DEBUG] Environment variables:', {
-      FIRESTORE_EMULATOR_HOST: process.env.FIRESTORE_EMULATOR_HOST,
-      FIREBASE_AUTH_EMULATOR_HOST: process.env.FIREBASE_AUTH_EMULATOR_HOST,
-      NODE_ENV: process.env.NODE_ENV
-    });
-  }
+  console.log('[DEBUG] Environment check:', {
+    hasWindow: typeof window !== 'undefined',
+    isNode: typeof process !== 'undefined',
+    currentFIRESTORE_EMULATOR_HOST: process.env.FIRESTORE_EMULATOR_HOST
+  });
+  
+  // Always set emulator environment variables for tests
+  process.env.FIRESTORE_EMULATOR_HOST = '127.0.0.1:8080';
+  process.env.FIREBASE_AUTH_EMULATOR_HOST = '127.0.0.1:9099';
+  process.env.FIREBASE_FUNCTIONS_EMULATOR_HOST = '127.0.0.1:5001';
+  console.log('🔧 Forced Firebase emulator configuration for test environment');
+  console.log('[DEBUG] Environment variables after setup:', {
+    FIRESTORE_EMULATOR_HOST: process.env.FIRESTORE_EMULATOR_HOST,
+    FIREBASE_AUTH_EMULATOR_HOST: process.env.FIREBASE_AUTH_EMULATOR_HOST,
+    NODE_ENV: process.env.NODE_ENV
+  });
   
   // Global test configuration
   console.log('🧪 Test environment initialized');

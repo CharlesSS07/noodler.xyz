@@ -190,8 +190,8 @@ async function simpleImageModificationNodes() {
     });
 
     imageViewer.code = `
-    outputs.set('img', inputs.img);
-  `;
+outputs.set('img', inputs.img);
+`;
 
     // Use it to convert the base64 to jimp for supporting subsequent operations
     // const base64ToJimp = await nodeBluePrintController.initOfficialNodeBluePrint("base64_to_jimp");

@@ -25,16 +25,6 @@ export const auth = getAuth(app);
 export const rtdb = getDatabase(app);
 export const firestore = getFirestore(app);
 
-// Debug: Log Firebase configuration
-console.log('[DEBUG] Firebase initialized:', {
-    projectId: app.options.projectId,
-    appName: app.name,
-    firestoreHost: firestore._settings?.host || 'default',
-    browser: browser,
-    NODE_ENV: process.env.NODE_ENV,
-    FIRESTORE_EMULATOR_HOST: process.env.FIRESTORE_EMULATOR_HOST
-});
-
 if (browser) {
     const hostname = window.location.hostname;
 
