@@ -16,7 +16,9 @@ const nodeBluePrintController: NodeBluePrintControllerFactoryInterface =
 
 async function specialtyDataInputDataNodes() {
     const rawTextEditor =
-        await nodeBluePrintController.initOfficialNodeBluePrint('raw_text_editor');
+        await nodeBluePrintController.initOfficialNodeBluePrint(
+            'raw_text_editor'
+        );
     rawTextEditor.title = 'Raw Text Editor';
     rawTextEditor.documentation = 'Displays or intakes text data.';
 
@@ -24,7 +26,7 @@ async function specialtyDataInputDataNodes() {
         label: 'Text',
         documentation: '',
         type: 'string',
-        params: new StringSocketParamsBuilder("").build(),
+        params: new StringSocketParamsBuilder('').build(),
     });
 
     rawTextEditor.newOutputSocket('outputText', {
@@ -36,7 +38,9 @@ async function specialtyDataInputDataNodes() {
     rawTextEditor.code = `outputs.set("outputText", inputs.inputText);`;
 
     const completeTextHuggingfaceLLM =
-        await nodeBluePrintController.initOfficialNodeBluePrint('huggingface_complete_text');
+        await nodeBluePrintController.initOfficialNodeBluePrint(
+            'huggingface_complete_text'
+        );
     completeTextHuggingfaceLLM.title = 'Raw Text Editor';
     completeTextHuggingfaceLLM.documentation = 'Displays or intakes text data.';
 
@@ -44,14 +48,14 @@ async function specialtyDataInputDataNodes() {
         label: 'Text',
         documentation: 'Text to complete.',
         type: 'string',
-        params: new StringSocketParamsBuilder("").build(),
+        params: new StringSocketParamsBuilder('').build(),
     });
 
     completeTextHuggingfaceLLM.newInputSocket('modelId', {
         label: 'Model ID',
         documentation: 'Hugginface Model ID',
         type: 'string',
-        params: new StringSocketParamsBuilder("").build(),
+        params: new StringSocketParamsBuilder('').build(),
     });
 
     completeTextHuggingfaceLLM.newInputSocket('maxTokens', {
@@ -70,15 +74,18 @@ async function specialtyDataInputDataNodes() {
     completeTextHuggingfaceLLM.code = `console.error("completeTextHuggingfaceLLM node not implemented")`;
 
     const mdTextEditor =
-        await nodeBluePrintController.initOfficialNodeBluePrint('md_text_editor');
+        await nodeBluePrintController.initOfficialNodeBluePrint(
+            'md_text_editor'
+        );
     mdTextEditor.title = 'Markdown Text Editor';
-    mdTextEditor.documentation = 'Displays or intakes text data, rendered as markdown.';
+    mdTextEditor.documentation =
+        'Displays or intakes text data, rendered as markdown.';
 
     mdTextEditor.newInputSocket('text', {
         label: 'Text',
         documentation: '',
         type: 'string',
-        params: new StringSocketParamsBuilder("").build(),
+        params: new StringSocketParamsBuilder('').build(),
     });
 
     mdTextEditor.newOutputSocket('text', {
@@ -92,13 +99,14 @@ async function specialtyDataInputDataNodes() {
     const textTemplateFillin =
         await nodeBluePrintController.initOfficialNodeBluePrint('template');
     textTemplateFillin.title = 'Template Text';
-    textTemplateFillin.documentation = 'Replaces @x with the value of x, a string value. Filled in during computation.';
+    textTemplateFillin.documentation =
+        'Replaces @x with the value of x, a string value. Filled in during computation.';
 
     textTemplateFillin.newInputSocket('text', {
         label: 'Text',
         documentation: '',
         type: 'unknown',
-        params: new StringSocketParamsBuilder("").build(),
+        params: new StringSocketParamsBuilder('').build(),
     });
 
     textTemplateFillin.newOutputSocket('text', {
@@ -112,7 +120,7 @@ async function specialtyDataInputDataNodes() {
     const imageLoader =
         await nodeBluePrintController.initOfficialNodeBluePrint('image_loader');
     imageLoader.title = 'Image Loader';
-    imageLoader.documentation= 'Read in an image from a socket/file.';
+    imageLoader.documentation = 'Read in an image from a socket/file.';
 
     imageLoader.newInputSocket('imageOrFileOrString', {
         label: 'Upload Image',
@@ -144,15 +152,17 @@ if (typeof imageOrFileOrString === 'string') {
 `;
 
     const htmlRenderer =
-        await nodeBluePrintController.initOfficialNodeBluePrint('html_renderer');
+        await nodeBluePrintController.initOfficialNodeBluePrint(
+            'html_renderer'
+        );
     htmlRenderer.title = 'HTML Renderer';
-    htmlRenderer.documentation= 'Display arbitrary html in iframe.';
+    htmlRenderer.documentation = 'Display arbitrary html in iframe.';
 
     htmlRenderer.newInputSocket('html', {
         label: 'HTML',
         documentation: 'HTML to display in iframe.',
         type: 'string',
-        params: new StringSocketParamsBuilder("").build(),
+        params: new StringSocketParamsBuilder('').build(),
     });
 
     htmlRenderer.code = `
@@ -170,7 +180,6 @@ outputs.set('image', img);
 }
 
 async function simpleImageModificationNodes() {
-
     const imageViewer =
         await nodeBluePrintController.initOfficialNodeBluePrint('image_viewer');
     imageViewer.title = 'Image Viewer';
@@ -297,21 +306,21 @@ outputs.set('img', img);
         type: 'image/jimp',
     });
 
-    hsv.code = 
+    hsv.code =
         'const img = inputs.img.clone();\n' +
-            'const hue = inputs.hue;\n' +
-            'const saturation = inputs.saturation;\n' +
-            'const value = inputs.value;\n' +
-            '// Adjust hue (in degrees, -360 to 360)\n' +
-            'if (hue) img.color([{ apply: "hue", params: [hue.valueOf()] }]);\n' +
-            '\n' +
-            '// Adjust saturation (0 to 100)\n' +
-            'if (saturation) img.color([{ apply: "saturate", params: [saturation.valueOf()] }]);\n' +
-            '\n' +
-            '// Adjust value (0 to 100)\n' +
-            'if (value) img.color([{ apply: "brighten", params: [value.valueOf()] }]);\n' +
-            '\n' +
-            "outputs.set('img', img);\n";
+        'const hue = inputs.hue;\n' +
+        'const saturation = inputs.saturation;\n' +
+        'const value = inputs.value;\n' +
+        '// Adjust hue (in degrees, -360 to 360)\n' +
+        'if (hue) img.color([{ apply: "hue", params: [hue.valueOf()] }]);\n' +
+        '\n' +
+        '// Adjust saturation (0 to 100)\n' +
+        'if (saturation) img.color([{ apply: "saturate", params: [saturation.valueOf()] }]);\n' +
+        '\n' +
+        '// Adjust value (0 to 100)\n' +
+        'if (value) img.color([{ apply: "brighten", params: [value.valueOf()] }]);\n' +
+        '\n' +
+        "outputs.set('img', img);\n";
 }
 
 async function fileLoadingNodes() {
@@ -363,297 +372,6 @@ async function dropboxNodes() {
     });
 
     loadDropbox.code = "console.error('Not Implemented');";
-}
-
-async function timeRelatedNodes() {
-    const dateTimeParser =
-        await nodeBluePrintController.initOfficialNodeBluePrint(
-            'datetime_parser'
-        );
-    dateTimeParser.title = 'Date & Time Constructor';
-    dateTimeParser.documentation = 'Parses a datetime object.';
-
-    await dateTimeParser.newInputSocket('date_time', {
-        label: 'Date & Time',
-        documentation: 'Datetime to parse.',
-        type: 'string',
-        params: new StringSocketParamsBuilder(
-            'Wednesday, September 7, 1998 02:45 PM'
-        ).build(),
-    });
-    await dateTimeParser.newInputSocket('locale', {
-        label: 'Locale (Time Zone)',
-        documentation: 'Time Zone (MST=Mountain Standard Time, etc.)',
-        type: 'string',
-        params: new StringSocketParamsBuilder('MST').build(),
-    });
-    await dateTimeParser.newInputSocket('lang', {
-        label: 'Language',
-        documentation: 'Language to use.',
-        type: 'string',
-        params: new StringSocketParamsBuilder('en-US').build(),
-    });
-    await dateTimeParser.newOutputSocket('hour_am_pm', {
-        label: 'Hour (AM/PM)',
-        documentation: 'Hour.',
-        type: 'number',
-        // config: { defaultValue: 0, min: 0, max: 12, step: 1 }
-    });
-    await dateTimeParser.newOutputSocket('hour_24', {
-        label: 'Hour (24)',
-        documentation: 'Hour.',
-        type: 'number',
-        // params: { defaultValue: 0, min: 0, max: 24, step: 1 }
-    });
-    await dateTimeParser.newOutputSocket('minute', {
-        label: 'Minute',
-        documentation: 'Minute.',
-        type: 'number',
-        // params: { defaultValue: 0, min: 0, max: 60, step: 1 }
-    });
-    await dateTimeParser.newOutputSocket('second', {
-        label: 'Second',
-        documentation: 'Second.',
-        type: 'number',
-        // params: { defaultValue: 0, min: 0, max: 60, step: 1 }
-    });
-    await dateTimeParser.newOutputSocket('day_of_week_name', {
-        label: 'Day of Week (name)',
-        documentation: 'Day of Week (named).',
-        type: 'string',
-        // params: { defaultValue: "May-day!" }
-    });
-    await dateTimeParser.newOutputSocket('day_of_month', {
-        label: 'Day of Month',
-        documentation: 'Day of Month.',
-        type: 'number',
-        // params: { defaultValue: 0, min: 0, max: 31, step: 1 }
-    });
-    await dateTimeParser.newOutputSocket('day_of_year', {
-        label: 'Day of Year',
-        documentation: 'Day of Year.',
-        type: 'number',
-        // params: { defaultValue: 0, min: 0, max: 365, step: 1 }
-    });
-    await dateTimeParser.newOutputSocket('month', {
-        label: 'Month (0-12)',
-        documentation: 'Month index.',
-        type: 'number',
-        // params: { defaultValue: 0, min: 0, max: 12, step: 1 }
-    });
-    await dateTimeParser.newOutputSocket('month_name', {
-        label: 'Month (January-December)',
-        documentation: 'Month by name.',
-        type: 'string',
-        // params: { defaultValue: 'Movember' }
-    });
-    await dateTimeParser.newOutputSocket('year', {
-        label: 'Year (AD)',
-        documentation: 'Year after death.',
-        type: 'number',
-        // params: { defaultValue: 0, min: 0, max: null, step: 1 }
-    });
-    await dateTimeParser.newOutputSocket('second_in_epoch', {
-        label: 'Second in Epoch',
-        documentation: 'Seconds since start of epoch (1970).',
-        type: 'number',
-        // params: { defaultValue: 0, min: 0, max: null, step: 1 }
-    });
-
-    dateTimeParser.code = `
-const dateStr = inputs.date_time;
-const lang = inputs.lang ?? 'en-US';
-const locale = inputs.locale ?? 'en-US';
-
-// Try to parse the date using Date constructor
-let date = new Date();
-if (date=='now') {
-  date = new Date();
-} else {
-  date = new Date(dateStr);
-}
-if (isNaN(date)) throw new Error("Invalid date format");
-
-const options = { timeZone: locale };
-const formatter = new Intl.DateTimeFormat(lang, options);
-const parts = formatter.formatToParts(date);
-const partMap = Object.fromEntries(parts.map(p => [p.type, p.value]));
-
-// Extract date components
-const hour24 = date.getHours();
-const hourAMPM = hour24 % 12 ?? 12;
-const minute = date.getMinutes();
-const second = date.getSeconds();
-const dayOfWeek = date.toLocaleString(lang, { weekday: 'long', timeZone: locale });
-const dayOfMonth = date.getDate();
-const startOfYear = new Date(date.getFullYear(), 0, 0);
-const dayOfYear = Math.floor((date - startOfYear) / (1000 * 60 * 60 * 24));
-const monthIndex = date.getMonth() + 1; // January is 0
-const monthName = date.toLocaleString(lang, { month: 'long', timeZone: locale });
-const year = date.getFullYear();
-const epochSeconds = Math.floor(date.getTime() / 1000);
-
-// Set outputs
-outputs.set('hour_am_pm', hourAMPM);
-outputs.set('hour_24', hour24);
-outputs.set('minute', minute);
-outputs.set('second', second);
-outputs.set('day_of_week_name', dayOfWeek);
-outputs.set('day_of_month', dayOfMonth);
-outputs.set('day_of_year', dayOfYear);
-outputs.set('month', monthIndex);
-outputs.set('month_name', monthName);
-outputs.set('year', year);
-outputs.set('second_in_epoch', epochSeconds);
-`;
-
-    const dateTimeConstructor =
-        await nodeBluePrintController.initOfficialNodeBluePrint(
-            'datetime_constructor'
-        );
-    dateTimeConstructor.title = 'Date & Time Parser';
-    dateTimeConstructor.documentation = 'Parses a datetime object.';
-
-    await dateTimeConstructor.newOutputSocket('date_time', {
-        label: 'Date & Time',
-        documentation: 'Datetime to parse.',
-        type: 'string',
-    });
-
-    await dateTimeConstructor.newInputSocket('locale', {
-        label: 'Locale',
-        documentation: 'Time Zone/Time Zone',
-        type: 'string',
-        params: new StringSocketParamsBuilder('en/us').build(),
-    });
-    await dateTimeConstructor.newInputSocket('lang', {
-        label: 'Language',
-        documentation: 'Language to use.',
-        type: 'string',
-        params: new StringSocketParamsBuilder('en-US').build(),
-    });
-    await dateTimeConstructor.newInputSocket('hour_am_pm', {
-        label: 'Hour (AM/PM)',
-        documentation: 'Hour.',
-        type: 'number',
-        params: new NumberSocketParamsBuilder(0)
-            .setMin(0)
-            .setMax(12)
-            .setStep(1)
-            .build(),
-    });
-    await dateTimeConstructor.newInputSocket('hour_24', {
-        label: 'Hour (24)',
-        documentation: 'Hour.',
-        type: 'number',
-        params: new NumberSocketParamsBuilder(0)
-            .setMin(0)
-            .setMax(24)
-            .setStep(1)
-            .build(),
-    });
-    await dateTimeConstructor.newInputSocket('minute', {
-        label: 'Minute',
-        documentation: 'Minute.',
-        type: 'number',
-        params: new NumberSocketParamsBuilder(0)
-            .setMin(0)
-            .setMax(60)
-            .setStep(1)
-            .build(),
-    });
-    await dateTimeConstructor.newInputSocket('second', {
-        label: 'Second',
-        documentation: 'Second.',
-        type: 'number',
-        params: new NumberSocketParamsBuilder(0)
-            .setMin(0)
-            .setMax(60)
-            .setStep(1)
-            .build(),
-    });
-    await dateTimeConstructor.newInputSocket('day_of_week_name', {
-        label: 'Day of Week (name)',
-        documentation: 'Day of Week (named).',
-        type: 'string',
-        params: new StringSocketParamsBuilder('May-day').build(),
-    });
-    await dateTimeConstructor.newInputSocket('day_of_month_name', {
-        label: 'Day of Month',
-        documentation: 'Day of Month.',
-        type: 'number',
-        params: new NumberSocketParamsBuilder(0)
-            .setMin(0)
-            .setMax(31)
-            .setStep(1)
-            .build(),
-    });
-    await dateTimeConstructor.newInputSocket('day_of_year', {
-        label: 'Day of Year',
-        documentation: 'Day of Year.',
-        type: 'number',
-        params: new NumberSocketParamsBuilder(0)
-            .setMin(0)
-            .setMax(365)
-            .setStep(1)
-            .build(),
-    });
-    await dateTimeConstructor.newInputSocket('month', {
-        label: 'Month (0-12)',
-        documentation: 'Month index.',
-        type: 'number',
-        params: new NumberSocketParamsBuilder(0)
-            .setMin(0)
-            .setMax(12)
-            .setStep(1)
-            .build(),
-    });
-    await dateTimeConstructor.newInputSocket('month_name', {
-        label: 'Month (January-December)',
-        documentation: 'Month by name.',
-        type: 'string',
-        params: new StringSocketParamsBuilder('Movember').build(),
-    });
-    await dateTimeConstructor.newInputSocket('year', {
-        label: 'Year (AD)',
-        documentation: 'Year after death.',
-        type: 'number',
-        params: new NumberSocketParamsBuilder(0)
-            .setMin(0)
-            .noMax()
-            .setStep(1)
-            .build(),
-    });
-    await dateTimeConstructor.newInputSocket('second_in_epoch', {
-        label: 'Second in Epoch',
-        documentation: 'Seconds since start of epoch (1970).',
-        type: 'number',
-        params: new NumberSocketParamsBuilder(0)
-            .setMin(0)
-            .noMax()
-            .setStep(1)
-            .build(),
-    });
-
-    dateTimeConstructor.code = `
-const lang = inputs.lang ?? 'en-US';
-const locale = inputs.locale ?? 'en-US';
-
-const year = inputs.year ?? 2000;
-const month = (inputs.month ?? 1) - 1; // JavaScript months are 0-based
-const day = inputs.day_of_month_name ?? 1;
-const hour = inputs.hour_24 ?? ((inputs.hour_am_pm % 12) + (inputs.hour_am_pm >= 12 ? 12 : 0)) || 0;
-const minute = inputs.minute ?? 0;
-const second = inputs.second ?? 0;
-
-// Construct Date object
-const date = new Date(Date.UTC(year, month, day, hour, minute, second));
-
-// Format as readable string with locale
-const dateStr = date.toLocaleString(lang, { timeZone: locale, hour12: false });
-
-outputs.set('date_time', dateStr);
-`;
 }
 
 async function worldStateDataNodes() {
@@ -948,8 +666,10 @@ const output = await upscaler(url);
         await nodeBluePrintController.initOfficialNodeBluePrint(
             'object_background_seperation'
         );
-    objectBackgroundSeperation.title = 'Separate Background & Foreground Object';
-    objectBackgroundSeperation.documentation = 'Separate a foreground object and infill the background, storing them in seperate images.';
+    objectBackgroundSeperation.title =
+        'Separate Background & Foreground Object';
+    objectBackgroundSeperation.documentation =
+        'Separate a foreground object and infill the background, storing them in seperate images.';
 
     await objectBackgroundSeperation.newInputSocket('img', {
         label: 'Image',
@@ -1019,7 +739,8 @@ async function promptDesignNodes() {
         type: 'string',
     });
 
-    joinText.code = "outputs.set('text', inputs.text1+inputs.text2+inputs.text3+inputs.text4);";
+    joinText.code =
+        "outputs.set('text', inputs.text1+inputs.text2+inputs.text3+inputs.text4);";
 
     const splitText =
         await nodeBluePrintController.initOfficialNodeBluePrint('split_text');
@@ -1046,7 +767,6 @@ async function promptDesignNodes() {
     });
 
     splitText.code = "outputs.set('splitText', inputs.text.split(inputs.sep));";
-
 }
 
 async function googleDriveNodes() {
@@ -1054,7 +774,8 @@ async function googleDriveNodes() {
         'get_file_from_google_drive'
     );
     googleDrive.title = 'Google Drive';
-    googleDrive.documentation = 'Retrieves a file from a google drive. Requires access to the google drive.';
+    googleDrive.documentation =
+        'Retrieves a file from a google drive. Requires access to the google drive.';
 
     await googleDrive.newInputSocket('account', {
         label: 'Google Account',
@@ -1086,7 +807,8 @@ outputs.set('img', inputs.img);
             'send_email_google'
         );
     sendEmail.title = 'Send Email';
-    sendEmail.documentation = 'Retrieves a file from a google drive. Requires access to the google drive.';
+    sendEmail.documentation =
+        'Retrieves a file from a google drive. Requires access to the google drive.';
 
     await sendEmail.newInputSocket('account', {
         label: 'From Google Account',
@@ -1171,7 +893,8 @@ async function jimpNodes() {
         type: 'image/jimp',
     });
 
-    newBlankImage.code = "outputs.set('image', new utils.Jimp({ width: inputs.width, height: inputs.height, color: inputs.color }));";
+    newBlankImage.code =
+        "outputs.set('image', new utils.Jimp({ width: inputs.width, height: inputs.height, color: inputs.color }));";
 
     const resize =
         await nodeBluePrintController.initOfficialNodeBluePrint(
@@ -1213,20 +936,20 @@ async function jimpNodes() {
         type: 'image/jimp',
     });
 
-    resize.code = 
-        'const img2 = inputs.image.clone();' +
-            'img2.resize({\n' +
-            '  w: Math.floor(inputs.width,\n' +
-            '  h: Math.floor(inputs.height\n' +
-            '});\n' +
-            "outputs.set('image', img2);";
+    resize.code = `const img2 = inputs.image.clone();
+img2.resize({
+  'w': Math.floor(inputs.width),
+  'h': Math.floor(inputs.height)
+});
+outputs.set('image', img2);`;
 }
 
 async function jsonNodes() {
     const jsonEditorAndViewer =
         await nodeBluePrintController.initOfficialNodeBluePrint('json_editor');
     jsonEditorAndViewer.title = 'JSON';
-    jsonEditorAndViewer.documentation = 'Create, or view a single instance of a JSON object.';
+    jsonEditorAndViewer.documentation =
+        'Create, or view a single instance of a JSON object.';
 
     await jsonEditorAndViewer.newInputSocket('jsonObject', {
         label: 'JSON',
@@ -1267,7 +990,8 @@ async function jsonNodes() {
         type: 'string',
     });
 
-    jsonToString.code = "outputs.set('jsonString', JSON.stringify(inputs.jsonObject));";
+    jsonToString.code =
+        "outputs.set('jsonString', JSON.stringify(inputs.jsonObject));";
 }
 
 async function htmlNodes() {
@@ -1290,7 +1014,8 @@ async function htmlNodes() {
             'html_elementify'
         );
     htmlElement.title = 'HTML Elementify';
-    htmlElement.documentation = 'Wrap text in html element tags and unpack args into html tags.';
+    htmlElement.documentation =
+        'Wrap text in html element tags and unpack args into html tags.';
 
     await htmlElement.newInputSocket('tag', {
         label: 'Tag',
@@ -1321,7 +1046,7 @@ async function htmlNodes() {
         type: 'string',
     });
 
-    htmlElement.code = 
+    htmlElement.code =
         // TODO: implement attributes, hope and pray this parses valid html
         `
 let d = '<'+inputs.tag;
@@ -1345,7 +1070,8 @@ outputs.set('html', d);
     const fetchURL =
         await nodeBluePrintController.initOfficialNodeBluePrint('fetch_url');
     fetchURL.title = 'Fetch URL';
-    fetchURL.documentation = 'Fetches content from a given URL and returns it as plain text.';
+    fetchURL.documentation =
+        'Fetches content from a given URL and returns it as plain text.';
 
     await fetchURL.newInputSocket('url', {
         label: 'URL',
@@ -1370,7 +1096,8 @@ async function fileNodes() {
         await nodeBluePrintController.initOfficialNodeBluePrint('load_csv');
 
     loadCSV.title = 'CSV Loader';
-    loadCSV.documentation = 'Reads a CSV file and returns its raw content as plain text.';
+    loadCSV.documentation =
+        'Reads a CSV file and returns its raw content as plain text.';
 
     await loadCSV.newInputSocket('file', {
         label: 'CSV File',
@@ -1385,15 +1112,14 @@ async function fileNodes() {
         type: 'string',
     });
 
-    loadCSV.code = `
-    outputs.set('text', inputs.file.text);
-  `;
+    loadCSV.code = `outputs.set('text', inputs.file.text);`;
 
     const loadTSV =
         await nodeBluePrintController.initOfficialNodeBluePrint('load_tsv');
 
     loadTSV.title = 'TSV Loader';
-    loadTSV.documentation = 'Reads a TSV (Tab-Separated Values) file and returns its raw content as plain text.';
+    loadTSV.documentation =
+        'Reads a TSV (Tab-Separated Values) file and returns its raw content as plain text.';
 
     await loadTSV.newInputSocket('file', {
         label: 'TSV File',
@@ -1413,81 +1139,33 @@ async function fileNodes() {
   `;
 }
 
-async function rank3Nodes() {
-    const imageCropper =
-        await nodeBluePrintController.initOfficialNodeBluePrint(
-            'image_cropper'
-        );
-
-    imageCropper.title = 'Image Cropper';
-    imageCropper.documentation = 'Crop a region from an uploaded image.';
-
-    await imageCropper.newInputSocket('img', {
-        label: 'Image',
-        documentation: 'Image uploaded from file.',
-        type: 'Crop',
-        params: new JIMPImageSocketParamsBuilder().build(),
-    });
-
-    await imageCropper.newInputSocket('crop', {
-        label: 'Crop Area',
-        type: 'unknown',
-        documentation: 'Object with {x, y, width, height}',
-        params: new CropParamSocketParamsBuilder().build(),
-    });
-
-    await imageCropper.newOutputSocket('img', {
-        label: 'Cropped Image',
-        documentation: 'Image after cropping.',
-        type: 'image/jimp',
-    });
-
-    imageCropper.code = `
-  const { x, y, width, height } = inputs.crop;
-
-  console.log("[image_cropper] Received crop params:", inputs.crop);
-
-  const image = inputs.img;
-
-  console.log("[image_cropper] Original image size:", image.bitmap.width, "x", image.bitmap.height);
-
-  const cropped = image.clone().crop(x, y, width, height);
-
-  console.log("[image_cropper] Cropping successful. Output size:", cropped.bitmap.width, "x", cropped.bitmap.height);
-
-  const base64 = await cropped.getBase64Async(utils.Jimp.MIME_PNG);
-  console.log("[image_cropper] Cropped preview (base64):", base64.substring(0, 100) + "...");
-
-  outputs.set("img", cropped);
-`;
-}
-
 async function basicMathNodes() {
     // Add node
-    const addNode = await nodeBluePrintController.initOfficialNodeBluePrint('add');
+    const addNode =
+        await nodeBluePrintController.initOfficialNodeBluePrint('add');
     addNode.title = 'Add Numbers';
     addNode.documentation = 'Adds two numbers together';
-    
+
     await addNode.newInputSocket('a', {
         label: 'Number A',
         documentation: 'First number to add',
         type: 'number',
         params: new NumberSocketParamsBuilder(0).build(),
     });
-    
+
     await addNode.newInputSocket('b', {
-        label: 'Number B', 
+        label: 'Number B',
         documentation: 'Second number to add',
         type: 'number',
         params: new NumberSocketParamsBuilder(0).build(),
     });
-    
+
     await addNode.newOutputSocket('result', {
         label: 'Sum',
         documentation: 'The sum of A + B',
         type: 'number',
     });
-    
+
     addNode.code = `
         const a = inputs.a ?? 0;
         const b = inputs.b ?? 0;
@@ -1496,30 +1174,31 @@ async function basicMathNodes() {
     `;
 
     // Subtract node
-    const subtractNode = await nodeBluePrintController.initOfficialNodeBluePrint('subtract');
+    const subtractNode =
+        await nodeBluePrintController.initOfficialNodeBluePrint('subtract');
     subtractNode.title = 'Subtract Numbers';
     subtractNode.documentation = 'Subtracts second number from first number';
-    
+
     await subtractNode.newInputSocket('a', {
         label: 'Number A',
         documentation: 'Number to subtract from',
         type: 'number',
         params: new NumberSocketParamsBuilder(0).build(),
     });
-    
+
     await subtractNode.newInputSocket('b', {
         label: 'Number B',
         documentation: 'Number to subtract',
-        type: 'number', 
+        type: 'number',
         params: new NumberSocketParamsBuilder(0).build(),
     });
-    
+
     await subtractNode.newOutputSocket('result', {
         label: 'Difference',
         documentation: 'The result of A - B',
         type: 'number',
     });
-    
+
     subtractNode.code = `
         const a = inputs.a ?? 0;
         const b = inputs.b ?? 0;
@@ -1528,30 +1207,31 @@ async function basicMathNodes() {
     `;
 
     // Multiply node
-    const multiplyNode = await nodeBluePrintController.initOfficialNodeBluePrint('multiply');
+    const multiplyNode =
+        await nodeBluePrintController.initOfficialNodeBluePrint('multiply');
     multiplyNode.title = 'Multiply Numbers';
     multiplyNode.documentation = 'Multiplies two numbers together';
-    
+
     await multiplyNode.newInputSocket('a', {
         label: 'Number A',
         documentation: 'First number to multiply',
         type: 'number',
         params: new NumberSocketParamsBuilder(1).build(),
     });
-    
+
     await multiplyNode.newInputSocket('b', {
         label: 'Number B',
-        documentation: 'Second number to multiply', 
+        documentation: 'Second number to multiply',
         type: 'number',
         params: new NumberSocketParamsBuilder(1).build(),
     });
-    
+
     await multiplyNode.newOutputSocket('result', {
         label: 'Product',
         documentation: 'The product of A * B',
         type: 'number',
     });
-    
+
     multiplyNode.code = `
         const a = inputs.a ?? 1;
         const b = inputs.b ?? 1;
@@ -1559,31 +1239,32 @@ async function basicMathNodes() {
         outputs.set('result', result);
     `;
 
-    // Divide node  
-    const divideNode = await nodeBluePrintController.initOfficialNodeBluePrint('divide');
+    // Divide node
+    const divideNode =
+        await nodeBluePrintController.initOfficialNodeBluePrint('divide');
     divideNode.title = 'Divide Numbers';
     divideNode.documentation = 'Divides first number by second number';
-    
+
     await divideNode.newInputSocket('a', {
         label: 'Dividend',
         documentation: 'Number to be divided',
         type: 'number',
         params: new NumberSocketParamsBuilder(1).build(),
     });
-    
+
     await divideNode.newInputSocket('b', {
         label: 'Divisor',
         documentation: 'Number to divide by',
         type: 'number',
         params: new NumberSocketParamsBuilder(1).build(),
     });
-    
+
     await divideNode.newOutputSocket('result', {
         label: 'Quotient',
         documentation: 'The result of A / B',
         type: 'number',
     });
-    
+
     divideNode.code = `
         const a = inputs.a ?? 1;
         const b = inputs.b ?? 1;

@@ -13,27 +13,27 @@ import {
     shouldUseBigData,
     isBigDataRef,
     cleanupOldData,
-    type BigDataRef
+    type BigDataRef,
 } from './BigData';
 
 // Mock browser environment
 vi.mock('$app/environment', () => ({
-    browser: true
+    browser: true,
 }));
 
 // Mock IndexedDB
 const mockIndexedDB = {
     open: vi.fn(),
-    databases: vi.fn()
+    databases: vi.fn(),
 };
 
 const mockIDBDatabase = {
     transaction: vi.fn(),
     close: vi.fn(),
     objectStoreNames: {
-        contains: vi.fn()
+        contains: vi.fn(),
     },
-    createObjectStore: vi.fn()
+    createObjectStore: vi.fn(),
 };
 
 const mockObjectStore = {
@@ -43,11 +43,11 @@ const mockObjectStore = {
     clear: vi.fn(),
     createIndex: vi.fn(),
     index: vi.fn(),
-    getAll: vi.fn()
+    getAll: vi.fn(),
 };
 
 const mockTransaction = {
-    objectStore: vi.fn(() => mockObjectStore)
+    objectStore: vi.fn(() => mockObjectStore),
 };
 
 const mockRequest = {
@@ -55,7 +55,7 @@ const mockRequest = {
     onerror: null as any,
     onupgradeneeded: null as any,
     result: null as any,
-    error: null as any
+    error: null as any,
 };
 
 // Mock IDBKeyRange
@@ -63,7 +63,7 @@ const mockIDBKeyRange = {
     upperBound: vi.fn((value) => ({ upper: value, type: 'upperBound' })),
     lowerBound: vi.fn((value) => ({ lower: value, type: 'lowerBound' })),
     bound: vi.fn((lower, upper) => ({ lower, upper, type: 'bound' })),
-    only: vi.fn((value) => ({ value, type: 'only' }))
+    only: vi.fn((value) => ({ value, type: 'only' })),
 };
 
 // Setup IndexedDB mocks
@@ -74,7 +74,7 @@ beforeEach(() => {
     mockIDBDatabase.transaction.mockReturnValue(mockTransaction);
     mockIDBDatabase.objectStoreNames.contains.mockReturnValue(false);
     mockRequest.result = mockIDBDatabase;
-    
+
     // Reset all mocks
     vi.clearAllMocks();
 });
@@ -93,7 +93,7 @@ describe('BigData Core Functions', () => {
                 _type: 'bigdata_ref',
                 id: 'test-id',
                 dataType: 'string',
-                size: 100
+                size: 100,
             };
 
             expect(isBigDataRef(bigDataRef)).toBe(true);
@@ -113,12 +113,16 @@ describe('BigData Core Functions', () => {
             expect(shouldUseBigData(largeString)).toBe(true);
 
             // Small file - shouldn't use BigData
-            const smallFile = new File(['test'], 'test.txt', { type: 'text/plain' });
+            const smallFile = new File(['test'], 'test.txt', {
+                type: 'text/plain',
+            });
             Object.defineProperty(smallFile, 'size', { value: 50 * 1024 }); // 50KB
             expect(shouldUseBigData(smallFile)).toBe(false);
 
             // Large file - should use BigData
-            const largeFile = new File(['test'], 'large.txt', { type: 'text/plain' });
+            const largeFile = new File(['test'], 'large.txt', {
+                type: 'text/plain',
+            });
             Object.defineProperty(largeFile, 'size', { value: 200 * 1024 }); // 200KB
             expect(shouldUseBigData(largeFile)).toBe(true);
 
@@ -154,7 +158,7 @@ describe('BigData Core Functions', () => {
                     dataType: 'string',
                     size: 100,
                     createdAt: new Date(),
-                    lastAccessed: new Date()
+                    lastAccessed: new Date(),
                 });
                 return request;
             });
@@ -176,7 +180,7 @@ describe('BigData Core Functions', () => {
             expect(ref).toMatchObject({
                 _type: 'bigdata_ref',
                 dataType: 'string',
-                size: expect.any(Number)
+                size: expect.any(Number),
             });
             expect(ref.id).toMatch(/^bigdata_\d+_/);
 
@@ -185,8 +189,10 @@ describe('BigData Core Functions', () => {
         });
 
         it('should handle storing File objects', async () => {
-            const file = new File(['test content'], 'test.txt', { type: 'text/plain' });
-            
+            const file = new File(['test content'], 'test.txt', {
+                type: 'text/plain',
+            });
+
             const ref = await storeImage(file);
 
             expect(ref).toMatchObject({
@@ -195,14 +201,14 @@ describe('BigData Core Functions', () => {
                 metadata: {
                     fileName: 'test.txt',
                     mimeType: 'text/plain',
-                    originalSize: expect.any(Number)
-                }
+                    originalSize: expect.any(Number),
+                },
             });
         });
 
         it('should handle storing Jimp instances', async () => {
             const jimpMock = {
-                bitmap: { width: 100, height: 200 }
+                bitmap: { width: 100, height: 200 },
             };
 
             const ref = await storeJimpImage(jimpMock);
@@ -212,8 +218,8 @@ describe('BigData Core Functions', () => {
                 dataType: 'jimp',
                 metadata: {
                     width: 100,
-                    height: 200
-                }
+                    height: 200,
+                },
             });
         });
 
@@ -252,7 +258,7 @@ describe('BigData Core Functions', () => {
                 _type: 'bigdata_ref',
                 id: 'non-existent-id',
                 dataType: 'string',
-                size: 100
+                size: 100,
             };
 
             // Mock get returning null (not found)
@@ -274,14 +280,14 @@ describe('BigData Core Functions', () => {
         it('should handle non-browser environments with memory fallback', async () => {
             // Mock non-browser environment by re-mocking the module
             vi.doMock('$app/environment', () => ({
-                browser: false
+                browser: false,
             }));
 
             // Re-import to get the mocked version
-            const { 
-                storeBigData: storeBigDataMocked, 
+            const {
+                storeBigData: storeBigDataMocked,
                 getBigData: getBigDataMocked,
-                isBigDataRef 
+                isBigDataRef,
             } = await import('./BigData');
 
             // Should not throw, should return a BigDataRef and use memory-only storage
@@ -293,10 +299,10 @@ describe('BigData Core Functions', () => {
             // Should be able to retrieve the data from memory cache
             const retrievedData = await getBigDataMocked(result);
             expect(retrievedData).toBe(testData);
-            
+
             // Restore browser mock
             vi.doMock('$app/environment', () => ({
-                browser: true
+                browser: true,
             }));
         });
     });
@@ -305,13 +311,13 @@ describe('BigData Core Functions', () => {
         it('should use memory cache for recent data', async () => {
             // Store data
             const ref = await storeBigData('cached-data', 'string');
-            
+
             // First retrieval might hit IndexedDB
             const result1 = await getBigData(ref);
-            
+
             // Second retrieval should hit memory cache (faster)
             const result2 = await getBigData(ref);
-            
+
             // Both should return the same data
             // Note: In a real implementation, we'd verify cache usage
         });
@@ -321,11 +327,11 @@ describe('BigData Core Functions', () => {
         beforeEach(() => {
             // Mock cleanup operations
             const mockIndex = {
-                openCursor: vi.fn()
+                openCursor: vi.fn(),
             };
-            
+
             mockObjectStore.index.mockReturnValue(mockIndex);
-            
+
             mockIndex.openCursor.mockImplementation(() => {
                 const request = { ...mockRequest };
                 setTimeout(() => {
@@ -336,12 +342,14 @@ describe('BigData Core Functions', () => {
                             continue: vi.fn(),
                             value: {
                                 id: 'old-entry',
-                                lastAccessed: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000) // 10 days old
-                            }
+                                lastAccessed: new Date(
+                                    Date.now() - 10 * 24 * 60 * 60 * 1000
+                                ), // 10 days old
+                            },
                         };
                         request.result = cursor;
                         request.onsuccess({ target: request });
-                        
+
                         // Second call returns null (end of cursor)
                         setTimeout(() => {
                             request.result = null;
@@ -376,7 +384,7 @@ describe('BigData Core Functions', () => {
                 _type: 'bigdata_ref',
                 id: 'test-delete-id',
                 dataType: 'string',
-                size: 100
+                size: 100,
             };
 
             mockObjectStore.delete.mockImplementation(() => {
@@ -397,7 +405,7 @@ describe('BigData Core Functions', () => {
                 _type: 'bigdata_ref',
                 id: 'test-delete-id',
                 dataType: 'string',
-                size: 100
+                size: 100,
             };
 
             mockObjectStore.delete.mockImplementation(() => {
@@ -423,7 +431,7 @@ describe('BigData Size Calculations', () => {
         const testCases = [
             { data: 'hello', expectedType: 'number' },
             { data: new ArrayBuffer(100), expectedType: 'number' },
-            { data: { key: 'value' }, expectedType: 'number' }
+            { data: { key: 'value' }, expectedType: 'number' },
         ];
 
         testCases.forEach(async ({ data }) => {
@@ -439,7 +447,7 @@ describe('BigData Integration', () => {
         const complexData = {
             user: { id: 1, name: 'Test User' },
             settings: { theme: 'dark', notifications: true },
-            data: [1, 2, 3, 4, 5]
+            data: [1, 2, 3, 4, 5],
         };
 
         const ref = await storeBigData(complexData, 'complex');
@@ -448,14 +456,14 @@ describe('BigData Integration', () => {
     });
 
     it('should maintain data integrity through store/retrieve cycle', async () => {
-        const originalData = { 
+        const originalData = {
             message: 'test message',
             timestamp: Date.now(),
-            array: [1, 2, 3]
+            array: [1, 2, 3],
         };
 
         const ref = await storeBigData(originalData, 'object');
-        
+
         // Note: In a full integration test, we'd retrieve and compare
         expect(isBigDataRef(ref)).toBe(true);
     });

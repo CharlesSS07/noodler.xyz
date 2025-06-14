@@ -30,13 +30,17 @@ export class NodeAPIConnectorManager {
         NodeLib<object>
     >();
 
-    static registerAPIConnector<T extends object>(connector: NodeLib<T>): NodeLib<T> {
+    static registerAPIConnector<T extends object>(
+        connector: NodeLib<T>
+    ): NodeLib<T> {
         NodeAPIConnectorManager.connections.set(connector.name, connector);
         return connector;
     }
 
     static getConnector<T extends object>(name: string): NodeLib<T> {
-        const ret = NodeAPIConnectorManager.connections.get(name) as NodeLib<T> | undefined;
+        const ret = NodeAPIConnectorManager.connections.get(name) as
+            | NodeLib<T>
+            | undefined;
         if (!ret) throw new Error(`Connector not registered:${name}`);
         return ret;
     }

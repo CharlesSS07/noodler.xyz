@@ -2,7 +2,9 @@ import { NodeLib } from './NodeAPIConnectorManager.js';
 
 // Temporary interface until @huggingface/inference is properly installed
 interface HfInference {
-    textGeneration(params: Record<string, unknown>): Promise<{ generated_text: string }>;
+    textGeneration(
+        params: Record<string, unknown>
+    ): Promise<{ generated_text: string }>;
     textToImage(params: Record<string, unknown>): Promise<Blob>;
 }
 

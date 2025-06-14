@@ -33,8 +33,8 @@ export default {
         files: {
             // Exclude examplesAndDocs from being processed by SvelteKit
             lib: 'src/lib',
-            routes: 'src/routes'
-        }
+            routes: 'src/routes',
+        },
     },
     onwarn: (warning, handler) => {
         // Ignore warnings from examplesAndDocs folder
@@ -42,5 +42,5 @@ export default {
             return;
         }
         handler(warning);
-    }
+    },
 };

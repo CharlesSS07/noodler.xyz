@@ -4,8 +4,8 @@ import type {
     OutputSocketModel,
     SocketID,
 } from './SocketModels.js';
-import {OutputSocketAsyncReturner} from "./Interpreter";
-import {writable, type Writable} from "svelte/store";
+import { OutputSocketAsyncReturner } from './Interpreter';
+import { writable, type Writable } from 'svelte/store';
 
 export interface NodeBluePrintControllerFactoryInterface {
     initNewNodeBluePrint(
@@ -30,9 +30,7 @@ export interface NodeBluePrintControllerFactoryInterface {
     forkNode(nid: string, author_uid: string): Promise<NodeBluePrint>;
 
     getNodeBluePrintFromNID(nid: string): Promise<NodeBluePrint>;
-
 }
-
 
 /**
  * The NodeBluePrint is used in three areas:
@@ -43,7 +41,6 @@ export interface NodeBluePrintControllerFactoryInterface {
  */
 
 export abstract class NodeBluePrint {
-
     /**
      * Does whatever it is to call the executable part of this node. Takes inputs, and sets the outputs.
      * @param inputs
@@ -54,15 +51,15 @@ export abstract class NodeBluePrint {
         outputs: OutputSocketAsyncReturner
     ): Promise<void>;
 
-    abstract get author_uid(): string
+    abstract get author_uid(): string;
 
-    abstract get created_at(): Date
+    abstract get created_at(): Date;
     abstract get last_updated_at(): Date;
     protected abstract update(): void;
     abstract get is_frozen(): boolean;
     abstract freeze(): void;
 
-    abstract get nid(): string
+    abstract get nid(): string;
 
     /**
      * The nid of the code this was forked from, for tracking version.
@@ -103,18 +100,21 @@ export abstract class NodeBluePrint {
 
     abstract get official_note(): string;
     abstract set official_note(note: string);
-
-
 }
 
 // Wrapper function to create a reactive store
-export function createNodeBluePrintStore(nodeBluePrint: NodeBluePrint): Writable<NodeBluePrint> {
+export function createNodeBluePrintStore(
+    nodeBluePrint: NodeBluePrint
+): Writable<NodeBluePrint> {
     return writable(nodeBluePrint);
 }
 
 // Helper function to trigger store updates after mutations
-export function updateNodeBluePrintStore(store: Writable<NodeBluePrint>, updateFn: (node: NodeBluePrint) => void | Promise<void>) {
-    store.update(node => {
+export function updateNodeBluePrintStore(
+    store: Writable<NodeBluePrint>,
+    updateFn: (node: NodeBluePrint) => void | Promise<void>
+) {
+    store.update((node) => {
         const result = updateFn(node);
 
         // Handle async updates

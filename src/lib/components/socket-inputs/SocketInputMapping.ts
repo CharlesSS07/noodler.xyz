@@ -28,118 +28,120 @@ export const SOCKET_INPUT_MAPPINGS: SocketInputMapping[] = [
         dataType: 'number',
         component: NumberInput,
         canHaveInput: true,
-        description: 'Numeric input with min/max/step support'
+        description: 'Numeric input with min/max/step support',
     },
     {
         dataType: 'string',
         component: StringInput,
         canHaveInput: true,
-        description: 'Text input with validation'
+        description: 'Text input with validation',
     },
     {
         dataType: 'text',
         component: StringInput,
         canHaveInput: true,
-        description: 'Text input (alias for string)'
+        description: 'Text input (alias for string)',
     },
     {
         dataType: 'boolean',
         component: BooleanInput,
         canHaveInput: true,
-        description: 'Checkbox for true/false values'
+        description: 'Checkbox for true/false values',
     },
-    
+
     // Complex types
     {
         dataType: 'json',
         component: JsonInput,
         canHaveInput: true,
-        description: 'JSON object editor'
+        description: 'JSON object editor',
     },
     {
         dataType: 'object',
         component: JsonInput,
         canHaveInput: true,
-        description: 'Object editor (uses JSON format)'
+        description: 'Object editor (uses JSON format)',
     },
-    
+
     // File types
     {
         dataType: 'file',
         component: FileInput,
         canHaveInput: true,
-        description: 'File upload input'
+        description: 'File upload input',
     },
     {
         dataType: 'csv',
         component: FileInput,
         canHaveInput: true,
-        description: 'CSV file upload'
+        description: 'CSV file upload',
     },
     {
         dataType: 'tsv',
         component: FileInput,
         canHaveInput: true,
-        description: 'TSV file upload'
+        description: 'TSV file upload',
     },
-    
+
     // Image types
     {
         dataType: 'image/base64',
         component: ImageInput,
         canHaveInput: true,
-        description: 'Image upload with base64 encoding'
+        description: 'Image upload with base64 encoding',
     },
     {
         dataType: 'image/jimp',
         component: ImageInput,
         canHaveInput: true,
-        description: 'Image upload for JIMP processing'
+        description: 'Image upload for JIMP processing',
     },
-    
+
     // Special types
     {
         dataType: 'crop',
         component: CropInput,
         canHaveInput: true,
-        description: 'Crop area selector'
+        description: 'Crop area selector',
     },
     {
         dataType: 'enum',
         component: EnumInput,
         canHaveInput: true,
-        description: 'Dropdown selector for predefined options'
+        description: 'Dropdown selector for predefined options',
     },
-    
+
     // Non-input types (these don't support user input)
     {
         dataType: 'array',
         component: StringInput, // Fallback to string representation
         canHaveInput: false,
-        description: 'Array type (not directly editable)'
+        description: 'Array type (not directly editable)',
     },
     {
         dataType: 'unknown',
         component: StringInput, // Fallback to string representation
         canHaveInput: false,
-        description: 'Unknown type (not directly editable)'
+        description: 'Unknown type (not directly editable)',
     },
     {
         dataType: 'any',
         component: StringInput, // Fallback to string representation
         canHaveInput: false,
-        description: 'Any type (not directly editable)'
-    }
+        description: 'Any type (not directly editable)',
+    },
 ];
 
 /**
  * Get the appropriate input component for a given data type
  */
-export function getInputComponentForDataType(dataType: string): SocketInputMapping | null {
-    const mapping = SOCKET_INPUT_MAPPINGS.find(m => 
-        m.dataType.toLowerCase() === dataType.toLowerCase()
+export function getInputComponentForDataType(
+    dataType: string
+): SocketInputMapping | null {
+    const mapping = SOCKET_INPUT_MAPPINGS.find(
+        (m) => m.dataType.toLowerCase() === dataType.toLowerCase()
     );
-    
+
     return mapping || null;
 }
 
@@ -155,7 +157,7 @@ export function canDataTypeHaveInput(dataType: string): boolean {
  * Get all data types that support input
  */
 export function getInputSupportedDataTypes(): string[] {
-    return SOCKET_INPUT_MAPPINGS
-        .filter(m => m.canHaveInput)
-        .map(m => m.dataType);
+    return SOCKET_INPUT_MAPPINGS.filter((m) => m.canHaveInput).map(
+        (m) => m.dataType
+    );
 }

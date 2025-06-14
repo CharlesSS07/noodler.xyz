@@ -25,17 +25,19 @@ export const auth = getAuth(app);
 export const rtdb = getDatabase(app);
 export const firestore = getFirestore(app);
 
+// Connect to emulators if in test environment or browser localhost
+if (
+    process.env.NODE_ENV === 'test' ||
+    (browser && window.location.hostname === 'localhost')
+) {
+    console.log('[DEBUG] Connecting to Firebase emulators');
+    connectAuthEmulator(auth, 'http://127.0.0.1:9099');
+    connectFirestoreEmulator(firestore, '127.0.0.1', 8080);
+    connectDatabaseEmulator(rtdb, '127.0.0.1', 9000);
+    console.log('[DEBUG] Connected to emulators');
+}
+
 if (browser) {
-    const hostname = window.location.hostname;
-
-    if (hostname === 'localhost') {
-        connectAuthEmulator(auth, 'http://127.0.0.1:9099');
-        connectFirestoreEmulator(firestore, '127.0.0.1', 8080);
-        connectDatabaseEmulator(rtdb, '127.0.0.1', 9000);
-        // connectStorageEmulator(storage, "localhost", 9199);
-        // connectFunctionsEmulator(functions, "localhost", 5001);
-    }
-
     setPersistence(auth, browserLocalPersistence).catch((error) =>
         console.error('Error setting persistence:', error)
     );

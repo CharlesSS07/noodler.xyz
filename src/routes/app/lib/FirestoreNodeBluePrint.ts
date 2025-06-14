@@ -1,11 +1,26 @@
-import {collection, doc, getDoc, onSnapshot, setDoc, type Unsubscribe,} from 'firebase/firestore';
-import {firestore} from '../../../firebase';
-import {NodeBluePrint, type NodeBluePrintControllerFactoryInterface,} from './NodeBluePrint.js';
-import {v4 as uuidv4} from 'uuid';
-import type {InputSocketModel, InputSocketParams, OutputSocketModel, SocketID,} from './SocketModels';
-import {OutputSocketAsyncReturner} from './Interpreter';
-import {Jimp} from "jimp";
-import {NodeAPIConnectorManager} from "./NodeAPIConnector/NodeAPIConnectorManager";
+import {
+    collection,
+    doc,
+    getDoc,
+    onSnapshot,
+    setDoc,
+    type Unsubscribe,
+} from 'firebase/firestore';
+import { firestore } from '../../../firebase';
+import {
+    NodeBluePrint,
+    type NodeBluePrintControllerFactoryInterface,
+} from './NodeBluePrint.js';
+import { v4 as uuidv4 } from 'uuid';
+import type {
+    InputSocketModel,
+    InputSocketParams,
+    OutputSocketModel,
+    SocketID,
+} from './SocketModels';
+import { OutputSocketAsyncReturner } from './Interpreter';
+import { Jimp } from 'jimp';
+import { NodeAPIConnectorManager } from './NodeAPIConnector/NodeAPIConnectorManager';
 
 export interface FirestoreNodeBluePrintModel {
     title: string;
@@ -27,16 +42,17 @@ export interface FirestoreNodeBluePrintModel {
 }
 
 export const DEFAULT_FIRESTORE_NODE_BLUEPRINT_MODEL = {
-    title: "Uninitialized Node",
-    author_uid: "anonymous",
-    documentation: "",
+    title: 'Uninitialized Node',
+    author_uid: 'anonymous',
+    documentation: '',
     created_at: new Date(),
     last_updated_at: new Date(),
-    predecessor_nid: "none",
+    predecessor_nid: 'none',
     is_frozen: true,
 
-    user_defined_code: 'throw Error("DefaultFirestoreNodeBluePrintModel: Node code is not yet loaded!");',
-    input_sockets: { },
+    user_defined_code:
+        'throw Error("DefaultFirestoreNodeBluePrintModel: Node code is not yet loaded!");',
+    input_sockets: {},
     input_socket_order: [],
     output_sockets: {},
     output_socket_order: [],
@@ -76,7 +92,7 @@ export class FirestoreNodeBluePrintControllerFactoryInterface
 
             trust_level: 'Official',
             official_note: '',
-        })
+        });
 
         return await this.getNodeBluePrintFromNID(nid);
     }
@@ -141,8 +157,8 @@ export class FirestoreNodeBluePrintControllerFactoryInterface
 }
 
 export class NodeBluePrintInFirestore extends NodeBluePrint {
-
-    private current: FirestoreNodeBluePrintModel = DEFAULT_FIRESTORE_NODE_BLUEPRINT_MODEL;
+    private current: FirestoreNodeBluePrintModel =
+        DEFAULT_FIRESTORE_NODE_BLUEPRINT_MODEL;
     readonly nid: string;
 
     // Firestore subscriptions
@@ -152,34 +168,29 @@ export class NodeBluePrintInFirestore extends NodeBluePrint {
         super();
         this.nid = nid;
     }
-    
+
     private getDoc() {
-        return doc(NODE_BLUEPRINTS_REF, this.nid)
+        return doc(NODE_BLUEPRINTS_REF, this.nid);
     }
-    
+
     async loadFromFirestore(): Promise<void> {
         const nodeRef = this.getDoc();
         const docSnapshot = await getDoc(nodeRef);
-        
+
         if (!docSnapshot.exists()) {
-            throw new Error(`NodeBlueprint document not found in Firestore: ${this.nid}`);
+            throw new Error(
+                `NodeBlueprint document not found in Firestore: ${this.nid}`
+            );
         }
-        
+
         const data = docSnapshot.data();
-        
-        // Debug: Log what we're loading from Firestore
-        console.log(`[DEBUG] Loading node ${this.nid} from Firestore:`, {
-            code: data.user_defined_code,
-            lastUpdated: data.last_updated_at,
-            docRef: nodeRef.path,
-            projectId: nodeRef.firestore.app.options.projectId,
-            host: nodeRef.firestore._settings?.host,
-            credentials: nodeRef.firestore._settings?.credentials
-        });
+
         this.current = {
             title: data.title || 'Untitled Operation',
             documentation: data.documentation || '',
-            user_defined_code: data.user_defined_code || `console.error("Code not defined in ${this.nid}");`,
+            user_defined_code:
+                data.user_defined_code ||
+                `console.error("Code not defined in ${this.nid}");`,
             input_sockets: data.input_sockets || {},
             input_socket_order: data.input_socket_order || [],
             output_sockets: data.output_sockets || {},
@@ -190,16 +201,18 @@ export class NodeBluePrintInFirestore extends NodeBluePrint {
             is_frozen: data.is_frozen as boolean,
             trust_level: data.trust_level || 'New',
             official_note: data.official_note || '',
-            last_updated_at: data.last_updated_at?.toDate() || new Date()
+            last_updated_at: data.last_updated_at?.toDate() || new Date(),
         };
     }
 
     private assertNotFrozen() {
         if (this.current.is_frozen) {
-            throw new Error(`Node is frozen. Cannot be modified. Fork to modify: ${this.nid}`);
+            throw new Error(
+                `Node is frozen. Cannot be modified. Fork to modify: ${this.nid}`
+            );
         }
     }
-    
+
     // Clean up subscriptions
     destroy() {
         if (this.unsubscribeFirestore) {
@@ -264,7 +277,10 @@ export class NodeBluePrintInFirestore extends NodeBluePrint {
     }
 
     // Socket management (stored at version level)
-    async newInputSocket(socket_key: SocketID, socket: InputSocketModel<InputSocketParams>): Promise<void> {
+    async newInputSocket(
+        socket_key: SocketID,
+        socket: InputSocketModel<InputSocketParams>
+    ): Promise<void> {
         this.assertNotFrozen();
         // Update local model
         this.current.input_sockets[socket_key] = socket;
@@ -282,7 +298,9 @@ export class NodeBluePrintInFirestore extends NodeBluePrint {
     }
 
     get inputSockets(): Array<InputSocketModel<InputSocketParams>> {
-        return this.current.input_socket_order.map(key => this.current.input_sockets[key]);
+        return this.current.input_socket_order.map(
+            (key) => this.current.input_sockets[key]
+        );
     }
 
     newOutputSocket(socket_key: SocketID, socket: OutputSocketModel): void {
@@ -293,13 +311,15 @@ export class NodeBluePrintInFirestore extends NodeBluePrint {
             this.current.output_socket_order.push(socket_key);
         }
         this.current.last_updated_at = new Date();
-        
+
         // Update Firestore
         this.update();
     }
 
     get outputSockets(): Array<OutputSocketModel> {
-        return this.current.output_socket_order.map(key => this.current.output_sockets[key]);
+        return this.current.output_socket_order.map(
+            (key) => this.current.output_sockets[key]
+        );
     }
 
     // Synchronous version using cached model
@@ -308,7 +328,10 @@ export class NodeBluePrintInFirestore extends NodeBluePrint {
     }
 
     // Execution
-    async call(inputs: Record<string, unknown>, outputs: OutputSocketAsyncReturner): Promise<void> {
+    async call(
+        inputs: Record<string, unknown>,
+        outputs: OutputSocketAsyncReturner
+    ): Promise<void> {
         try {
             const code = this.current.user_defined_code;
 
@@ -328,7 +351,7 @@ export class NodeBluePrintInFirestore extends NodeBluePrint {
                     Jimp: Jimp,
                     APIConnectionManager: NodeAPIConnectorManager,
                 },
-                console: console
+                console: console,
             };
 
             // Create async function from the code
@@ -349,7 +372,6 @@ export class NodeBluePrintInFirestore extends NodeBluePrint {
                 executionContext.utils,
                 executionContext.console
             );
-
         } catch (error) {
             console.error(`Error executing node ${this.nid}:`, error);
             throw new Error(`Node execution failed: ${error}`);
@@ -365,8 +387,11 @@ export class NodeBluePrintInFirestore extends NodeBluePrint {
     }
 
     protected async update(): Promise<void> {
-        if (this.is_frozen) throw new Error(`Cannot update this node, it is frozen: ${this.nid}`);
-        if (! this.current) throw new Error("Node not initialized");
+        if (this.is_frozen)
+            throw new Error(
+                `Cannot update this node, it is frozen: ${this.nid}`
+            );
+        if (!this.current) throw new Error('Node not initialized');
         this.current.last_updated_at = new Date();
         await setDoc(this.getDoc(), this.current);
     }

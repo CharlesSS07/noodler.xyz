@@ -21,7 +21,9 @@ export class BigDataCleanup {
     /**
      * Clean up old, unused BigData entries
      */
-    static async cleanup(maxAge: number = 7 * 24 * 60 * 60 * 1000): Promise<number> {
+    static async cleanup(
+        maxAge: number = 7 * 24 * 60 * 60 * 1000
+    ): Promise<number> {
         if (!browser) {
             return 0;
         }
@@ -32,20 +34,27 @@ export class BigDataCleanup {
 
             try {
                 return await new Promise<number>((resolve, reject) => {
-                    const transaction = db.transaction([STORE_NAME], 'readwrite');
+                    const transaction = db.transaction(
+                        [STORE_NAME],
+                        'readwrite'
+                    );
                     const store = transaction.objectStore(STORE_NAME);
                     const index = store.index('lastAccessed');
                     // Check if IDBKeyRange is available (not in Node.js/testing)
-                    const keyRange = typeof IDBKeyRange !== 'undefined' 
-                        ? IDBKeyRange.upperBound(cutoffDate)
-                        : undefined;
-                        
+                    const keyRange =
+                        typeof IDBKeyRange !== 'undefined'
+                            ? IDBKeyRange.upperBound(cutoffDate)
+                            : undefined;
+
                     const request = index.openCursor(keyRange);
 
                     let deletedCount = 0;
 
                     request.onerror = () => {
-                        console.error('Failed to cleanup BigData:', request.error);
+                        console.error(
+                            'Failed to cleanup BigData:',
+                            request.error
+                        );
                         reject(request.error);
                     };
 
@@ -57,7 +66,9 @@ export class BigDataCleanup {
                             deletedCount++;
                             cursor.continue();
                         } else {
-                            console.log(`BigData cleanup completed: deleted ${deletedCount} old entries`);
+                            console.log(
+                                `BigData cleanup completed: deleted ${deletedCount} old entries`
+                            );
                             resolve(deletedCount);
                         }
                     };
@@ -75,7 +86,11 @@ export class BigDataCleanup {
     /**
      * Get storage statistics
      */
-    static async getStats(): Promise<{ count: number; totalSize: number; dataTypes: Record<string, number> }> {
+    static async getStats(): Promise<{
+        count: number;
+        totalSize: number;
+        dataTypes: Record<string, number>;
+    }> {
         if (!browser) {
             return { count: 0, totalSize: 0, dataTypes: {} };
         }
@@ -84,13 +99,23 @@ export class BigDataCleanup {
             const db = await this.openDB();
 
             try {
-                return await new Promise<{ count: number; totalSize: number; dataTypes: Record<string, number> }>((resolve, reject) => {
-                    const transaction = db.transaction([STORE_NAME], 'readonly');
+                return await new Promise<{
+                    count: number;
+                    totalSize: number;
+                    dataTypes: Record<string, number>;
+                }>((resolve, reject) => {
+                    const transaction = db.transaction(
+                        [STORE_NAME],
+                        'readonly'
+                    );
                     const store = transaction.objectStore(STORE_NAME);
                     const request = store.getAll();
 
                     request.onerror = () => {
-                        console.error('Failed to get BigData stats:', request.error);
+                        console.error(
+                            'Failed to get BigData stats:',
+                            request.error
+                        );
                         reject(request.error);
                     };
 
@@ -98,11 +123,18 @@ export class BigDataCleanup {
                         const chunks = request.result as StoredChunk[];
                         const stats = {
                             count: chunks.length,
-                            totalSize: chunks.reduce((sum, chunk) => sum + chunk.size, 0),
-                            dataTypes: chunks.reduce((types, chunk) => {
-                                types[chunk.dataType] = (types[chunk.dataType] || 0) + 1;
-                                return types;
-                            }, {} as Record<string, number>)
+                            totalSize: chunks.reduce(
+                                (sum, chunk) => sum + chunk.size,
+                                0
+                            ),
+                            dataTypes: chunks.reduce(
+                                (types, chunk) => {
+                                    types[chunk.dataType] =
+                                        (types[chunk.dataType] || 0) + 1;
+                                    return types;
+                                },
+                                {} as Record<string, number>
+                            ),
                         };
                         resolve(stats);
                     };
@@ -130,12 +162,18 @@ export class BigDataCleanup {
 
             try {
                 return await new Promise<void>((resolve, reject) => {
-                    const transaction = db.transaction([STORE_NAME], 'readwrite');
+                    const transaction = db.transaction(
+                        [STORE_NAME],
+                        'readwrite'
+                    );
                     const store = transaction.objectStore(STORE_NAME);
                     const request = store.clear();
 
                     request.onerror = () => {
-                        console.error('Failed to clear BigData:', request.error);
+                        console.error(
+                            'Failed to clear BigData:',
+                            request.error
+                        );
                         reject(request.error);
                     };
 
@@ -182,7 +220,9 @@ export function startAutomaticCleanup(intervalHours: number = 24): void {
         try {
             const deletedCount = await BigDataCleanup.cleanup();
             if (deletedCount > 0) {
-                console.log(`Automatic BigData cleanup: removed ${deletedCount} old entries`);
+                console.log(
+                    `Automatic BigData cleanup: removed ${deletedCount} old entries`
+                );
             }
         } catch (error) {
             console.warn('Automatic BigData cleanup failed:', error);

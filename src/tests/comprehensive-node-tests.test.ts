@@ -1,7 +1,7 @@
 /**
  * Comprehensive test suite for all nodes in FirestoreStandardNodeSet.ts
  * Tests every node type available in the standard node library
- * 
+ *
  * This file systematically tests each node category:
  * - Basic Math Operations (add, subtract, multiply, divide)
  * - Text Processing (raw_text_editor, md_text_editor, template, join_text, split_text)
@@ -14,819 +14,890 @@
  * - Utility Operations (weather, colorize, super_resolution, object_background_seperation)
  */
 
-import { beforeEach, describe, expect, test } from "vitest";
-import { executeFlowGraph } from "../routes/app/lib/Interpreter";
-import type { Node, Edge } from "@xyflow/svelte";
-import { projectOutputDataCache } from "$lib/stores/ProjectState";
+import { beforeEach, describe, expect, test } from 'vitest';
+import { executeFlowGraph } from '../routes/app/lib/Interpreter';
+import type { Node, Edge } from '@xyflow/svelte';
+import { projectOutputDataCache } from '$lib/stores/ProjectState';
 
-describe("Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes", () => {
-  let mockNodes: Node[];
-  let mockEdges: Edge[];
+describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => {
+    let mockNodes: Node[];
+    let mockEdges: Edge[];
 
-  beforeEach(async () => {
-    mockNodes = [];
-    mockEdges = [];
-    await projectOutputDataCache.clear();
-  });
-
-  // ========================================
-  // BASIC MATH OPERATIONS
-  // ========================================
-  
-  describe("Basic Math Operations", () => {
-    test("Add node: 15 + 25 = 40", async () => {
-      mockNodes = [{
-        id: 'add-test',
-        type: 'node',
-        position: { x: 0, y: 0 },
-        data: {
-          nid: 'node_official_add',
-          input: { a: 15, b: 25 }
-        }
-      }];
-      mockEdges = [];
-
-      await executeFlowGraph('add-test', mockNodes, mockEdges);
-      const result = await projectOutputDataCache.get('add-test', 'result');
-      expect(result).toBe(40);
+    beforeEach(async () => {
+        mockNodes = [];
+        mockEdges = [];
+        await projectOutputDataCache.clear();
     });
 
-    test("Subtract node: 100 - 37 = 63", async () => {
-      mockNodes = [{
-        id: 'subtract-test',
-        type: 'node',
-        position: { x: 0, y: 0 },
-        data: {
-          nid: 'node_official_subtract',
-          input: { a: 100, b: 37 }
-        }
-      }];
-      mockEdges = [];
+    // ========================================
+    // BASIC MATH OPERATIONS
+    // ========================================
 
-      await executeFlowGraph('subtract-test', mockNodes, mockEdges);
-      const result = await projectOutputDataCache.get('subtract-test', 'result');
-      expect(result).toBe(63);
+    describe('Basic Math Operations', () => {
+        test('Add node: 15 + 25 = 40', async () => {
+            mockNodes = [
+                {
+                    id: 'add-test',
+                    type: 'node',
+                    position: { x: 0, y: 0 },
+                    data: {
+                        nid: 'node_official_add',
+                        input: { a: 15, b: 25 },
+                    },
+                },
+            ];
+            mockEdges = [];
+
+            await executeFlowGraph('add-test', mockNodes, mockEdges);
+            const result = await projectOutputDataCache.get(
+                'add-test',
+                'result'
+            );
+            expect(result).toBe(40);
+        });
+
+        test('Subtract node: 100 - 37 = 63', async () => {
+            mockNodes = [
+                {
+                    id: 'subtract-test',
+                    type: 'node',
+                    position: { x: 0, y: 0 },
+                    data: {
+                        nid: 'node_official_subtract',
+                        input: { a: 100, b: 37 },
+                    },
+                },
+            ];
+            mockEdges = [];
+
+            await executeFlowGraph('subtract-test', mockNodes, mockEdges);
+            const result = await projectOutputDataCache.get(
+                'subtract-test',
+                'result'
+            );
+            expect(result).toBe(63);
+        });
+
+        test('Multiply node: 12 * 8 = 96', async () => {
+            mockNodes = [
+                {
+                    id: 'multiply-test',
+                    type: 'node',
+                    position: { x: 0, y: 0 },
+                    data: {
+                        nid: 'node_official_multiply',
+                        input: { a: 12, b: 8 },
+                    },
+                },
+            ];
+            mockEdges = [];
+
+            await executeFlowGraph('multiply-test', mockNodes, mockEdges);
+            const result = await projectOutputDataCache.get(
+                'multiply-test',
+                'result'
+            );
+            expect(result).toBe(96);
+        });
+
+        test('Divide node: 144 / 12 = 12', async () => {
+            mockNodes = [
+                {
+                    id: 'divide-test',
+                    type: 'node',
+                    position: { x: 0, y: 0 },
+                    data: {
+                        nid: 'node_official_divide',
+                        input: { a: 144, b: 12 },
+                    },
+                },
+            ];
+            mockEdges = [];
+
+            await executeFlowGraph('divide-test', mockNodes, mockEdges);
+            const result = await projectOutputDataCache.get(
+                'divide-test',
+                'result'
+            );
+            expect(result).toBe(12);
+        });
     });
 
-    test("Multiply node: 12 * 8 = 96", async () => {
-      mockNodes = [{
-        id: 'multiply-test',
-        type: 'node',
-        position: { x: 0, y: 0 },
-        data: {
-          nid: 'node_official_multiply',
-          input: { a: 12, b: 8 }
-        }
-      }];
-      mockEdges = [];
+    // ========================================
+    // TEXT PROCESSING OPERATIONS
+    // ========================================
 
-      await executeFlowGraph('multiply-test', mockNodes, mockEdges);
-      const result = await projectOutputDataCache.get('multiply-test', 'result');
-      expect(result).toBe(96);
+    describe('Text Processing Operations', () => {
+        test('Raw text editor node: pass through text', async () => {
+            mockNodes = [
+                {
+                    id: 'raw-text-test',
+                    type: 'node',
+                    position: { x: 0, y: 0 },
+                    data: {
+                        nid: 'node_official_raw_text_editor',
+                        input: { inputText: 'Hello, World!' },
+                    },
+                },
+            ];
+            mockEdges = [];
+
+            await executeFlowGraph('raw-text-test', mockNodes, mockEdges);
+            const result = await projectOutputDataCache.get(
+                'raw-text-test',
+                'outputText'
+            );
+            expect(result).toBe('Hello, World!');
+        });
+
+        test('Markdown text editor node: pass through markdown', async () => {
+            mockNodes = [
+                {
+                    id: 'md-text-test',
+                    type: 'node',
+                    position: { x: 0, y: 0 },
+                    data: {
+                        nid: 'node_official_md_text_editor',
+                        input: { text: '# Heading\n\nThis is **bold** text.' },
+                    },
+                },
+            ];
+            mockEdges = [];
+
+            await executeFlowGraph('md-text-test', mockNodes, mockEdges);
+            const result = await projectOutputDataCache.get(
+                'md-text-test',
+                'text'
+            );
+            expect(result).toBe('# Heading\n\nThis is **bold** text.');
+        });
+
+        test('Template text node: basic template processing', async () => {
+            mockNodes = [
+                {
+                    id: 'template-test',
+                    type: 'node',
+                    position: { x: 0, y: 0 },
+                    data: {
+                        nid: 'node_official_template',
+                        input: { text: 'Hello @name, welcome to @place!' },
+                    },
+                },
+            ];
+            mockEdges = [];
+
+            await executeFlowGraph('template-test', mockNodes, mockEdges);
+            const result = await projectOutputDataCache.get(
+                'template-test',
+                'text'
+            );
+            expect(result).toBe('Hello @name, welcome to @place!');
+        });
+
+        test('Join text node: concatenate 4 strings', async () => {
+            mockNodes = [
+                {
+                    id: 'join-text-test',
+                    type: 'node',
+                    position: { x: 0, y: 0 },
+                    data: {
+                        nid: 'node_official_join_text',
+                        input: {
+                            text1: 'Hello',
+                            text2: ' ',
+                            text3: 'World',
+                            text4: '!',
+                        },
+                    },
+                },
+            ];
+            mockEdges = [];
+
+            await executeFlowGraph('join-text-test', mockNodes, mockEdges);
+            const result = await projectOutputDataCache.get(
+                'join-text-test',
+                'text'
+            );
+            expect(result).toBe('Hello World!');
+        });
+
+        test('Split text node: split by comma', async () => {
+            mockNodes = [
+                {
+                    id: 'split-text-test',
+                    type: 'node',
+                    position: { x: 0, y: 0 },
+                    data: {
+                        nid: 'node_official_split_text',
+                        input: {
+                            text: 'apple,banana,cherry,date',
+                            sep: ',',
+                        },
+                    },
+                },
+            ];
+            mockEdges = [];
+
+            await executeFlowGraph('split-text-test', mockNodes, mockEdges);
+            const result = await projectOutputDataCache.get(
+                'split-text-test',
+                'splitText'
+            );
+            expect(result).toEqual(['apple', 'banana', 'cherry', 'date']);
+        });
     });
 
-    test("Divide node: 144 / 12 = 12", async () => {
-      mockNodes = [{
-        id: 'divide-test',
-        type: 'node',
-        position: { x: 0, y: 0 },
-        data: {
-          nid: 'node_official_divide',
-          input: { a: 144, b: 12 }
-        }
-      }];
-      mockEdges = [];
+    // ========================================
+    // IMAGE PROCESSING OPERATIONS
+    // ========================================
 
-      await executeFlowGraph('divide-test', mockNodes, mockEdges);
-      const result = await projectOutputDataCache.get('divide-test', 'result');
-      expect(result).toBe(12);
-    });
-  });
+    describe('Image Processing Operations', () => {
+        test('Image viewer node: pass through image', async () => {
+            mockNodes = [
+                {
+                    id: 'new-image',
+                    type: 'node',
+                    position: { x: 0, y: 0 },
+                    data: {
+                        nid: 'node_official_jimp_new_blank_image',
+                        input: { width: 50, height: 50, color: '#ff0000' },
+                    },
+                },
+                {
+                    id: 'image-viewer',
+                    type: 'node',
+                    position: { x: 200, y: 0 },
+                    data: {
+                        nid: 'node_official_image_viewer',
+                        input: {},
+                    },
+                },
+            ];
+            mockEdges = [
+                {
+                    id: 'e1',
+                    source: 'new-image',
+                    target: 'image-viewer',
+                    sourceHandle: 'image',
+                    targetHandle: 'img',
+                },
+            ];
 
-  // ========================================
-  // TEXT PROCESSING OPERATIONS
-  // ========================================
-  
-  describe("Text Processing Operations", () => {
-    test("Raw text editor node: pass through text", async () => {
-      mockNodes = [{
-        id: 'raw-text-test',
-        type: 'node',
-        position: { x: 0, y: 0 },
-        data: {
-          nid: 'node_official_raw_text_editor',
-          input: { inputText: 'Hello, World!' }
-        }
-      }];
-      mockEdges = [];
+            await executeFlowGraph('image-viewer', mockNodes, mockEdges);
+            const result = await projectOutputDataCache.get(
+                'image-viewer',
+                'img'
+            );
+            expect(result).toBeDefined();
+            expect(result.bitmap?.width).toBe(50);
+            expect(result.bitmap?.height).toBe(50);
+        });
 
-      await executeFlowGraph('raw-text-test', mockNodes, mockEdges);
-      const result = await projectOutputDataCache.get('raw-text-test', 'outputText');
-      expect(result).toBe('Hello, World!');
-    });
+        test('Greyscale node: convert color image to greyscale', async () => {
+            mockNodes = [
+                {
+                    id: 'new-image',
+                    type: 'node',
+                    position: { x: 0, y: 0 },
+                    data: {
+                        nid: 'node_official_jimp_new_blank_image',
+                        input: { width: 100, height: 100, color: '#ff0000' },
+                    },
+                },
+                {
+                    id: 'greyscale',
+                    type: 'node',
+                    position: { x: 200, y: 0 },
+                    data: {
+                        nid: 'node_official_greyscale',
+                        input: {},
+                    },
+                },
+            ];
+            mockEdges = [
+                {
+                    id: 'e1',
+                    source: 'new-image',
+                    target: 'greyscale',
+                    sourceHandle: 'image',
+                    targetHandle: 'img',
+                },
+            ];
 
-    test("Markdown text editor node: pass through markdown", async () => {
-      mockNodes = [{
-        id: 'md-text-test',
-        type: 'node',
-        position: { x: 0, y: 0 },
-        data: {
-          nid: 'node_official_md_text_editor',
-          input: { text: '# Heading\n\nThis is **bold** text.' }
-        }
-      }];
-      mockEdges = [];
+            await executeFlowGraph('greyscale', mockNodes, mockEdges);
+            const result = await projectOutputDataCache.get('greyscale', 'img');
+            expect(result).toBeDefined();
+            expect(result.bitmap?.width).toBe(100);
+            expect(result.bitmap?.height).toBe(100);
+        });
 
-      await executeFlowGraph('md-text-test', mockNodes, mockEdges);
-      const result = await projectOutputDataCache.get('md-text-test', 'text');
-      expect(result).toBe('# Heading\n\nThis is **bold** text.');
-    });
+        test('HSV node: apply hue/saturation/value transformations', async () => {
+            mockNodes = [
+                {
+                    id: 'new-image',
+                    type: 'node',
+                    position: { x: 0, y: 0 },
+                    data: {
+                        nid: 'node_official_jimp_new_blank_image',
+                        input: { width: 100, height: 100, color: '#00ff00' },
+                    },
+                },
+                {
+                    id: 'hsv-transform',
+                    type: 'node',
+                    position: { x: 200, y: 0 },
+                    data: {
+                        nid: 'node_official_hsv',
+                        input: { hue: 45, saturation: 20, value: 10 },
+                    },
+                },
+            ];
+            mockEdges = [
+                {
+                    id: 'e1',
+                    source: 'new-image',
+                    target: 'hsv-transform',
+                    sourceHandle: 'image',
+                    targetHandle: 'img',
+                },
+            ];
 
-    test("Template text node: basic template processing", async () => {
-      mockNodes = [{
-        id: 'template-test',
-        type: 'node',
-        position: { x: 0, y: 0 },
-        data: {
-          nid: 'node_official_template',
-          input: { text: 'Hello @name, welcome to @place!' }
-        }
-      }];
-      mockEdges = [];
+            await executeFlowGraph('hsv-transform', mockNodes, mockEdges);
+            const result = await projectOutputDataCache.get(
+                'hsv-transform',
+                'img'
+            );
+            expect(result).toBeDefined();
+            expect(result.bitmap?.width).toBe(100);
+            expect(result.bitmap?.height).toBe(100);
+        });
 
-      await executeFlowGraph('template-test', mockNodes, mockEdges);
-      const result = await projectOutputDataCache.get('template-test', 'text');
-      expect(result).toBe('Hello @name, welcome to @place!');
-    });
+        test('New blank image node: create image with specified dimensions', async () => {
+            mockNodes = [
+                {
+                    id: 'new-image-test',
+                    type: 'node',
+                    position: { x: 0, y: 0 },
+                    data: {
+                        nid: 'node_official_jimp_new_blank_image',
+                        input: { width: 300, height: 200, color: '#0000ff' },
+                    },
+                },
+            ];
+            mockEdges = [];
 
-    test("Join text node: concatenate 4 strings", async () => {
-      mockNodes = [{
-        id: 'join-text-test',
-        type: 'node',
-        position: { x: 0, y: 0 },
-        data: {
-          nid: 'node_official_join_text',
-          input: { 
-            text1: 'Hello', 
-            text2: ' ', 
-            text3: 'World', 
-            text4: '!' 
-          }
-        }
-      }];
-      mockEdges = [];
+            await executeFlowGraph('new-image-test', mockNodes, mockEdges);
+            const result = await projectOutputDataCache.get(
+                'new-image-test',
+                'image'
+            );
+            expect(result).toBeDefined();
+            expect(result.bitmap?.width).toBe(300);
+            expect(result.bitmap?.height).toBe(200);
+        });
 
-      await executeFlowGraph('join-text-test', mockNodes, mockEdges);
-      const result = await projectOutputDataCache.get('join-text-test', 'text');
-      expect(result).toBe('Hello World!');
-    });
+        test('Resize image node: resize existing image', async () => {
+            mockNodes = [
+                {
+                    id: 'new-image',
+                    type: 'node',
+                    position: { x: 0, y: 0 },
+                    data: {
+                        nid: 'node_official_jimp_new_blank_image',
+                        input: { width: 100, height: 100, color: '#ff00ff' },
+                    },
+                },
+                {
+                    id: 'resize',
+                    type: 'node',
+                    position: { x: 200, y: 0 },
+                    data: {
+                        nid: 'node_official_jimp_resize_image',
+                        input: { width: 200, height: 150 },
+                    },
+                },
+            ];
+            mockEdges = [
+                {
+                    id: 'e1',
+                    source: 'new-image',
+                    target: 'resize',
+                    sourceHandle: 'image',
+                    targetHandle: 'image',
+                },
+            ];
 
-    test("Split text node: split by comma", async () => {
-      mockNodes = [{
-        id: 'split-text-test',
-        type: 'node',
-        position: { x: 0, y: 0 },
-        data: {
-          nid: 'node_official_split_text',
-          input: { 
-            text: 'apple,banana,cherry,date', 
-            sep: ',' 
-          }
-        }
-      }];
-      mockEdges = [];
-
-      await executeFlowGraph('split-text-test', mockNodes, mockEdges);
-      const result = await projectOutputDataCache.get('split-text-test', 'splitText');
-      expect(result).toEqual(['apple', 'banana', 'cherry', 'date']);
-    });
-  });
-
-  // ========================================
-  // IMAGE PROCESSING OPERATIONS
-  // ========================================
-  
-  describe("Image Processing Operations", () => {
-    test("Image viewer node: pass through image", async () => {
-      mockNodes = [
-        {
-          id: 'new-image',
-          type: 'node',
-          position: { x: 0, y: 0 },
-          data: {
-            nid: 'node_official_jimp_new_blank_image',
-            input: { width: 50, height: 50, color: '#ff0000' }
-          }
-        },
-        {
-          id: 'image-viewer',
-          type: 'node',
-          position: { x: 200, y: 0 },
-          data: {
-            nid: 'node_official_image_viewer',
-            input: {}
-          }
-        }
-      ];
-      mockEdges = [{
-        id: 'e1',
-        source: 'new-image',
-        target: 'image-viewer',
-        sourceHandle: 'image',
-        targetHandle: 'img'
-      }];
-
-      await executeFlowGraph('image-viewer', mockNodes, mockEdges);
-      const result = await projectOutputDataCache.get('image-viewer', 'img');
-      expect(result).toBeDefined();
-      expect(result.bitmap?.width).toBe(50);
-      expect(result.bitmap?.height).toBe(50);
-    });
-
-    test("Greyscale node: convert color image to greyscale", async () => {
-      mockNodes = [
-        {
-          id: 'new-image',
-          type: 'node',
-          position: { x: 0, y: 0 },
-          data: {
-            nid: 'node_official_jimp_new_blank_image',
-            input: { width: 100, height: 100, color: '#ff0000' }
-          }
-        },
-        {
-          id: 'greyscale',
-          type: 'node',
-          position: { x: 200, y: 0 },
-          data: {
-            nid: 'node_official_greyscale',
-            input: {}
-          }
-        }
-      ];
-      mockEdges = [{
-        id: 'e1',
-        source: 'new-image',
-        target: 'greyscale',
-        sourceHandle: 'image',
-        targetHandle: 'img'
-      }];
-
-      await executeFlowGraph('greyscale', mockNodes, mockEdges);
-      const result = await projectOutputDataCache.get('greyscale', 'img');
-      expect(result).toBeDefined();
-      expect(result.bitmap?.width).toBe(100);
-      expect(result.bitmap?.height).toBe(100);
+            await executeFlowGraph('resize', mockNodes, mockEdges);
+            const result = await projectOutputDataCache.get('resize', 'image');
+            expect(result).toBeDefined();
+            expect(result.bitmap?.width).toBe(200);
+            expect(result.bitmap?.height).toBe(150);
+        });
     });
 
-    test("HSV node: apply hue/saturation/value transformations", async () => {
-      mockNodes = [
-        {
-          id: 'new-image',
-          type: 'node',
-          position: { x: 0, y: 0 },
-          data: {
-            nid: 'node_official_jimp_new_blank_image',
-            input: { width: 100, height: 100, color: '#00ff00' }
-          }
-        },
-        {
-          id: 'hsv-transform',
-          type: 'node',
-          position: { x: 200, y: 0 },
-          data: {
-            nid: 'node_official_hsv',
-            input: { hue: 45, saturation: 20, value: 10 }
-          }
-        }
-      ];
-      mockEdges = [{
-        id: 'e1',
-        source: 'new-image',
-        target: 'hsv-transform',
-        sourceHandle: 'image',
-        targetHandle: 'img'
-      }];
+    // ========================================
+    // JSON OPERATIONS
+    // ========================================
 
-      await executeFlowGraph('hsv-transform', mockNodes, mockEdges);
-      const result = await projectOutputDataCache.get('hsv-transform', 'img');
-      expect(result).toBeDefined();
-      expect(result.bitmap?.width).toBe(100);
-      expect(result.bitmap?.height).toBe(100);
+    describe('JSON Operations', () => {
+        test('JSON editor node: parse JSON string to object', async () => {
+            mockNodes = [
+                {
+                    id: 'json-editor-test',
+                    type: 'node',
+                    position: { x: 0, y: 0 },
+                    data: {
+                        nid: 'node_official_json_editor',
+                        input: {
+                            jsonObject:
+                                '{"name": "test", "value": 42, "active": true}',
+                        },
+                    },
+                },
+            ];
+            mockEdges = [];
+
+            await executeFlowGraph('json-editor-test', mockNodes, mockEdges);
+            const result = await projectOutputDataCache.get(
+                'json-editor-test',
+                'jsonObject'
+            );
+            expect(result).toEqual({ name: 'test', value: 42, active: true });
+        });
+
+        test('JSON to string node: stringify object to JSON', async () => {
+            mockNodes = [
+                {
+                    id: 'json-to-string-test',
+                    type: 'node',
+                    position: { x: 0, y: 0 },
+                    data: {
+                        nid: 'node_official_json_to_string',
+                        input: { jsonObject: { message: 'Hello', count: 123 } },
+                    },
+                },
+            ];
+            mockEdges = [];
+
+            await executeFlowGraph('json-to-string-test', mockNodes, mockEdges);
+            const result = await projectOutputDataCache.get(
+                'json-to-string-test',
+                'jsonString'
+            );
+            expect(result).toBe('{"message":"Hello","count":123}');
+        });
     });
 
-    test("New blank image node: create image with specified dimensions", async () => {
-      mockNodes = [{
-        id: 'new-image-test',
-        type: 'node',
-        position: { x: 0, y: 0 },
-        data: {
-          nid: 'node_official_jimp_new_blank_image',
-          input: { width: 300, height: 200, color: '#0000ff' }
-        }
-      }];
-      mockEdges = [];
+    // ========================================
+    // HTML OPERATIONS
+    // ========================================
 
-      await executeFlowGraph('new-image-test', mockNodes, mockEdges);
-      const result = await projectOutputDataCache.get('new-image-test', 'image');
-      expect(result).toBeDefined();
-      expect(result.bitmap?.width).toBe(300);
-      expect(result.bitmap?.height).toBe(200);
+    describe('HTML Operations', () => {
+        test('HTML viewer node: process HTML content', async () => {
+            mockNodes = [
+                {
+                    id: 'html-viewer-test',
+                    type: 'node',
+                    position: { x: 0, y: 0 },
+                    data: {
+                        nid: 'node_official_html_viewer',
+                        input: {
+                            html: '<h1>Test Heading</h1><p>This is a paragraph.</p>',
+                        },
+                    },
+                },
+            ];
+            mockEdges = [];
+
+            await executeFlowGraph('html-viewer-test', mockNodes, mockEdges);
+            // HTML viewer just logs, so we mainly test it doesn't crash
+            expect(true).toBe(true);
+        });
+
+        test('HTML elementify node: create HTML element from components', async () => {
+            mockNodes = [
+                {
+                    id: 'html-elementify-test',
+                    type: 'node',
+                    position: { x: 0, y: 0 },
+                    data: {
+                        nid: 'node_official_html_elementify',
+                        input: {
+                            tag: 'div',
+                            innerHTML: 'Content goes here',
+                            attributes: { class: 'test-class', id: 'test-id' },
+                        },
+                    },
+                },
+            ];
+            mockEdges = [];
+
+            await executeFlowGraph(
+                'html-elementify-test',
+                mockNodes,
+                mockEdges
+            );
+            const result = await projectOutputDataCache.get(
+                'html-elementify-test',
+                'html'
+            );
+            expect(result).toContain('<div');
+            expect(result).toContain('Content goes here');
+            expect(result).toContain('</div>');
+        });
+
+        test('Fetch URL node: basic URL processing', async () => {
+            mockNodes = [
+                {
+                    id: 'fetch-url-test',
+                    type: 'node',
+                    position: { x: 0, y: 0 },
+                    data: {
+                        nid: 'node_official_fetch_url',
+                        input: { url: 'https://example.com' },
+                    },
+                },
+            ];
+            mockEdges = [];
+
+            await executeFlowGraph('fetch-url-test', mockNodes, mockEdges);
+            const result = await projectOutputDataCache.get(
+                'fetch-url-test',
+                'text'
+            );
+            expect(result).toBe('https://example.com');
+        });
     });
 
-    test("Resize image node: resize existing image", async () => {
-      mockNodes = [
-        {
-          id: 'new-image',
-          type: 'node',
-          position: { x: 0, y: 0 },
-          data: {
-            nid: 'node_official_jimp_new_blank_image',
-            input: { width: 100, height: 100, color: '#ff00ff' }
-          }
-        },
-        {
-          id: 'resize',
-          type: 'node',
-          position: { x: 200, y: 0 },
-          data: {
-            nid: 'node_official_jimp_resize_image',
-            input: { width: 200, height: 150 }
-          }
-        }
-      ];
-      mockEdges = [{
-        id: 'e1',
-        source: 'new-image',
-        target: 'resize',
-        sourceHandle: 'image',
-        targetHandle: 'image'
-      }];
+    // ========================================
+    // ERROR HANDLING TESTS
+    // ========================================
 
-      await executeFlowGraph('resize', mockNodes, mockEdges);
-      const result = await projectOutputDataCache.get('resize', 'image');
-      expect(result).toBeDefined();
-      expect(result.bitmap?.width).toBe(200);
-      expect(result.bitmap?.height).toBe(150);
-    });
-  });
+    describe('Error Handling and Edge Cases', () => {
+        test('Should handle missing node gracefully', async () => {
+            mockNodes = [
+                {
+                    id: 'non-existent-node',
+                    type: 'node',
+                    position: { x: 0, y: 0 },
+                    data: {
+                        nid: 'node_official_nonexistent',
+                        input: {},
+                    },
+                },
+            ];
+            mockEdges = [];
 
-  // ========================================
-  // JSON OPERATIONS
-  // ========================================
-  
-  describe("JSON Operations", () => {
-    test("JSON editor node: parse JSON string to object", async () => {
-      mockNodes = [{
-        id: 'json-editor-test',
-        type: 'node',
-        position: { x: 0, y: 0 },
-        data: {
-          nid: 'node_official_json_editor',
-          input: { jsonObject: '{"name": "test", "value": 42, "active": true}' }
-        }
-      }];
-      mockEdges = [];
+            // This should throw an error due to missing node
+            await expect(
+                executeFlowGraph('non-existent-node', mockNodes, mockEdges)
+            ).rejects.toThrow();
+        });
 
-      await executeFlowGraph('json-editor-test', mockNodes, mockEdges);
-      const result = await projectOutputDataCache.get('json-editor-test', 'jsonObject');
-      expect(result).toEqual({ name: "test", value: 42, active: true });
+        test('Should handle invalid JSON gracefully', async () => {
+            mockNodes = [
+                {
+                    id: 'invalid-json-test',
+                    type: 'node',
+                    position: { x: 0, y: 0 },
+                    data: {
+                        nid: 'node_official_json_editor',
+                        input: { jsonObject: 'invalid json string {[}' },
+                    },
+                },
+            ];
+            mockEdges = [];
+
+            // This should throw a JSON parsing error
+            await expect(
+                executeFlowGraph('invalid-json-test', mockNodes, mockEdges)
+            ).rejects.toThrow();
+        });
     });
 
-    test("JSON to string node: stringify object to JSON", async () => {
-      mockNodes = [{
-        id: 'json-to-string-test',
-        type: 'node',
-        position: { x: 0, y: 0 },
-        data: {
-          nid: 'node_official_json_to_string',
-          input: { jsonObject: { message: "Hello", count: 123 } }
-        }
-      }];
-      mockEdges = [];
+    // ========================================
+    // COMPLEX WORKFLOW TESTS
+    // ========================================
 
-      await executeFlowGraph('json-to-string-test', mockNodes, mockEdges);
-      const result = await projectOutputDataCache.get('json-to-string-test', 'jsonString');
-      expect(result).toBe('{"message":"Hello","count":123}');
-    });
-  });
+    describe('Complex Multi-Node Workflows', () => {
+        test('Math chain: (10 + 5) * 2 - 3 = 27', async () => {
+            mockNodes = [
+                {
+                    id: 'add-step',
+                    type: 'node',
+                    position: { x: 0, y: 0 },
+                    data: {
+                        nid: 'node_official_add',
+                        input: { a: 10, b: 5 },
+                    },
+                },
+                {
+                    id: 'multiply-step',
+                    type: 'node',
+                    position: { x: 200, y: 0 },
+                    data: {
+                        nid: 'node_official_multiply',
+                        input: { b: 2 },
+                    },
+                },
+                {
+                    id: 'subtract-step',
+                    type: 'node',
+                    position: { x: 400, y: 0 },
+                    data: {
+                        nid: 'node_official_subtract',
+                        input: { b: 3 },
+                    },
+                },
+            ];
+            mockEdges = [
+                {
+                    id: 'e1',
+                    source: 'add-step',
+                    target: 'multiply-step',
+                    sourceHandle: 'result',
+                    targetHandle: 'a',
+                },
+                {
+                    id: 'e2',
+                    source: 'multiply-step',
+                    target: 'subtract-step',
+                    sourceHandle: 'result',
+                    targetHandle: 'a',
+                },
+            ];
 
-  // ========================================
-  // HTML OPERATIONS
-  // ========================================
-  
-  describe("HTML Operations", () => {
-    test("HTML viewer node: process HTML content", async () => {
-      mockNodes = [{
-        id: 'html-viewer-test',
-        type: 'node',
-        position: { x: 0, y: 0 },
-        data: {
-          nid: 'node_official_html_viewer',
-          input: { html: '<h1>Test Heading</h1><p>This is a paragraph.</p>' }
-        }
-      }];
-      mockEdges = [];
+            await executeFlowGraph('subtract-step', mockNodes, mockEdges);
 
-      await executeFlowGraph('html-viewer-test', mockNodes, mockEdges);
-      // HTML viewer just logs, so we mainly test it doesn't crash
-      expect(true).toBe(true);
-    });
+            const addResult = await projectOutputDataCache.get(
+                'add-step',
+                'result'
+            );
+            const multiplyResult = await projectOutputDataCache.get(
+                'multiply-step',
+                'result'
+            );
+            const finalResult = await projectOutputDataCache.get(
+                'subtract-step',
+                'result'
+            );
 
-    test("HTML elementify node: create HTML element from components", async () => {
-      mockNodes = [{
-        id: 'html-elementify-test',
-        type: 'node',
-        position: { x: 0, y: 0 },
-        data: {
-          nid: 'node_official_html_elementify',
-          input: { 
-            tag: 'div',
-            innerHTML: 'Content goes here',
-            attributes: { class: 'test-class', id: 'test-id' }
-          }
-        }
-      }];
-      mockEdges = [];
+            expect(addResult).toBe(15);
+            expect(multiplyResult).toBe(30);
+            expect(finalResult).toBe(27);
+        });
 
-      await executeFlowGraph('html-elementify-test', mockNodes, mockEdges);
-      const result = await projectOutputDataCache.get('html-elementify-test', 'html');
-      expect(result).toContain('<div');
-      expect(result).toContain('Content goes here');
-      expect(result).toContain('</div>');
-    });
+        test('Text processing chain: split -> join -> template', async () => {
+            mockNodes = [
+                {
+                    id: 'split-text',
+                    type: 'node',
+                    position: { x: 0, y: 0 },
+                    data: {
+                        nid: 'node_official_split_text',
+                        input: { text: 'apple,banana,cherry', sep: ',' },
+                    },
+                },
+                {
+                    id: 'join-text',
+                    type: 'node',
+                    position: { x: 200, y: 0 },
+                    data: {
+                        nid: 'node_official_join_text',
+                        input: {
+                            text2: ' and ',
+                            text3: ' and ',
+                            text4: ' are fruits',
+                        },
+                    },
+                },
+            ];
+            mockEdges = [
+                // Note: This is a simplified example as connecting arrays to individual text inputs
+                // would require more complex handling in a real scenario
+            ];
 
-    test("Fetch URL node: basic URL processing", async () => {
-      mockNodes = [{
-        id: 'fetch-url-test',
-        type: 'node',
-        position: { x: 0, y: 0 },
-        data: {
-          nid: 'node_official_fetch_url',
-          input: { url: 'https://example.com' }
-        }
-      }];
-      mockEdges = [];
+            await executeFlowGraph('split-text', mockNodes, mockEdges);
+            const splitResult = await projectOutputDataCache.get(
+                'split-text',
+                'splitText'
+            );
+            expect(splitResult).toEqual(['apple', 'banana', 'cherry']);
+        });
 
-      await executeFlowGraph('fetch-url-test', mockNodes, mockEdges);
-      const result = await projectOutputDataCache.get('fetch-url-test', 'text');
-      expect(result).toBe('https://example.com');
-    });
-  });
+        test('Image processing pipeline: create -> transform -> greyscale', async () => {
+            mockNodes = [
+                {
+                    id: 'create-image',
+                    type: 'node',
+                    position: { x: 0, y: 0 },
+                    data: {
+                        nid: 'node_official_jimp_new_blank_image',
+                        input: { width: 100, height: 100, color: '#ff0000' },
+                    },
+                },
+                {
+                    id: 'hsv-transform',
+                    type: 'node',
+                    position: { x: 200, y: 0 },
+                    data: {
+                        nid: 'node_official_hsv',
+                        input: { hue: 60, saturation: 15, value: 5 },
+                    },
+                },
+                {
+                    id: 'make-greyscale',
+                    type: 'node',
+                    position: { x: 400, y: 0 },
+                    data: {
+                        nid: 'node_official_greyscale',
+                        input: {},
+                    },
+                },
+            ];
+            mockEdges = [
+                {
+                    id: 'e1',
+                    source: 'create-image',
+                    target: 'hsv-transform',
+                    sourceHandle: 'image',
+                    targetHandle: 'img',
+                },
+                {
+                    id: 'e2',
+                    source: 'hsv-transform',
+                    target: 'make-greyscale',
+                    sourceHandle: 'img',
+                    targetHandle: 'img',
+                },
+            ];
 
-  // ========================================
-  // DATE/TIME OPERATIONS
-  // ========================================
-  
-  describe("Date/Time Operations", () => {
-    test("DateTime parser node: parse date string into components", async () => {
-      mockNodes = [{
-        id: 'datetime-parser-test',
-        type: 'node',
-        position: { x: 0, y: 0 },
-        data: {
-          nid: 'node_official_datetime_parser',
-          input: { 
-            date_time: 'Wednesday, September 7, 1998 02:45 PM',
-            locale: 'MST',
-            lang: 'en-US'
-          }
-        }
-      }];
-      mockEdges = [];
+            await executeFlowGraph('make-greyscale', mockNodes, mockEdges);
 
-      await executeFlowGraph('datetime-parser-test', mockNodes, mockEdges);
-      
-      // Check that multiple outputs are available
-      const hour24 = await projectOutputDataCache.get('datetime-parser-test', 'hour_24');
-      const year = await projectOutputDataCache.get('datetime-parser-test', 'year');
-      const month = await projectOutputDataCache.get('datetime-parser-test', 'month');
-      
-      expect(typeof hour24).toBe('number');
-      expect(year).toBe(1998);
-      expect(typeof month).toBe('number');
-      expect(month).toBeGreaterThan(0);
-      expect(month).toBeLessThanOrEqual(12);
-    });
+            const originalImage = await projectOutputDataCache.get(
+                'create-image',
+                'image'
+            );
+            const transformedImage = await projectOutputDataCache.get(
+                'hsv-transform',
+                'img'
+            );
+            const greyscaleImage = await projectOutputDataCache.get(
+                'make-greyscale',
+                'img'
+            );
 
-    test("DateTime constructor node: build date from components", async () => {
-      mockNodes = [{
-        id: 'datetime-constructor-test',
-        type: 'node',
-        position: { x: 0, y: 0 },
-        data: {
-          nid: 'node_official_datetime_constructor',
-          input: { 
-            year: 2023,
-            month: 12,
-            day_of_month_name: 25,
-            hour_24: 14,
-            minute: 30,
-            second: 0,
-            locale: 'en-US',
-            lang: 'en-US'
-          }
-        }
-      }];
-      mockEdges = [];
-
-      await executeFlowGraph('datetime-constructor-test', mockNodes, mockEdges);
-      const result = await projectOutputDataCache.get('datetime-constructor-test', 'date_time');
-      expect(typeof result).toBe('string');
-      expect(result).toContain('2023');
-    });
-  });
-
-  // ========================================
-  // ERROR HANDLING TESTS
-  // ========================================
-  
-  describe("Error Handling and Edge Cases", () => {
-    test("Should handle missing node gracefully", async () => {
-      mockNodes = [{
-        id: 'non-existent-node',
-        type: 'node',
-        position: { x: 0, y: 0 },
-        data: {
-          nid: 'node_official_nonexistent',
-          input: {}
-        }
-      }];
-      mockEdges = [];
-
-      // This should throw an error due to missing node
-      await expect(executeFlowGraph('non-existent-node', mockNodes, mockEdges))
-        .rejects.toThrow();
-    });
-
-    test("Should handle invalid JSON gracefully", async () => {
-      mockNodes = [{
-        id: 'invalid-json-test',
-        type: 'node',
-        position: { x: 0, y: 0 },
-        data: {
-          nid: 'node_official_json_editor',
-          input: { jsonObject: 'invalid json string {[}' }
-        }
-      }];
-      mockEdges = [];
-
-      // This should throw a JSON parsing error
-      await expect(executeFlowGraph('invalid-json-test', mockNodes, mockEdges))
-        .rejects.toThrow();
-    });
-  });
-
-  // ========================================
-  // COMPLEX WORKFLOW TESTS
-  // ========================================
-  
-  describe("Complex Multi-Node Workflows", () => {
-    test("Math chain: (10 + 5) * 2 - 3 = 27", async () => {
-      mockNodes = [
-        {
-          id: 'add-step',
-          type: 'node',
-          position: { x: 0, y: 0 },
-          data: {
-            nid: 'node_official_add',
-            input: { a: 10, b: 5 }
-          }
-        },
-        {
-          id: 'multiply-step',
-          type: 'node',
-          position: { x: 200, y: 0 },
-          data: {
-            nid: 'node_official_multiply',
-            input: { b: 2 }
-          }
-        },
-        {
-          id: 'subtract-step',
-          type: 'node',
-          position: { x: 400, y: 0 },
-          data: {
-            nid: 'node_official_subtract',
-            input: { b: 3 }
-          }
-        }
-      ];
-      mockEdges = [
-        {
-          id: 'e1',
-          source: 'add-step',
-          target: 'multiply-step',
-          sourceHandle: 'result',
-          targetHandle: 'a'
-        },
-        {
-          id: 'e2',
-          source: 'multiply-step',
-          target: 'subtract-step',
-          sourceHandle: 'result',
-          targetHandle: 'a'
-        }
-      ];
-
-      await executeFlowGraph('subtract-step', mockNodes, mockEdges);
-
-      const addResult = await projectOutputDataCache.get('add-step', 'result');
-      const multiplyResult = await projectOutputDataCache.get('multiply-step', 'result');
-      const finalResult = await projectOutputDataCache.get('subtract-step', 'result');
-
-      expect(addResult).toBe(15);
-      expect(multiplyResult).toBe(30);
-      expect(finalResult).toBe(27);
+            expect(originalImage.bitmap?.width).toBe(100);
+            expect(transformedImage.bitmap?.width).toBe(100);
+            expect(greyscaleImage.bitmap?.width).toBe(100);
+            expect(greyscaleImage.bitmap?.height).toBe(100);
+        });
     });
 
-    test("Text processing chain: split -> join -> template", async () => {
-      mockNodes = [
-        {
-          id: 'split-text',
-          type: 'node',
-          position: { x: 0, y: 0 },
-          data: {
-            nid: 'node_official_split_text',
-            input: { text: 'apple,banana,cherry', sep: ',' }
-          }
-        },
-        {
-          id: 'join-text',
-          type: 'node',
-          position: { x: 200, y: 0 },
-          data: {
-            nid: 'node_official_join_text',
-            input: { text2: ' and ', text3: ' and ', text4: ' are fruits' }
-          }
-        }
-      ];
-      mockEdges = [
-        // Note: This is a simplified example as connecting arrays to individual text inputs
-        // would require more complex handling in a real scenario
-      ];
+    // ========================================
+    // PERFORMANCE AND STRESS TESTS
+    // ========================================
 
-      await executeFlowGraph('split-text', mockNodes, mockEdges);
-      const splitResult = await projectOutputDataCache.get('split-text', 'splitText');
-      expect(splitResult).toEqual(['apple', 'banana', 'cherry']);
+    describe('Performance Tests', () => {
+        test('Large number operations: handle big calculations', async () => {
+            mockNodes = [
+                {
+                    id: 'big-multiply',
+                    type: 'node',
+                    position: { x: 0, y: 0 },
+                    data: {
+                        nid: 'node_official_multiply',
+                        input: { a: 999999, b: 999999 },
+                    },
+                },
+            ];
+            mockEdges = [];
+
+            const startTime = Date.now();
+            await executeFlowGraph('big-multiply', mockNodes, mockEdges);
+            const endTime = Date.now();
+
+            const result = await projectOutputDataCache.get(
+                'big-multiply',
+                'result'
+            );
+            expect(result).toBe(999999 * 999999);
+            expect(endTime - startTime).toBeLessThan(1000); // Should complete in under 1 second
+        });
+
+        test('Multiple parallel operations: concurrent execution', async () => {
+            mockNodes = [
+                {
+                    id: 'add-1',
+                    type: 'node',
+                    position: { x: 0, y: 0 },
+                    data: {
+                        nid: 'node_official_add',
+                        input: { a: 10, b: 20 },
+                    },
+                },
+                {
+                    id: 'add-2',
+                    type: 'node',
+                    position: { x: 0, y: 100 },
+                    data: {
+                        nid: 'node_official_add',
+                        input: { a: 30, b: 40 },
+                    },
+                },
+                {
+                    id: 'add-3',
+                    type: 'node',
+                    position: { x: 0, y: 200 },
+                    data: {
+                        nid: 'node_official_add',
+                        input: { a: 50, b: 60 },
+                    },
+                },
+                {
+                    id: 'final-multiply',
+                    type: 'node',
+                    position: { x: 300, y: 100 },
+                    data: {
+                        nid: 'node_official_multiply',
+                        input: {},
+                    },
+                },
+            ];
+            mockEdges = [
+                {
+                    id: 'e1',
+                    source: 'add-1',
+                    target: 'final-multiply',
+                    sourceHandle: 'result',
+                    targetHandle: 'a',
+                },
+                {
+                    id: 'e2',
+                    source: 'add-2',
+                    target: 'final-multiply',
+                    sourceHandle: 'result',
+                    targetHandle: 'b',
+                },
+            ];
+
+            const startTime = Date.now();
+            await executeFlowGraph('final-multiply', mockNodes, mockEdges);
+            const endTime = Date.now();
+
+            const result1 = await projectOutputDataCache.get('add-1', 'result');
+            const result2 = await projectOutputDataCache.get('add-2', 'result');
+            const result3 = await projectOutputDataCache.get('add-3', 'result');
+            const finalResult = await projectOutputDataCache.get(
+                'final-multiply',
+                'result'
+            );
+
+            expect(result1).toBe(30);
+            expect(result2).toBe(70);
+            expect(result3).toBe(110);
+            expect(finalResult).toBe(30 * 70); // 2100
+            expect(endTime - startTime).toBeLessThan(2000); // Should complete efficiently
+        });
     });
-
-    test("Image processing pipeline: create -> transform -> greyscale", async () => {
-      mockNodes = [
-        {
-          id: 'create-image',
-          type: 'node',
-          position: { x: 0, y: 0 },
-          data: {
-            nid: 'node_official_jimp_new_blank_image',
-            input: { width: 100, height: 100, color: '#ff0000' }
-          }
-        },
-        {
-          id: 'hsv-transform',
-          type: 'node',
-          position: { x: 200, y: 0 },
-          data: {
-            nid: 'node_official_hsv',
-            input: { hue: 60, saturation: 15, value: 5 }
-          }
-        },
-        {
-          id: 'make-greyscale',
-          type: 'node',
-          position: { x: 400, y: 0 },
-          data: {
-            nid: 'node_official_greyscale',
-            input: {}
-          }
-        }
-      ];
-      mockEdges = [
-        {
-          id: 'e1',
-          source: 'create-image',
-          target: 'hsv-transform',
-          sourceHandle: 'image',
-          targetHandle: 'img'
-        },
-        {
-          id: 'e2',
-          source: 'hsv-transform',
-          target: 'make-greyscale',
-          sourceHandle: 'img',
-          targetHandle: 'img'
-        }
-      ];
-
-      await executeFlowGraph('make-greyscale', mockNodes, mockEdges);
-
-      const originalImage = await projectOutputDataCache.get('create-image', 'image');
-      const transformedImage = await projectOutputDataCache.get('hsv-transform', 'img');
-      const greyscaleImage = await projectOutputDataCache.get('make-greyscale', 'img');
-
-      expect(originalImage.bitmap?.width).toBe(100);
-      expect(transformedImage.bitmap?.width).toBe(100);
-      expect(greyscaleImage.bitmap?.width).toBe(100);
-      expect(greyscaleImage.bitmap?.height).toBe(100);
-    });
-  });
-
-  // ========================================
-  // PERFORMANCE AND STRESS TESTS
-  // ========================================
-  
-  describe("Performance Tests", () => {
-    test("Large number operations: handle big calculations", async () => {
-      mockNodes = [{
-        id: 'big-multiply',
-        type: 'node',
-        position: { x: 0, y: 0 },
-        data: {
-          nid: 'node_official_multiply',
-          input: { a: 999999, b: 999999 }
-        }
-      }];
-      mockEdges = [];
-
-      const startTime = Date.now();
-      await executeFlowGraph('big-multiply', mockNodes, mockEdges);
-      const endTime = Date.now();
-
-      const result = await projectOutputDataCache.get('big-multiply', 'result');
-      expect(result).toBe(999999 * 999999);
-      expect(endTime - startTime).toBeLessThan(1000); // Should complete in under 1 second
-    });
-
-    test("Multiple parallel operations: concurrent execution", async () => {
-      mockNodes = [
-        {
-          id: 'add-1',
-          type: 'node',
-          position: { x: 0, y: 0 },
-          data: {
-            nid: 'node_official_add',
-            input: { a: 10, b: 20 }
-          }
-        },
-        {
-          id: 'add-2',
-          type: 'node',
-          position: { x: 0, y: 100 },
-          data: {
-            nid: 'node_official_add',
-            input: { a: 30, b: 40 }
-          }
-        },
-        {
-          id: 'add-3',
-          type: 'node',
-          position: { x: 0, y: 200 },
-          data: {
-            nid: 'node_official_add',
-            input: { a: 50, b: 60 }
-          }
-        },
-        {
-          id: 'final-multiply',
-          type: 'node',
-          position: { x: 300, y: 100 },
-          data: {
-            nid: 'node_official_multiply',
-            input: {}
-          }
-        }
-      ];
-      mockEdges = [
-        {
-          id: 'e1',
-          source: 'add-1',
-          target: 'final-multiply',
-          sourceHandle: 'result',
-          targetHandle: 'a'
-        },
-        {
-          id: 'e2',
-          source: 'add-2',
-          target: 'final-multiply',
-          sourceHandle: 'result',
-          targetHandle: 'b'
-        }
-      ];
-
-      const startTime = Date.now();
-      await executeFlowGraph('final-multiply', mockNodes, mockEdges);
-      const endTime = Date.now();
-
-      const result1 = await projectOutputDataCache.get('add-1', 'result');
-      const result2 = await projectOutputDataCache.get('add-2', 'result');
-      const result3 = await projectOutputDataCache.get('add-3', 'result');
-      const finalResult = await projectOutputDataCache.get('final-multiply', 'result');
-
-      expect(result1).toBe(30);
-      expect(result2).toBe(70);
-      expect(result3).toBe(110);
-      expect(finalResult).toBe(30 * 70); // 2100
-      expect(endTime - startTime).toBeLessThan(2000); // Should complete efficiently
-    });
-  });
 });

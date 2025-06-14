@@ -35,7 +35,10 @@ interface StoredChunk {
 class BigDataManager {
     private db: IDBDatabase | null = null;
     private initPromise: Promise<void> | null = null;
-    private memoryCache = new Map<string, { data: any; lastAccessed: number }>();
+    private memoryCache = new Map<
+        string,
+        { data: any; lastAccessed: number }
+    >();
     private readonly CACHE_EXPIRY = 5 * 60 * 1000; // 5 minutes
 
     constructor() {
@@ -47,7 +50,9 @@ class BigDataManager {
     private async initDB(): Promise<void> {
         // Check if IndexedDB is available (not in SSR)
         if (typeof indexedDB === 'undefined') {
-            console.warn('IndexedDB not available (likely SSR), using memory-only storage');
+            console.warn(
+                'IndexedDB not available (likely SSR), using memory-only storage'
+            );
             return;
         }
 
@@ -56,10 +61,13 @@ class BigDataManager {
                 const request = indexedDB.open(DB_NAME, DB_VERSION);
 
                 request.onerror = () => {
-                    console.warn('IndexedDB failed to open, using memory-only storage:', request.error);
+                    console.warn(
+                        'IndexedDB failed to open, using memory-only storage:',
+                        request.error
+                    );
                     resolve(); // Don't reject, just continue without IndexedDB
                 };
-                
+
                 request.onsuccess = () => {
                     this.db = request.result;
                     console.log('BigData IndexedDB initialized successfully');
@@ -69,19 +77,31 @@ class BigDataManager {
                 request.onupgradeneeded = (event) => {
                     try {
                         const db = (event.target as IDBOpenDBRequest).result;
-                        
+
                         if (!db.objectStoreNames.contains(STORE_NAME)) {
-                            const store = db.createObjectStore(STORE_NAME, { keyPath: 'id' });
-                            store.createIndex('lastAccessed', 'lastAccessed', { unique: false });
-                            store.createIndex('dataType', 'dataType', { unique: false });
+                            const store = db.createObjectStore(STORE_NAME, {
+                                keyPath: 'id',
+                            });
+                            store.createIndex('lastAccessed', 'lastAccessed', {
+                                unique: false,
+                            });
+                            store.createIndex('dataType', 'dataType', {
+                                unique: false,
+                            });
                         }
                     } catch (error) {
-                        console.warn('IndexedDB upgrade failed, using memory-only storage:', error);
+                        console.warn(
+                            'IndexedDB upgrade failed, using memory-only storage:',
+                            error
+                        );
                         resolve(); // Continue without IndexedDB
                     }
                 };
             } catch (error) {
-                console.warn('IndexedDB initialization failed, using memory-only storage:', error);
+                console.warn(
+                    'IndexedDB initialization failed, using memory-only storage:',
+                    error
+                );
                 resolve(); // Don't reject, just continue without IndexedDB
             }
         });
@@ -105,7 +125,11 @@ class BigDataManager {
     /**
      * Store data and return a reference
      */
-    async store(data: any, dataType: string, metadata?: Record<string, any>): Promise<BigDataRef> {
+    async store(
+        data: any,
+        dataType: string,
+        metadata?: Record<string, any>
+    ): Promise<BigDataRef> {
         const id = `bigdata_${Date.now()}_${uuidv4()}`;
         const size = this.calculateSize(data);
         const now = new Date();
@@ -124,11 +148,14 @@ class BigDataManager {
                     size,
                     createdAt: now,
                     lastAccessed: now,
-                    metadata
+                    metadata,
                 };
 
                 await new Promise<void>((resolve, reject) => {
-                    const transaction = db.transaction([STORE_NAME], 'readwrite');
+                    const transaction = db.transaction(
+                        [STORE_NAME],
+                        'readwrite'
+                    );
                     const store = transaction.objectStore(STORE_NAME);
                     const request = store.put(chunk);
 
@@ -140,7 +167,10 @@ class BigDataManager {
                 console.log(`BigData stored in memory only: ${id}`);
             }
         } catch (error) {
-            console.warn('Failed to persist to IndexedDB, using memory only:', error);
+            console.warn(
+                'Failed to persist to IndexedDB, using memory only:',
+                error
+            );
         }
 
         return {
@@ -148,7 +178,7 @@ class BigDataManager {
             id,
             dataType,
             size,
-            metadata
+            metadata,
         };
     }
 
@@ -160,7 +190,7 @@ class BigDataManager {
 
         // Check memory cache first
         const cached = this.memoryCache.get(id);
-        if (cached && (Date.now() - cached.lastAccessed) < this.CACHE_EXPIRY) {
+        if (cached && Date.now() - cached.lastAccessed < this.CACHE_EXPIRY) {
             cached.lastAccessed = Date.now();
             return cached.data;
         }
@@ -169,26 +199,36 @@ class BigDataManager {
         try {
             const db = await this.ensureDB();
             if (db) {
-                const chunk = await new Promise<StoredChunk | null>((resolve, reject) => {
-                    const transaction = db.transaction([STORE_NAME], 'readwrite');
-                    const store = transaction.objectStore(STORE_NAME);
-                    const getRequest = store.get(id);
+                const chunk = await new Promise<StoredChunk | null>(
+                    (resolve, reject) => {
+                        const transaction = db.transaction(
+                            [STORE_NAME],
+                            'readwrite'
+                        );
+                        const store = transaction.objectStore(STORE_NAME);
+                        const getRequest = store.get(id);
 
-                    getRequest.onerror = () => reject(getRequest.error);
-                    getRequest.onsuccess = () => {
-                        const result = getRequest.result as StoredChunk | undefined;
-                        if (result) {
-                            // Update last accessed time
-                            result.lastAccessed = new Date();
-                            store.put(result);
-                        }
-                        resolve(result || null);
-                    };
-                });
+                        getRequest.onerror = () => reject(getRequest.error);
+                        getRequest.onsuccess = () => {
+                            const result = getRequest.result as
+                                | StoredChunk
+                                | undefined;
+                            if (result) {
+                                // Update last accessed time
+                                result.lastAccessed = new Date();
+                                store.put(result);
+                            }
+                            resolve(result || null);
+                        };
+                    }
+                );
 
                 if (chunk) {
                     // Update memory cache
-                    this.memoryCache.set(id, { data: chunk.data, lastAccessed: Date.now() });
+                    this.memoryCache.set(id, {
+                        data: chunk.data,
+                        lastAccessed: Date.now(),
+                    });
                     return chunk.data;
                 }
             }
@@ -203,7 +243,9 @@ class BigDataManager {
             return fallback.data;
         }
 
-        console.warn(`BigData not found: ${id}. This could be due to browser storage being cleared or data expiry.`);
+        console.warn(
+            `BigData not found: ${id}. This could be due to browser storage being cleared or data expiry.`
+        );
         return null; // Return null instead of throwing to prevent crashes
     }
 
@@ -218,7 +260,10 @@ class BigDataManager {
             const db = await this.ensureDB();
             if (db) {
                 await new Promise<void>((resolve, reject) => {
-                    const transaction = db.transaction([STORE_NAME], 'readwrite');
+                    const transaction = db.transaction(
+                        [STORE_NAME],
+                        'readwrite'
+                    );
                     const store = transaction.objectStore(STORE_NAME);
                     const request = store.delete(id);
 
@@ -241,14 +286,14 @@ class BigDataManager {
                 // No IndexedDB available, just clean memory cache
                 const cutoffTime = Date.now() - maxAge;
                 let deletedCount = 0;
-                
+
                 for (const [id, cached] of this.memoryCache.entries()) {
                     if (cached.lastAccessed < cutoffTime) {
                         this.memoryCache.delete(id);
                         deletedCount++;
                     }
                 }
-                
+
                 return deletedCount;
             }
 
@@ -258,7 +303,9 @@ class BigDataManager {
                 const transaction = db.transaction([STORE_NAME], 'readwrite');
                 const store = transaction.objectStore(STORE_NAME);
                 const index = store.index('lastAccessed');
-                const request = index.openCursor(IDBKeyRange.upperBound(cutoffDate));
+                const request = index.openCursor(
+                    IDBKeyRange.upperBound(cutoffDate)
+                );
 
                 let deletedCount = 0;
 
@@ -298,7 +345,11 @@ class BigDataManager {
 const bigDataManager = new BigDataManager();
 
 // Main API functions
-export async function storeBigData(data: any, dataType: string, metadata?: Record<string, any>): Promise<BigDataRef> {
+export async function storeBigData(
+    data: any,
+    dataType: string,
+    metadata?: Record<string, any>
+): Promise<BigDataRef> {
     return bigDataManager.store(data, dataType, metadata);
 }
 
@@ -315,14 +366,14 @@ export async function storeImage(file: File): Promise<BigDataRef> {
     return storeBigData(file, 'image', {
         fileName: file.name,
         mimeType: file.type,
-        originalSize: file.size
+        originalSize: file.size,
     });
 }
 
 export async function storeJimpImage(jimpInstance: any): Promise<BigDataRef> {
     return storeBigData(jimpInstance, 'jimp', {
         width: jimpInstance.bitmap?.width,
-        height: jimpInstance.bitmap?.height
+        height: jimpInstance.bitmap?.height,
     });
 }
 
@@ -368,7 +419,7 @@ export function startAutoCleanup(intervalHours: number = 24): void {
     if (!browser) return;
 
     const interval = intervalHours * 60 * 60 * 1000;
-    
+
     const runCleanup = async () => {
         try {
             const deleted = await cleanupOldData();
@@ -382,7 +433,7 @@ export function startAutoCleanup(intervalHours: number = 24): void {
 
     // Initial cleanup after 5 seconds
     setTimeout(runCleanup, 5000);
-    
+
     // Periodic cleanup
     setInterval(runCleanup, interval);
 }

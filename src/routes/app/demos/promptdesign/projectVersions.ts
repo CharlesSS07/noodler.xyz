@@ -93,7 +93,8 @@ export const nodesVersion2 = [
         type: 'textEditorRaw',
         data: {
             input: {
-                inputText: 'Entertain, demonstrate product potential, build connections',
+                inputText:
+                    'Entertain, demonstrate product potential, build connections',
             },
         },
         position: {
@@ -119,7 +120,8 @@ export const nodesVersion2 = [
         type: 'textEditorRaw',
         data: {
             input: {
-                inputText: 'Flow-designer, no-code, no setup, plug-n-play interface, explainable, extendable',
+                inputText:
+                    'Flow-designer, no-code, no setup, plug-n-play interface, explainable, extendable',
             },
         },
         position: {
@@ -145,7 +147,8 @@ export const nodesVersion2 = [
         type: 'textEditorRaw',
         data: {
             input: {
-                inputText: 'build with me, democratize AI design, create art, visualize your code',
+                inputText:
+                    'build with me, democratize AI design, create art, visualize your code',
             },
         },
         position: {
@@ -249,7 +252,8 @@ export const nodesVersion2 = [
         type: 'textEditorRaw',
         data: {
             input: {
-                inputText: 'You are an expert marketing content creator specializing in persuasive and engaging copy. Your task is to craft compelling content for a specific product launch.',
+                inputText:
+                    'You are an expert marketing content creator specializing in persuasive and engaging copy. Your task is to craft compelling content for a specific product launch.',
             },
         },
         position: {

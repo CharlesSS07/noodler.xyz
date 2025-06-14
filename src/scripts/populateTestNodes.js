@@ -1,6 +1,11 @@
 // Script to populate test nodes in Firestore emulator for testing NodeSearch
 import { initializeApp } from 'firebase/app';
-import { connectFirestoreEmulator, getFirestore, collection, addDoc } from 'firebase/firestore';
+import {
+    connectFirestoreEmulator,
+    getFirestore,
+    collection,
+    addDoc,
+} from 'firebase/firestore';
 
 const firebaseConfig = {
     apiKey: 'AIzaSyAs0yTwlWsB5XrmDx5PXV10gNfotvKIG5o',
@@ -26,25 +31,25 @@ const testNodes = [
         trust_level: 'Official',
         input_socket_order: [],
         output_socket_order: ['text'],
-        category: 'Text Processing'
+        category: 'Text Processing',
     },
     {
         title: 'Image Loader',
         documentation: 'Load and display images from files',
-        author_uid: 'test-user', 
+        author_uid: 'test-user',
         trust_level: 'Official',
         input_socket_order: ['file'],
         output_socket_order: ['image'],
-        category: 'Image Processing'
+        category: 'Image Processing',
     },
     {
         title: 'Text Template',
         documentation: 'Fill in text templates with variables',
         author_uid: 'test-user',
-        trust_level: 'Official', 
+        trust_level: 'Official',
         input_socket_order: ['template', 'variables'],
         output_socket_order: ['text'],
-        category: 'Text Processing'
+        category: 'Text Processing',
     },
     {
         title: 'LLM Chat',
@@ -53,7 +58,7 @@ const testNodes = [
         trust_level: 'Trusted',
         input_socket_order: ['prompt', 'model', 'temperature'],
         output_socket_order: ['response'],
-        category: 'AI/ML'
+        category: 'AI/ML',
     },
     {
         title: 'Image Grayscale',
@@ -62,7 +67,7 @@ const testNodes = [
         trust_level: 'Official',
         input_socket_order: ['image'],
         output_socket_order: ['image'],
-        category: 'Image Processing'
+        category: 'Image Processing',
     },
     {
         title: 'JSON Parser',
@@ -71,7 +76,7 @@ const testNodes = [
         trust_level: 'New',
         input_socket_order: ['json_text'],
         output_socket_order: ['object'],
-        category: 'Data Processing'
+        category: 'Data Processing',
     },
     {
         title: 'HTML Renderer',
@@ -80,7 +85,7 @@ const testNodes = [
         trust_level: 'Official',
         input_socket_order: ['html'],
         output_socket_order: [],
-        category: 'Web/HTML'
+        category: 'Web/HTML',
     },
     {
         title: 'File Uploader',
@@ -89,21 +94,21 @@ const testNodes = [
         trust_level: 'Trusted',
         input_socket_order: [],
         output_socket_order: ['file_content', 'filename'],
-        category: 'File Operations'
-    }
+        category: 'File Operations',
+    },
 ];
 
 async function populateNodes() {
     console.log('Populating test nodes in Firestore emulator...');
-    
+
     try {
         const nodesCollection = collection(firestore, 'nodes');
-        
+
         for (const node of testNodes) {
             const docRef = await addDoc(nodesCollection, node);
             console.log(`Added node: ${node.title} with ID: ${docRef.id}`);
         }
-        
+
         console.log('Successfully populated all test nodes!');
     } catch (error) {
         console.error('Error populating nodes:', error);

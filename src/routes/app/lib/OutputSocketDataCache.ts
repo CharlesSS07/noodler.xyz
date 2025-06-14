@@ -41,7 +41,10 @@ export class OutputSocketDataCache {
     /**
      * Get a reactive store for a specific socket's data
      */
-    useSocketStore(node_key: string, socket_id: string): Readable<unknown | null> {
+    useSocketStore(
+        node_key: string,
+        socket_id: string
+    ): Readable<unknown | null> {
         const key = socketInstanceKey(node_key, socket_id);
 
         return derived(this.dataStore, ($data) => {
@@ -88,7 +91,11 @@ export class OutputSocketDataCache {
     /**
      * Cache data for a socket
      */
-    async cache(node_key: string, socket_id: string, data: unknown): Promise<void> {
+    async cache(
+        node_key: string,
+        socket_id: string,
+        data: unknown
+    ): Promise<void> {
         const key = socketInstanceKey(node_key, socket_id);
 
         // if (this.data.has(key)) {
@@ -155,5 +162,4 @@ export class OutputSocketDataCache {
         this.data.clear();
         this.updateStores();
     }
-
 }
