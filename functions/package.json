@@ -9,18 +9,27 @@
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log",
-    "test": "npm run build && mocha lib/test/**/*.js --timeout 10000",
-    "test:watch": "npm run build:watch & mocha lib/test/**/*.js --watch --timeout 10000",
+    "test": "mocha",
+    "test:watch": "mocha --watch",
+    "test:unit": "mocha --require ts-node/register src/test/*.test.ts",
+    "test:utils": "mocha --require ts-node/register src/test/utils.test.ts",
+    "test:text": "mocha --require ts-node/register src/test/textProcessing.test.ts",
+    "test:media": "mocha --require ts-node/register src/test/mediaProcessing.test.ts",
     "test:comprehensive": "npm run build && mocha lib/test/comprehensive-api.test.js --timeout 30000",
     "test:stress": "npm run build && mocha lib/test/stress-tests.test.js --timeout 300000",
     "test:quick-stress": "npm run build && mocha lib/test/quick-stress.test.js --timeout 60000",
-    "test:basic": "npm run build && mocha lib/test/simple.test.js --timeout 10000"
+    "test:basic": "npm run build && mocha lib/test/simple.test.js --timeout 10000",
+    "test:integration": "mocha --require ts-node/register src/test/integration.test.ts --timeout 60000",
+    "test:integration:quick": "mocha --require ts-node/register src/test/integration.test.ts --timeout 60000 --grep 'text generation|text classification'",
+    "test:integration:working": "mocha --require ts-node/register --ignore 'src/test/*Processing.test.ts' src/test/working-integration.test.ts --timeout 90000"
   },
   "engines": {
     "node": "22"
   },
   "main": "lib/index.js",
   "dependencies": {
+    "@huggingface/hub": "^2.2.0",
+    "@huggingface/inference": "^4.0.4",
     "@types/uuid": "^10.0.0",
     "axios": "^1.9.0",
     "firebase-admin": "^12.6.0",
@@ -30,14 +39,18 @@
   "devDependencies": {
     "@types/chai": "^5.2.2",
     "@types/mocha": "^10.0.10",
+    "@types/sinon": "^17.0.4",
     "@typescript-eslint/eslint-plugin": "^5.12.0",
     "@typescript-eslint/parser": "^5.12.0",
     "chai": "^5.2.0",
+    "dotenv": "^16.5.0",
     "eslint": "^8.9.0",
     "eslint-config-google": "^0.14.0",
     "eslint-plugin-import": "^2.25.4",
     "firebase-functions-test": "^3.1.0",
     "mocha": "^11.6.0",
+    "sinon": "^19.0.5",
+    "ts-node": "^10.9.2",
     "typescript": "^4.9.0"
   },
   "private": true

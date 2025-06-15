@@ -16,6 +16,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `yarn emulators` - Start Firebase emulators (auth:9099, database:9000, firestore:8080, storage:9199)
 - `yarn deploy` - Build and deploy to Firebase
 
+### HuggingFace Cloud Functions
+- `cd functions && ./deploy.sh` - Deploy HuggingFace inference API endpoints
+- Available endpoints: textGeneration, textClassification, tokenClassification, questionAnswering, fillMask, summarization, translation, sentenceSimilarity, conversational, featureExtraction, imageClassification, objectDetection, automaticSpeechRecognition, tableQuestionAnswering
+- See `HUGGINGFACE_API_DOCS.md` for complete API documentation and examples
+
 ### SvelteFlow
 - Examples and documentation for svelteflow are in examplesAndDocs/svelteflow.dev/
 

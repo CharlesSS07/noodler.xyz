@@ -1,8 +1,9 @@
 {
   "compilerOptions": {
-    "module": "NodeNext",
+    "module": "CommonJS",
     "esModuleInterop": true,
-    "moduleResolution": "nodenext",
+    "allowSyntheticDefaultImports": true,
+    "moduleResolution": "node",
     "noImplicitReturns": true,
     "noUnusedLocals": true,
     "outDir": "lib",
@@ -10,10 +11,14 @@
     "strict": false,
     "target": "es2017",
     "skipLibCheck": true,
-    "lib": ["es2017"]
+    "lib": ["es2017"],
+    "types": ["node", "mocha", "chai"]
   },
   "compileOnSave": true,
   "include": [
     "src"
   ],
+  "exclude": [
+    "node_modules"
+  ]
 }

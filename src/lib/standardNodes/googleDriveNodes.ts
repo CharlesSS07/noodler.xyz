@@ -1,0 +1,95 @@
+import type { NodeBluePrintControllerFactoryInterface } from '../../routes/app/lib/NodeBluePrint.js';
+import { FirestoreNodeBluePrintControllerFactoryInterface } from '../../routes/app/lib/FirestoreNodeBluePrint.js';
+import { StringSocketParamsBuilder } from '../../routes/app/lib/SocketParamBuilders.js';
+
+const nodeBluePrintController: NodeBluePrintControllerFactoryInterface =
+    new FirestoreNodeBluePrintControllerFactoryInterface();
+
+export async function googleDriveNodes() {
+    const googleDrive = await nodeBluePrintController.initOfficialNodeBluePrint(
+        'get_file_from_google_drive'
+    );
+    googleDrive.title = 'Google Drive';
+    googleDrive.documentation =
+        'Retrieves a file from a google drive. Requires access to the google drive.';
+
+    await googleDrive.newInputSocket('account', {
+        label: 'Google Account',
+        documentation: 'Google account to get the file from.',
+        type: 'string',
+        params: new StringSocketParamsBuilder('').asPassword().build(),
+    });
+
+    await googleDrive.newInputSocket('file_selector', {
+        label: 'File Selector',
+        documentation: 'File to retrieve.',
+        type: 'string',
+        params: new StringSocketParamsBuilder('').asSentence().build(),
+    });
+
+    await googleDrive.newOutputSocket('file', {
+        label: 'File',
+        documentation: 'The retrieved file.',
+        type: 'string',
+    });
+
+    googleDrive.code = `
+inputs.img.greyscale();
+outputs.set('img', inputs.img);
+`;
+
+    const sendEmail =
+        await nodeBluePrintController.initOfficialNodeBluePrint(
+            'send_email_google'
+        );
+    sendEmail.title = 'Send Email';
+    sendEmail.documentation =
+        'Retrieves a file from a google drive. Requires access to the google drive.';
+
+    await sendEmail.newInputSocket('account', {
+        label: 'From Google Account',
+        documentation: 'Google account to get the file from.',
+        type: 'string',
+        params: new StringSocketParamsBuilder('').asPassword().build(),
+    });
+
+    await sendEmail.newInputSocket('to', {
+        label: 'To',
+        documentation: 'Google account to get the file from.',
+        type: 'string',
+        params: new StringSocketParamsBuilder('').asSentence().build(),
+    });
+
+    await sendEmail.newInputSocket('cc', {
+        label: 'CC',
+        documentation: 'Google account to get the file from.',
+        type: 'string',
+        params: new StringSocketParamsBuilder('').asSentence().build(),
+    });
+
+    await sendEmail.newInputSocket('bcc', {
+        label: 'BCC',
+        documentation: 'Google account to get the file from.',
+        type: 'string',
+        params: new StringSocketParamsBuilder('').asSentence().build(),
+    });
+
+    await sendEmail.newInputSocket('subject', {
+        label: 'Subject',
+        documentation: 'Google account to get the file from.',
+        type: 'string',
+        params: new StringSocketParamsBuilder('').asSentence().build(),
+    });
+
+    await sendEmail.newInputSocket('body', {
+        label: 'Email Body',
+        documentation: 'File to retrieve.',
+        type: 'string',
+        params: new StringSocketParamsBuilder('').asParagraph().build(),
+    });
+
+    sendEmail.code = `
+inputs.img.greyscale();
+outputs.set('img', inputs.img);
+`;
+}

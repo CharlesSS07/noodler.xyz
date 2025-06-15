@@ -26,6 +26,9 @@
  * ```
  */
 declare module '$env/static/private' {
+	export const HUGGINGFACE_TOKEN: string;
+	export const FIREBASE_PROJECT_ID: string;
+	export const FIREBASE_API_KEY: string;
 	export const HOMEBREW_PREFIX: string;
 	export const CONDA_PROMPT_MODIFIER: string;
 	export const COMMAND_MODE: string;
@@ -53,7 +56,6 @@ declare module '$env/static/private' {
 	export const NVM_DIR: string;
 	export const LC_CTYPE: string;
 	export const CONDA_SHLVL: string;
-	export const IJ_RESTARTER_LOG: string;
 	export const CONDA_EXE: string;
 	export const npm_config_color: string;
 	export const SSH_AUTH_SOCK: string;
@@ -103,6 +105,9 @@ declare module '$env/static/public' {
  */
 declare module '$env/dynamic/private' {
 	export const env: {
+		HUGGINGFACE_TOKEN: string;
+		FIREBASE_PROJECT_ID: string;
+		FIREBASE_API_KEY: string;
 		HOMEBREW_PREFIX: string;
 		CONDA_PROMPT_MODIFIER: string;
 		COMMAND_MODE: string;
@@ -130,7 +135,6 @@ declare module '$env/dynamic/private' {
 		NVM_DIR: string;
 		LC_CTYPE: string;
 		CONDA_SHLVL: string;
-		IJ_RESTARTER_LOG: string;
 		CONDA_EXE: string;
 		npm_config_color: string;
 		SSH_AUTH_SOCK: string;
