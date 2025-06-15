@@ -7,6 +7,7 @@ import {
 } from 'firebase/auth';
 import { connectDatabaseEmulator, getDatabase } from 'firebase/database';
 import { connectFirestoreEmulator, getFirestore } from 'firebase/firestore';
+import { connectFunctionsEmulator, getFunctions } from 'firebase/functions';
 import { browser } from '$app/environment';
 
 const firebaseConfig = {
@@ -24,8 +25,10 @@ export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const rtdb = getDatabase(app);
 export const firestore = getFirestore(app);
+export const functions = getFunctions(app);
 
 // Connect to emulators if in test environment or browser localhost
+let isUsingEmulators = false;
 if (
     process.env.NODE_ENV === 'test' ||
     (browser && window.location.hostname === 'localhost')
@@ -34,8 +37,13 @@ if (
     connectAuthEmulator(auth, 'http://127.0.0.1:9099');
     connectFirestoreEmulator(firestore, '127.0.0.1', 8080);
     connectDatabaseEmulator(rtdb, '127.0.0.1', 9000);
+    connectFunctionsEmulator(functions, '127.0.0.1', 5001);
+    isUsingEmulators = true;
     console.log('[DEBUG] Connected to emulators');
 }
+
+// Export emulator status for use in other services
+export { isUsingEmulators };
 
 if (browser) {
     setPersistence(auth, browserLocalPersistence).catch((error) =>

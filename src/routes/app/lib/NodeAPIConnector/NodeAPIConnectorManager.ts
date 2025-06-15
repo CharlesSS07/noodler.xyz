@@ -49,4 +49,3 @@ export class NodeAPIConnectorManager {
         return NodeAPIConnectorManager.connections.has(name);
     }
 }
-

@@ -4,7 +4,7 @@ import {
     NumberSocketParamsBuilder,
     StringSocketParamsBuilder,
     JIMPImageSocketParamsBuilder,
-    GenericSocketParamsBuilder
+    GenericSocketParamsBuilder,
 } from '../../routes/app/lib/SocketParamBuilders.js';
 
 const factory: NodeBluePrintControllerFactoryInterface =
@@ -12,7 +12,8 @@ const factory: NodeBluePrintControllerFactoryInterface =
 
 export async function aiInferenceNodes() {
     // TEXT TO IMAGE NODE
-    const textToImage = await factory.initOfficialNodeBluePrint('ai_text_to_image');
+    const textToImage =
+        await factory.initOfficialNodeBluePrint('ai_text_to_image');
     textToImage.title = 'AI Text to Image';
     textToImage.documentation = 'Generates an image from text using AI models.';
 
@@ -20,49 +21,71 @@ export async function aiInferenceNodes() {
         label: 'Prompt',
         documentation: 'Text description of the image to generate.',
         type: 'string',
-        params: new StringSocketParamsBuilder("A beautiful sunset over mountains").asParagraph().build(),
+        params: new StringSocketParamsBuilder(
+            'A beautiful sunset over mountains'
+        )
+            .asParagraph()
+            .build(),
     });
 
     textToImage.newInputSocket('model', {
         label: 'Model',
         documentation: 'AI model to use for generation.',
         type: 'string',
-        params: new StringSocketParamsBuilder("runwayml/stable-diffusion-v1-5").build(),
+        params: new StringSocketParamsBuilder(
+            'runwayml/stable-diffusion-v1-5'
+        ).build(),
     });
 
     textToImage.newInputSocket('num_inference_steps', {
         label: 'Inference Steps',
-        documentation: 'Number of denoising steps (higher = better quality, slower).',
+        documentation:
+            'Number of denoising steps (higher = better quality, slower).',
         type: 'number',
         params: new NumberSocketParamsBuilder(50).setMin(1).setMax(100).build(),
     });
 
     textToImage.newInputSocket('guidance_scale', {
         label: 'Guidance Scale',
-        documentation: 'How closely to follow the prompt (higher = more adherent).',
+        documentation:
+            'How closely to follow the prompt (higher = more adherent).',
         type: 'number',
-        params: new NumberSocketParamsBuilder(7.5).setMin(1).setMax(20).setStep(0.5).build(),
+        params: new NumberSocketParamsBuilder(7.5)
+            .setMin(1)
+            .setMax(20)
+            .setStep(0.5)
+            .build(),
     });
 
     textToImage.newInputSocket('negative_prompt', {
         label: 'Negative Prompt',
         documentation: 'What to avoid in the generated image.',
         type: 'string',
-        params: new StringSocketParamsBuilder("blurry, low quality, distorted").asParagraph().build(),
+        params: new StringSocketParamsBuilder('blurry, low quality, distorted')
+            .asParagraph()
+            .build(),
     });
 
     textToImage.newInputSocket('height', {
         label: 'Height',
         documentation: 'Image height in pixels.',
         type: 'number',
-        params: new NumberSocketParamsBuilder(512).setMin(64).setMax(1024).setStep(64).build(),
+        params: new NumberSocketParamsBuilder(512)
+            .setMin(64)
+            .setMax(1024)
+            .setStep(64)
+            .build(),
     });
 
     textToImage.newInputSocket('width', {
         label: 'Width',
         documentation: 'Image width in pixels.',
         type: 'number',
-        params: new NumberSocketParamsBuilder(512).setMin(64).setMax(1024).setStep(64).build(),
+        params: new NumberSocketParamsBuilder(512)
+            .setMin(64)
+            .setMax(1024)
+            .setStep(64)
+            .build(),
     });
 
     textToImage.newOutputSocket('image', {
@@ -88,9 +111,12 @@ export async function aiInferenceNodes() {
     `;
 
     // IMAGE CLASSIFICATION NODE
-    const imageClassification = await factory.initOfficialNodeBluePrint('ai_image_classification');
+    const imageClassification = await factory.initOfficialNodeBluePrint(
+        'ai_image_classification'
+    );
     imageClassification.title = 'AI Image Classification';
-    imageClassification.documentation = 'Classifies images into categories using AI models.';
+    imageClassification.documentation =
+        'Classifies images into categories using AI models.';
 
     imageClassification.newInputSocket('image', {
         label: 'Image',
@@ -103,12 +129,15 @@ export async function aiInferenceNodes() {
         label: 'Model',
         documentation: 'Classification model to use.',
         type: 'string',
-        params: new StringSocketParamsBuilder("google/vit-base-patch16-224").build(),
+        params: new StringSocketParamsBuilder(
+            'google/vit-base-patch16-224'
+        ).build(),
     });
 
     imageClassification.newOutputSocket('results', {
         label: 'Classification Results',
-        documentation: 'Array of classification results with labels and scores.',
+        documentation:
+            'Array of classification results with labels and scores.',
         type: 'unknown',
     });
 
@@ -122,9 +151,12 @@ export async function aiInferenceNodes() {
     `;
 
     // OBJECT DETECTION NODE
-    const objectDetection = await factory.initOfficialNodeBluePrint('ai_object_detection');
+    const objectDetection = await factory.initOfficialNodeBluePrint(
+        'ai_object_detection'
+    );
     objectDetection.title = 'AI Object Detection';
-    objectDetection.documentation = 'Detects objects in images with bounding boxes.';
+    objectDetection.documentation =
+        'Detects objects in images with bounding boxes.';
 
     objectDetection.newInputSocket('image', {
         label: 'Image',
@@ -137,19 +169,26 @@ export async function aiInferenceNodes() {
         label: 'Model',
         documentation: 'Object detection model to use.',
         type: 'string',
-        params: new StringSocketParamsBuilder("facebook/detr-resnet-50").build(),
+        params: new StringSocketParamsBuilder(
+            'facebook/detr-resnet-50'
+        ).build(),
     });
 
     objectDetection.newInputSocket('threshold', {
         label: 'Confidence Threshold',
         documentation: 'Minimum confidence score for detections.',
         type: 'number',
-        params: new NumberSocketParamsBuilder(0.5).setMin(0.1).setMax(1.0).setStep(0.1).build(),
+        params: new NumberSocketParamsBuilder(0.5)
+            .setMin(0.1)
+            .setMax(1.0)
+            .setStep(0.1)
+            .build(),
     });
 
     objectDetection.newOutputSocket('detections', {
         label: 'Object Detections',
-        documentation: 'Array of detected objects with labels, scores, and bounding boxes.',
+        documentation:
+            'Array of detected objects with labels, scores, and bounding boxes.',
         type: 'unknown',
     });
 
@@ -166,36 +205,47 @@ export async function aiInferenceNodes() {
     `;
 
     // TEXT GENERATION NODE
-    const textGeneration = await factory.initOfficialNodeBluePrint('ai_text_generation');
+    const textGeneration =
+        await factory.initOfficialNodeBluePrint('ai_text_generation');
     textGeneration.title = 'AI Text Generation';
-    textGeneration.documentation = 'Generates text completions using language models.';
+    textGeneration.documentation =
+        'Generates text completions using language models.';
 
     textGeneration.newInputSocket('prompt', {
         label: 'Text Prompt',
         documentation: 'Text to complete or continue.',
         type: 'string',
-        params: new StringSocketParamsBuilder("Once upon a time").asParagraph().build(),
+        params: new StringSocketParamsBuilder('Once upon a time')
+            .asParagraph()
+            .build(),
     });
 
     textGeneration.newInputSocket('model', {
         label: 'Model',
         documentation: 'Language model to use.',
         type: 'string',
-        params: new StringSocketParamsBuilder("gpt2").build(),
+        params: new StringSocketParamsBuilder('gpt2').build(),
     });
 
     textGeneration.newInputSocket('max_length', {
         label: 'Max Length',
         documentation: 'Maximum length of generated text.',
         type: 'number',
-        params: new NumberSocketParamsBuilder(100).setMin(10).setMax(1000).build(),
+        params: new NumberSocketParamsBuilder(100)
+            .setMin(10)
+            .setMax(1000)
+            .build(),
     });
 
     textGeneration.newInputSocket('temperature', {
         label: 'Temperature',
         documentation: 'Creativity level (higher = more creative).',
         type: 'number',
-        params: new NumberSocketParamsBuilder(0.7).setMin(0.1).setMax(2.0).setStep(0.1).build(),
+        params: new NumberSocketParamsBuilder(0.7)
+            .setMin(0.1)
+            .setMax(2.0)
+            .setStep(0.1)
+            .build(),
     });
 
     textGeneration.newInputSocket('do_sample', {
@@ -216,7 +266,11 @@ export async function aiInferenceNodes() {
         label: 'Top P',
         documentation: 'Nucleus sampling parameter.',
         type: 'number',
-        params: new NumberSocketParamsBuilder(0.9).setMin(0.1).setMax(1.0).setStep(0.1).build(),
+        params: new NumberSocketParamsBuilder(0.9)
+            .setMin(0.1)
+            .setMax(1.0)
+            .setStep(0.1)
+            .build(),
     });
 
     textGeneration.newOutputSocket('generated_text', {
@@ -242,27 +296,37 @@ export async function aiInferenceNodes() {
     `;
 
     // TEXT CLASSIFICATION NODE
-    const textClassification = await factory.initOfficialNodeBluePrint('ai_text_classification');
+    const textClassification = await factory.initOfficialNodeBluePrint(
+        'ai_text_classification'
+    );
     textClassification.title = 'AI Text Classification';
-    textClassification.documentation = 'Classifies text into categories (sentiment, topic, etc.).';
+    textClassification.documentation =
+        'Classifies text into categories (sentiment, topic, etc.).';
 
     textClassification.newInputSocket('text', {
         label: 'Text',
         documentation: 'Text to classify.',
         type: 'string',
-        params: new StringSocketParamsBuilder("I love this product! It works amazingly well.").asParagraph().build(),
+        params: new StringSocketParamsBuilder(
+            'I love this product! It works amazingly well.'
+        )
+            .asParagraph()
+            .build(),
     });
 
     textClassification.newInputSocket('model', {
         label: 'Model',
         documentation: 'Classification model to use.',
         type: 'string',
-        params: new StringSocketParamsBuilder("cardiffnlp/twitter-roberta-base-sentiment-latest").build(),
+        params: new StringSocketParamsBuilder(
+            'cardiffnlp/twitter-roberta-base-sentiment-latest'
+        ).build(),
     });
 
     textClassification.newOutputSocket('results', {
         label: 'Classification Results',
-        documentation: 'Array of classification results with labels and scores.',
+        documentation:
+            'Array of classification results with labels and scores.',
         type: 'unknown',
     });
 
@@ -276,29 +340,40 @@ export async function aiInferenceNodes() {
     `;
 
     // QUESTION ANSWERING NODE
-    const questionAnswering = await factory.initOfficialNodeBluePrint('ai_question_answering');
+    const questionAnswering = await factory.initOfficialNodeBluePrint(
+        'ai_question_answering'
+    );
     questionAnswering.title = 'AI Question Answering';
-    questionAnswering.documentation = 'Answers questions based on provided context.';
+    questionAnswering.documentation =
+        'Answers questions based on provided context.';
 
     questionAnswering.newInputSocket('question', {
         label: 'Question',
         documentation: 'Question to answer.',
         type: 'string',
-        params: new StringSocketParamsBuilder("What is the capital of France?").asSentence().build(),
+        params: new StringSocketParamsBuilder('What is the capital of France?')
+            .asSentence()
+            .build(),
     });
 
     questionAnswering.newInputSocket('context', {
         label: 'Context',
         documentation: 'Context text containing the answer.',
         type: 'string',
-        params: new StringSocketParamsBuilder("France is a country in Europe. Paris is the capital and largest city of France.").asParagraph().build(),
+        params: new StringSocketParamsBuilder(
+            'France is a country in Europe. Paris is the capital and largest city of France.'
+        )
+            .asParagraph()
+            .build(),
     });
 
     questionAnswering.newInputSocket('model', {
         label: 'Model',
         documentation: 'Question answering model to use.',
         type: 'string',
-        params: new StringSocketParamsBuilder("distilbert-base-cased-distilled-squad").build(),
+        params: new StringSocketParamsBuilder(
+            'distilbert-base-cased-distilled-squad'
+        ).build(),
     });
 
     questionAnswering.newOutputSocket('answer', {
@@ -327,7 +402,8 @@ export async function aiInferenceNodes() {
     `;
 
     // SUMMARIZATION NODE
-    const summarization = await factory.initOfficialNodeBluePrint('ai_summarization');
+    const summarization =
+        await factory.initOfficialNodeBluePrint('ai_summarization');
     summarization.title = 'AI Text Summarization';
     summarization.documentation = 'Summarizes long text into shorter versions.';
 
@@ -335,21 +411,26 @@ export async function aiInferenceNodes() {
         label: 'Text to Summarize',
         documentation: 'Long text to be summarized.',
         type: 'string',
-        params: new StringSocketParamsBuilder("").asParagraph().build(),
+        params: new StringSocketParamsBuilder('').asParagraph().build(),
     });
 
     summarization.newInputSocket('model', {
         label: 'Model',
         documentation: 'Summarization model to use.',
         type: 'string',
-        params: new StringSocketParamsBuilder("facebook/bart-large-cnn").build(),
+        params: new StringSocketParamsBuilder(
+            'facebook/bart-large-cnn'
+        ).build(),
     });
 
     summarization.newInputSocket('max_length', {
         label: 'Max Summary Length',
         documentation: 'Maximum length of the summary.',
         type: 'number',
-        params: new NumberSocketParamsBuilder(150).setMin(10).setMax(500).build(),
+        params: new NumberSocketParamsBuilder(150)
+            .setMin(10)
+            .setMax(500)
+            .build(),
     });
 
     summarization.newInputSocket('min_length', {
@@ -380,7 +461,8 @@ export async function aiInferenceNodes() {
     `;
 
     // TRANSLATION NODE
-    const translation = await factory.initOfficialNodeBluePrint('ai_translation');
+    const translation =
+        await factory.initOfficialNodeBluePrint('ai_translation');
     translation.title = 'AI Language Translation';
     translation.documentation = 'Translates text between languages.';
 
@@ -388,14 +470,19 @@ export async function aiInferenceNodes() {
         label: 'Text to Translate',
         documentation: 'Text in source language.',
         type: 'string',
-        params: new StringSocketParamsBuilder("Hello, how are you?").asSentence().build(),
+        params: new StringSocketParamsBuilder('Hello, how are you?')
+            .asSentence()
+            .build(),
     });
 
     translation.newInputSocket('model', {
         label: 'Translation Model',
-        documentation: 'Translation model (e.g., "Helsinki-NLP/opus-mt-en-fr" for English to French).',
+        documentation:
+            'Translation model (e.g., "Helsinki-NLP/opus-mt-en-fr" for English to French).',
         type: 'string',
-        params: new StringSocketParamsBuilder("Helsinki-NLP/opus-mt-en-fr").build(),
+        params: new StringSocketParamsBuilder(
+            'Helsinki-NLP/opus-mt-en-fr'
+        ).build(),
     });
 
     translation.newOutputSocket('translated_text', {
@@ -422,14 +509,16 @@ export async function aiInferenceNodes() {
         label: 'Text with Mask',
         documentation: 'Text with [MASK] token to fill.',
         type: 'string',
-        params: new StringSocketParamsBuilder("The weather today is [MASK].").asSentence().build(),
+        params: new StringSocketParamsBuilder('The weather today is [MASK].')
+            .asSentence()
+            .build(),
     });
 
     fillMask.newInputSocket('model', {
         label: 'Model',
         documentation: 'Fill mask model to use.',
         type: 'string',
-        params: new StringSocketParamsBuilder("bert-base-uncased").build(),
+        params: new StringSocketParamsBuilder('bert-base-uncased').build(),
     });
 
     fillMask.newInputSocket('top_k', {
@@ -458,29 +547,40 @@ export async function aiInferenceNodes() {
     `;
 
     // SENTENCE SIMILARITY NODE
-    const sentenceSimilarity = await factory.initOfficialNodeBluePrint('ai_sentence_similarity');
+    const sentenceSimilarity = await factory.initOfficialNodeBluePrint(
+        'ai_sentence_similarity'
+    );
     sentenceSimilarity.title = 'AI Sentence Similarity';
-    sentenceSimilarity.documentation = 'Computes semantic similarity between sentences.';
+    sentenceSimilarity.documentation =
+        'Computes semantic similarity between sentences.';
 
     sentenceSimilarity.newInputSocket('source_sentence', {
         label: 'Source Sentence',
         documentation: 'Reference sentence to compare against.',
         type: 'string',
-        params: new StringSocketParamsBuilder("The cat is sleeping.").asSentence().build(),
+        params: new StringSocketParamsBuilder('The cat is sleeping.')
+            .asSentence()
+            .build(),
     });
 
     sentenceSimilarity.newInputSocket('sentences', {
         label: 'Sentences to Compare',
         documentation: 'Array of sentences to compare (as JSON array).',
         type: 'unknown',
-        params: new GenericSocketParamsBuilder(['The dog is resting.', 'I like pizza.', 'A feline is napping.']).build(),
+        params: new GenericSocketParamsBuilder([
+            'The dog is resting.',
+            'I like pizza.',
+            'A feline is napping.',
+        ]).build(),
     });
 
     sentenceSimilarity.newInputSocket('model', {
         label: 'Model',
         documentation: 'Sentence similarity model to use.',
         type: 'string',
-        params: new StringSocketParamsBuilder("sentence-transformers/all-MiniLM-L6-v2").build(),
+        params: new StringSocketParamsBuilder(
+            'sentence-transformers/all-MiniLM-L6-v2'
+        ).build(),
     });
 
     sentenceSimilarity.newOutputSocket('similarities', {
@@ -502,7 +602,8 @@ export async function aiInferenceNodes() {
     `;
 
     // CONVERSATIONAL NODE
-    const conversational = await factory.initOfficialNodeBluePrint('ai_conversational');
+    const conversational =
+        await factory.initOfficialNodeBluePrint('ai_conversational');
     conversational.title = 'AI Conversational';
     conversational.documentation = 'Generates conversational responses.';
 
@@ -510,7 +611,11 @@ export async function aiInferenceNodes() {
         label: 'Message',
         documentation: 'Current message in the conversation.',
         type: 'string',
-        params: new StringSocketParamsBuilder("Hello, how can you help me today?").asSentence().build(),
+        params: new StringSocketParamsBuilder(
+            'Hello, how can you help me today?'
+        )
+            .asSentence()
+            .build(),
     });
 
     conversational.newInputSocket('past_user_inputs', {
@@ -531,21 +636,30 @@ export async function aiInferenceNodes() {
         label: 'Model',
         documentation: 'Conversational model to use.',
         type: 'string',
-        params: new StringSocketParamsBuilder("microsoft/DialoGPT-medium").build(),
+        params: new StringSocketParamsBuilder(
+            'microsoft/DialoGPT-medium'
+        ).build(),
     });
 
     conversational.newInputSocket('max_length', {
         label: 'Max Response Length',
         documentation: 'Maximum length of the response.',
         type: 'number',
-        params: new NumberSocketParamsBuilder(100).setMin(10).setMax(500).build(),
+        params: new NumberSocketParamsBuilder(100)
+            .setMin(10)
+            .setMax(500)
+            .build(),
     });
 
     conversational.newInputSocket('temperature', {
         label: 'Temperature',
         documentation: 'Response creativity (higher = more creative).',
         type: 'number',
-        params: new NumberSocketParamsBuilder(0.7).setMin(0.1).setMax(2.0).setStep(0.1).build(),
+        params: new NumberSocketParamsBuilder(0.7)
+            .setMin(0.1)
+            .setMax(2.0)
+            .setStep(0.1)
+            .build(),
     });
 
     conversational.newOutputSocket('response', {
@@ -572,7 +686,9 @@ export async function aiInferenceNodes() {
     `;
 
     // FEATURE EXTRACTION NODE
-    const featureExtraction = await factory.initOfficialNodeBluePrint('ai_feature_extraction');
+    const featureExtraction = await factory.initOfficialNodeBluePrint(
+        'ai_feature_extraction'
+    );
     featureExtraction.title = 'AI Feature Extraction';
     featureExtraction.documentation = 'Extracts feature embeddings from text.';
 
@@ -580,14 +696,20 @@ export async function aiInferenceNodes() {
         label: 'Text',
         documentation: 'Text to extract features from.',
         type: 'string',
-        params: new StringSocketParamsBuilder("This is a sample text for feature extraction.").asSentence().build(),
+        params: new StringSocketParamsBuilder(
+            'This is a sample text for feature extraction.'
+        )
+            .asSentence()
+            .build(),
     });
 
     featureExtraction.newInputSocket('model', {
         label: 'Model',
         documentation: 'Feature extraction model to use.',
         type: 'string',
-        params: new StringSocketParamsBuilder("sentence-transformers/all-MiniLM-L6-v2").build(),
+        params: new StringSocketParamsBuilder(
+            'sentence-transformers/all-MiniLM-L6-v2'
+        ).build(),
     });
 
     featureExtraction.newOutputSocket('features', {
@@ -606,22 +728,25 @@ export async function aiInferenceNodes() {
     `;
 
     // AUTOMATIC SPEECH RECOGNITION NODE
-    const automaticSpeechRecognition = await factory.initOfficialNodeBluePrint('ai_speech_recognition');
+    const automaticSpeechRecognition = await factory.initOfficialNodeBluePrint(
+        'ai_speech_recognition'
+    );
     automaticSpeechRecognition.title = 'AI Speech Recognition';
-    automaticSpeechRecognition.documentation = 'Converts audio to text using speech recognition.';
+    automaticSpeechRecognition.documentation =
+        'Converts audio to text using speech recognition.';
 
     automaticSpeechRecognition.newInputSocket('audio_data', {
         label: 'Audio Data',
         documentation: 'Base64 encoded audio data.',
         type: 'string',
-        params: new StringSocketParamsBuilder("").asParagraph().build(),
+        params: new StringSocketParamsBuilder('').asParagraph().build(),
     });
 
     automaticSpeechRecognition.newInputSocket('model', {
         label: 'Model',
         documentation: 'Speech recognition model to use.',
         type: 'string',
-        params: new StringSocketParamsBuilder("openai/whisper-small").build(),
+        params: new StringSocketParamsBuilder('openai/whisper-small').build(),
     });
 
     automaticSpeechRecognition.newOutputSocket('text', {
@@ -640,15 +765,19 @@ export async function aiInferenceNodes() {
     `;
 
     // TABLE QUESTION ANSWERING NODE
-    const tableQuestionAnswering = await factory.initOfficialNodeBluePrint('ai_table_qa');
+    const tableQuestionAnswering =
+        await factory.initOfficialNodeBluePrint('ai_table_qa');
     tableQuestionAnswering.title = 'AI Table Question Answering';
-    tableQuestionAnswering.documentation = 'Answers questions about tabular data.';
+    tableQuestionAnswering.documentation =
+        'Answers questions about tabular data.';
 
     tableQuestionAnswering.newInputSocket('question', {
         label: 'Question',
         documentation: 'Question about the table data.',
         type: 'string',
-        params: new StringSocketParamsBuilder("How many employees are there?").asSentence().build(),
+        params: new StringSocketParamsBuilder('How many employees are there?')
+            .asSentence()
+            .build(),
     });
 
     tableQuestionAnswering.newInputSocket('table', {
@@ -656,9 +785,9 @@ export async function aiInferenceNodes() {
         documentation: 'Table as JSON object with column headers as keys.',
         type: 'unknown',
         params: new GenericSocketParamsBuilder({
-            "Name": ["John", "Jane", "Bob"],
-            "Age": ["25", "30", "35"],
-            "Department": ["Sales", "Marketing", "Engineering"]
+            Name: ['John', 'Jane', 'Bob'],
+            Age: ['25', '30', '35'],
+            Department: ['Sales', 'Marketing', 'Engineering'],
         }).build(),
     });
 
@@ -666,7 +795,9 @@ export async function aiInferenceNodes() {
         label: 'Model',
         documentation: 'Table QA model to use.',
         type: 'string',
-        params: new StringSocketParamsBuilder("google/tapas-base-finetuned-wtq").build(),
+        params: new StringSocketParamsBuilder(
+            'google/tapas-base-finetuned-wtq'
+        ).build(),
     });
 
     tableQuestionAnswering.newOutputSocket('answer', {
@@ -695,34 +826,44 @@ export async function aiInferenceNodes() {
     `;
 
     // TOKEN CLASSIFICATION NODE
-    const tokenClassification = await factory.initOfficialNodeBluePrint('ai_token_classification');
+    const tokenClassification = await factory.initOfficialNodeBluePrint(
+        'ai_token_classification'
+    );
     tokenClassification.title = 'AI Token Classification';
-    tokenClassification.documentation = 'Classifies individual tokens in text (Named Entity Recognition).';
+    tokenClassification.documentation =
+        'Classifies individual tokens in text (Named Entity Recognition).';
 
     tokenClassification.newInputSocket('text', {
         label: 'Text',
         documentation: 'Text to analyze for named entities.',
         type: 'string',
-        params: new StringSocketParamsBuilder("Apple Inc. was founded by Steve Jobs in Cupertino.").asSentence().build(),
+        params: new StringSocketParamsBuilder(
+            'Apple Inc. was founded by Steve Jobs in Cupertino.'
+        )
+            .asSentence()
+            .build(),
     });
 
     tokenClassification.newInputSocket('model', {
         label: 'Model',
         documentation: 'Token classification model to use.',
         type: 'string',
-        params: new StringSocketParamsBuilder("dbmdz/bert-large-cased-finetuned-conll03-english").build(),
+        params: new StringSocketParamsBuilder(
+            'dbmdz/bert-large-cased-finetuned-conll03-english'
+        ).build(),
     });
 
     tokenClassification.newInputSocket('aggregation_strategy', {
         label: 'Aggregation Strategy',
         documentation: 'How to aggregate sub-word tokens.',
         type: 'string',
-        params: new StringSocketParamsBuilder("simple").build(),
+        params: new StringSocketParamsBuilder('simple').build(),
     });
 
     tokenClassification.newOutputSocket('entities', {
         label: 'Named Entities',
-        documentation: 'Array of detected named entities with labels and positions.',
+        documentation:
+            'Array of detected named entities with labels and positions.',
         type: 'unknown',
     });
 

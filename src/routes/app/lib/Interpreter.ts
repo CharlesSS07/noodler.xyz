@@ -4,6 +4,12 @@ import type { NodeBluePrint } from './NodeBluePrint';
 import { OutputSocketDataCache } from './OutputSocketDataCache';
 import { projectOutputDataCache } from '$lib/stores/ProjectState';
 import { getBigData, type BigDataRef } from './BigData';
+import { NodeAPIConnectorManager } from './NodeAPIConnector/NodeAPIConnectorManager';
+import { AIInferenceAPIConnector } from './NodeAPIConnector/AIServiceConnector';
+
+NodeAPIConnectorManager.registerAPIConnector(
+    new AIInferenceAPIConnector('ai_inference')
+);
 
 class CyclicDependencyException extends Error {}
 
@@ -44,7 +50,7 @@ export async function executeFlowGraph(
     start_node_id: string,
     nodes: Node[],
     edges: Edge[]
-): Promise<void> {
+): Promise<{ success: boolean; errors?: any[] }> {
     /**
      * 1. Build a dependency graph of nodes that start_node_id depends on (ignore all others)
      * 2. Begin executing the source nodes, i.e. the nodes that everything depends on
@@ -206,7 +212,12 @@ export async function executeFlowGraph(
     };
 
     // Start execution with sink nodes
-    await Promise.all(sinkNodes.map(executeNode));
+    try {
+        await Promise.all(sinkNodes.map(executeNode));
+        return { success: true };
+    } catch (error) {
+        return { success: false, errors: [error] };
+    }
 }
 
 function buildDependencyGraph(

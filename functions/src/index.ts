@@ -1,4 +1,4 @@
-import * as admin from 'firebase-admin';
+import * as admin from "firebase-admin";
 
 admin.initializeApp();
 
@@ -13,8 +13,8 @@ export {
   translation,
   sentenceSimilarity,
   conversational,
-  featureExtraction
-} from './api/textProcessing';
+  featureExtraction,
+} from "./api/textProcessing";
 
 // Media Processing Endpoints
 export {
@@ -22,5 +22,5 @@ export {
   objectDetection,
   automaticSpeechRecognition,
   tableQuestionAnswering,
-  textToImage
-} from './api/mediaProcessing';
+  textToImage,
+} from "./api/mediaProcessing";
