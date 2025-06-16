@@ -83,14 +83,22 @@ export const getDefaultModel = (task: string): string => {
   return defaults[task] || "gpt2";
 };
 
-export const setCorsHeaders = (res: any): void => {
-  res.set("Access-Control-Allow-Origin", "*");
+export const setCorsHeaders = (res: any, req?: any): void => {
+  const allowedOrigins = ["https://noodeler.xyz", "http://localhost:5173"];
+  const origin = req?.headers?.origin;
+
+  if (allowedOrigins.includes(origin)) {
+    res.set("Access-Control-Allow-Origin", origin);
+  } else {
+    res.set("Access-Control-Allow-Origin", "https://noodeler.xyz");
+  }
   res.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
 };
 
-export const handleError = (res: any, error: any, context: string): void => {
-  setCorsHeaders(res);
+export const handleError = (res: any, error: any, context: string,
+  req?: any): void => {
+  setCorsHeaders(res, req);
   console.error(`${context} Error:`, error.message);
   res.status(error.response?.status || 500).json({
     error: error.message || "Internal Server Error",
@@ -100,10 +108,11 @@ export const handleError = (res: any, error: any, context: string): void => {
 export const validateInput = (
   res: any,
   condition: boolean,
-  message: string
+  message: string,
+  req?: any
 ): boolean => {
   if (!condition) {
-    setCorsHeaders(res);
+    setCorsHeaders(res, req);
     res.status(400).json({error: message});
     return false;
   }

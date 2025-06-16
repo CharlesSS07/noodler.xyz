@@ -22,7 +22,7 @@ import {
 } from "./utils";
 
 export const textGeneration = functions.https.onRequest(async (req, res) => {
-  setCorsHeaders(res);
+  setCorsHeaders(res, req);
 
   if (req.method === "OPTIONS") {
     res.status(204).send("");
@@ -35,7 +35,7 @@ export const textGeneration = functions.https.onRequest(async (req, res) => {
     const {inputs, parameters}: TextGenerationRequest = req.body;
     const model = req.body.model || getDefaultModel("text-generation");
 
-    if (!validateInput(res, !!inputs, "Missing inputs field")) return;
+    if (!validateInput(res, !!inputs, "Missing inputs field", req)) return;
 
     const client = getHFClient();
     const response = await wrapHFResponse(
@@ -52,12 +52,19 @@ export const textGeneration = functions.https.onRequest(async (req, res) => {
 
     res.status(200).json(response.data);
   } catch (error: any) {
-    handleError(res, error, "Text Generation");
+    handleError(res, error, "Text Generation", req);
   }
 });
 
 export const textClassification = functions.https.onRequest(
   async (req, res) => {
+    setCorsHeaders(res, req);
+
+    if (req.method === "OPTIONS") {
+      res.status(204).send("");
+      return;
+    }
+
     try {
       await authenticateRequest(req);
 
@@ -78,13 +85,20 @@ export const textClassification = functions.https.onRequest(
 
       res.status(200).json(response.data);
     } catch (error: any) {
-      handleError(res, error, "Text Classification");
+      handleError(res, error, "Text Classification", req);
     }
   }
 );
 
 export const tokenClassification = functions.https.onRequest(
   async (req, res) => {
+    setCorsHeaders(res, req);
+
+    if (req.method === "OPTIONS") {
+      res.status(204).send("");
+      return;
+    }
+
     try {
       await authenticateRequest(req);
 
@@ -108,12 +122,19 @@ export const tokenClassification = functions.https.onRequest(
 
       res.status(200).json(response.data);
     } catch (error: any) {
-      handleError(res, error, "Token Classification");
+      handleError(res, error, "Token Classification", req);
     }
   }
 );
 
 export const questionAnswering = functions.https.onRequest(async (req, res) => {
+  setCorsHeaders(res, req);
+
+  if (req.method === "OPTIONS") {
+    res.status(204).send("");
+    return;
+  }
+
   try {
     await authenticateRequest(req);
 
@@ -124,7 +145,8 @@ export const questionAnswering = functions.https.onRequest(async (req, res) => {
       !validateInput(
         res,
         !!(inputs && inputs.question && inputs.context),
-        "Missing inputs.question or inputs.context"
+        "Missing inputs.question or inputs.context",
+        req
       )
     ) {
       return;
@@ -141,11 +163,18 @@ export const questionAnswering = functions.https.onRequest(async (req, res) => {
 
     res.status(200).json(response.data);
   } catch (error: any) {
-    handleError(res, error, "Question Answering");
+    handleError(res, error, "Question Answering", req);
   }
 });
 
 export const fillMask = functions.https.onRequest(async (req, res) => {
+  setCorsHeaders(res, req);
+
+  if (req.method === "OPTIONS") {
+    res.status(204).send("");
+    return;
+  }
+
   try {
     await authenticateRequest(req);
 
@@ -156,7 +185,8 @@ export const fillMask = functions.https.onRequest(async (req, res) => {
       !validateInput(
         res,
         !!(inputs && inputs.includes("[MASK]")),
-        "Missing inputs or [MASK] token not found"
+        "Missing inputs or [MASK] token not found",
+        req
       )
     ) {
       return;
@@ -176,11 +206,18 @@ export const fillMask = functions.https.onRequest(async (req, res) => {
 
     res.status(200).json(response.data);
   } catch (error: any) {
-    handleError(res, error, "Fill Mask");
+    handleError(res, error, "Fill Mask", req);
   }
 });
 
 export const summarization = functions.https.onRequest(async (req, res) => {
+  setCorsHeaders(res, req);
+
+  if (req.method === "OPTIONS") {
+    res.status(204).send("");
+    return;
+  }
+
   try {
     await authenticateRequest(req);
 
@@ -205,11 +242,18 @@ export const summarization = functions.https.onRequest(async (req, res) => {
 
     res.status(200).json(response.data);
   } catch (error: any) {
-    handleError(res, error, "Summarization");
+    handleError(res, error, "Summarization", req);
   }
 });
 
 export const translation = functions.https.onRequest(async (req, res) => {
+  setCorsHeaders(res, req);
+
+  if (req.method === "OPTIONS") {
+    res.status(204).send("");
+    return;
+  }
+
   try {
     await authenticateRequest(req);
 
@@ -229,12 +273,19 @@ export const translation = functions.https.onRequest(async (req, res) => {
 
     res.status(200).json(response.data);
   } catch (error: any) {
-    handleError(res, error, "Translation");
+    handleError(res, error, "Translation", req);
   }
 });
 
 export const sentenceSimilarity = functions.https.onRequest(
   async (req, res) => {
+    setCorsHeaders(res, req);
+
+    if (req.method === "OPTIONS") {
+      res.status(204).send("");
+      return;
+    }
+
     try {
       await authenticateRequest(req);
 
@@ -246,7 +297,8 @@ export const sentenceSimilarity = functions.https.onRequest(
         !validateInput(
           res,
           !!(inputs && inputs.source_sentence && inputs.sentences),
-          "Missing inputs.source_sentence or inputs.sentences"
+          "Missing inputs.source_sentence or inputs.sentences",
+          req
         )
       ) {
         return;
@@ -263,12 +315,19 @@ export const sentenceSimilarity = functions.https.onRequest(
 
       res.status(200).json(response.data);
     } catch (error: any) {
-      handleError(res, error, "Sentence Similarity");
+      handleError(res, error, "Sentence Similarity", req);
     }
   }
 );
 
 export const conversational = functions.https.onRequest(async (req, res) => {
+  setCorsHeaders(res, req);
+
+  if (req.method === "OPTIONS") {
+    res.status(204).send("");
+    return;
+  }
+
   try {
     await authenticateRequest(req);
 
@@ -279,7 +338,8 @@ export const conversational = functions.https.onRequest(async (req, res) => {
       !validateInput(
         res,
         !!(inputs && inputs.text),
-        "Missing inputs.text field"
+        "Missing inputs.text field",
+        req
       )
     ) {
       return;
@@ -300,11 +360,18 @@ export const conversational = functions.https.onRequest(async (req, res) => {
 
     res.status(200).json(response.data);
   } catch (error: any) {
-    handleError(res, error, "Conversational");
+    handleError(res, error, "Conversational", req);
   }
 });
 
 export const featureExtraction = functions.https.onRequest(async (req, res) => {
+  setCorsHeaders(res, req);
+
+  if (req.method === "OPTIONS") {
+    res.status(204).send("");
+    return;
+  }
+
   try {
     await authenticateRequest(req);
 
@@ -324,6 +391,6 @@ export const featureExtraction = functions.https.onRequest(async (req, res) => {
 
     res.status(200).json(response.data);
   } catch (error: any) {
-    handleError(res, error, "Feature Extraction");
+    handleError(res, error, "Feature Extraction", req);
   }
 });

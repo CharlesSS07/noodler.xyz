@@ -20,6 +20,8 @@ module.exports = {
   ignorePatterns: [
     "/lib/**/*", // Ignore built files.
     "/generated/**/*", // Ignore generated files.
+    "scripts/examples/huggingfaceInferenceAPI.ts", // Ignore example file.
+    "src/test/**/*", // Ignore test files.
   ],
   plugins: [
     "@typescript-eslint",

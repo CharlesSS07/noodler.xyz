@@ -33,6 +33,10 @@ export const createMockResponse = () => {
       this.data = data;
       return this;
     },
+    send: function(data: any) {
+      this.data = data;
+      return this;
+    },
     set: function(key: string, value: string) {
       this.headers[key] = value;
       return this;

@@ -54,7 +54,11 @@
                 sourceHandle
             ).subscribe((socketData) => {
                 console.log('output socket data updated:', socketData, id)
-                displayValue = socketData as string;
+                if (typeof socketData === 'string')
+                    displayValue = socketData as string;
+                else
+                    displayValue = '<<OBJECT>>\n'+JSON.stringify(socketData, null, 2);
+                autoResize(textarea);
             });
             return unsubscribeSocket;
         }

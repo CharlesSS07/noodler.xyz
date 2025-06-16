@@ -18,7 +18,7 @@ import {
 
 export const imageClassification = functions.https.onRequest(
   async (req, res) => {
-    setCorsHeaders(res);
+    setCorsHeaders(res, req);
 
     if (req.method === "OPTIONS") {
       res.status(204).send("");
@@ -36,7 +36,8 @@ export const imageClassification = functions.https.onRequest(
         !validateInput(
           res,
           !!inputs,
-          "Missing inputs field (base64 image or image URL)"
+          "Missing inputs field (base64 image or image URL)",
+          req
         )
       ) {
         return;
@@ -62,12 +63,19 @@ export const imageClassification = functions.https.onRequest(
 
       res.status(200).json(response.data);
     } catch (error: any) {
-      handleError(res, error, "Image Classification");
+      handleError(res, error, "Image Classification", req);
     }
   }
 );
 
 export const objectDetection = functions.https.onRequest(async (req, res) => {
+  setCorsHeaders(res, req);
+
+  if (req.method === "OPTIONS") {
+    res.status(204).send("");
+    return;
+  }
+
   try {
     await authenticateRequest(req);
 
@@ -78,7 +86,8 @@ export const objectDetection = functions.https.onRequest(async (req, res) => {
       !validateInput(
         res,
         !!inputs,
-        "Missing inputs field (base64 image or image URL)"
+        "Missing inputs field (base64 image or image URL)",
+        req
       )
     ) {
       return;
@@ -106,12 +115,19 @@ export const objectDetection = functions.https.onRequest(async (req, res) => {
 
     res.status(200).json(response.data);
   } catch (error: any) {
-    handleError(res, error, "Object Detection");
+    handleError(res, error, "Object Detection", req);
   }
 });
 
 export const automaticSpeechRecognition = functions.https.onRequest(
   async (req, res) => {
+    setCorsHeaders(res, req);
+
+    if (req.method === "OPTIONS") {
+      res.status(204).send("");
+      return;
+    }
+
     try {
       await authenticateRequest(req);
 
@@ -125,7 +141,8 @@ export const automaticSpeechRecognition = functions.https.onRequest(
         !validateInput(
           res,
           !!inputs,
-          "Missing inputs field (base64 audio data)"
+          "Missing inputs field (base64 audio data)",
+          req
         )
       ) {
         return;
@@ -150,13 +167,20 @@ export const automaticSpeechRecognition = functions.https.onRequest(
 
       res.status(200).json(response.data);
     } catch (error: any) {
-      handleError(res, error, "ASR");
+      handleError(res, error, "ASR", req);
     }
   }
 );
 
 export const tableQuestionAnswering = functions.https.onRequest(
   async (req, res) => {
+    setCorsHeaders(res, req);
+
+    if (req.method === "OPTIONS") {
+      res.status(204).send("");
+      return;
+    }
+
     try {
       await authenticateRequest(req);
 
@@ -169,7 +193,8 @@ export const tableQuestionAnswering = functions.https.onRequest(
         !validateInput(
           res,
           !!(inputs && inputs.query && inputs.table),
-          "Missing inputs.query or inputs.table"
+          "Missing inputs.query or inputs.table",
+          req
         )
       ) {
         return;
@@ -189,19 +214,27 @@ export const tableQuestionAnswering = functions.https.onRequest(
 
       res.status(200).json(response.data);
     } catch (error: any) {
-      handleError(res, error, "Table QA");
+      handleError(res, error, "Table QA", req);
     }
   }
 );
 
 export const textToImage = functions.https.onRequest(async (req, res) => {
+  setCorsHeaders(res, req);
+
+  if (req.method === "OPTIONS") {
+    res.status(204).send("");
+    return;
+  }
+
   try {
     await authenticateRequest(req);
 
     const {inputs, parameters}: TextToImageRequest = req.body;
     const model = req.body.model || "black-forest-labs/FLUX.1-dev";
 
-    if (!validateInput(res, !!inputs, "Missing inputs field (text prompt)")) {
+    if (!validateInput(res, !!inputs,
+      "Missing inputs field (text prompt)", req)) {
       return;
     }
 
@@ -235,6 +268,6 @@ export const textToImage = functions.https.onRequest(async (req, res) => {
       },
     });
   } catch (error: any) {
-    handleError(res, error, "Text to Image");
+    handleError(res, error, "Text to Image", req);
   }
 });

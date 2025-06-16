@@ -89,7 +89,6 @@ describe("Media Processing Endpoints", () => {
 
   describe("objectDetection", () => {
     it("should detect objects successfully", async () => {
-
       const req = createMockRequest({
         inputs: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD...",
         parameters: {threshold: 0.7},

@@ -64,6 +64,8 @@ export class AIInferenceService {
     private async makeRequest<T>(endpoint: string, data: any): Promise<T> {
         const idToken = await this.user.getIdToken();
 
+        console.log('ai inference service request data', JSON.stringify(data));
+
         const response = await fetch(`${this.baseUrl}/${endpoint}`, {
             method: 'POST',
             headers: {
@@ -85,7 +87,11 @@ export class AIInferenceService {
             throw aiError;
         }
 
-        return await response.json();
+        const ret = await response.json();
+
+        console.log('ai inference service request data', ret);
+
+        return ret;
     }
 
     // Text-to-Image Generation
