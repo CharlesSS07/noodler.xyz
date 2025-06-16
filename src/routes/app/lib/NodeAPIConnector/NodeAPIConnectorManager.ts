@@ -20,7 +20,10 @@ export abstract class NodeLib<T extends object> {
         if (this.connection !== undefined)
             return Promise.resolve(this.connection);
         await this.connect();
-        return this.getAPI();
+        if (this.connection === undefined) {
+            throw new Error(`Failed to establish connection for ${this.name}`);
+        }
+        return this.connection;
     }
 }
 

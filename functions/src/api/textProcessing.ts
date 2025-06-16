@@ -19,7 +19,6 @@ import {
   validateInput,
   getDefaultModel,
   setCorsHeaders,
-  getHFProviderTyped,
 } from "./utils";
 
 export const textGeneration = functions.https.onRequest(async (req, res) => {
@@ -41,7 +40,6 @@ export const textGeneration = functions.https.onRequest(async (req, res) => {
     const client = getHFClient();
     const response = await wrapHFResponse(
       client.textGeneration({
-        provider: getHFProviderTyped(),
         model,
         inputs,
         parameters: {
@@ -72,7 +70,6 @@ export const textClassification = functions.https.onRequest(
       const client = getHFClient();
       const response = await wrapHFResponse(
         client.textClassification({
-          provider: getHFProviderTyped(),
           model,
           inputs,
           parameters,
@@ -100,7 +97,6 @@ export const tokenClassification = functions.https.onRequest(
       const client = getHFClient();
       const response = await wrapHFResponse(
         client.tokenClassification({
-          provider: getHFProviderTyped(),
           model,
           inputs,
           parameters: {
@@ -137,7 +133,6 @@ export const questionAnswering = functions.https.onRequest(async (req, res) => {
     const client = getHFClient();
     const response = await wrapHFResponse(
       client.questionAnswering({
-        provider: getHFProviderTyped(),
         model,
         inputs,
         parameters,
@@ -170,7 +165,6 @@ export const fillMask = functions.https.onRequest(async (req, res) => {
     const client = getHFClient();
     const response = await wrapHFResponse(
       client.fillMask({
-        provider: getHFProviderTyped(),
         model,
         inputs,
         parameters: {
@@ -198,7 +192,6 @@ export const summarization = functions.https.onRequest(async (req, res) => {
     const client = getHFClient();
     const response = await wrapHFResponse(
       client.summarization({
-        provider: getHFProviderTyped(),
         model,
         inputs,
         parameters: {
@@ -228,7 +221,6 @@ export const translation = functions.https.onRequest(async (req, res) => {
     const client = getHFClient();
     const response = await wrapHFResponse(
       client.translation({
-        provider: getHFProviderTyped(),
         model,
         inputs,
         parameters,
@@ -263,7 +255,6 @@ export const sentenceSimilarity = functions.https.onRequest(
       const client = getHFClient();
       const response = await wrapHFResponse(
         client.sentenceSimilarity({
-          provider: getHFProviderTyped(),
           model,
           inputs,
           parameters,
@@ -297,7 +288,6 @@ export const conversational = functions.https.onRequest(async (req, res) => {
     const client = getHFClient();
     const response = await wrapHFResponse(
       client.textGeneration({
-        provider: getHFProviderTyped(),
         model,
         inputs: inputs.text, // Use the text field for conversational
         parameters: {
@@ -326,7 +316,6 @@ export const featureExtraction = functions.https.onRequest(async (req, res) => {
     const client = getHFClient();
     const response = await wrapHFResponse(
       client.featureExtraction({
-        provider: getHFProviderTyped(),
         model,
         inputs,
         parameters,

@@ -24,12 +24,17 @@ export const createMockResponse = () => {
   const res: any = {
     statusCode: 200,
     data: null,
+    headers: {},
     status: function(code: number) {
       this.statusCode = code;
       return this;
     },
     json: function(data: any) {
       this.data = data;
+      return this;
+    },
+    set: function(key: string, value: string) {
+      this.headers[key] = value;
       return this;
     },
   };

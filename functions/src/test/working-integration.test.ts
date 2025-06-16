@@ -233,7 +233,6 @@ describe("Working HuggingFace API Integration Tests", () => {
       const client = getHFClient();
       const result = await wrapHFResponse(
         client.textToImage({
-          provider: "hf-inference",
           model: "black-forest-labs/FLUX.1-dev",
           inputs: "A cute cat sitting on a red couch",
           parameters: {

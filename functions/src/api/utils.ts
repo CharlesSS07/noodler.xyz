@@ -6,12 +6,6 @@ import {HuggingFaceResponse} from "./types";
 const HF_TOKEN =
     functions.config().huggingface?.token || process.env.HUGGINGFACE_TOKEN;
 
-// Global provider configuration
-const HF_PROVIDER =
-    functions.config().huggingface?.provider ||
-    process.env.HUGGINGFACE_PROVIDER ||
-    "hf-inference";
-
 // Only warn about token if we're actually trying to use it
 if (!HF_TOKEN) {
   console.warn(
@@ -21,7 +15,6 @@ if (!HF_TOKEN) {
   );
 }
 
-console.log(`Using HuggingFace provider: ${HF_PROVIDER}`);
 
 // Initialize HuggingFace client
 let hfClient: InferenceClient | null = null;
@@ -42,23 +35,6 @@ export const getHFClient = (): InferenceClient => {
   return hfClient;
 };
 
-// Get the configured provider
-export const getHFProvider = (): string => {
-  return HF_PROVIDER;
-};
-
-// Helper to add provider to inference parameters when supported
-export const addProviderToParams = (baseParams: any): any => {
-  return {
-    ...baseParams,
-    provider: HF_PROVIDER as any,
-  };
-};
-
-// Get the configured provider with proper typing
-export const getHFProviderTyped = (): any => {
-  return HF_PROVIDER as any;
-};
 
 // Generic helper for HuggingFace API responses
 export const wrapHFResponse = async <T>(

@@ -89,22 +89,6 @@ describe("Media Processing Endpoints", () => {
 
   describe("objectDetection", () => {
     it("should detect objects successfully", async () => {
-      const mockHFResponse = {
-        data: [
-          {
-            score: 0.999,
-            label: "person",
-            box: {xmin: 123, ymin: 456, xmax: 789, ymax: 1012},
-          },
-          {
-            score: 0.845,
-            label: "car",
-            box: {xmin: 50, ymin: 100, xmax: 300, ymax: 400},
-          },
-        ],
-        status: 200,
-      };
-      sandbox.stub(utils, "wrapHFResponse").resolves(mockHFResponse);
 
       const req = createMockRequest({
         inputs: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD...",
@@ -113,6 +97,8 @@ describe("Media Processing Endpoints", () => {
       const res = createMockResponse();
 
       await objectDetection(req, res);
+
+      console.error(res.data);
 
       expect(res.statusCode).to.equal(200);
       expect(res.data).to.have.length(2);

@@ -13,7 +13,6 @@ import {
   handleError,
   validateInput,
   getDefaultModel,
-  getHFProviderTyped,
   setCorsHeaders,
 } from "./utils";
 
@@ -55,7 +54,6 @@ export const imageClassification = functions.https.onRequest(
 
       const response = await wrapHFResponse(
         client.imageClassification({
-          provider: getHFProviderTyped(),
           model,
           inputs: data,
           parameters,
@@ -97,7 +95,6 @@ export const objectDetection = functions.https.onRequest(async (req, res) => {
 
     const response = await wrapHFResponse(
       client.objectDetection({
-        provider: getHFProviderTyped(),
         model,
         inputs: data,
         parameters: {
@@ -145,7 +142,6 @@ export const automaticSpeechRecognition = functions.https.onRequest(
 
       const response = await wrapHFResponse(
         client.automaticSpeechRecognition({
-          provider: getHFProviderTyped(),
           model,
           inputs: data,
           parameters,
@@ -182,7 +178,6 @@ export const tableQuestionAnswering = functions.https.onRequest(
       const client = getHFClient();
       const response = await wrapHFResponse(
         client.tableQuestionAnswering({
-          provider: getHFProviderTyped(),
           model,
           inputs: {
             question: inputs.query,
@@ -213,7 +208,6 @@ export const textToImage = functions.https.onRequest(async (req, res) => {
     const client = getHFClient();
     const response = await wrapHFResponse(
       client.textToImage({
-        provider: getHFProviderTyped(),
         model,
         inputs,
         parameters: {
