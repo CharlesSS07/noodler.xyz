@@ -12,16 +12,16 @@
     "test": "mocha",
     "test:watch": "mocha --watch",
     "test:unit": "mocha --require ts-node/register src/test/*.test.ts",
-    "test:utils": "mocha --require ts-node/register src/test/utils.test.ts",
-    "test:text": "mocha --require ts-node/register src/test/textProcessing.test.ts",
-    "test:media": "mocha --require ts-node/register src/test/mediaProcessing.test.ts",
+    "test:utils": "mocha --require ts-node/register src/aiService/test/utils.test.ts",
+    "test:text": "mocha --require ts-node/register src/aiService/test/textProcessing.test.ts",
+    "test:media": "mocha --require ts-node/register src/aiService/test/mediaProcessing.test.ts",
     "test:comprehensive": "npm run build && mocha lib/test/comprehensive-api.test.js --timeout 30000",
     "test:stress": "npm run build && mocha lib/test/stress-tests.test.js --timeout 300000",
     "test:quick-stress": "npm run build && mocha lib/test/quick-stress.test.js --timeout 60000",
     "test:basic": "npm run build && mocha lib/test/simple.test.js --timeout 10000",
     "test:integration": "mocha --require ts-node/register src/test/integration.test.ts --timeout 60000",
     "test:integration:quick": "mocha --require ts-node/register src/test/integration.test.ts --timeout 60000 --grep 'text generation|text classification'",
-    "test:integration:working": "mocha --require ts-node/register --ignore 'src/test/*Processing.test.ts' src/test/working-integration.test.ts --timeout 90000"
+    "test:integration:working": "mocha --require ts-node/register --ignore 'src/test/*Processing.test.ts' src/aiService/test/working-integration.test.ts --timeout 90000"
   },
   "engines": {
     "node": "22"
@@ -34,6 +34,7 @@
     "axios": "^1.9.0",
     "firebase-admin": "^12.6.0",
     "firebase-functions": "^6.0.1",
+    "langchain": "^0.3.28",
     "uuid": "^11.1.0"
   },
   "devDependencies": {

@@ -3,11 +3,11 @@
 <script module lang="ts">
     import { type Node } from '@xyflow/svelte';
 
-    // Official NID for this node: node_official_html_renderer
+    // Official NID for this node: html_renderer
     export type HtmlRendererNodeType = Node<
         {
             input: {html: string};
-            nid?: string; // Should be set to 'node_official_html_renderer' when using official blueprint
+            nid?: string; // Should be set to 'html_renderer' when using official blueprint
         },
         'node-html-renderer'
     >;
@@ -23,7 +23,7 @@
     
     // Set the official NID if not already set
     if (!data.nid) {
-        updateNodeData(id, { nid: 'node_official_html_renderer' });
+        updateNodeData(id, { nid: 'html_renderer' });
     }
 
     // State for HTML handling

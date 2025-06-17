@@ -9,60 +9,6 @@ const nodeBluePrintController: NodeBluePrintControllerFactoryInterface =
     new FirestoreNodeBluePrintControllerFactoryInterface();
 
 export async function simpleImageModificationNodes() {
-    const imageViewer =
-        await nodeBluePrintController.initOfficialNodeBluePrint('image_viewer');
-    imageViewer.title = 'Image Viewer';
-    imageViewer.documentation = 'Display an image from a socket.';
-
-    imageViewer.newInputSocket('img', {
-        label: 'Image',
-        documentation: 'Image to view.',
-        type: 'image/jimp',
-        params: new JIMPImageSocketParamsBuilder().build(),
-    });
-
-    imageViewer.newOutputSocket('img', {
-        label: 'Image',
-        documentation: 'The image you viewed.',
-        type: 'image/jimp',
-    });
-
-    imageViewer.code = `
-outputs.set('img', inputs.img);
-`;
-
-    // Use it to convert the base64 to jimp for supporting subsequent operations
-    // const base64ToJimp = await nodeBluePrintController.initOfficialNodeBluePrint("base64_to_jimp");
-    // await base64ToJimp.setTitle("Base64 to JIMP");
-    // await base64ToJimp.setDocumentation("Convert a base64-encoded image string into a JIMP object for further image processing.");
-
-    // await base64ToJimp.newInputSocket("img", {
-    //   label: "Base64 Image",
-    //   documentation: "Base64 encoded image string",
-    //   type: "UploadImage",
-    //   config: {
-    //     defaultValue: null
-    //   }
-    // });
-
-    // await base64ToJimp.newOutputSocket("img", {
-    //   label: "JIMP Image",
-    //   type: "JIMP",
-    //   documentation: "Image as a JIMP object"
-    // });
-
-    // await base64ToJimp.setCode(`
-    //   const Jimp = require('jimp');
-    //   const input = inputs.get('img');
-
-    //   if (typeof input === 'string' && input.startsWith('data:image')) {
-    //     const base64 = input.split(',')[1];
-    //     const img = await Jimp.read(Buffer.from(base64, 'base64'));
-    //     outputs.set('img', img);
-    //   } else {
-    //     throw new Error("Input is not a valid base64 image.");
-    //   }
-    // ` );
 
     const grayscale =
         await nodeBluePrintController.initOfficialNodeBluePrint('greyscale');

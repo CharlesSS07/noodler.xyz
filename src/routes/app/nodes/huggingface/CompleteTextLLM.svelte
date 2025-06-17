@@ -1,12 +1,12 @@
 <script module lang="ts">
     import { type Node } from '@xyflow/svelte';
 
-    // Official NID for this node: node_official_huggingface_complete_text
+    // Official NID for this node: huggingface_complete_text
     export type CompleteTextNodeType = Node<
         {
             input: {text: string, modelId: string, maxTokens: number},
             output: {text: string},
-            nid?: string; // Should be set to 'node_official_huggingface_complete_text' when using official blueprint
+            nid?: string; // Should be set to 'huggingface_complete_text' when using official blueprint
         },
         'node-text-complete-llm'
     >;
@@ -24,7 +24,7 @@
     
     // Set the official NID if not already set
     if (!data.nid) {
-        updateNodeData(id, { nid: 'node_official_huggingface_complete_text' });
+        updateNodeData(id, { nid: 'huggingface_complete_text' });
     }
 
 

@@ -14,7 +14,7 @@ export {
   sentenceSimilarity,
   conversational,
   featureExtraction,
-} from "./api/textProcessing";
+} from "./aiService/api/textProcessing";
 
 // Media Processing Endpoints
 export {
@@ -23,4 +23,4 @@ export {
   automaticSpeechRecognition,
   tableQuestionAnswering,
   textToImage,
-} from "./api/mediaProcessing";
+} from "./aiService/api/mediaProcessing";

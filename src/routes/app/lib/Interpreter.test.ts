@@ -4,7 +4,7 @@
  *
  * ISSUES FIXED:
  * 1. Updated mock node data structure to match current implementation
- * 2. Fixed node blueprint IDs (node_official_add, node_official_subtract, etc.)
+ * 2. Fixed node blueprint IDs (add, subtract, etc.)
  * 3. Updated assertions to use projectOutputDataCache.get() instead of node.data.output
  * 4. Removed obsolete 'output' property from node data structure
  * 5. Fixed array index bug: changed `if (idx && ...)` to `if (idx !== undefined && ...)`
@@ -47,7 +47,7 @@ describe('Interpreter Flow Graph Tests', () => {
                 type: 'node',
                 position: { x: 0, y: 0 },
                 data: {
-                    nid: 'node_official_add',
+                    nid: 'add',
                     input: { a: 9, b: 6 },
                 },
             },
@@ -72,7 +72,7 @@ describe('Interpreter Flow Graph Tests', () => {
                 type: 'node',
                 position: { x: 0, y: 0 },
                 data: {
-                    nid: 'node_official_add',
+                    nid: 'add',
                     input: { a: 5, b: 6 },
                 },
             },
@@ -81,7 +81,7 @@ describe('Interpreter Flow Graph Tests', () => {
                 type: 'node',
                 position: { x: 100, y: 0 },
                 data: {
-                    nid: 'node_official_add',
+                    nid: 'add',
                     input: { a: 9, b: 0 },
                 },
             },
@@ -123,7 +123,7 @@ describe('Interpreter Flow Graph Tests', () => {
                 type: 'node',
                 position: { x: 0, y: 0 },
                 data: {
-                    nid: 'node_official_add',
+                    nid: 'add',
                     input: { a: 5, b: 6 },
                 },
             },
@@ -132,7 +132,7 @@ describe('Interpreter Flow Graph Tests', () => {
                 type: 'node',
                 position: { x: 100, y: 0 },
                 data: {
-                    nid: 'node_official_add',
+                    nid: 'add',
                     input: { a: 9 },
                 },
             },
@@ -141,7 +141,7 @@ describe('Interpreter Flow Graph Tests', () => {
                 type: 'node',
                 position: { x: 200, y: 0 },
                 data: {
-                    nid: 'node_official_multiply',
+                    nid: 'multiply',
                     input: { b: 5 },
                 },
             },
@@ -193,7 +193,7 @@ describe('Interpreter Flow Graph Tests', () => {
                 type: 'node',
                 position: { x: 0, y: 0 },
                 data: {
-                    nid: 'node_official_divide',
+                    nid: 'divide',
                     input: { a: 20, b: 4 },
                 },
             },
@@ -220,7 +220,7 @@ describe('Interpreter Flow Graph Tests', () => {
                 type: 'node',
                 position: { x: 0, y: 0 },
                 data: {
-                    nid: 'node_official_divide',
+                    nid: 'divide',
                     input: { a: 10, b: 0 },
                 },
             },
@@ -241,7 +241,7 @@ describe('Interpreter Flow Graph Tests', () => {
                 type: 'node',
                 position: { x: 0, y: 0 },
                 data: {
-                    nid: 'node_official_subtract',
+                    nid: 'subtract',
                     input: { a: 15, b: 7 },
                 },
             },
@@ -265,7 +265,7 @@ describe('Interpreter Flow Graph Tests', () => {
                 type: 'node',
                 position: { x: 0, y: 0 },
                 data: {
-                    nid: 'node_official_add',
+                    nid: 'add',
                     input: { a: 3, b: 4 },
                 },
             },
@@ -274,7 +274,7 @@ describe('Interpreter Flow Graph Tests', () => {
                 type: 'node',
                 position: { x: 0, y: 100 },
                 data: {
-                    nid: 'node_official_add',
+                    nid: 'add',
                     input: { a: 10, b: 20 },
                 },
             },
@@ -283,7 +283,7 @@ describe('Interpreter Flow Graph Tests', () => {
                 type: 'node',
                 position: { x: 200, y: 50 },
                 data: {
-                    nid: 'node_official_multiply',
+                    nid: 'multiply',
                     input: {},
                 },
             },
@@ -331,7 +331,7 @@ describe('Interpreter Flow Graph Tests', () => {
                 type: 'node',
                 position: { x: 0, y: 0 },
                 data: {
-                    nid: 'node_official_add',
+                    nid: 'add',
                     input: { a: 1, b: 1 },
                 },
             },
@@ -363,10 +363,10 @@ describe('Interpreter Flow Graph Tests', () => {
         try {
             // Try to fetch the add node that should exist
             const addNode =
-                await factory.getNodeBluePrintFromNID('node_official_add');
+                await factory.getNodeBluePrintFromNID('add');
             console.log('✅ Successfully found add node:', addNode.title);
             expect(addNode).toBeDefined();
-            expect(addNode.nid).toBe('node_official_add');
+            expect(addNode.nid).toBe('add');
         } catch (error) {
             console.log('❌ Could not find add node. This suggests either:');
             console.log('  1. The standard node suite has not been generated');
@@ -377,7 +377,7 @@ describe('Interpreter Flow Graph Tests', () => {
             console.log('Error:', error);
 
             // This test should fail to highlight the issue
-            throw new Error(`Failed to find node_official_add: ${error}`);
+            throw new Error(`Failed to find add: ${error}`);
         }
     });
 
@@ -453,7 +453,7 @@ describe('Interpreter Flow Graph Tests', () => {
                 type: 'node',
                 position: { x: 0, y: 0 },
                 data: {
-                    nid: 'node_official_jimp_new_blank_image',
+                    nid: 'jimp_new_blank_image',
                     input: {
                         width: 100,
                         height: 100,
@@ -466,7 +466,7 @@ describe('Interpreter Flow Graph Tests', () => {
                 type: 'node',
                 position: { x: 200, y: 0 },
                 data: {
-                    nid: 'node_official_hsv',
+                    nid: 'hsv',
                     input: {
                         hue: 30, // Shift hue by 30 degrees
                         saturation: 10, // Increase saturation by 10
@@ -479,7 +479,7 @@ describe('Interpreter Flow Graph Tests', () => {
                 type: 'node',
                 position: { x: 400, y: 0 },
                 data: {
-                    nid: 'node_official_greyscale',
+                    nid: 'greyscale',
                     input: {},
                 },
             },
@@ -505,7 +505,7 @@ describe('Interpreter Flow Graph Tests', () => {
         // Use standard factory - should connect to emulator due to env vars and test Firebase import
         const factory = new FirestoreNodeBluePrintControllerFactoryInterface();
         const n = await factory.getNodeBluePrintFromNID(
-            'node_official_jimp_new_blank_image'
+            'jimp_new_blank_image'
         );
         console.log('[TEST DEBUG] Current node code:', n.code);
 
@@ -552,7 +552,7 @@ describe('Interpreter Flow Graph Tests', () => {
                 type: 'node',
                 position: { x: 0, y: 0 },
                 data: {
-                    nid: 'node_official_jimp_new_blank_image',
+                    nid: 'jimp_new_blank_image',
                     input: {
                         width: 50,
                         height: 50,
@@ -565,7 +565,7 @@ describe('Interpreter Flow Graph Tests', () => {
                 type: 'node',
                 position: { x: 200, y: 0 },
                 data: {
-                    nid: 'node_official_image_viewer',
+                    nid: 'image_viewer',
                     input: {},
                 },
             },

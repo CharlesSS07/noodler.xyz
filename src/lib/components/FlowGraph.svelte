@@ -15,7 +15,6 @@
     } from '@xyflow/svelte';
     import '@xyflow/svelte/dist/style.css';
 
-
     import NoteNode from '../../routes/app/nodes/NoteNode.svelte';
     import StemNode from '$lib/components/StemNode.svelte';
     import TextTemplateFillinNode from "../../routes/app/nodes/text/TextTemplateFillinNode.svelte";
@@ -32,7 +31,6 @@
     
     // Import the existing nodes
     import CompleteTextLLM from "../../routes/app/nodes/huggingface/CompleteTextLLM.svelte";
-    import TextEditorRaw from "../../routes/app/nodes/text/TextEditorRawNode.svelte";
 
     let nodes = $state.raw<Node[]>([]);
 
@@ -162,7 +160,6 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
         textTemplate: TextTemplateFillinNode,
         textEditorMd: TextEditorNode,
         huggingfaceLLM: CompleteTextLLM,
-        textEditorRaw: TextEditorRaw
     };
 
     let colorMode: ColorMode = $state('light');
@@ -196,17 +193,6 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
                 markdown: '# New Note\n\nWrite your markdown here...'
             }
         },
-        {
-            id: 'textEditorRaw',
-            type: 'textEditorRaw',
-            title: 'Raw Text Editor',
-            description: 'Simple text input/output editor',
-            category: 'Text',
-            defaultData: {
-                input: { text: '' },
-                nid: 'node_official_raw_text_editor'
-            }
-        },
         // {
         //     id: 'textEditor',
         //     type: 'textEditor',
@@ -215,19 +201,19 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
         //     category: 'Text',
         //     defaultData: {
         //         input: { text: '' },
-        //         nid: 'node_official_md_text_editor'
+        //         nid: 'md_text_editor'
         //     }
         // },
         {
             id: 'textTemplate',
             type: 'textTemplate',
-            title: 'Text Template',
+            title: 'Text',
             description: 'Template with variable substitution',
             category: 'Text',
             defaultData: {
-                template: 'Hello @name!',
-                inputs: { name: 'noodler' },
-                nid: 'node_official_template'
+                template: '@fillin_variable',
+                fillins: {},
+                nid: 'template'
             }
         },
         {
@@ -248,7 +234,7 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
             category: 'Media',
             defaultData: {
                 input: { },
-                nid: 'node_official_image_loader'
+                nid: 'image_loader'
             }
         },
         // {

@@ -55,7 +55,7 @@ describe('FirestoreNodeBluePrint Test Suite', () => {
                     await factory.initOfficialNodeBluePrint(uniqueName);
 
                 expect(node).toBeInstanceOf(NodeBluePrintInFirestore);
-                expect(node.nid).toBe(`node_official_${uniqueName}`);
+                expect(node.nid).toBe(uniqueName);
                 expect(node.title).toBe(uniqueName);
                 expect(node.author_uid).toBe('official');
                 expect(node.trust_level).toBe('Official');

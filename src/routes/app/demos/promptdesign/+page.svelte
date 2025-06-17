@@ -12,13 +12,13 @@
     } from "@xyflow/svelte";
     import '@xyflow/svelte/dist/style.css';
     import NoteNode from "../../nodes/NoteNode.svelte";
-    import StemNode from "$lib/components/StemNode.svelte";
+    import StemNode from "$lib/components/StemNodeOld.svelte";
     import ImageNode from "../../nodes/images/ImageNode.svelte";
     import HTMLRendererNode from "../../nodes/html/HTMLRendererNode.svelte";
     import TextTemplateFillinNode from "../../nodes/text/TextTemplateFillinNode.svelte";
     import TextEditorNode from "../../nodes/text/TextEditorMarkdownNode.svelte";
     import MagicTextTransformLLM from "../dummynodes/TextFormatterLLM.svelte";
-    import "../../nodes.css";
+    import "$lib/css/nodes.css";
     import ELK from 'elkjs/lib/elk.bundled.js';
     import { onMount } from "svelte";
     import {edgesVersion2, nodesVersion2} from "./projectVersions";

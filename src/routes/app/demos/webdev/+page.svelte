@@ -10,7 +10,7 @@
 	import HtmlBoilerplateNode from '../dummynodes/HtmlBoilerplateNode.svelte';
 	import WebNavbarNode from '../dummynodes/WebNavbarNode.svelte';
 	import LlmContentGenerator from '../dummynodes/LlmContentGenerator.svelte';
-	import StemNode from "$lib/components/StemNode.svelte";
+	import StemNode from "$lib/components/StemNodeOld.svelte";
 	import EmailSignup from "../../../../components/EmailSignup.svelte";
 	import BugReportButton from "../../../../components/BugReportButton.svelte";
 

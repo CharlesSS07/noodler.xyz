@@ -457,7 +457,7 @@ export async function aiInferenceNodes() {
                 do_sample: false
             }
         });
-        outputs.set('summary', results[0]?.summary_text || '');
+        outputs.set('summary', results?.summary_text || '');
     `;
 
     // TRANSLATION NODE

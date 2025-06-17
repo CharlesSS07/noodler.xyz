@@ -12,7 +12,7 @@
     } from "@xyflow/svelte";
     import '@xyflow/svelte/dist/style.css';
     import NoteNode from "../../nodes/NoteNode.svelte";
-    import StemNode from "$lib/components/StemNode.svelte";
+    import StemNode from "$lib/components/StemNodeOld.svelte";
     import ImageNode from "../../nodes/images/ImageNode.svelte";
     import HTMLRendererNode from "../../nodes/html/HTMLRendererNode.svelte";
     import TextTemplateFillinNode from "../../nodes/text/TextTemplateFillinNode.svelte";
@@ -27,7 +27,7 @@
     import EmailSignup from "../../../../components/EmailSignup.svelte";
     import BugReportButton from "../../../../components/BugReportButton.svelte";
     
-    import "../../nodes.css";
+    import "$lib/css/nodes.css";
     import { onMount } from "svelte";
     import Logo from "../../../../components/Logo.svelte";
     import { Play, RefreshCw, Download, ArrowLeft, Layout } from "lucide-svelte";

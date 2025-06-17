@@ -68,7 +68,6 @@
 /* Header section - contains title and controls with light background */
 .node-header {
     padding: 12px 16px;
-    border-bottom: 1px solid #e5e7eb;
     cursor: pointer;
 }
 
@@ -129,11 +128,7 @@
 /* Execution info bar - shows timing and errors below header */
 .execution-info {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-top: 8px;
-    padding-top: 8px;
-    border-top: 1px solid #e5e7eb;
     font-size: 11px;
 }
 
@@ -277,7 +272,7 @@
 /* Output socket content - right-aligned text */
 .output-content {
     align-items: flex-end;
-    text-align: right;
+    text-align: left;
 }
 
 /* Socket label - main text for socket name */
@@ -302,7 +297,7 @@
 
 /* Socket type label - small uppercase text showing data type */
 .socket-type {
-    font-size: 10px;
+    font-size: 5px;
     font-weight: 400;
     text-transform: uppercase;
     letter-spacing: 0.5px;

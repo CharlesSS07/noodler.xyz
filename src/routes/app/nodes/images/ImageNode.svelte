@@ -3,11 +3,11 @@
     import { type Node } from '@xyflow/svelte';
     import type { BigDataRef } from "../../lib/BigData";
 
-    // Official NID for this node: node_official_image_loader
+    // Official NID for this node: image_loader
     export type ImageNodeType = Node<
         {
             input: { imageOrFileOrString: BigDataRef | string | null };
-            nid?: string; // Should be set to 'node_official_image_loader' when using official blueprint
+            nid?: string; // Should be set to 'image_loader' when using official blueprint
         },
         'node-image'
     >;
@@ -26,6 +26,9 @@
         isBigDataRef, 
         autoConvertToBigData,
     } from "../../lib/BigData";
+
+    import NodeWrapper from '$lib/components/NodeWrapper.svelte';
+
 
     const { updateNodeData } = useSvelteFlow();
 
@@ -164,8 +167,10 @@
     });
 </script>
 
+<NodeWrapper
+    label="Image"
+    documentation="View an image from an output, or load in an image to use as input.">
 <div class="relative">
-    {id}
     <!-- Main image container -->
     <div class="border-2 border-gray-300 rounded-lg bg-white overflow-hidden">
         {#if hasInputConnection}
@@ -252,3 +257,4 @@
         class="socket-handle"
     />
 </div>
+</NodeWrapper>

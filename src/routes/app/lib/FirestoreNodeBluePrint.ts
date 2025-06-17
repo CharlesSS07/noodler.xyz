@@ -71,7 +71,7 @@ export class FirestoreNodeBluePrintControllerFactoryInterface
     async initOfficialNodeBluePrint(
         uniqueFunctionName: string
     ): Promise<NodeBluePrint> {
-        const nid = `node_official_${uniqueFunctionName}`;
+        const nid = uniqueFunctionName;
         const authorUid = 'official';
         const createdAt = new Date();
 

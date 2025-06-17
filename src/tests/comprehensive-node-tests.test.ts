@@ -41,7 +41,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
                     type: 'node',
                     position: { x: 0, y: 0 },
                     data: {
-                        nid: 'node_official_add',
+                        nid: 'add',
                         input: { a: 15, b: 25 },
                     },
                 },
@@ -63,7 +63,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
                     type: 'node',
                     position: { x: 0, y: 0 },
                     data: {
-                        nid: 'node_official_subtract',
+                        nid: 'subtract',
                         input: { a: 100, b: 37 },
                     },
                 },
@@ -85,7 +85,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
                     type: 'node',
                     position: { x: 0, y: 0 },
                     data: {
-                        nid: 'node_official_multiply',
+                        nid: 'multiply',
                         input: { a: 12, b: 8 },
                     },
                 },
@@ -107,7 +107,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
                     type: 'node',
                     position: { x: 0, y: 0 },
                     data: {
-                        nid: 'node_official_divide',
+                        nid: 'divide',
                         input: { a: 144, b: 12 },
                     },
                 },
@@ -135,7 +135,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
                     type: 'node',
                     position: { x: 0, y: 0 },
                     data: {
-                        nid: 'node_official_raw_text_editor',
+                        nid: 'raw_text_editor',
                         input: { inputText: 'Hello, World!' },
                     },
                 },
@@ -157,7 +157,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
                     type: 'node',
                     position: { x: 0, y: 0 },
                     data: {
-                        nid: 'node_official_md_text_editor',
+                        nid: 'md_text_editor',
                         input: { text: '# Heading\n\nThis is **bold** text.' },
                     },
                 },
@@ -179,7 +179,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
                     type: 'node',
                     position: { x: 0, y: 0 },
                     data: {
-                        nid: 'node_official_template',
+                        nid: 'template',
                         input: { text: 'Hello @name, welcome to @place!' },
                     },
                 },
@@ -201,7 +201,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
                     type: 'node',
                     position: { x: 0, y: 0 },
                     data: {
-                        nid: 'node_official_join_text',
+                        nid: 'join_text',
                         input: {
                             text1: 'Hello',
                             text2: ' ',
@@ -228,7 +228,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
                     type: 'node',
                     position: { x: 0, y: 0 },
                     data: {
-                        nid: 'node_official_split_text',
+                        nid: 'split_text',
                         input: {
                             text: 'apple,banana,cherry,date',
                             sep: ',',
@@ -259,7 +259,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
                     type: 'node',
                     position: { x: 0, y: 0 },
                     data: {
-                        nid: 'node_official_jimp_new_blank_image',
+                        nid: 'jimp_new_blank_image',
                         input: { width: 50, height: 50, color: '#ff0000' },
                     },
                 },
@@ -268,7 +268,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
                     type: 'node',
                     position: { x: 200, y: 0 },
                     data: {
-                        nid: 'node_official_image_viewer',
+                        nid: 'image_viewer',
                         input: {},
                     },
                 },
@@ -300,7 +300,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
                     type: 'node',
                     position: { x: 0, y: 0 },
                     data: {
-                        nid: 'node_official_jimp_new_blank_image',
+                        nid: 'jimp_new_blank_image',
                         input: { width: 100, height: 100, color: '#ff0000' },
                     },
                 },
@@ -309,7 +309,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
                     type: 'node',
                     position: { x: 200, y: 0 },
                     data: {
-                        nid: 'node_official_greyscale',
+                        nid: 'greyscale',
                         input: {},
                     },
                 },
@@ -338,7 +338,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
                     type: 'node',
                     position: { x: 0, y: 0 },
                     data: {
-                        nid: 'node_official_jimp_new_blank_image',
+                        nid: 'jimp_new_blank_image',
                         input: { width: 100, height: 100, color: '#00ff00' },
                     },
                 },
@@ -347,7 +347,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
                     type: 'node',
                     position: { x: 200, y: 0 },
                     data: {
-                        nid: 'node_official_hsv',
+                        nid: 'hsv',
                         input: { hue: 45, saturation: 20, value: 10 },
                     },
                 },
@@ -379,7 +379,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
                     type: 'node',
                     position: { x: 0, y: 0 },
                     data: {
-                        nid: 'node_official_jimp_new_blank_image',
+                        nid: 'jimp_new_blank_image',
                         input: { width: 300, height: 200, color: '#0000ff' },
                     },
                 },
@@ -403,7 +403,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
                     type: 'node',
                     position: { x: 0, y: 0 },
                     data: {
-                        nid: 'node_official_jimp_new_blank_image',
+                        nid: 'jimp_new_blank_image',
                         input: { width: 100, height: 100, color: '#ff00ff' },
                     },
                 },
@@ -412,7 +412,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
                     type: 'node',
                     position: { x: 200, y: 0 },
                     data: {
-                        nid: 'node_official_jimp_resize_image',
+                        nid: 'jimp_resize_image',
                         input: { width: 200, height: 150 },
                     },
                 },
@@ -447,7 +447,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
                     type: 'node',
                     position: { x: 0, y: 0 },
                     data: {
-                        nid: 'node_official_json_editor',
+                        nid: 'json_editor',
                         input: {
                             jsonObject:
                                 '{"name": "test", "value": 42, "active": true}',
@@ -472,7 +472,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
                     type: 'node',
                     position: { x: 0, y: 0 },
                     data: {
-                        nid: 'node_official_json_to_string',
+                        nid: 'json_to_string',
                         input: { jsonObject: { message: 'Hello', count: 123 } },
                     },
                 },
@@ -500,7 +500,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
                     type: 'node',
                     position: { x: 0, y: 0 },
                     data: {
-                        nid: 'node_official_html_viewer',
+                        nid: 'html_viewer',
                         input: {
                             html: '<h1>Test Heading</h1><p>This is a paragraph.</p>',
                         },
@@ -521,7 +521,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
                     type: 'node',
                     position: { x: 0, y: 0 },
                     data: {
-                        nid: 'node_official_html_elementify',
+                        nid: 'html_elementify',
                         input: {
                             tag: 'div',
                             innerHTML: 'Content goes here',
@@ -553,7 +553,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
                     type: 'node',
                     position: { x: 0, y: 0 },
                     data: {
-                        nid: 'node_official_fetch_url',
+                        nid: 'fetch_url',
                         input: { url: 'https://example.com' },
                     },
                 },
@@ -581,7 +581,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
                     type: 'node',
                     position: { x: 0, y: 0 },
                     data: {
-                        nid: 'node_official_nonexistent',
+                        nid: 'nonexistent',
                         input: {},
                     },
                 },
@@ -601,7 +601,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
                     type: 'node',
                     position: { x: 0, y: 0 },
                     data: {
-                        nid: 'node_official_json_editor',
+                        nid: 'json_editor',
                         input: { jsonObject: 'invalid json string {[}' },
                     },
                 },
@@ -627,7 +627,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
                     type: 'node',
                     position: { x: 0, y: 0 },
                     data: {
-                        nid: 'node_official_add',
+                        nid: 'add',
                         input: { a: 10, b: 5 },
                     },
                 },
@@ -636,7 +636,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
                     type: 'node',
                     position: { x: 200, y: 0 },
                     data: {
-                        nid: 'node_official_multiply',
+                        nid: 'multiply',
                         input: { b: 2 },
                     },
                 },
@@ -645,7 +645,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
                     type: 'node',
                     position: { x: 400, y: 0 },
                     data: {
-                        nid: 'node_official_subtract',
+                        nid: 'subtract',
                         input: { b: 3 },
                     },
                 },
@@ -694,7 +694,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
                     type: 'node',
                     position: { x: 0, y: 0 },
                     data: {
-                        nid: 'node_official_split_text',
+                        nid: 'split_text',
                         input: { text: 'apple,banana,cherry', sep: ',' },
                     },
                 },
@@ -703,7 +703,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
                     type: 'node',
                     position: { x: 200, y: 0 },
                     data: {
-                        nid: 'node_official_join_text',
+                        nid: 'join_text',
                         input: {
                             text2: ' and ',
                             text3: ' and ',
@@ -732,7 +732,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
                     type: 'node',
                     position: { x: 0, y: 0 },
                     data: {
-                        nid: 'node_official_jimp_new_blank_image',
+                        nid: 'jimp_new_blank_image',
                         input: { width: 100, height: 100, color: '#ff0000' },
                     },
                 },
@@ -741,7 +741,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
                     type: 'node',
                     position: { x: 200, y: 0 },
                     data: {
-                        nid: 'node_official_hsv',
+                        nid: 'hsv',
                         input: { hue: 60, saturation: 15, value: 5 },
                     },
                 },
@@ -750,7 +750,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
                     type: 'node',
                     position: { x: 400, y: 0 },
                     data: {
-                        nid: 'node_official_greyscale',
+                        nid: 'greyscale',
                         input: {},
                     },
                 },
@@ -806,7 +806,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
                     type: 'node',
                     position: { x: 0, y: 0 },
                     data: {
-                        nid: 'node_official_multiply',
+                        nid: 'multiply',
                         input: { a: 999999, b: 999999 },
                     },
                 },
@@ -832,7 +832,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
                     type: 'node',
                     position: { x: 0, y: 0 },
                     data: {
-                        nid: 'node_official_add',
+                        nid: 'add',
                         input: { a: 10, b: 20 },
                     },
                 },
@@ -841,7 +841,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
                     type: 'node',
                     position: { x: 0, y: 100 },
                     data: {
-                        nid: 'node_official_add',
+                        nid: 'add',
                         input: { a: 30, b: 40 },
                     },
                 },
@@ -850,7 +850,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
                     type: 'node',
                     position: { x: 0, y: 200 },
                     data: {
-                        nid: 'node_official_add',
+                        nid: 'add',
                         input: { a: 50, b: 60 },
                     },
                 },
@@ -859,7 +859,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
                     type: 'node',
                     position: { x: 300, y: 100 },
                     data: {
-                        nid: 'node_official_multiply',
+                        nid: 'multiply',
                         input: {},
                     },
                 },

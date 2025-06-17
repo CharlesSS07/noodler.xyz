@@ -1,12 +1,12 @@
 <script module lang="ts">
     import { type Node } from '@xyflow/svelte';
 
-    // Official NID for this node: node_official_template
+    // Official NID for this node: template
     export type TemplateFillinNodeType = Node<
         {
-            input: Record<string, string>; // Stores connected input values for variables
             template: string; // The user-defined template string
-            nid?: string; // Should be set to 'node_official_template' when using official blueprint
+            fillins: string[],
+            nid?: string; // Should be set to 'template' when using official blueprint
         },
         'node-template-fillin'
     >;
@@ -28,21 +28,12 @@
     let { id, data }: NodeProps<TemplateFillinNodeType> = $props();
 
     const { updateNodeData } = useSvelteFlow();
-    
-    // Set the official NID if not already set
-    if (!data.nid) {
-        updateNodeData(id, { nid: 'node_official_template' });
-    }
+
     const connections = useNodeConnections();
 
     // State for template handling
     let isEditing: boolean = $state(false);
     let textareaRef: HTMLTextAreaElement;
-
-    // Initialize data.template if not set
-    if (!data.template) {
-        data.template = 'Hello @name, welcome to @city!\nYour age is @age years old.';
-    }
 
     // Socket styling for string inputs and output
     let inputSocketStyle = $state('');
@@ -65,21 +56,6 @@
         // Get unique variable names (remove @ prefix and dedupe)
         const uniqueVars = [...new Set(matches.map((match) => match.slice(1)))];
         return uniqueVars;
-    });
-
-    // Process template with variables - this effect will update the output
-    $effect(() => {
-        if (data.input) {
-            let result = data.template;
-
-            // Replace each variable with its value from data.input
-            Object.entries(data.input).forEach(([key, value]) => {
-                const placeholder = `@${key}`;
-                // Ensure that if a variable is not provided, its placeholder remains or is replaced by empty string
-                result = result.replaceAll(placeholder, value || ''); // Replaced with empty string if value is falsy
-            });
-
-        }
     });
 
     // Handle click to edit
@@ -155,7 +131,33 @@
     }
 </script>
 
-<div class="w-[300px] max-w-[400px] flex flex-col border-2 border-gray-300 rounded-lg bg-white relative">
+<div class="flex flex-col border-2 border-gray-300 rounded-lg bg-white relative">
+
+    <NodeResizeControl
+            minWidth={100}
+            minHeight={50}
+            style="background: transparent; border: none;"
+    >
+        <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                stroke-width="2"
+                stroke="rgb(128, 128, 128)"
+                fill="none"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                style="position: absolute; right: 5px; bottom: 5px;"
+        >
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <polyline points="16 20 20 20 20 16" />
+            <line x1="14" y1="14" x2="20" y2="20" />
+            <polyline points="8 4 4 4 4 8" />
+            <line x1="4" y1="4" x2="10" y2="10" />
+        </svg>
+    </NodeResizeControl>
+
     <div class="p-3"> {#if isEditing}
             <textarea
                     bind:this={textareaRef}
@@ -203,33 +205,14 @@
             {/if}
         </div>
     {/if}
-
-        {#if isEditing}
-            <div class="absolute top-2 right-2 px-2 py-1 bg-blue-500 text-white text-xs rounded">
-                Editing (ESC to finish)
-            </div>
-        {/if}
     </div>
-
-    <!--{#if templateVariables().length > 0}-->
-    <!--    <div class="bg-gray-100 border-t border-gray-300 rounded-b-lg p-2 text-xs">-->
-    <!--        <div class="text-gray-600 mb-1">Variables:</div>-->
-    <!--        <div class="flex flex-wrap gap-1">-->
-    <!--            {#each templateVariables() as variable}-->
-    <!--                <span class="px-1 py-0.5 rounded text-xs {getTemplateVariable(variable) ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">-->
-    <!--                    @{variable}-->
-    <!--                </span>-->
-    <!--            {/each}-->
-    <!--        </div>-->
-    <!--    </div>-->
-    <!--{/if}-->
 
     {#each templateVariables() as variable, index}
         <Handle
                 type="target"
                 position={Position.Left}
                 style="top:{5 + index * 10}%;{inputSocketStyle}"
-                id={variable}
+                id='fillins_{variable}'
                 class="socket-handle"
         />
         <Tooltip placement="left">{variable}</Tooltip>
@@ -260,10 +243,5 @@
         border-radius: 3px;
         font-weight: 500;
         border: 1px dashed #fca5a5;
-    }
-
-    .socket-handle {
-        width: 8px;
-        height: 8px;
     }
 </style>

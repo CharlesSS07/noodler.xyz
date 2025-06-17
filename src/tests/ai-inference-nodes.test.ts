@@ -38,7 +38,7 @@ describe('AI Inference Nodes Unit Tests', () => {
                     type: 'node',
                     position: { x: 0, y: 0 },
                     data: {
-                        nid: 'node_official_ai_fill_mask',
+                        nid: 'ai_fill_mask',
                         input: {
                             text: 'The weather today is [MASK].',
                             model: 'bert-base-uncased',

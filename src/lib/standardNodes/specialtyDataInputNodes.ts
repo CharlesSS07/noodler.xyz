@@ -1,6 +1,7 @@
 import type { NodeBluePrintControllerFactoryInterface } from '../../routes/app/lib/NodeBluePrint.js';
 import { FirestoreNodeBluePrintControllerFactoryInterface } from '../../routes/app/lib/FirestoreNodeBluePrint.js';
 import {
+    GenericSocketParamsBuilder,
     JIMPImageSocketParamsBuilder,
     NumberSocketParamsBuilder,
     StringSocketParamsBuilder,
@@ -97,11 +98,18 @@ export async function specialtyDataInputDataNodes() {
     textTemplateFillin.documentation =
         'Replaces @x with the value of x, a string value. Filled in during computation.';
 
-    textTemplateFillin.newInputSocket('text', {
+    textTemplateFillin.newInputSocket('template', {
         label: 'Text',
         documentation: '',
-        type: 'unknown',
+        type: 'string',
         params: new StringSocketParamsBuilder('').build(),
+    });
+
+    textTemplateFillin.newInputSocket('fillins', {
+        label: 'Text',
+        documentation: '',
+        type: 'Record<string, string>',
+        params: new GenericSocketParamsBuilder({}).build(),
     });
 
     textTemplateFillin.newOutputSocket('text', {
@@ -110,7 +118,12 @@ export async function specialtyDataInputDataNodes() {
         type: 'string',
     });
 
-    textTemplateFillin.code = `outputs.set("text", inputs.text);`;
+    // should iterate through the keys of inputs.fillins and replace the keys in the text
+    textTemplateFillin.code = `
+let filledIn = inputs.template;
+for ()
+outputs.set("text", inputs.text);
+`;
 
     const imageLoader =
         await nodeBluePrintController.initOfficialNodeBluePrint('image_loader');
@@ -172,4 +185,27 @@ const img = await utils.Jimp.read(arrayBuffer);
 
 outputs.set('image', img);
 `;
+
+
+    const jsNode =
+        await nodeBluePrintController.initOfficialNodeBluePrint(
+            'js'
+        );
+    jsNode.title = 'JS Node';
+    jsNode.documentation = 'Modify JS in a Node Environment';
+
+    jsNode.newInputSocket('js_code', {
+        label: 'JS',
+        documentation: '',
+        type: 'string',
+        params: new StringSocketParamsBuilder('').build(),
+    });
+
+    jsNode.newOutputSocket('outputText', {
+        label: 'Return',
+        documentation: '',
+        type: 'unknown',
+    });
+
+    jsNode.code = `outputs.set("outputText", inputs.inputText);`;
 }
