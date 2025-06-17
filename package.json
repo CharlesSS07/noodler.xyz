@@ -60,6 +60,7 @@
     "dependencies": {
         "@gradio/client": "^1.15.0",
         "@sveltejs/adapter-static": "^3.0.8",
+        "@tensorflow/tfjs": "^4.22.0",
         "@xyflow/svelte": "^1.0.2",
         "elkjs": "^0.10.0",
         "firebase": "^11.8.1",

@@ -6,6 +6,7 @@ import {
     NumberSocketParamsBuilder,
     StringSocketParamsBuilder,
 } from '../../routes/app/lib/SocketParamBuilders.js';
+import { STANDARD_DATATYPES } from '../../routes/app/lib/DataTypes.js';
 
 const nodeBluePrintController: NodeBluePrintControllerFactoryInterface =
     new FirestoreNodeBluePrintControllerFactoryInterface();
@@ -21,14 +22,14 @@ export async function specialtyDataInputDataNodes() {
     rawTextEditor.newInputSocket('inputText', {
         label: 'Text',
         documentation: '',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder('').build(),
     });
 
     rawTextEditor.newOutputSocket('outputText', {
         label: 'Text',
         documentation: '',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
     });
 
     rawTextEditor.code = `outputs.set("outputText", inputs.inputText);`;
@@ -43,28 +44,28 @@ export async function specialtyDataInputDataNodes() {
     completeTextHuggingfaceLLM.newInputSocket('text', {
         label: 'Text',
         documentation: 'Text to complete.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder('').build(),
     });
 
     completeTextHuggingfaceLLM.newInputSocket('modelId', {
         label: 'Model ID',
         documentation: 'Hugginface Model ID',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder('').build(),
     });
 
     completeTextHuggingfaceLLM.newInputSocket('maxTokens', {
         label: 'Max Tokens',
         documentation: 'Largest number of tokens to allocate.',
-        type: 'number',
+        type: STANDARD_DATATYPES.NUMBER,
         params: new NumberSocketParamsBuilder(1000).build(),
     });
 
     completeTextHuggingfaceLLM.newOutputSocket('completed_text', {
         label: 'Completed Text',
         documentation: 'The prediced next tokens.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
     });
 
     completeTextHuggingfaceLLM.code = `console.error("completeTextHuggingfaceLLM node not implemented")`;
@@ -80,14 +81,14 @@ export async function specialtyDataInputDataNodes() {
     mdTextEditor.newInputSocket('text', {
         label: 'Text',
         documentation: '',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder('').build(),
     });
 
     mdTextEditor.newOutputSocket('text', {
         label: 'Text',
         documentation: '',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
     });
 
     mdTextEditor.code = `outputs.set("text", inputs.text);`;
@@ -101,7 +102,7 @@ export async function specialtyDataInputDataNodes() {
     textTemplateFillin.newInputSocket('template', {
         label: 'Text',
         documentation: '',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder('').build(),
     });
 
@@ -115,7 +116,7 @@ export async function specialtyDataInputDataNodes() {
     textTemplateFillin.newOutputSocket('text', {
         label: 'Filled in Template',
         documentation: '',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
     });
 
     // should iterate through the keys of inputs.fillins and replace the keys in the text
@@ -133,14 +134,14 @@ outputs.set("text", inputs.text);
     imageLoader.newInputSocket('imageOrFileOrString', {
         label: 'Upload Image',
         documentation: 'Image uploaded from file.',
-        type: 'file',
+        type: STANDARD_DATATYPES.FILE,
         params: new JIMPImageSocketParamsBuilder().build(),
     });
 
     imageLoader.newOutputSocket('image', {
         label: 'Image',
         documentation: 'The image you viewed.',
-        type: 'image/jimp',
+        type: STANDARD_DATATYPES.IMAGE_JIMP,
     });
 
     imageLoader.code = `
@@ -169,7 +170,7 @@ if (typeof imageOrFileOrString === 'string') {
     htmlRenderer.newInputSocket('html', {
         label: 'HTML',
         documentation: 'HTML to display in iframe.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder('').build(),
     });
 
@@ -197,7 +198,7 @@ outputs.set('image', img);
     jsNode.newInputSocket('js_code', {
         label: 'JS',
         documentation: '',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder('').build(),
     });
 

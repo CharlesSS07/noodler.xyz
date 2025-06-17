@@ -1,7 +1,7 @@
 <script lang="ts">
     import NodeWrapper from "$lib/components/NodeWrapper.svelte";
     import {Handle, Position, type NodeProps} from "@xyflow/svelte";
-    import {getSocketDataTypeByName} from "../../lib/DataTypes.ts";
+    import {fetchSocketDataTypeByName} from "../../lib/DataTypes.ts";
     import { type Node } from '@xyflow/svelte';
 
     export type SplitStringNodeType = Node<
@@ -23,10 +23,10 @@
 
     let inputSocketStyle = $state('');
     let outputSocketStyle = $state('');
-    getSocketDataTypeByName('string').then((datatype) => {
+    fetchSocketDataTypeByName('string').then((datatype) => {
         inputSocketStyle = datatype?.style || '';
     });
-    getSocketDataTypeByName('string').then((datatype) => {
+    fetchSocketDataTypeByName('string').then((datatype) => {
         outputSocketStyle = datatype?.style || '';
     });
 </script>

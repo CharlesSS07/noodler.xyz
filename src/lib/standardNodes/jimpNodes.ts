@@ -5,6 +5,7 @@ import {
     NumberSocketParamsBuilder,
     StringSocketParamsBuilder,
 } from '../../routes/app/lib/SocketParamBuilders.js';
+import { STANDARD_DATATYPES } from '../../routes/app/lib/DataTypes.js';
 
 const nodeBluePrintController: NodeBluePrintControllerFactoryInterface =
     new FirestoreNodeBluePrintControllerFactoryInterface();
@@ -27,21 +28,21 @@ export async function jimpNodes() {
     await newBlankImage.newInputSocket('height', {
         label: 'Height',
         documentation: 'Height of the image.',
-        type: 'number',
+        type: STANDARD_DATATYPES.NUMBER,
         params: new NumberSocketParamsBuilder(1024).setMin(0).build(),
     });
 
     await newBlankImage.newInputSocket('width', {
         label: 'Width',
         documentation: 'Width of the image.',
-        type: 'number',
+        type: STANDARD_DATATYPES.NUMBER,
         params: new NumberSocketParamsBuilder(1024).setMin(0).build(),
     });
 
     await newBlankImage.newOutputSocket('image', {
         label: 'Image (JIMP)',
         documentation: 'The new images.',
-        type: 'image/jimp',
+        type: STANDARD_DATATYPES.IMAGE_JIMP,
     });
 
     newBlankImage.code =
@@ -57,14 +58,14 @@ export async function jimpNodes() {
     await resize.newInputSocket('image', {
         label: 'Image (JIMP)',
         documentation: 'The high-res images.',
-        type: 'image/jimp',
+        type: STANDARD_DATATYPES.IMAGE_JIMP,
         params: new JIMPImageSocketParamsBuilder().build(),
     });
 
     await resize.newInputSocket('width', {
         label: 'Width',
         documentation: 'Width of the image.',
-        type: 'number',
+        type: STANDARD_DATATYPES.NUMBER,
         params: new NumberSocketParamsBuilder(1024)
             .setMin(0)
             .setStep(1)
@@ -74,7 +75,7 @@ export async function jimpNodes() {
     await resize.newInputSocket('height', {
         label: 'Height',
         documentation: 'Height of the image.',
-        type: 'number',
+        type: STANDARD_DATATYPES.NUMBER,
         params: new NumberSocketParamsBuilder(1024)
             .setMin(0)
             .setStep(1)
@@ -84,7 +85,7 @@ export async function jimpNodes() {
     await resize.newOutputSocket('image', {
         label: 'Image (JIMP)',
         documentation: 'The resized images.',
-        type: 'image/jimp',
+        type: STANDARD_DATATYPES.IMAGE_JIMP,
     });
 
     resize.code = `const img2 = inputs.image.clone();

@@ -1,6 +1,7 @@
 import type { NodeBluePrintControllerFactoryInterface } from '../../routes/app/lib/NodeBluePrint.js';
 import { FirestoreNodeBluePrintControllerFactoryInterface } from '../../routes/app/lib/FirestoreNodeBluePrint.js';
 import { NumberSocketParamsBuilder } from '../../routes/app/lib/SocketParamBuilders.js';
+import { STANDARD_DATATYPES } from '../../routes/app/lib/DataTypes.js';
 
 const nodeBluePrintController: NodeBluePrintControllerFactoryInterface =
     new FirestoreNodeBluePrintControllerFactoryInterface();
@@ -15,21 +16,21 @@ export async function basicMathNodes() {
     await addNode.newInputSocket('a', {
         label: 'Number A',
         documentation: 'First number to add',
-        type: 'number',
+        type: STANDARD_DATATYPES.NUMBER,
         params: new NumberSocketParamsBuilder(0).build(),
     });
 
     await addNode.newInputSocket('b', {
         label: 'Number B',
         documentation: 'Second number to add',
-        type: 'number',
+        type: STANDARD_DATATYPES.NUMBER,
         params: new NumberSocketParamsBuilder(0).build(),
     });
 
     await addNode.newOutputSocket('result', {
         label: 'Sum',
         documentation: 'The sum of A + B',
-        type: 'number',
+        type: STANDARD_DATATYPES.NUMBER,
     });
 
     addNode.code = `
@@ -48,21 +49,21 @@ export async function basicMathNodes() {
     await subtractNode.newInputSocket('a', {
         label: 'Number A',
         documentation: 'Number to subtract from',
-        type: 'number',
+        type: STANDARD_DATATYPES.NUMBER,
         params: new NumberSocketParamsBuilder(0).build(),
     });
 
     await subtractNode.newInputSocket('b', {
         label: 'Number B',
         documentation: 'Number to subtract',
-        type: 'number',
+        type: STANDARD_DATATYPES.NUMBER,
         params: new NumberSocketParamsBuilder(0).build(),
     });
 
     await subtractNode.newOutputSocket('result', {
         label: 'Difference',
         documentation: 'The result of A - B',
-        type: 'number',
+        type: STANDARD_DATATYPES.NUMBER,
     });
 
     subtractNode.code = `
@@ -81,21 +82,21 @@ export async function basicMathNodes() {
     await multiplyNode.newInputSocket('a', {
         label: 'Number A',
         documentation: 'First number to multiply',
-        type: 'number',
+        type: STANDARD_DATATYPES.NUMBER,
         params: new NumberSocketParamsBuilder(1).build(),
     });
 
     await multiplyNode.newInputSocket('b', {
         label: 'Number B',
         documentation: 'Second number to multiply',
-        type: 'number',
+        type: STANDARD_DATATYPES.NUMBER,
         params: new NumberSocketParamsBuilder(1).build(),
     });
 
     await multiplyNode.newOutputSocket('result', {
         label: 'Product',
         documentation: 'The product of A * B',
-        type: 'number',
+        type: STANDARD_DATATYPES.NUMBER,
     });
 
     multiplyNode.code = `
@@ -114,21 +115,21 @@ export async function basicMathNodes() {
     await divideNode.newInputSocket('a', {
         label: 'Dividend',
         documentation: 'Number to be divided',
-        type: 'number',
+        type: STANDARD_DATATYPES.NUMBER,
         params: new NumberSocketParamsBuilder(1).build(),
     });
 
     await divideNode.newInputSocket('b', {
         label: 'Divisor',
         documentation: 'Number to divide by',
-        type: 'number',
+        type: STANDARD_DATATYPES.NUMBER,
         params: new NumberSocketParamsBuilder(1).build(),
     });
 
     await divideNode.newOutputSocket('result', {
         label: 'Quotient',
         documentation: 'The result of A / B',
-        type: 'number',
+        type: STANDARD_DATATYPES.NUMBER,
     });
 
     divideNode.code = `

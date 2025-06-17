@@ -16,7 +16,7 @@
 <script lang="ts">
     import { Handle, Position, type NodeProps, useSvelteFlow, useNodeConnections } from '@xyflow/svelte';
     import { Jimp } from "jimp";
-    import { getSocketDataTypeByName } from "../../lib/DataTypes";
+    import { fetchSocketDataTypeByName } from "../../lib/DataTypes";
     import { projectOutputDataCache } from "$lib/stores/ProjectState";
     import { untrack } from "svelte";
     import { 
@@ -162,7 +162,7 @@
     });
 
     let socketStyle = $state('');
-    getSocketDataTypeByName('image/jimp').then((datatype) => {
+    fetchSocketDataTypeByName('image/jimp').then((datatype) => {
         socketStyle = datatype?.style || 'background: #10b981';
     });
 </script>

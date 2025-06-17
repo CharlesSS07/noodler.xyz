@@ -20,7 +20,7 @@
         type NodeProps
     } from '@xyflow/svelte';
 
-    import { getSocketDataTypeByName } from '../../lib/DataTypes';
+    import { fetchSocketDataTypeByName } from '../../lib/DataTypes';
     import { untrack } from 'svelte';
     import { marked } from 'marked'; // Import marked
 
@@ -38,7 +38,7 @@
     let isFocused = $state(false); // New state variable
 
     // Handle style loading
-    getSocketDataTypeByName('string').then((datatype) => {
+    fetchSocketDataTypeByName('string').then((datatype) => {
         socketStyle = datatype?.style || '';
     });
 

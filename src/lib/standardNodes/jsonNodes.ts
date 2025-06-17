@@ -1,6 +1,7 @@
 import type { NodeBluePrintControllerFactoryInterface } from '../../routes/app/lib/NodeBluePrint.js';
 import { FirestoreNodeBluePrintControllerFactoryInterface } from '../../routes/app/lib/FirestoreNodeBluePrint.js';
 import { GenericSocketParamsBuilder } from '../../routes/app/lib/SocketParamBuilders.js';
+import { STANDARD_DATATYPES } from '../../routes/app/lib/DataTypes.js';
 
 const nodeBluePrintController: NodeBluePrintControllerFactoryInterface =
     new FirestoreNodeBluePrintControllerFactoryInterface();
@@ -48,7 +49,7 @@ export async function jsonNodes() {
     await jsonToString.newOutputSocket('jsonString', {
         label: 'Text',
         documentation: 'The string JSON.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
     });
 
     jsonToString.code =

@@ -22,7 +22,7 @@
         type NodeProps,
         NodeResizeControl
     } from '@xyflow/svelte';
-    import { getSocketDataTypeByName } from '../../lib/DataTypes';
+    import { fetchSocketDataTypeByName } from '../../lib/DataTypes';
     import {Tooltip} from "flowbite-svelte";
 
     let { id, data }: NodeProps<TemplateFillinNodeType> = $props();
@@ -38,10 +38,10 @@
     // Socket styling for string inputs and output
     let inputSocketStyle = $state('');
     let outputSocketStyle = $state('');
-    getSocketDataTypeByName('string').then((datatype) => {
+    fetchSocketDataTypeByName('string').then((datatype) => {
         inputSocketStyle = datatype?.style || '';
     });
-    getSocketDataTypeByName('string').then((datatype) => {
+    fetchSocketDataTypeByName('string').then((datatype) => {
         outputSocketStyle = datatype?.style || '';
     });
 

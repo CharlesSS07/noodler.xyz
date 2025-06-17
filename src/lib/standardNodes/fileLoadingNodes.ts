@@ -1,6 +1,7 @@
 import type { NodeBluePrintControllerFactoryInterface } from '../../routes/app/lib/NodeBluePrint.js';
 import { FirestoreNodeBluePrintControllerFactoryInterface } from '../../routes/app/lib/FirestoreNodeBluePrint.js';
 import { JIMPImageSocketParamsBuilder } from '../../routes/app/lib/SocketParamBuilders.js';
+import { STANDARD_DATATYPES } from '../../routes/app/lib/DataTypes.js';
 
 const nodeBluePrintController: NodeBluePrintControllerFactoryInterface =
     new FirestoreNodeBluePrintControllerFactoryInterface();
@@ -14,7 +15,7 @@ export async function fileLoadingNodes() {
     await loadExcel.newInputSocket('xlsx_file', {
         label: '.xlsx',
         documentation: 'Excel File',
-        type: 'file',
+        type: STANDARD_DATATYPES.FILE,
         params: new JIMPImageSocketParamsBuilder().build(),
     });
 

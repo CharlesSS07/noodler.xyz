@@ -1,6 +1,7 @@
 import type { NodeBluePrintControllerFactoryInterface } from '../../routes/app/lib/NodeBluePrint.js';
 import { FirestoreNodeBluePrintControllerFactoryInterface } from '../../routes/app/lib/FirestoreNodeBluePrint.js';
 import { JIMPImageSocketParamsBuilder } from '../../routes/app/lib/SocketParamBuilders.js';
+import { STANDARD_DATATYPES } from '../../routes/app/lib/DataTypes.js';
 
 const nodeBluePrintController: NodeBluePrintControllerFactoryInterface =
     new FirestoreNodeBluePrintControllerFactoryInterface();
@@ -14,14 +15,14 @@ export async function aiDemoNodes() {
     await colorize.newInputSocket('img', {
         label: 'Greyscale Image',
         documentation: 'Greyscale image to colorize.',
-        type: 'image/jimp',
+        type: STANDARD_DATATYPES.IMAGE_JIMP,
         params: new JIMPImageSocketParamsBuilder().build(),
     });
 
     await colorize.newOutputSocket('img', {
         label: 'Color Image',
         documentation: 'Color version of input image.',
-        type: 'image/jimp',
+        type: STANDARD_DATATYPES.IMAGE_JIMP,
     });
 
     colorize.code = `
@@ -38,14 +39,14 @@ export async function aiDemoNodes() {
     await superResolution.newInputSocket('img', {
         label: 'Low-res Image',
         documentation: 'Image to enhance.',
-        type: 'image/jimp',
+        type: STANDARD_DATATYPES.IMAGE_JIMP,
         params: new JIMPImageSocketParamsBuilder().build(),
     });
 
     await superResolution.newOutputSocket('super_res_img', {
         label: 'High-res Image',
         documentation: 'Enhanced image.',
-        type: 'image/jimp',
+        type: STANDARD_DATATYPES.IMAGE_JIMP,
     });
 
     superResolution.code = `
@@ -73,26 +74,26 @@ const output = await upscaler(url);
     await objectBackgroundSeperation.newInputSocket('img', {
         label: 'Image',
         documentation: 'Image to enhance.',
-        type: 'image/jimp',
+        type: STANDARD_DATATYPES.IMAGE_JIMP,
         params: new JIMPImageSocketParamsBuilder().build(),
     });
 
     await objectBackgroundSeperation.newOutputSocket('foreground_img', {
         label: 'Foreground Image',
         documentation: 'Alpha-ed out background.',
-        type: 'image/jimp',
+        type: STANDARD_DATATYPES.IMAGE_JIMP,
     });
 
     await objectBackgroundSeperation.newOutputSocket('background_img', {
         label: 'Background Infilled Image',
         documentation: 'Infilled image with no foreground.',
-        type: 'image/jimp',
+        type: STANDARD_DATATYPES.IMAGE_JIMP,
     });
 
     await objectBackgroundSeperation.newOutputSocket('mask', {
         label: 'Mask',
         documentation: 'Black for background, white for foreground.',
-        type: 'image/jimp',
+        type: STANDARD_DATATYPES.IMAGE_JIMP,
     });
 
     objectBackgroundSeperation.code = `

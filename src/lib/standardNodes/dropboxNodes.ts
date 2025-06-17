@@ -1,6 +1,7 @@
 import type { NodeBluePrintControllerFactoryInterface } from '../../routes/app/lib/NodeBluePrint.js';
 import { FirestoreNodeBluePrintControllerFactoryInterface } from '../../routes/app/lib/FirestoreNodeBluePrint.js';
 import { JIMPImageSocketParamsBuilder } from '../../routes/app/lib/SocketParamBuilders.js';
+import { STANDARD_DATATYPES } from '../../routes/app/lib/DataTypes.js';
 
 const nodeBluePrintController: NodeBluePrintControllerFactoryInterface =
     new FirestoreNodeBluePrintControllerFactoryInterface();
@@ -14,7 +15,7 @@ export async function dropboxNodes() {
     await saveDropbox.newInputSocket('image_file', {
         label: 'Image',
         documentation: 'Image File',
-        type: 'image/jimp',
+        type: STANDARD_DATATYPES.IMAGE_JIMP,
         params: new JIMPImageSocketParamsBuilder().build(),
     });
 
@@ -28,7 +29,7 @@ export async function dropboxNodes() {
     await loadDropbox.newOutputSocket('image_file', {
         label: 'Image',
         documentation: 'Image File',
-        type: 'image/jimp',
+        type: STANDARD_DATATYPES.IMAGE_JIMP,
     });
 
     loadDropbox.code = "console.error('Not Implemented');";

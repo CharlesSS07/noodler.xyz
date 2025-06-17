@@ -15,7 +15,7 @@
 
 <script lang="ts">
     import { Handle, Position, type NodeProps, useSvelteFlow } from '@xyflow/svelte';
-    import { getSocketDataTypeByName } from "../../lib/DataTypes";
+    import { fetchSocketDataTypeByName } from "../../lib/DataTypes";
 
     let { id, data }: NodeProps<HtmlRendererNodeType> = $props();
     
@@ -32,7 +32,7 @@
 
     // Socket styling
     let socketStyle = $state('');
-    getSocketDataTypeByName('text').then((datatype) => {
+    fetchSocketDataTypeByName('text').then((datatype) => {
         socketStyle = datatype?.style || '';
     });
 

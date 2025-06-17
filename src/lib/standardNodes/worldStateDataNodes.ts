@@ -1,6 +1,7 @@
 import type { NodeBluePrintControllerFactoryInterface } from '../../routes/app/lib/NodeBluePrint.js';
 import { FirestoreNodeBluePrintControllerFactoryInterface } from '../../routes/app/lib/FirestoreNodeBluePrint.js';
 import { NumberSocketParamsBuilder } from '../../routes/app/lib/SocketParamBuilders.js';
+import { STANDARD_DATATYPES } from '../../routes/app/lib/DataTypes.js';
 
 const nodeBluePrintController: NodeBluePrintControllerFactoryInterface =
     new FirestoreNodeBluePrintControllerFactoryInterface();
@@ -14,7 +15,7 @@ export async function worldStateDataNodes() {
     await weather.newInputSocket('lat', {
         label: 'GPS Latitude',
         documentation: 'Latitude',
-        type: 'number',
+        type: STANDARD_DATATYPES.NUMBER,
         params: new NumberSocketParamsBuilder(40.758701)
             .setMin(-90)
             .setMax(90)
@@ -24,7 +25,7 @@ export async function worldStateDataNodes() {
     await weather.newInputSocket('long', {
         label: 'GPS Longitude',
         documentation: 'Longitude',
-        type: 'number',
+        type: STANDARD_DATATYPES.NUMBER,
         params: new NumberSocketParamsBuilder(-111.876183)
             .setMin(-180)
             .setMax(180)
@@ -35,37 +36,37 @@ export async function worldStateDataNodes() {
     await weather.newOutputSocket('precipitation', {
         label: 'Precipitation',
         documentation: 'How much it rains',
-        type: 'number',
+        type: STANDARD_DATATYPES.NUMBER,
     });
 
     await weather.newOutputSocket('predipication_variance', {
         label: 'Precipitation Uncertainty',
         documentation: 'How much it rains when this says it will rain.',
-        type: 'number',
+        type: STANDARD_DATATYPES.NUMBER,
     });
 
     await weather.newOutputSocket('temp_f', {
         label: 'Temperature (F)',
         documentation: 'In farenheight',
-        type: 'number',
+        type: STANDARD_DATATYPES.NUMBER,
     });
 
     await weather.newOutputSocket('temp_c', {
         label: 'Temperature (C)',
         documentation: 'In celcius',
-        type: 'number',
+        type: STANDARD_DATATYPES.NUMBER,
     });
 
     await weather.newOutputSocket('wind_speed_mph', {
         label: 'Wind Speed (mph)',
         documentation: 'Wind speed in miles per hour',
-        type: 'number',
+        type: STANDARD_DATATYPES.NUMBER,
     });
 
     await weather.newOutputSocket('wind_speed_kmph', {
         label: 'Wind Speed (km/h)',
         documentation: 'Wind speed in kilometers per hour',
-        type: 'number',
+        type: STANDARD_DATATYPES.NUMBER,
     });
 
     await weather.newOutputSocket('anomolous_rating', {
@@ -73,7 +74,7 @@ export async function worldStateDataNodes() {
         documentation:
             'How anomalous is the weather in this location on this day given known history? ' +
             'Is today significatnly different?',
-        type: 'number',
+        type: STANDARD_DATATYPES.NUMBER,
     });
 
     weather.code = `

@@ -1,6 +1,7 @@
 import type { NodeBluePrintControllerFactoryInterface } from '../../routes/app/lib/NodeBluePrint.js';
 import { FirestoreNodeBluePrintControllerFactoryInterface } from '../../routes/app/lib/FirestoreNodeBluePrint.js';
 import { StringSocketParamsBuilder } from '../../routes/app/lib/SocketParamBuilders.js';
+import { STANDARD_DATATYPES } from '../../routes/app/lib/DataTypes.js';
 
 const nodeBluePrintController: NodeBluePrintControllerFactoryInterface =
     new FirestoreNodeBluePrintControllerFactoryInterface();
@@ -14,32 +15,32 @@ export async function promptDesignNodes() {
     await joinText.newInputSocket('text1', {
         label: 'Text',
         documentation: 'String of text.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder('').asSentence().build(),
     });
     await joinText.newInputSocket('text2', {
         label: 'Text',
         documentation: 'String of text.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder('').asSentence().build(),
     });
     await joinText.newInputSocket('text3', {
         label: 'Text',
         documentation: 'String of text.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder('').asSentence().build(),
     });
     await joinText.newInputSocket('text4', {
         label: 'Text',
         documentation: 'String of text.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder('').asSentence().build(),
     });
 
     await joinText.newOutputSocket('text', {
         label: 'Joined Text',
         documentation: 'Text. Joined.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
     });
 
     joinText.code =
@@ -53,13 +54,13 @@ export async function promptDesignNodes() {
     await splitText.newInputSocket('text', {
         label: 'Text',
         documentation: 'String of text.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder('').build(),
     });
     await splitText.newInputSocket('sep', {
         label: 'Seperator',
         documentation: 'String of text.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder(',').build(),
     });
 

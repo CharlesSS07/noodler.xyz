@@ -4,6 +4,7 @@ import {
     GenericSocketParamsBuilder,
     StringSocketParamsBuilder,
 } from '../../routes/app/lib/SocketParamBuilders.js';
+import { STANDARD_DATATYPES } from '../../routes/app/lib/DataTypes.js';
 
 const nodeBluePrintController: NodeBluePrintControllerFactoryInterface =
     new FirestoreNodeBluePrintControllerFactoryInterface();
@@ -36,14 +37,14 @@ export async function htmlNodes() {
         documentation: 'Object to stringify into JSON.',
         // type: "ENUM",
         // params: new ENUMSocketConfig(Array.from(new Set(Array.from(document.querySelectorAll("*"), el => el.tagName.toLowerCase()))))
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder('').asSentence().build(),
     });
 
     await htmlElement.newInputSocket('innerHTML', {
         label: 'Inner HTML',
         documentation: 'Inner html of this element.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder('').asParagraph().build(),
     });
 
@@ -57,7 +58,7 @@ export async function htmlNodes() {
     await htmlElement.newOutputSocket('html', {
         label: 'HTML',
         documentation: 'The html.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
     });
 
     htmlElement.code =
@@ -90,14 +91,14 @@ outputs.set('html', d);
     await fetchURL.newInputSocket('url', {
         label: 'URL',
         documentation: 'The URL to fetch data from.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder('').asWord().build(),
     });
 
     await fetchURL.newOutputSocket('text', {
         label: 'Fetched Content',
         documentation: 'The plain text fetched from the URL.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
     });
 
     fetchURL.code = `

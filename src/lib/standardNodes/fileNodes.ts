@@ -4,6 +4,7 @@ import {
     CSVSocketParamsBuilder,
     TSVSocketParamsBuilder,
 } from '../../routes/app/lib/SocketParamBuilders.js';
+import { STANDARD_DATATYPES } from '../../routes/app/lib/DataTypes.js';
 
 const nodeBluePrintController: NodeBluePrintControllerFactoryInterface =
     new FirestoreNodeBluePrintControllerFactoryInterface();
@@ -26,7 +27,7 @@ export async function fileNodes() {
     await loadCSV.newOutputSocket('text', {
         label: 'CSV Content',
         documentation: 'Raw text content from the CSV file.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
     });
 
     loadCSV.code = `outputs.set('text', inputs.file.text);`;
@@ -48,7 +49,7 @@ export async function fileNodes() {
     await loadTSV.newOutputSocket('text', {
         label: 'TSV Content',
         documentation: 'Raw text content from the TSV file.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
     });
 
     loadTSV.code = `

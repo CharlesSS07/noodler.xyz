@@ -6,6 +6,7 @@ import {
     JIMPImageSocketParamsBuilder,
     GenericSocketParamsBuilder,
 } from '../../routes/app/lib/SocketParamBuilders.js';
+import { STANDARD_DATATYPES } from '../../routes/app/lib/DataTypes.js';
 
 const factory: NodeBluePrintControllerFactoryInterface =
     new FirestoreNodeBluePrintControllerFactoryInterface();
@@ -20,7 +21,7 @@ export async function aiInferenceNodes() {
     textToImage.newInputSocket('prompt', {
         label: 'Prompt',
         documentation: 'Text description of the image to generate.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder(
             'A beautiful sunset over mountains'
         )
@@ -31,7 +32,7 @@ export async function aiInferenceNodes() {
     textToImage.newInputSocket('model', {
         label: 'Model',
         documentation: 'AI model to use for generation.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder(
             'runwayml/stable-diffusion-v1-5'
         ).build(),
@@ -41,7 +42,7 @@ export async function aiInferenceNodes() {
         label: 'Inference Steps',
         documentation:
             'Number of denoising steps (higher = better quality, slower).',
-        type: 'number',
+        type: STANDARD_DATATYPES.NUMBER,
         params: new NumberSocketParamsBuilder(50).setMin(1).setMax(100).build(),
     });
 
@@ -49,7 +50,7 @@ export async function aiInferenceNodes() {
         label: 'Guidance Scale',
         documentation:
             'How closely to follow the prompt (higher = more adherent).',
-        type: 'number',
+        type: STANDARD_DATATYPES.NUMBER,
         params: new NumberSocketParamsBuilder(7.5)
             .setMin(1)
             .setMax(20)
@@ -60,7 +61,7 @@ export async function aiInferenceNodes() {
     textToImage.newInputSocket('negative_prompt', {
         label: 'Negative Prompt',
         documentation: 'What to avoid in the generated image.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder('blurry, low quality, distorted')
             .asParagraph()
             .build(),
@@ -69,7 +70,7 @@ export async function aiInferenceNodes() {
     textToImage.newInputSocket('height', {
         label: 'Height',
         documentation: 'Image height in pixels.',
-        type: 'number',
+        type: STANDARD_DATATYPES.NUMBER,
         params: new NumberSocketParamsBuilder(512)
             .setMin(64)
             .setMax(1024)
@@ -80,7 +81,7 @@ export async function aiInferenceNodes() {
     textToImage.newInputSocket('width', {
         label: 'Width',
         documentation: 'Image width in pixels.',
-        type: 'number',
+        type: STANDARD_DATATYPES.NUMBER,
         params: new NumberSocketParamsBuilder(512)
             .setMin(64)
             .setMax(1024)
@@ -91,7 +92,7 @@ export async function aiInferenceNodes() {
     textToImage.newOutputSocket('image', {
         label: 'Generated Image',
         documentation: 'The AI-generated image.',
-        type: 'image/jimp',
+        type: STANDARD_DATATYPES.IMAGE_JIMP,
     });
 
     textToImage.code = `
@@ -121,14 +122,14 @@ export async function aiInferenceNodes() {
     imageClassification.newInputSocket('image', {
         label: 'Image',
         documentation: 'Image to classify.',
-        type: 'image/jimp',
+        type: STANDARD_DATATYPES.IMAGE_JIMP,
         params: new JIMPImageSocketParamsBuilder().build(),
     });
 
     imageClassification.newInputSocket('model', {
         label: 'Model',
         documentation: 'Classification model to use.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder(
             'google/vit-base-patch16-224'
         ).build(),
@@ -161,14 +162,14 @@ export async function aiInferenceNodes() {
     objectDetection.newInputSocket('image', {
         label: 'Image',
         documentation: 'Image to analyze for objects.',
-        type: 'image/jimp',
+        type: STANDARD_DATATYPES.IMAGE_JIMP,
         params: new JIMPImageSocketParamsBuilder().build(),
     });
 
     objectDetection.newInputSocket('model', {
         label: 'Model',
         documentation: 'Object detection model to use.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder(
             'facebook/detr-resnet-50'
         ).build(),
@@ -177,7 +178,7 @@ export async function aiInferenceNodes() {
     objectDetection.newInputSocket('threshold', {
         label: 'Confidence Threshold',
         documentation: 'Minimum confidence score for detections.',
-        type: 'number',
+        type: STANDARD_DATATYPES.NUMBER,
         params: new NumberSocketParamsBuilder(0.5)
             .setMin(0.1)
             .setMax(1.0)
@@ -214,7 +215,7 @@ export async function aiInferenceNodes() {
     textGeneration.newInputSocket('prompt', {
         label: 'Text Prompt',
         documentation: 'Text to complete or continue.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder('Once upon a time')
             .asParagraph()
             .build(),
@@ -223,14 +224,14 @@ export async function aiInferenceNodes() {
     textGeneration.newInputSocket('model', {
         label: 'Model',
         documentation: 'Language model to use.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder('gpt2').build(),
     });
 
     textGeneration.newInputSocket('max_length', {
         label: 'Max Length',
         documentation: 'Maximum length of generated text.',
-        type: 'number',
+        type: STANDARD_DATATYPES.NUMBER,
         params: new NumberSocketParamsBuilder(100)
             .setMin(10)
             .setMax(1000)
@@ -240,7 +241,7 @@ export async function aiInferenceNodes() {
     textGeneration.newInputSocket('temperature', {
         label: 'Temperature',
         documentation: 'Creativity level (higher = more creative).',
-        type: 'number',
+        type: STANDARD_DATATYPES.NUMBER,
         params: new NumberSocketParamsBuilder(0.7)
             .setMin(0.1)
             .setMax(2.0)
@@ -251,21 +252,21 @@ export async function aiInferenceNodes() {
     textGeneration.newInputSocket('do_sample', {
         label: 'Use Sampling',
         documentation: 'Whether to use sampling for generation.',
-        type: 'boolean',
+        type: STANDARD_DATATYPES.BOOLEAN,
         params: new GenericSocketParamsBuilder(true).build(),
     });
 
     textGeneration.newInputSocket('top_k', {
         label: 'Top K',
         documentation: 'Limit vocabulary to top K tokens.',
-        type: 'number',
+        type: STANDARD_DATATYPES.NUMBER,
         params: new NumberSocketParamsBuilder(50).setMin(1).setMax(100).build(),
     });
 
     textGeneration.newInputSocket('top_p', {
         label: 'Top P',
         documentation: 'Nucleus sampling parameter.',
-        type: 'number',
+        type: STANDARD_DATATYPES.NUMBER,
         params: new NumberSocketParamsBuilder(0.9)
             .setMin(0.1)
             .setMax(1.0)
@@ -276,7 +277,7 @@ export async function aiInferenceNodes() {
     textGeneration.newOutputSocket('generated_text', {
         label: 'Generated Text',
         documentation: 'The generated text completion.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
     });
 
     textGeneration.code = `
@@ -306,7 +307,7 @@ export async function aiInferenceNodes() {
     textClassification.newInputSocket('text', {
         label: 'Text',
         documentation: 'Text to classify.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder(
             'I love this product! It works amazingly well.'
         )
@@ -317,7 +318,7 @@ export async function aiInferenceNodes() {
     textClassification.newInputSocket('model', {
         label: 'Model',
         documentation: 'Classification model to use.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder(
             'cardiffnlp/twitter-roberta-base-sentiment-latest'
         ).build(),
@@ -350,7 +351,7 @@ export async function aiInferenceNodes() {
     questionAnswering.newInputSocket('question', {
         label: 'Question',
         documentation: 'Question to answer.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder('What is the capital of France?')
             .asSentence()
             .build(),
@@ -359,7 +360,7 @@ export async function aiInferenceNodes() {
     questionAnswering.newInputSocket('context', {
         label: 'Context',
         documentation: 'Context text containing the answer.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder(
             'France is a country in Europe. Paris is the capital and largest city of France.'
         )
@@ -370,7 +371,7 @@ export async function aiInferenceNodes() {
     questionAnswering.newInputSocket('model', {
         label: 'Model',
         documentation: 'Question answering model to use.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder(
             'distilbert-base-cased-distilled-squad'
         ).build(),
@@ -379,13 +380,13 @@ export async function aiInferenceNodes() {
     questionAnswering.newOutputSocket('answer', {
         label: 'Answer',
         documentation: 'The extracted answer.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
     });
 
     questionAnswering.newOutputSocket('score', {
         label: 'Confidence Score',
         documentation: 'Confidence score of the answer.',
-        type: 'number',
+        type: STANDARD_DATATYPES.NUMBER,
     });
 
     questionAnswering.code = `
@@ -410,14 +411,14 @@ export async function aiInferenceNodes() {
     summarization.newInputSocket('text', {
         label: 'Text to Summarize',
         documentation: 'Long text to be summarized.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder('').asParagraph().build(),
     });
 
     summarization.newInputSocket('model', {
         label: 'Model',
         documentation: 'Summarization model to use.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder(
             'facebook/bart-large-cnn'
         ).build(),
@@ -426,7 +427,7 @@ export async function aiInferenceNodes() {
     summarization.newInputSocket('max_length', {
         label: 'Max Summary Length',
         documentation: 'Maximum length of the summary.',
-        type: 'number',
+        type: STANDARD_DATATYPES.NUMBER,
         params: new NumberSocketParamsBuilder(150)
             .setMin(10)
             .setMax(500)
@@ -436,14 +437,14 @@ export async function aiInferenceNodes() {
     summarization.newInputSocket('min_length', {
         label: 'Min Summary Length',
         documentation: 'Minimum length of the summary.',
-        type: 'number',
+        type: STANDARD_DATATYPES.NUMBER,
         params: new NumberSocketParamsBuilder(30).setMin(5).setMax(100).build(),
     });
 
     summarization.newOutputSocket('summary', {
         label: 'Summary',
         documentation: 'The generated summary.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
     });
 
     summarization.code = `
@@ -469,7 +470,7 @@ export async function aiInferenceNodes() {
     translation.newInputSocket('text', {
         label: 'Text to Translate',
         documentation: 'Text in source language.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder('Hello, how are you?')
             .asSentence()
             .build(),
@@ -479,7 +480,7 @@ export async function aiInferenceNodes() {
         label: 'Translation Model',
         documentation:
             'Translation model (e.g., "Helsinki-NLP/opus-mt-en-fr" for English to French).',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder(
             'Helsinki-NLP/opus-mt-en-fr'
         ).build(),
@@ -488,7 +489,7 @@ export async function aiInferenceNodes() {
     translation.newOutputSocket('translated_text', {
         label: 'Translated Text',
         documentation: 'Text in target language.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
     });
 
     translation.code = `
@@ -508,7 +509,7 @@ export async function aiInferenceNodes() {
     fillMask.newInputSocket('text', {
         label: 'Text with Mask',
         documentation: 'Text with [MASK] token to fill.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder('The weather today is [MASK].')
             .asSentence()
             .build(),
@@ -517,14 +518,14 @@ export async function aiInferenceNodes() {
     fillMask.newInputSocket('model', {
         label: 'Model',
         documentation: 'Fill mask model to use.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder('bert-base-uncased').build(),
     });
 
     fillMask.newInputSocket('top_k', {
         label: 'Top K Results',
         documentation: 'Number of top predictions to return.',
-        type: 'number',
+        type: STANDARD_DATATYPES.NUMBER,
         params: new NumberSocketParamsBuilder(5).setMin(1).setMax(10).build(),
     });
 
@@ -557,7 +558,7 @@ export async function aiInferenceNodes() {
     sentenceSimilarity.newInputSocket('source_sentence', {
         label: 'Source Sentence',
         documentation: 'Reference sentence to compare against.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder('The cat is sleeping.')
             .asSentence()
             .build(),
@@ -577,7 +578,7 @@ export async function aiInferenceNodes() {
     sentenceSimilarity.newInputSocket('model', {
         label: 'Model',
         documentation: 'Sentence similarity model to use.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder(
             'sentence-transformers/all-MiniLM-L6-v2'
         ).build(),
@@ -610,7 +611,7 @@ export async function aiInferenceNodes() {
     conversational.newInputSocket('text', {
         label: 'Message',
         documentation: 'Current message in the conversation.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder(
             'Hello, how can you help me today?'
         )
@@ -635,7 +636,7 @@ export async function aiInferenceNodes() {
     conversational.newInputSocket('model', {
         label: 'Model',
         documentation: 'Conversational model to use.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder(
             'microsoft/DialoGPT-medium'
         ).build(),
@@ -644,7 +645,7 @@ export async function aiInferenceNodes() {
     conversational.newInputSocket('max_length', {
         label: 'Max Response Length',
         documentation: 'Maximum length of the response.',
-        type: 'number',
+        type: STANDARD_DATATYPES.NUMBER,
         params: new NumberSocketParamsBuilder(100)
             .setMin(10)
             .setMax(500)
@@ -654,7 +655,7 @@ export async function aiInferenceNodes() {
     conversational.newInputSocket('temperature', {
         label: 'Temperature',
         documentation: 'Response creativity (higher = more creative).',
-        type: 'number',
+        type: STANDARD_DATATYPES.NUMBER,
         params: new NumberSocketParamsBuilder(0.7)
             .setMin(0.1)
             .setMax(2.0)
@@ -665,7 +666,7 @@ export async function aiInferenceNodes() {
     conversational.newOutputSocket('response', {
         label: 'Bot Response',
         documentation: 'Generated conversational response.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
     });
 
     conversational.code = `
@@ -695,7 +696,7 @@ export async function aiInferenceNodes() {
     featureExtraction.newInputSocket('text', {
         label: 'Text',
         documentation: 'Text to extract features from.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder(
             'This is a sample text for feature extraction.'
         )
@@ -706,7 +707,7 @@ export async function aiInferenceNodes() {
     featureExtraction.newInputSocket('model', {
         label: 'Model',
         documentation: 'Feature extraction model to use.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder(
             'sentence-transformers/all-MiniLM-L6-v2'
         ).build(),
@@ -738,21 +739,21 @@ export async function aiInferenceNodes() {
     automaticSpeechRecognition.newInputSocket('audio_data', {
         label: 'Audio Data',
         documentation: 'Base64 encoded audio data.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder('').asParagraph().build(),
     });
 
     automaticSpeechRecognition.newInputSocket('model', {
         label: 'Model',
         documentation: 'Speech recognition model to use.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder('openai/whisper-small').build(),
     });
 
     automaticSpeechRecognition.newOutputSocket('text', {
         label: 'Transcribed Text',
         documentation: 'Transcribed text from audio.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
     });
 
     automaticSpeechRecognition.code = `
@@ -774,7 +775,7 @@ export async function aiInferenceNodes() {
     tableQuestionAnswering.newInputSocket('question', {
         label: 'Question',
         documentation: 'Question about the table data.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder('How many employees are there?')
             .asSentence()
             .build(),
@@ -794,7 +795,7 @@ export async function aiInferenceNodes() {
     tableQuestionAnswering.newInputSocket('model', {
         label: 'Model',
         documentation: 'Table QA model to use.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder(
             'google/tapas-base-finetuned-wtq'
         ).build(),
@@ -803,7 +804,7 @@ export async function aiInferenceNodes() {
     tableQuestionAnswering.newOutputSocket('answer', {
         label: 'Answer',
         documentation: 'Answer extracted from the table.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
     });
 
     tableQuestionAnswering.newOutputSocket('coordinates', {
@@ -836,7 +837,7 @@ export async function aiInferenceNodes() {
     tokenClassification.newInputSocket('text', {
         label: 'Text',
         documentation: 'Text to analyze for named entities.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder(
             'Apple Inc. was founded by Steve Jobs in Cupertino.'
         )
@@ -847,7 +848,7 @@ export async function aiInferenceNodes() {
     tokenClassification.newInputSocket('model', {
         label: 'Model',
         documentation: 'Token classification model to use.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder(
             'dbmdz/bert-large-cased-finetuned-conll03-english'
         ).build(),
@@ -856,7 +857,7 @@ export async function aiInferenceNodes() {
     tokenClassification.newInputSocket('aggregation_strategy', {
         label: 'Aggregation Strategy',
         documentation: 'How to aggregate sub-word tokens.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder('simple').build(),
     });
 

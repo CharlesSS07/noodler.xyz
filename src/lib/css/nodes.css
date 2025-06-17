@@ -273,6 +273,20 @@
 .output-content {
     align-items: flex-end;
     text-align: left;
+    position: relative;
+}
+
+/* Output text container - positions text to overhang the right side */
+.output-text-container {
+    position: absolute;
+    right: -8px;
+    transform: translateX(100%);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    white-space: nowrap;
+    z-index: 10;
 }
 
 /* Socket label - main text for socket name */
@@ -282,6 +296,7 @@
     color: #000000; /* Note: White text might need adjustment for light theme */
     line-height: 1.2;
     white-space: nowrap;
+    padding-left: 4px;
 }
 
 /* Required socket label - bold text for mandatory sockets */
@@ -303,6 +318,7 @@
     letter-spacing: 0.5px;
     opacity: 0.8;
     line-height: 1;
+    padding-left: 4px;
 }
 
 

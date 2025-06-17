@@ -1,6 +1,7 @@
 import type { NodeBluePrintControllerFactoryInterface } from '../../routes/app/lib/NodeBluePrint.js';
 import { FirestoreNodeBluePrintControllerFactoryInterface } from '../../routes/app/lib/FirestoreNodeBluePrint.js';
 import { StringSocketParamsBuilder } from '../../routes/app/lib/SocketParamBuilders.js';
+import { STANDARD_DATATYPES } from '../../routes/app/lib/DataTypes.js';
 
 const nodeBluePrintController: NodeBluePrintControllerFactoryInterface =
     new FirestoreNodeBluePrintControllerFactoryInterface();
@@ -16,21 +17,21 @@ export async function googleDriveNodes() {
     await googleDrive.newInputSocket('account', {
         label: 'Google Account',
         documentation: 'Google account to get the file from.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder('').asPassword().build(),
     });
 
     await googleDrive.newInputSocket('file_selector', {
         label: 'File Selector',
         documentation: 'File to retrieve.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder('').asSentence().build(),
     });
 
     await googleDrive.newOutputSocket('file', {
         label: 'File',
         documentation: 'The retrieved file.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
     });
 
     googleDrive.code = `
@@ -49,42 +50,42 @@ outputs.set('img', inputs.img);
     await sendEmail.newInputSocket('account', {
         label: 'From Google Account',
         documentation: 'Google account to get the file from.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder('').asPassword().build(),
     });
 
     await sendEmail.newInputSocket('to', {
         label: 'To',
         documentation: 'Google account to get the file from.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder('').asSentence().build(),
     });
 
     await sendEmail.newInputSocket('cc', {
         label: 'CC',
         documentation: 'Google account to get the file from.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder('').asSentence().build(),
     });
 
     await sendEmail.newInputSocket('bcc', {
         label: 'BCC',
         documentation: 'Google account to get the file from.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder('').asSentence().build(),
     });
 
     await sendEmail.newInputSocket('subject', {
         label: 'Subject',
         documentation: 'Google account to get the file from.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder('').asSentence().build(),
     });
 
     await sendEmail.newInputSocket('body', {
         label: 'Email Body',
         documentation: 'File to retrieve.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder('').asParagraph().build(),
     });
 

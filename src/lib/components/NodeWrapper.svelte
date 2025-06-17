@@ -1,47 +1,26 @@
 <script lang="ts">
     import {Tooltip} from 'flowbite-svelte';
-    import {Info, CheckCircle, AlertCircle, Clock} from 'lucide-svelte';
+    import {Info} from 'lucide-svelte';
     import {Card} from 'flowbite-svelte';
 
     interface NodeWrapperProps {
         label: string;
         documentation?: string;
-        nodeState?: 'idle' | 'running' | 'success' | 'error';
         executionTime?: number;
-        errorMessage?: string;
         isSelected?: boolean;
     }
 
     let {
         label,
         documentation,
-        nodeState = 'idle',
         executionTime = 0,
-        errorMessage = '',
         isSelected = false
     }: NodeWrapperProps = $props();
-
-    // Get node status color
-    function getStatusColor(state: typeof nodeState): string {
-        switch (state) {
-            case 'running':
-                return 'blue';
-            case 'success':
-                return 'green';
-            case 'error':
-                return 'red';
-            default:
-                return 'gray';
-        }
-    }
 </script>
 
 <div
         class="node-container"
         class:selected={isSelected}
-        class:executing={nodeState === 'running'}
-        class:success={nodeState === 'success'}
-        class:error={nodeState === 'error'}
 >
     <!-- Node Header -->
     <div class="node-header" role="button" tabindex="0">
@@ -75,7 +54,8 @@
 
     </div>
 
-    <Card class="node-card">
+    <Card class="node-card node-card-with-background">
+        
         <!-- Node Body -->
         <div class="node-body">
             <div class="node-content">

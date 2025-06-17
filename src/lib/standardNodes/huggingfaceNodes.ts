@@ -4,6 +4,7 @@ import {
     NumberSocketParamsBuilder,
     StringSocketParamsBuilder,
 } from '../../routes/app/lib/SocketParamBuilders.js';
+import { STANDARD_DATATYPES } from '../../routes/app/lib/DataTypes.js';
 
 const nodeBluePrintController: NodeBluePrintControllerFactoryInterface =
     new FirestoreNodeBluePrintControllerFactoryInterface();
@@ -28,7 +29,7 @@ export async function huggingfaceNodes() {
     await llm.newInputSocket('model_id', {
         label: 'Model ID',
         documentation: 'Initial prompt (used to instruct model on task).',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder(
             'HuggingFaceH4/zephyr-7b-alpha'
         ).build(),
@@ -38,7 +39,7 @@ export async function huggingfaceNodes() {
         label: 'Prompt',
         documentation:
             'Initial prompt (used to instruct model on task). This is the text to complete.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder(
             'The quick brown fox jumped over the la'
         ).build(),
@@ -46,7 +47,7 @@ export async function huggingfaceNodes() {
     await llm.newInputSocket('temp', {
         label: 'Temperature',
         documentation: 'Creativity level of the mode.',
-        type: 'number',
+        type: STANDARD_DATATYPES.NUMBER,
         params: new NumberSocketParamsBuilder(0)
             .setMin(0)
             .setMax(1)
@@ -58,13 +59,13 @@ export async function huggingfaceNodes() {
     await llm.newOutputSocket('output_text', {
         label: 'Completed Text',
         documentation: 'LLM output with prompt',
-        type: 'number',
+        type: STANDARD_DATATYPES.NUMBER,
     });
 
     await llm.newOutputSocket('output_text_no_prompt', {
         label: 'Completed Text without Prompt',
         documentation: 'LLM output without prompt',
-        type: 'number',
+        type: STANDARD_DATATYPES.NUMBER,
     });
 
     llm.code = `
@@ -115,7 +116,7 @@ outputs.set('output_text_no_prompt', output.generated_text);
         label: 'Model ID',
         documentation:
             'Model to generate from (serch text-to-image models category on huggingface.com).',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder(
             'black-forest-labs/FLUX.1-dev'
         ).build(),
@@ -125,7 +126,7 @@ outputs.set('output_text_no_prompt', output.generated_text);
         label: 'Text Prompt',
         documentation:
             'Initial prompt (used to instruct model on task). This is the text to complete.',
-        type: 'string',
+        type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder(
             'shrek riding a motor cycle over an exploding galaxy, being chased by a dragon (the wedjat eye is the eye of horus from egyptian mythology) make the galaxy look like the wedjat eye. there should be no ground, just space with the exploding galaxy in the background'
         ).build(),
@@ -133,7 +134,7 @@ outputs.set('output_text_no_prompt', output.generated_text);
     await text_to_image.newInputSocket('temp', {
         label: 'Temperature',
         documentation: 'Creativity level of the model.',
-        type: 'number',
+        type: STANDARD_DATATYPES.NUMBER,
         params: new NumberSocketParamsBuilder(0)
             .setMin(0)
             .setMax(1)
@@ -145,7 +146,7 @@ outputs.set('output_text_no_prompt', output.generated_text);
     await text_to_image.newOutputSocket('image', {
         label: 'Generated Image',
         documentation: 'Image generated from the input specifications.',
-        type: 'image/jimp',
+        type: STANDARD_DATATYPES.IMAGE_JIMP,
     });
 
     text_to_image.code = `

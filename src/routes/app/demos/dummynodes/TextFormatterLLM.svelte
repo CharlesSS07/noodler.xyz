@@ -14,7 +14,7 @@
 <script lang="ts">
     import NodeWrapper from "$lib/components/NodeWrapper.svelte";
     import {Handle, type NodeProps, Position} from "@xyflow/svelte";
-    import {getSocketDataTypeByName} from "../../lib/DataTypes";
+    import {fetchSocketDataTypeByName} from "../../lib/DataTypes";
     import SocketStem from "$lib/components/SocketStem.svelte";
 
     let { id, data }: NodeProps<MagicTextTransformNodeType> = $props();
@@ -29,10 +29,10 @@
 
     let inputSocketStyle = $state('');
     let outputSocketStyle = $state('');
-    getSocketDataTypeByName('string').then((datatype) => {
+    fetchSocketDataTypeByName('string').then((datatype) => {
         inputSocketStyle = datatype?.style || '';
     });
-    getSocketDataTypeByName('string').then((datatype) => {
+    fetchSocketDataTypeByName('string').then((datatype) => {
         outputSocketStyle = datatype?.style || '';
     });
 </script>

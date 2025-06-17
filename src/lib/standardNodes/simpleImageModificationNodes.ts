@@ -4,6 +4,7 @@ import {
     JIMPImageSocketParamsBuilder,
     NumberSocketParamsBuilder,
 } from '../../routes/app/lib/SocketParamBuilders.js';
+import { STANDARD_DATATYPES } from '../../routes/app/lib/DataTypes.js';
 
 const nodeBluePrintController: NodeBluePrintControllerFactoryInterface =
     new FirestoreNodeBluePrintControllerFactoryInterface();
@@ -18,14 +19,14 @@ export async function simpleImageModificationNodes() {
     await grayscale.newInputSocket('img', {
         label: 'Color Image',
         documentation: 'Color image to greyscale.',
-        type: 'image/jimp',
+        type: STANDARD_DATATYPES.IMAGE_JIMP,
         params: new JIMPImageSocketParamsBuilder().build(),
     });
 
     await grayscale.newOutputSocket('img', {
         label: 'Greyscale Image',
         documentation: 'Greyscale version of input image.',
-        type: 'image/jimp',
+        type: STANDARD_DATATYPES.IMAGE_JIMP,
     });
 
     grayscale.code = `
@@ -41,13 +42,13 @@ outputs.set('img', img);
     await hsv.newInputSocket('img', {
         label: 'Input Image',
         documentation: 'Any image.',
-        type: 'image/jimp',
+        type: STANDARD_DATATYPES.IMAGE_JIMP,
         params: new JIMPImageSocketParamsBuilder().build(),
     });
     await hsv.newInputSocket('hue', {
         label: 'Hue Shift',
         documentation: 'Amount to shift hue by.',
-        type: 'number',
+        type: STANDARD_DATATYPES.NUMBER,
         params: new NumberSocketParamsBuilder(0)
             .setMin(0)
             .setMax(360)
@@ -57,7 +58,7 @@ outputs.set('img', img);
     await hsv.newInputSocket('saturation', {
         label: 'Saturation Shift',
         documentation: 'Amount to shift saturation by.',
-        type: 'number',
+        type: STANDARD_DATATYPES.NUMBER,
         params: new NumberSocketParamsBuilder(0)
             .setMin(0)
             .setMax(100)
@@ -67,7 +68,7 @@ outputs.set('img', img);
     await hsv.newInputSocket('value', {
         label: 'Value Shift',
         documentation: 'Amount to shift brightness/darkness by.',
-        type: 'number',
+        type: STANDARD_DATATYPES.NUMBER,
         params: new NumberSocketParamsBuilder(0)
             .setMin(0)
             .setMax(100)
@@ -78,7 +79,7 @@ outputs.set('img', img);
     await hsv.newOutputSocket('img', {
         label: 'Output Image',
         documentation: 'Shifted image.',
-        type: 'image/jimp',
+        type: STANDARD_DATATYPES.IMAGE_JIMP,
     });
 
     hsv.code =

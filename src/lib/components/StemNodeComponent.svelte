@@ -2,45 +2,84 @@
 
     import {Handle, Position} from "@xyflow/svelte";
 
-    export let title = 'Untitled Node';
-    export let tooltip = 'a tooltip';
-    export let inputs:  {label: string, id: string, type: string, socketStyle?: string, value: unknown, isConnected: boolean}[] = [];
-    export let outputs: {label: string, id: string, type: string, socketStyle?: string}[] = [];
-    export let nodeState: 'idle' | 'running' | 'success' | 'error' = 'idle';
-    export let executionTime = 0;
-    export let errorMessage: string | undefined = undefined;
-    export let isSelected = false;
+    interface Props {
+        title?: string;
+        tooltip?: string;
+        inputs?: {label: string, id: string, type: string, value: unknown, isConnected: boolean}[];
+        outputs?: {label: string, id: string, type: string}[];
+        executionTime?: number;
+        errorMessage?: string | undefined;
+        isSelected?: boolean;
+    }
+
+    let {
+        title = 'Untitled Node',
+        tooltip = 'a tooltip',
+        inputs = [],
+        outputs = [],
+        executionTime = 0,
+        errorMessage = undefined,
+        isSelected = false
+    }: Props = $props();
 
     import NodeWrapper from '$lib/components/NodeWrapper.svelte';
 
     import '$lib/css/nodes.css';
+    import {fetchSocketDataTypeByName, type SocketDataType} from "../../routes/app/lib/DataTypes";
+
+    let inputDataTypes = $state(new Map<string, SocketDataType>());
+    let outputDataTypes = $state(new Map<string, SocketDataType>());
+
+    $effect(() => {
+        inputs.forEach((inputSocket) => {
+            fetchSocketDataTypeByName(inputSocket.type).then((datatype) => {
+                console.log(datatype)
+                if (datatype) {
+                    inputDataTypes.set(inputSocket.id, datatype);
+                    inputDataTypes = new Map(inputDataTypes); // Trigger reactivity
+                }
+            });
+        });
+    });
+
+    $effect(() => {
+        outputs.forEach((outputSocket) => {
+            fetchSocketDataTypeByName(outputSocket.type).then((datatype) => {
+                if (datatype) {
+                    outputDataTypes.set(outputSocket.id, datatype);
+                    outputDataTypes = new Map(outputDataTypes); // Trigger reactivity
+                }
+            });
+        });
+    });
 
 </script>
+
 
 <div>
     <NodeWrapper
             label={title}
             documentation={tooltip}
-            {nodeState}
             {executionTime}
-            {errorMessage}
             {isSelected}>
 
         <div class="flex flex-col">
             {#each outputs as outputSocket}
                 <div class="socket-content output-content socket-container">
-<!--                    Right here make the text hang to the right side of the socket which is mounted on the right edge of the node. the socket is already properly placed. just position the text proplerly-->
-                    <span class="socket-label">{outputSocket.label}</span>
-                    {#if outputSocket.type}
-                        <span class="socket-type" >
-                            {outputSocket.type}
-                        </span>
-                    {/if}
+                    <div class="output-text-container">
+                        <span class="socket-label">{outputSocket.label}</span>
+                        {#if outputSocket.type}
+                            <span class="socket-type" >
+                                {outputSocket.type}
+                            </span>
+                        {/if}
+                    </div>
                     <Handle
                         type="source"
                         position={Position.Right}
                         id="{outputSocket.id}"
-                        class="socket-handle {outputSocket.socketStyle || ''}"
+                        style={outputDataTypes.get(outputSocket.id)?.style || ''}
+                        class="socket-handle"
                     />
                 </div>
             {/each}
@@ -61,10 +100,13 @@
                         type="target"
                         position={Position.Left}
                         id="{inputSocket.id}"
-                        class="socket-handle {inputSocket.socketStyle || ''}"
+                        class="socket-handle"
+                        style={inputDataTypes.get(inputSocket.id)?.style || ''}
+                        isConnectable={!inputSocket.isConnected}
                     />
                 </div>
             {/each}
         </div>
+
     </NodeWrapper>
 </div>

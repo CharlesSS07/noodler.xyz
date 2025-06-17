@@ -1,6 +1,6 @@
 <script lang="ts">
 	import {Handle, Position, type HandleType } from '@xyflow/svelte';
-	import {getSocketDataTypeByName} from "../../routes/app/lib/DataTypes";
+	import {fetchSocketDataTypeByName} from "../../routes/app/lib/DataTypes";
 
 	// Props
 	export let type: HandleType; // 'source' for output, 'target' for input
@@ -14,7 +14,7 @@
 
 
 	let socketStyle = '';
-	getSocketDataTypeByName(socketType).then((datatype) => {
+	fetchSocketDataTypeByName(socketType).then((datatype) => {
 		socketStyle = datatype?.style || '';
 	});
 	$: isRequired = required && type === 'target';

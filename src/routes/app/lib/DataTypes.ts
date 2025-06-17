@@ -1,9 +1,10 @@
+
 export type SocketDataType = {
     name: string; // name is the unique identifier. there are no ids because then we could have overlapping names
     style: string;
     description: string;
     type: string;
-    childOfType?: string | undefined;
+    // childOfType?: string | undefined;
 };
 
 function baseSocketStyle(color: string): string {
@@ -24,6 +25,19 @@ export const DATATYPE_UNREGISTERED = {
         'Represents an unknown object. This could be anything. Introspect to find out.',
     type: 'unknown',
 };
+
+export const STANDARD_DATATYPES = {
+    NUMBER: 'number',
+    STRING: 'string',
+    BOOLEAN: 'boolean',
+    DATE: 'date',
+    TEXT: 'string',
+    OBJECT: 'object',
+    FILE: 'File',
+    IMAGE_JIMP: 'image/jimp',
+    IMAGE_BASE64: 'image/base64',
+    TENSOR: 'Tensor',
+}
 
 const standardDataTypes: SocketDataType[] = [
     DATATYPE_UNREGISTERED,
@@ -59,34 +73,10 @@ const standardDataTypes: SocketDataType[] = [
         type: 'object',
     },
     {
-        name: 'array',
-        style: baseSocketStyle('#2ecc71'),
-        description: 'Holds a standard JavaScript array.',
-        type: 'unknown[]',
-    },
-    {
-        name: 'any',
-        style: baseSocketStyle('#95a5a6'),
-        description: 'Can hold any type of data.',
-        type: 'unknown',
-    },
-    {
-        name: 'json',
-        style: baseSocketStyle('#1abc9c'),
-        description: 'Holds data in JSON (JavaScript Object Notation) format.',
-        type: 'string',
-    },
-    {
-        name: 'file',
+        name: 'File',
         style: baseSocketStyle('#8e44ad'),
         description: 'Represents a file or file-like object.',
         type: 'File',
-    },
-    {
-        name: 'image/base64',
-        style: baseSocketStyle('#6dff99'),
-        description: 'Represents an image stored as a base64 string.',
-        type: 'string',
     },
     {
         name: 'image/jimp',
@@ -94,6 +84,13 @@ const standardDataTypes: SocketDataType[] = [
         description:
             'Represents an image stored as a JIMP (JS image processing library) object.',
         type: 'JimpInstance',
+    },
+    {
+        name: 'Tensor',
+        style: baseSocketStyle('#00b900'),
+        description:
+            'Represents an nd-array (tfjs).',
+        type: 'tf.tensor',
     },
 ];
 
@@ -103,7 +100,7 @@ const standardDataTypes: SocketDataType[] = [
  * @param name The name of the SocketDataType to retrieve.
  * @returns The SocketDataType object if found, otherwise undefined.
  */
-export async function getSocketDataTypeByName(
+export async function fetchSocketDataTypeByName(
     name: string
 ): Promise<SocketDataType | undefined> {
     // 1. Check the local list first
@@ -134,5 +131,5 @@ export async function getSocketDataTypeByName(
     //
     // // For now, if not found locally, it returns undefined.
     console.error(`Datatype Not found: ${name}`);
-    return getSocketDataTypeByName('unregistered');
+    return fetchSocketDataTypeByName('unregistered');
 }

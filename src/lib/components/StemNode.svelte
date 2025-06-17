@@ -18,7 +18,7 @@
     import {firestore} from "../../firebase";
     import StemNodeComponent from "$lib/components/StemNodeComponent.svelte";
 
-    let {id, data}: NodeProps<StemNodeType> = $props();
+    let {id, data, selected}: NodeProps<StemNodeType> = $props();
     let nodeBluePrint = docStore<FirestoreNodeBluePrintModel>(firestore, `nodes/${data.nid}`);
 
     const connections = useNodeConnections();
@@ -82,7 +82,8 @@
 {#if $nodeBluePrint}
     <StemNodeComponent
             title={$nodeBluePrint.title}
-        inputs={inputSockets}
-        outputs={outputSockets}
+            inputs={inputSockets}
+            outputs={outputSockets}
+            isSelected={selected}
     ></StemNodeComponent>
 {/if}
