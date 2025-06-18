@@ -22,7 +22,7 @@
         type NodeProps,
         NodeResizeControl
     } from '@xyflow/svelte';
-    import {fetchSocketDataTypeByName} from '../../lib/DataTypes';
+    import {fetchSocketDataTypeByName} from '$lib/compositor/DataTypes';
     import {Tooltip} from "flowbite-svelte";
     import NodeWrapper from "$lib/components/NodeWrapper.svelte";
 

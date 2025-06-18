@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { generateStandardNodeSuite } from '../app/lib/FirestoreStandardNodeSet.js';
+	import { generateStandardNodeSuite } from '$lib/compositor/FirestoreStandardNodeSet.js';
 	import '../../app.css'; // Assuming this provides some base styles
 	import { auth } from '../../firebase';
 	import { SignedIn, SignedOut } from 'sveltefire'; // Import SignedOut for a better user experience

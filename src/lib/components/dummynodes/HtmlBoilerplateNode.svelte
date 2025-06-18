@@ -22,7 +22,7 @@
 <script lang="ts">
     import { type NodeProps } from '@xyflow/svelte';
     import NodeWrapper from "$lib/components/NodeWrapper.svelte";
-    import SocketStem from "$lib/components/SocketStem.svelte";
+    import { Handle } from '@xyflow/svelte';
     
     let { id, data }: NodeProps<HtmlBoilerplateNodeType> = $props();
 
@@ -152,7 +152,7 @@
 
 <NodeWrapper documentation={nodeDescription} label="HTML Boilerplate">
     <!-- Input Sockets -->
-    <SocketStem 
+    <Handle 
         type="target"
         socketType="string"
         label="Title"
@@ -163,9 +163,9 @@
             <span class="socket-label">Title</span>
             <span class="socket-type">string</span>
         </div>
-    </SocketStem>
+    </Handle>
     
-    <SocketStem 
+    <Handle 
         type="target"
         socketType="string"
         label="Head Content"
@@ -176,9 +176,9 @@
             <span class="socket-label">Head Content</span>
             <span class="socket-type">string</span>
         </div>
-    </SocketStem>
+    </Handle>
     
-    <SocketStem 
+    <Handle 
         type="target"
         socketType="string"
         label="Body Content"
@@ -189,9 +189,9 @@
             <span class="socket-label">Body Content</span>
             <span class="socket-type">string</span>
         </div>
-    </SocketStem>
+    </Handle>
     
-    <SocketStem 
+    <Handle 
         type="target"
         socketType="string"
         label="Footer Content"
@@ -202,7 +202,7 @@
             <span class="socket-label">Footer Content</span>
             <span class="socket-type">string</span>
         </div>
-    </SocketStem>
+    </Handle>
 
     <!-- Node Content -->
     <div class="boilerplate-content">
@@ -271,7 +271,7 @@
     </div>
 
     <!-- Output Socket -->
-    <SocketStem 
+    <Handle 
         type="source"
         socketType="string"
         label="Full HTML"
@@ -282,7 +282,7 @@
             <span class="socket-label">Full HTML</span>
             <span class="socket-type">string</span>
         </div>
-    </SocketStem>
+    </Handle>
 </NodeWrapper>
 
 <style>

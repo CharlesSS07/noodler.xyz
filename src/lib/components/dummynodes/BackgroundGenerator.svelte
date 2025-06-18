@@ -143,7 +143,7 @@
 
 <NodeWrapper title={nodeTitle} description={nodeDescription} label="Background Generator">
     <!-- Input Sockets -->
-    <SocketStem 
+    <Handle 
         type="target"
         socketType="string"
         label="Background Prompt"
@@ -154,9 +154,9 @@
             <span class="socket-label">Background Prompt</span>
             <span class="socket-type">string</span>
         </div>
-    </SocketStem>
+    </Handle>
     
-    <SocketStem 
+    <Handle 
         type="target"
         socketType="image/jimp"
         label="Background Mask"
@@ -167,9 +167,9 @@
             <span class="socket-label">Background Mask</span>
             <span class="socket-type">image/jimp</span>
         </div>
-    </SocketStem>
+    </Handle>
     
-    <SocketStem 
+    <Handle 
         type="target"
         socketType="image/jimp"
         label="Style Reference"
@@ -180,7 +180,7 @@
             <span class="socket-label">Style Reference</span>
             <span class="socket-type">image/jimp</span>
         </div>
-    </SocketStem>
+    </Handle>
 
     <!-- Node Content -->
     <div class="generator-content">
@@ -271,7 +271,7 @@
     </div>
 
     <!-- Output Socket -->
-    <SocketStem 
+    <Handle 
         type="source"
         socketType="image/jimp"
         label="Generated Background"
@@ -282,7 +282,7 @@
             <span class="socket-label">Generated Background</span>
             <span class="socket-type">image/jimp</span>
         </div>
-    </SocketStem>
+    </Handle>
 </NodeWrapper>
 
 <style>

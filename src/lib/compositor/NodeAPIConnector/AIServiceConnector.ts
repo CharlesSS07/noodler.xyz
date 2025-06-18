@@ -1,6 +1,6 @@
 import { NodeLib } from './NodeAPIConnectorManager';
 import { AIInferenceService } from '$lib/services';
-import { auth } from '../../../../firebase';
+import { auth } from '../../../firebase';
 
 export class AIInferenceAPIConnector extends NodeLib<AIInferenceService> {
     async setupConnection(): Promise<void> {

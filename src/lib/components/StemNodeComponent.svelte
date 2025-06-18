@@ -5,7 +5,7 @@
     interface Props {
         title?: string;
         tooltip?: string;
-        inputs?: {label: string, id: string, type: string, value: unknown, isConnected: boolean}[];
+        inputs?: {label: string, id: string, type: string, value: unknown, isConnected: boolean, params: InputSocketParams}[];
         outputs?: {label: string, id: string, type: string}[];
         executionTime?: number;
         errorMessage?: string | undefined;
@@ -25,7 +25,10 @@
     import NodeWrapper from '$lib/components/NodeWrapper.svelte';
 
     import '$lib/css/nodes.css';
-    import {fetchSocketDataTypeByName, type SocketDataType} from "../../routes/app/lib/DataTypes";
+    import {fetchSocketDataTypeByName, type SocketDataType} from "$lib/compositor/DataTypes";
+    import {getInputComponentForDataType} from "$lib/components/socket-inputs/SocketInputMapping";
+    import type {GenericSocketParamsBuilder} from "$lib/compositor/SocketParamBuilders";
+    import type {InputSocketParams} from "$lib/compositor/SocketModels";
 
     let inputDataTypes = $state(new Map<string, SocketDataType>());
     let outputDataTypes = $state(new Map<string, SocketDataType>());
@@ -33,7 +36,6 @@
     $effect(() => {
         inputs.forEach((inputSocket) => {
             fetchSocketDataTypeByName(inputSocket.type).then((datatype) => {
-                console.log(datatype)
                 if (datatype) {
                     inputDataTypes.set(inputSocket.id, datatype);
                     inputDataTypes = new Map(inputDataTypes); // Trigger reactivity
@@ -104,6 +106,19 @@
                         style={inputDataTypes.get(inputSocket.id)?.style || ''}
                         isConnectable={!inputSocket.isConnected}
                     />
+                    {#if !inputSocket.isConnected && inputSocket.type !== "unknown" && inputSocket.type !== "unregistered"}
+                        {@const inputMapping = getInputComponentForDataType(inputSocket.type)}
+                        {#if inputMapping}
+                            {@const Component = inputMapping.component}
+                            <div class="socket-input-container">
+                                <Component
+                                    bind:value={inputSocket.value}
+                                    {...{...(inputSocket.options || {}), params: inputSocket.params}}
+                                />
+                                <!--{JSON.stringify(inputSocket.params, null, 2)}-->
+                            </div>
+                        {/if}
+                    {/if}
                 </div>
             {/each}
         </div>

@@ -18,7 +18,7 @@ module.exports = {
     sourceType: "module",
   },
   ignorePatterns: [
-    "/lib/**/*", // Ignore built files.
+    "/compositor/**/*", // Ignore built files.
     "/generated/**/*", // Ignore generated files.
     "scripts/examples/huggingfaceInferenceAPI.ts", // Ignore example file.
     "src/test/**/*", // Ignore test files.

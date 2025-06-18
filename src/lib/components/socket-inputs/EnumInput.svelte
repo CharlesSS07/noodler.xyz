@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { ENUMSocketParams } from '../../../routes/app/lib/SocketParamBuilders';
+    import type { ENUMSocketParams } from '$lib/compositor/SocketParamBuilders';
     
     export let value: string = '';
     export let params: ENUMSocketParams | undefined = undefined;

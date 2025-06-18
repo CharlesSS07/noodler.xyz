@@ -20,7 +20,7 @@
 <script lang="ts">
     import { type NodeProps } from '@xyflow/svelte';
     import NodeWrapper from "$lib/components/NodeWrapper.svelte";
-    import SocketStem from "$lib/components/SocketStem.svelte";
+    import { Handle } from '@xyflow/svelte';
     
     let { id, data }: NodeProps<InpaintingType> = $props();
 
@@ -150,7 +150,7 @@
 
 <NodeWrapper title={nodeTitle} description={nodeDescription} label="AI Inpainting">
     <!-- Input Sockets -->
-    <SocketStem 
+    <Handle 
         type="target"
         socketType="image"
         label="Source Image"
@@ -161,9 +161,9 @@
             <span class="socket-label">Source Image</span>
             <span class="socket-type">image</span>
         </div>
-    </SocketStem>
+    </Handle>
     
-    <SocketStem 
+    <Handle 
         type="target"
         socketType="image"
         label="Mask Image"
@@ -174,9 +174,9 @@
             <span class="socket-label">Mask Image</span>
             <span class="socket-type">image</span>
         </div>
-    </SocketStem>
+    </Handle>
     
-    <SocketStem 
+    <Handle 
         type="target"
         socketType="string"
         label="Inpaint Prompt"
@@ -187,7 +187,7 @@
             <span class="socket-label">Inpaint Prompt</span>
             <span class="socket-type">string</span>
         </div>
-    </SocketStem>
+    </Handle>
 
     <!-- Node Content -->
     <div class="inpaint-content">
@@ -291,7 +291,7 @@
     </div>
 
     <!-- Output Socket -->
-    <SocketStem 
+    <Handle 
         type="source"
         socketType="image"
         label="Inpainted Image"
@@ -302,7 +302,7 @@
             <span class="socket-label">Inpainted Image</span>
             <span class="socket-type">image</span>
         </div>
-    </SocketStem>
+    </Handle>
 </NodeWrapper>
 
 <style>

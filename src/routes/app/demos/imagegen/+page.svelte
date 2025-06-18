@@ -11,11 +11,11 @@
         Panel
     } from "@xyflow/svelte";
     import '@xyflow/svelte/dist/style.css';
-    import NoteNode from "../../nodes/NoteNode.svelte";
-    import ImageNode from "../../nodes/images/ImageNode.svelte";
-    import HTMLRendererNode from "../../nodes/html/HTMLRendererNode.svelte";
-    import TextTemplateFillinNode from "../../nodes/text/TextTemplateFillinNode.svelte";
-    import TextEditorNode from "../../nodes/text/TextEditorMarkdownNode.svelte";
+    import NoteNode from "$lib/components/nodes/NoteNode.svelte";
+    import ImageNode from "$lib/components/nodes/images/ImageNode.svelte";
+    import HTMLRendererNode from "$lib/components/nodes/html/HTMLRendererNode.svelte";
+    import TextTemplateFillinNode from "$lib/components/nodes/text/TextTemplateFillinNode.svelte";
+    import TextEditorNode from "$lib/components/nodes/text/TextEditorMarkdownNode.svelte";
 
     // Import our custom demo nodes
     import ForegroundSplitter from "$lib/components/dummynodes/ForegroundSplitter.svelte";

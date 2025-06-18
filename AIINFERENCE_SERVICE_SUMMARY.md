@@ -54,7 +54,7 @@ I've created a comprehensive **AIInferenceService** for the main SvelteKit proje
 
 #### **Basic Setup**
 ```typescript
-import { AIInferenceService } from '$lib/services';
+import { AIInferenceService } from '$compositor/services';
 import { getAuth } from 'firebase/auth';
 
 const auth = getAuth();

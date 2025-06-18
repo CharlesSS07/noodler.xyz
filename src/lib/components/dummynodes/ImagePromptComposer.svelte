@@ -19,7 +19,7 @@
 <script lang="ts">
     import { type NodeProps } from '@xyflow/svelte';
     import NodeWrapper from "$lib/components/NodeWrapper.svelte";
-    import SocketStem from "$lib/components/SocketStem.svelte";
+    import { Handle } from '@xyflow/svelte';
     
     let { id, data }: NodeProps<ImagePromptComposerType> = $props();
 
@@ -68,7 +68,7 @@
 
 <NodeWrapper title={nodeTitle} description={nodeDescription} label="Prompt Composer">
     <!-- Input Sockets -->
-    <SocketStem 
+    <Handle 
         type="target"
         socketType="string"
         label="Base Prompt"
@@ -79,9 +79,9 @@
             <span class="socket-label">Base Prompt</span>
             <span class="socket-type">string</span>
         </div>
-    </SocketStem>
+    </Handle>
     
-    <SocketStem 
+    <Handle 
         type="target"
         socketType="string"
         label="Style Modifiers"
@@ -92,9 +92,9 @@
             <span class="socket-label">Style Modifiers</span>
             <span class="socket-type">string</span>
         </div>
-    </SocketStem>
+    </Handle>
     
-    <SocketStem 
+    <Handle 
         type="target"
         socketType="string"
         label="Quality Settings"
@@ -105,7 +105,7 @@
             <span class="socket-label">Quality Settings</span>
             <span class="socket-type">string</span>
         </div>
-    </SocketStem>
+    </Handle>
 
     <!-- Node Content -->
     <div class="composer-content">
@@ -150,7 +150,7 @@
     </div>
 
     <!-- Output Socket -->
-    <SocketStem 
+    <Handle 
         type="source"
         socketType="string"
         label="Composed Prompt"
@@ -161,7 +161,7 @@
             <span class="socket-label">Composed Prompt</span>
             <span class="socket-type">string</span>
         </div>
-    </SocketStem>
+    </Handle>
 </NodeWrapper>
 
 <style>

@@ -15,22 +15,22 @@
     } from '@xyflow/svelte';
     import '@xyflow/svelte/dist/style.css';
 
-    import NoteNode from '../../routes/app/nodes/NoteNode.svelte';
+    import NoteNode from '$lib/components/nodes/NoteNode.svelte';
     import StemNode from '$lib/components/StemNode.svelte';
-    import TextTemplateFillinNode from "../../routes/app/nodes/text/TextTemplateFillinNode.svelte";
-    import ImageNode from "../../routes/app/nodes/images/ImageNode.svelte";
-    import TextEditorNode from "../../routes/app/nodes/text/TextEditorMarkdownNode.svelte";
-    import HTMLRendererNode from "../../routes/app/nodes/html/HTMLRendererNode.svelte";
+    import TextTemplateFillinNode from "$lib/components/nodes/text/TextTemplateFillinNode.svelte";
+    import ImageNode from "$lib/components/nodes/images/ImageNode.svelte";
+    import TextEditorNode from "$lib/components/nodes/text/TextEditorMarkdownNode.svelte";
+    import HTMLRendererNode from "$lib/components/nodes/html/HTMLRendererNode.svelte";
 
     import Logo from "../../components/Logo.svelte";
     import NodeSearch from "./NodeSearch.svelte";
     import BugReportButton from "../../components/BugReportButton.svelte";
     import { Plus, Play, X, ChevronDown } from "lucide-svelte";
     import { projectState, projectActions, projectSync } from "$lib/stores/ProjectState";
-    import { executeFlowGraph } from "../../routes/app/lib/Interpreter";
+    import { executeFlowGraph } from "$lib/compositor/Interpreter";
     
     // Import the existing nodes
-    import CompleteTextLLM from "../../routes/app/nodes/huggingface/CompleteTextLLM.svelte";
+    import CompleteTextLLM from "$lib/components/nodes/huggingface/CompleteTextLLM.svelte";
 
     let nodes = $state.raw<Node[]>([]);
 

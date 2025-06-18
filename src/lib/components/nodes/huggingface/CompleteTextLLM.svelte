@@ -15,8 +15,7 @@
 <script lang="ts">
     import NodeWrapper from "$lib/components/NodeWrapper.svelte";
     import {Handle, type NodeProps, Position, useSvelteFlow} from "@xyflow/svelte";
-    import {fetchSocketDataTypeByName} from "../../lib/DataTypes";
-    import SocketStem from "$lib/components/SocketStem.svelte";
+    import {fetchSocketDataTypeByName} from "$lib/compositor/DataTypes";
 
     let { id, data }: NodeProps<CompleteTextNodeType> = $props();
     
@@ -32,7 +31,7 @@
 
 <NodeWrapper label="Text Complete LLM" documentation="Format text according to natural-language-based rules." >
 
-    <SocketStem
+    <Handle
             type="source"
             socket_id='complete_text'
             label="Complete Text"
@@ -59,9 +58,9 @@
                                 </span>
             {/if}
         </div>
-    </SocketStem>
+    </Handle>
 
-    <SocketStem
+    <Handle
             type="target"
             socket_id='text'
             label="Incomplete Text"
@@ -88,9 +87,9 @@
                                 </span>
             {/if}
         </div>
-    </SocketStem>
+    </Handle>
 
-    <SocketStem
+    <Handle
             type="target"
             socket_id='model'
             label="HF Model ID"
@@ -117,6 +116,6 @@
                                 </span>
             {/if}
         </div>
-    </SocketStem>
+    </Handle>
     <h2>Text Formatting Prompt/Guidlines</h2>
 </NodeWrapper>

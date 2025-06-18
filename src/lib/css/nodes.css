@@ -252,6 +252,7 @@
 /* Socket input container - allows pointer events for input components */
 .socket-input-container {
     pointer-events: auto;
+    width: 100%;
 }
 
 /* Socket input components - ensure all inputs can receive pointer events */

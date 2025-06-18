@@ -19,7 +19,7 @@
 <script lang="ts">
     import { type NodeProps } from '@xyflow/svelte';
     import NodeWrapper from "$lib/components/NodeWrapper.svelte";
-    import SocketStem from "$lib/components/SocketStem.svelte";
+    import { Handle } from '@xyflow/svelte';
 
     let { id, data }: NodeProps<StringToImageConverterType> = $props();
 
@@ -183,7 +183,7 @@
 
 <NodeWrapper title={nodeTitle} description={nodeDescription} label="String to Image">
     <!-- Input Socket -->
-    <SocketStem 
+    <Handle 
         type="target"
         socketType="string"
         label="Image String"
@@ -194,7 +194,7 @@
             <span class="socket-label">Image String</span>
             <span class="socket-type">string</span>
         </div>
-    </SocketStem>
+    </Handle>
 
     <!-- Node Content -->
     <div class="converter-content">
@@ -240,7 +240,7 @@
     </div>
 
     <!-- Output Sockets -->
-    <SocketStem 
+    <Handle 
         type="source"
         socketType="image/jimp"
         label="Jimp Image"
@@ -251,9 +251,9 @@
             <span class="socket-label">Jimp Image</span>
             <span class="socket-type">image/jimp</span>
         </div>
-    </SocketStem>
+    </Handle>
     
-    <SocketStem 
+    <Handle 
         type="source"
         socketType="object"
         label="Dimensions"
@@ -264,7 +264,7 @@
             <span class="socket-label">Dimensions</span>
             <span class="socket-type">object</span>
         </div>
-    </SocketStem>
+    </Handle>
 </NodeWrapper>
 
 <style>

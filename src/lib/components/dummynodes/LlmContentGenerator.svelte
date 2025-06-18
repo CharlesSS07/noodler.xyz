@@ -21,7 +21,7 @@
 <script lang="ts">
     import { type NodeProps } from '@xyflow/svelte';
     import NodeWrapper from "$lib/components/NodeWrapper.svelte";
-    import SocketStem from "$lib/components/SocketStem.svelte";
+    import { Handle } from '@xyflow/svelte';
     
     let { id, data }: NodeProps<LlmContentGeneratorType> = $props();
 
@@ -227,7 +227,7 @@
 
 <NodeWrapper title={nodeTitle} description={nodeDescription} label="LLM Content Generator">
     <!-- Input Sockets -->
-    <SocketStem 
+    <Handle 
         type="target"
         socketType="string"
         label="Topic"
@@ -238,9 +238,9 @@
             <span class="socket-label">Topic</span>
             <span class="socket-type">string</span>
         </div>
-    </SocketStem>
+    </Handle>
     
-    <SocketStem 
+    <Handle 
         type="target"
         socketType="string"
         label="Content Type"
@@ -251,9 +251,9 @@
             <span class="socket-label">Content Type</span>
             <span class="socket-type">string</span>
         </div>
-    </SocketStem>
+    </Handle>
     
-    <SocketStem 
+    <Handle 
         type="target"
         socketType="string"
         label="Tone"
@@ -264,9 +264,9 @@
             <span class="socket-label">Tone</span>
             <span class="socket-type">string</span>
         </div>
-    </SocketStem>
+    </Handle>
     
-    <SocketStem 
+    <Handle 
         type="target"
         socketType="string"
         label="Length"
@@ -277,7 +277,7 @@
             <span class="socket-label">Length</span>
             <span class="socket-type">string</span>
         </div>
-    </SocketStem>
+    </Handle>
 
     <!-- Node Content -->
     <div class="generator-content">
@@ -366,7 +366,7 @@
     </div>
 
     <!-- Output Sockets -->
-    <SocketStem 
+    <Handle 
         type="source"
         socketType="string"
         label="Generated Content"
@@ -377,9 +377,9 @@
             <span class="socket-label">Generated Content</span>
             <span class="socket-type">string</span>
         </div>
-    </SocketStem>
+    </Handle>
     
-    <SocketStem 
+    <Handle 
         type="source"
         socketType="object"
         label="Metadata"
@@ -390,7 +390,7 @@
             <span class="socket-label">Metadata</span>
             <span class="socket-type">object</span>
         </div>
-    </SocketStem>
+    </Handle>
 </NodeWrapper>
 
 <style>

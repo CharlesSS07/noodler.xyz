@@ -21,7 +21,7 @@
 <script lang="ts">
     import { type NodeProps } from '@xyflow/svelte';
     import NodeWrapper from "$lib/components/NodeWrapper.svelte";
-    import SocketStem from "$lib/components/SocketStem.svelte";
+    import { Handle } from '@xyflow/svelte';
     
     let { id, data }: NodeProps<SmartCompositorType> = $props();
 
@@ -157,7 +157,7 @@
 
 <NodeWrapper title={nodeTitle} description={nodeDescription} label="Smart Compositor">
     <!-- Input Sockets -->
-    <SocketStem 
+    <Handle 
         type="target"
         socketType="image/jimp"
         label="Foreground"
@@ -168,9 +168,9 @@
             <span class="socket-label">Foreground</span>
             <span class="socket-type">image/jimp</span>
         </div>
-    </SocketStem>
+    </Handle>
     
-    <SocketStem 
+    <Handle 
         type="target"
         socketType="image/jimp"
         label="Background"
@@ -181,9 +181,9 @@
             <span class="socket-label">Background</span>
             <span class="socket-type">image/jimp</span>
         </div>
-    </SocketStem>
+    </Handle>
     
-    <SocketStem 
+    <Handle 
         type="target"
         socketType="string"
         label="Composition Prompt"
@@ -194,7 +194,7 @@
             <span class="socket-label">Composition Prompt</span>
             <span class="socket-type">string</span>
         </div>
-    </SocketStem>
+    </Handle>
 
     <!-- Node Content -->
     <div class="compositor-content">
@@ -285,7 +285,7 @@
     </div>
 
     <!-- Output Socket -->
-    <SocketStem 
+    <Handle 
         type="source"
         socketType="image/jimp"
         label="Composite Result"
@@ -296,7 +296,7 @@
             <span class="socket-label">Composite Result</span>
             <span class="socket-type">image/jimp</span>
         </div>
-    </SocketStem>
+    </Handle>
 </NodeWrapper>
 
 <style>

@@ -18,7 +18,7 @@
 <script lang="ts">
     import { type NodeProps } from '@xyflow/svelte';
     import NodeWrapper from "$lib/components/NodeWrapper.svelte";
-    import SocketStem from "$lib/components/SocketStem.svelte";
+    import { Handle } from '@xyflow/svelte';
     
     let { id, data }: NodeProps<HtmlTagNodeType> = $props();
 
@@ -98,7 +98,7 @@
 
 <NodeWrapper title={nodeTitle} description={nodeDescription} label="HTML Tag">
     <!-- Input Socket for innerHTML -->
-    <SocketStem 
+    <Handle 
         type="target"
         socketType="string"
         label="Inner HTML"
@@ -109,7 +109,7 @@
             <span class="socket-label">Inner HTML</span>
             <span class="socket-type">string</span>
         </div>
-    </SocketStem>
+    </Handle>
 
     <!-- Node Content -->
     <div class="tag-content">
@@ -188,7 +188,7 @@
     </div>
 
     <!-- Output Socket -->
-    <SocketStem 
+    <Handle 
         type="source"
         socketType="string"
         label="HTML Output"
@@ -199,7 +199,7 @@
             <span class="socket-label">HTML Output</span>
             <span class="socket-type">string</span>
         </div>
-    </SocketStem>
+    </Handle>
 </NodeWrapper>
 
 <style>

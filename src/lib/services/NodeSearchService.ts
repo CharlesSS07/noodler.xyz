@@ -9,7 +9,7 @@ import {
     type QuerySnapshot,
     type DocumentData,
 } from 'firebase/firestore';
-import type { NodeBluePrintModel } from '../../routes/app/lib/NodeBluePrint.js';
+import type { NodeBluePrintModel } from '$lib/compositor/NodeBluePrint.js';
 
 export interface NodeSearchResult {
     id: string;

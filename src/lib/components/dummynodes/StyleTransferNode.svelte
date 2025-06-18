@@ -20,7 +20,7 @@
 <script lang="ts">
     import { type NodeProps } from '@xyflow/svelte';
     import NodeWrapper from "$lib/components/NodeWrapper.svelte";
-    import SocketStem from "$lib/components/SocketStem.svelte";
+    import { Handle } from '@xyflow/svelte';
     
     let { id, data }: NodeProps<StyleTransferType> = $props();
 
@@ -120,7 +120,7 @@
 
 <NodeWrapper title={nodeTitle} description={nodeDescription} label="Style Transfer">
     <!-- Input Sockets -->
-    <SocketStem 
+    <Handle 
         type="target"
         socketType="image"
         label="Source Image"
@@ -131,9 +131,9 @@
             <span class="socket-label">Source Image</span>
             <span class="socket-type">image</span>
         </div>
-    </SocketStem>
+    </Handle>
     
-    <SocketStem 
+    <Handle 
         type="target"
         socketType="image"
         label="Style Reference"
@@ -144,9 +144,9 @@
             <span class="socket-label">Style Reference</span>
             <span class="socket-type">image</span>
         </div>
-    </SocketStem>
+    </Handle>
     
-    <SocketStem 
+    <Handle 
         type="target"
         socketType="string"
         label="Style Prompt"
@@ -157,7 +157,7 @@
             <span class="socket-label">Style Prompt</span>
             <span class="socket-type">string</span>
         </div>
-    </SocketStem>
+    </Handle>
 
     <!-- Node Content -->
     <div class="transfer-content">
@@ -226,7 +226,7 @@
     </div>
 
     <!-- Output Socket -->
-    <SocketStem 
+    <Handle 
         type="source"
         socketType="image"
         label="Processed Image"
@@ -237,7 +237,7 @@
             <span class="socket-label">Processed Image</span>
             <span class="socket-type">image</span>
         </div>
-    </SocketStem>
+    </Handle>
 </NodeWrapper>
 
 <style>

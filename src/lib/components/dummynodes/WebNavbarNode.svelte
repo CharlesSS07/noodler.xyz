@@ -18,7 +18,7 @@
 <script lang="ts">
     import { type NodeProps } from '@xyflow/svelte';
     import NodeWrapper from "$lib/components/NodeWrapper.svelte";
-    import SocketStem from "$lib/components/SocketStem.svelte";
+    import { Handle } from '@xyflow/svelte';
     
     let { id, data }: NodeProps<WebNavbarNodeType> = $props();
 
@@ -186,7 +186,7 @@
 
 <NodeWrapper title={nodeTitle} description={nodeDescription} label="Web Navbar">
     <!-- Input Sockets -->
-    <SocketStem 
+    <Handle 
         type="target"
         socketType="string"
         label="Brand Name"
@@ -197,9 +197,9 @@
             <span class="socket-label">Brand Name</span>
             <span class="socket-type">string</span>
         </div>
-    </SocketStem>
+    </Handle>
     
-    <SocketStem 
+    <Handle 
         type="target"
         socketType="string"
         label="Logo URL"
@@ -210,7 +210,7 @@
             <span class="socket-label">Logo URL</span>
             <span class="socket-type">string</span>
         </div>
-    </SocketStem>
+    </Handle>
 
     <!-- Node Content -->
     <div class="navbar-content">
@@ -283,7 +283,7 @@
     </div>
 
     <!-- Output Socket -->
-    <SocketStem 
+    <Handle 
         type="source"
         socketType="string"
         label="Navbar HTML"
@@ -294,7 +294,7 @@
             <span class="socket-label">Navbar HTML</span>
             <span class="socket-type">string</span>
         </div>
-    </SocketStem>
+    </Handle>
 </NodeWrapper>
 
 <style>

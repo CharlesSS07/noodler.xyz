@@ -51,7 +51,7 @@
 - **TextTemplate**: variable names (targets), `output` (source)  
 - **ImageNode**: `image` (target), `output` (source)
 - **Official nodes**: Check existing implementations for handle names
-- **Custom nodes**: Use `socket_id` from SocketStem components
+- **Custom nodes**: Use `socket_id` from Handle components
 
 #### Edge Timing Issues
 - TextTemplate generates dynamic sockets after mount
@@ -76,7 +76,7 @@
 ### 5. Node Wrapper Requirements
 - Always include `label` prop: `<NodeWrapper label="Node Name">`
 - Provide meaningful `title` and `description`
-- Use proper socket structure with SocketStem components
+- Use proper socket structure with Handle components
 
 ### 6. ELK.js Auto-Layout
 - Import ELK and Position from respective packages

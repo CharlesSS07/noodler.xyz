@@ -14,8 +14,8 @@
 <script lang="ts">
     import {type NodeProps, useNodeConnections} from "@xyflow/svelte";
     import {docStore} from "sveltefire";
-    import type {FirestoreNodeBluePrintModel} from "../../routes/app/lib/FirestoreNodeBluePrint";
     import {firestore} from "../../firebase";
+    import type {FirestoreNodeBluePrintModel} from "$lib/compositor/FirestoreNodeBluePrint";
     import StemNodeComponent from "$lib/components/StemNodeComponent.svelte";
 
     let {id, data, selected}: NodeProps<StemNodeType> = $props();
@@ -49,7 +49,8 @@
                         id: socketId,
                         type: socket.type,
                         value: data.input[socketId],
-                        isConnected
+                        isConnected,
+                        params: socket.params,
                     });
                 } else {
                     newInputSockets.push({
@@ -57,7 +58,8 @@
                         id: socketId,
                         type: socket.type,
                         value: socket.params.default_value,
-                        isConnected
+                        isConnected,
+                        params: socket.params,
                     });
                 }
             }

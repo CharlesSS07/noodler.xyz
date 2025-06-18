@@ -1,10 +1,10 @@
-import type { NodeBluePrintControllerFactoryInterface } from '../../routes/app/lib/NodeBluePrint.js';
-import { FirestoreNodeBluePrintControllerFactoryInterface } from '../../routes/app/lib/FirestoreNodeBluePrint.js';
+import type { NodeBluePrintControllerFactoryInterface } from '$lib/compositor/NodeBluePrint.js';
+import { FirestoreNodeBluePrintControllerFactoryInterface } from '$lib/compositor/FirestoreNodeBluePrint.js';
 import {
     JIMPImageSocketParamsBuilder,
     NumberSocketParamsBuilder,
-} from '../../routes/app/lib/SocketParamBuilders.js';
-import { STANDARD_DATATYPES } from '../../routes/app/lib/DataTypes.js';
+} from '$lib/compositor/SocketParamBuilders.js';
+import { STANDARD_DATATYPES } from '$lib/compositor/DataTypes.js';
 
 const nodeBluePrintController: NodeBluePrintControllerFactoryInterface =
     new FirestoreNodeBluePrintControllerFactoryInterface();
@@ -39,13 +39,13 @@ outputs.set('img', img);
     hsv.title = 'HSV Shift Change';
     hsv.documentation = 'Shift hue, saturation, or value of the input image.';
 
-    await hsv.newInputSocket('img', {
+    hsv.newInputSocket('img', {
         label: 'Input Image',
         documentation: 'Any image.',
         type: STANDARD_DATATYPES.IMAGE_JIMP,
         params: new JIMPImageSocketParamsBuilder().build(),
     });
-    await hsv.newInputSocket('hue', {
+    hsv.newInputSocket('hue', {
         label: 'Hue Shift',
         documentation: 'Amount to shift hue by.',
         type: STANDARD_DATATYPES.NUMBER,
@@ -55,7 +55,7 @@ outputs.set('img', img);
             .setStep(0.1)
             .build(),
     });
-    await hsv.newInputSocket('saturation', {
+    hsv.newInputSocket('saturation', {
         label: 'Saturation Shift',
         documentation: 'Amount to shift saturation by.',
         type: STANDARD_DATATYPES.NUMBER,
@@ -65,7 +65,7 @@ outputs.set('img', img);
             .setStep(0.1)
             .build(),
     });
-    await hsv.newInputSocket('value', {
+    hsv.newInputSocket('value', {
         label: 'Value Shift',
         documentation: 'Amount to shift brightness/darkness by.',
         type: STANDARD_DATATYPES.NUMBER,
@@ -76,7 +76,7 @@ outputs.set('img', img);
             .build(),
     });
 
-    await hsv.newOutputSocket('img', {
+    hsv.newOutputSocket('img', {
         label: 'Output Image',
         documentation: 'Shifted image.',
         type: STANDARD_DATATYPES.IMAGE_JIMP,

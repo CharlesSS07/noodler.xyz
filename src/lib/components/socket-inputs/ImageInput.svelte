@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { JIMPSocketParams } from '../../../routes/app/lib/SocketParamBuilders';
+    import type { JIMPSocketParams } from '$lib/compositor/SocketParamBuilders';
     
     export let value: File | string | null = null;
     export let params: JIMPSocketParams | undefined = undefined;

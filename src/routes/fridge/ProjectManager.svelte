@@ -2,7 +2,7 @@
     import { onMount } from 'svelte';
     import { Plus, Calendar, Users, Clock, Search, Filter, Grid, List } from 'lucide-svelte';
     import { auth, rtdb } from '../../firebase'; // Assuming firebase.js exports initialized auth and rtdb
-    import type { ProjectInfo } from '../app/lib/ProjectModels.js';
+    import type { ProjectInfo } from '$lib/compositor/ProjectModels.js';
     import { goto } from '$app/navigation';
     import { ref, onValue, off } from 'firebase/database';
     import { onAuthStateChanged, type User } from 'firebase/auth';
@@ -10,8 +10,8 @@
 
     import {
         FirebaseRTDBProjectCollection, type FirebaseRTDBProjectKey,
-    } from '../app/lib/FirebaseRTDBProjectController.js';
-    import type { ProjectCollectionInterface } from '../app/lib/ProjectInterfaces.js';
+    } from '$lib/compositor/FirebaseRTDBProjectController.js';
+    import type { ProjectCollectionInterface } from '$lib/compositor/ProjectInterfaces.js';
     import Logo from "../../components/Logo.svelte";
     export const ACTIVE_PROJECT_COLLECTION: ProjectCollectionInterface<FirebaseRTDBProjectKey> =
         new FirebaseRTDBProjectCollection();

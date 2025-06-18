@@ -20,7 +20,7 @@
         type NodeProps
     } from '@xyflow/svelte';
 
-    import { fetchSocketDataTypeByName } from '../../lib/DataTypes';
+    import { fetchSocketDataTypeByName } from '$lib/compositor/DataTypes';
     import { untrack } from 'svelte';
     import { marked } from 'marked'; // Import marked
 

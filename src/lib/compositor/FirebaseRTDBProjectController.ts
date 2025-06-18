@@ -1,5 +1,5 @@
 import { child, push, ref, remove, serverTimestamp } from 'firebase/database';
-import { auth, rtdb } from '../../../firebase';
+import { auth, rtdb } from '../../firebase';
 import { type ProjectCollectionInterface } from './ProjectInterfaces.js';
 
 const projectsRef = ref(rtdb, 'fridge');

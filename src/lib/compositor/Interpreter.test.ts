@@ -348,7 +348,7 @@ describe('Interpreter Flow Graph Tests', () => {
     // Diagnostic tests to check Firebase connection
     test('Should connect to Firebase emulators and check node existence', async () => {
         const { getAuth, signInAnonymously } = await import('firebase/auth');
-        const { app } = await import('../../../firebase');
+        const { app } = await import('../../firebase');
         const { FirestoreNodeBluePrintControllerFactoryInterface } =
             await import('./FirestoreNodeBluePrint');
 

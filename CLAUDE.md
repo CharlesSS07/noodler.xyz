@@ -49,7 +49,7 @@ This is a SvelteKit application that implements a visual node-based flow editor 
 **Node Architecture**: 
 - `NodeBluePrint.ts` - Defines the interface and model for node types with input/output sockets
 - `StemNode.svelte` - Wrapper component for all node types in the flow graph
-- `SocketStem.svelte` - Handles socket connections and data propagation
+- `Handle` components from `@xyflow/svelte` - Handle socket connections and data propagation
 - Individual node implementations in `src/routes/app/nodes/` (text, images, html, etc.)
 
 **Node Search & Discovery**:

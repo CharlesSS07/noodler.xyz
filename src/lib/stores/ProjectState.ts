@@ -9,7 +9,7 @@ import {
     type DatabaseReference,
 } from 'firebase/database';
 import type { Node, Edge } from '@xyflow/svelte';
-import { OutputSocketDataCache } from '../../routes/app/lib/OutputSocketDataCache';
+import { OutputSocketDataCache } from '$lib/compositor/OutputSocketDataCache';
 
 // Project state interface
 export interface ProjectState {

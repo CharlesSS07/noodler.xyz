@@ -14,8 +14,7 @@
 <script lang="ts">
     import NodeWrapper from "$lib/components/NodeWrapper.svelte";
     import {Handle, type NodeProps, Position} from "@xyflow/svelte";
-    import {fetchSocketDataTypeByName} from "../../../routes/app/lib/DataTypes";
-    import SocketStem from "$lib/components/SocketStem.svelte";
+    import {fetchSocketDataTypeByName} from "$lib/compositor/DataTypes";
 
     let { id, data }: NodeProps<MagicTextTransformNodeType> = $props();
 
@@ -39,7 +38,7 @@
 
 <NodeWrapper label="Text Formatter LLM" documentation="Format text according to natural-language-based rules." >
 
-    <SocketStem
+    <Handle
             type="source"
             socket_id='formatted_text'
             label="Formatted Text"
@@ -66,9 +65,9 @@
                                 </span>
             {/if}
         </div>
-    </SocketStem>
+    </Handle>
 
-    <SocketStem
+    <Handle
             type="target"
             socket_id='messy_text'
             label="Messy Text"
@@ -95,7 +94,7 @@
                                 </span>
             {/if}
         </div>
-    </SocketStem>
+    </Handle>
     <h2>Text Formatting Prompt/Guidlines</h2>
     <textarea bind:value={data.transformPrompt} placeholder="Extract proper nouns. Return in list." rows="3"></textarea>
 </NodeWrapper>

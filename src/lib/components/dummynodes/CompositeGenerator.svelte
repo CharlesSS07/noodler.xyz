@@ -21,7 +21,7 @@
 <script lang="ts">
     import { type NodeProps } from '@xyflow/svelte';
     import NodeWrapper from "$lib/components/NodeWrapper.svelte";
-    import SocketStem from "$lib/components/SocketStem.svelte";
+    import { Handle } from '@xyflow/svelte';
     
     let { id, data }: NodeProps<CompositeGeneratorType> = $props();
 
@@ -149,7 +149,7 @@
 
 <NodeWrapper title={nodeTitle} description={nodeDescription} label="Composite Generator">
     <!-- Input Sockets -->
-    <SocketStem 
+    <Handle 
         type="target"
         socketType="string"
         label="Main Prompt"
@@ -160,9 +160,9 @@
             <span class="socket-label">Main Prompt</span>
             <span class="socket-type">string</span>
         </div>
-    </SocketStem>
+    </Handle>
     
-    <SocketStem 
+    <Handle 
         type="target"
         socketType="image"
         label="Background"
@@ -173,9 +173,9 @@
             <span class="socket-label">Background</span>
             <span class="socket-type">image</span>
         </div>
-    </SocketStem>
+    </Handle>
     
-    <SocketStem 
+    <Handle 
         type="target"
         socketType="image"
         label="Overlay"
@@ -186,9 +186,9 @@
             <span class="socket-label">Overlay</span>
             <span class="socket-type">image</span>
         </div>
-    </SocketStem>
+    </Handle>
     
-    <SocketStem 
+    <Handle 
         type="target"
         socketType="image"
         label="Mask"
@@ -199,7 +199,7 @@
             <span class="socket-label">Mask</span>
             <span class="socket-type">image</span>
         </div>
-    </SocketStem>
+    </Handle>
 
     <!-- Node Content -->
     <div class="generator-content">
@@ -315,7 +315,7 @@
     </div>
 
     <!-- Output Socket -->
-    <SocketStem 
+    <Handle 
         type="source"
         socketType="image"
         label="Composite Image"
@@ -326,7 +326,7 @@
             <span class="socket-label">Composite Image</span>
             <span class="socket-type">image</span>
         </div>
-    </SocketStem>
+    </Handle>
 </NodeWrapper>
 
 <style>

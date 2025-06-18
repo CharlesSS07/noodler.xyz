@@ -50,11 +50,16 @@ export class NumberSocketParamsBuilder extends GenericSocketParamsBuilder<
     NumberSocketParams
 > {
     params: NumberSocketParams = new (class implements NumberSocketParams {
-        default_value: SocketData = 0;
+        default_value: number = 0;
         max: number | null = null;
         min: number | null = null;
         step: number | null = null;
     })();
+
+    constructor(default_value: number) {
+        super(default_value);
+        this.params.default_value = default_value;
+    }
 
     /**
      * Sets the minimum value for the number input.
@@ -117,9 +122,14 @@ export class NumberSocketParamsBuilder extends GenericSocketParamsBuilder<
             throw new Error(`value must be increment of ${this.params.step}`);
     }
 
-    // build(): NumberSocketParams {
-    // 	return this.params;
-    // }
+    build(): NumberSocketParams {
+    	return {
+    		default_value: this.params.default_value,
+    		min: this.params.min,
+    		max: this.params.max,
+    		step: this.params.step,
+    	};
+    }
 }
 
 export interface StringSocketParams extends InputSocketParams {
@@ -141,12 +151,17 @@ export class StringSocketParamsBuilder extends GenericSocketParamsBuilder<
     StringSocketParams
 > {
     params: StringSocketParams = new (class implements StringSocketParams {
-        default_value: SocketData = '';
+        default_value: string = '';
         isSensitive: boolean = false;
         maxCharacters: number | null = null;
         minCharacters: number | null = null;
         numRows: number | null = null;
     })();
+
+    constructor(default_value: string) {
+        super(default_value);
+        this.params.default_value = default_value;
+    }
 
     asWord() {
         this.setDefaultValue('');
@@ -175,10 +190,12 @@ export class StringSocketParamsBuilder extends GenericSocketParamsBuilder<
 
     setMinCharacters(minCharacters: number) {
         this.params.minCharacters = minCharacters;
+        return this;
     }
 
     setMaxCharacters(maxCharacters: number) {
         this.params.maxCharacters = maxCharacters;
+        return this;
     }
 
     check(value: string): void {
@@ -196,9 +213,15 @@ export class StringSocketParamsBuilder extends GenericSocketParamsBuilder<
             );
     }
 
-    // build(): StringSocketParams {
-    // 	return {...this.params};
-    // }
+    build(): StringSocketParams {
+    	return {
+    		default_value: this.params.default_value,
+    		isSensitive: this.params.isSensitive,
+    		minCharacters: this.params.minCharacters,
+    		maxCharacters: this.params.maxCharacters,
+    		numRows: this.params.numRows,
+    	};
+    }
 }
 
 export interface JIMPSocketParams extends InputSocketParams {
@@ -235,6 +258,13 @@ export class JIMPImageSocketParamsBuilder extends GenericSocketParamsBuilder<
         if (value == JIMPImageSocketParamsBuilder.EMPTY_IMAGE)
             throw new Error(`value is the empty image`);
     }
+
+    build(): JIMPSocketParams {
+        return {
+        	default_value: this.params.default_value,
+        	displayImage: this.params.displayImage,
+        };
+    }
 }
 
 export interface ENUMSocketParams extends InputSocketParams {
@@ -251,12 +281,13 @@ export class ENUMSocketParamBuilder extends GenericSocketParamsBuilder<
     })();
 
     constructor(options: string[]) {
-        const optionsUnique = new Set<string>(options).values().toArray();
+        const optionsUnique = Array.from(new Set<string>(options));
         if (optionsUnique.length <= 1)
             throw new Error(`options must not be empty`);
         super(optionsUnique[0]);
         // this.setDefaultValue(); // set default value
         this.params.options = optionsUnique;
+        this.params.default_value = optionsUnique[0];
     }
 
     getOptions() {
@@ -268,6 +299,13 @@ export class ENUMSocketParamBuilder extends GenericSocketParamsBuilder<
         const val = value as string;
         if (!this.params.options.includes(val))
             throw new Error(`value should be in enum options; illegal value`);
+    }
+
+    build(): ENUMSocketParams {
+        return {
+        	default_value: this.params.default_value,
+        	options: this.params.options,
+        };
     }
 }
 

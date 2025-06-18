@@ -6,7 +6,7 @@ import {
     setDoc,
     type Unsubscribe,
 } from 'firebase/firestore';
-import { firestore } from '../../../firebase';
+import { firestore } from '../../firebase';
 import {
     NodeBluePrint,
     type NodeBluePrintControllerFactoryInterface,

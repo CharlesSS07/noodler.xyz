@@ -1,7 +1,7 @@
 <script lang="ts">
     import NodeWrapper from "$lib/components/NodeWrapper.svelte";
     import {Handle, Position, type NodeProps} from "@xyflow/svelte";
-    import {fetchSocketDataTypeByName} from "../../../routes/app/lib/DataTypes.ts";
+    import {fetchSocketDataTypeByName} from "$lib/compositor/DataTypes.ts";
     import { type Node } from '@xyflow/svelte';
 
     export type SplitStringNodeType = Node<

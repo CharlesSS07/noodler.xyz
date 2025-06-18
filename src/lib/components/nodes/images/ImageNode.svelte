@@ -1,7 +1,7 @@
 
 <script module lang="ts">
     import { type Node } from '@xyflow/svelte';
-    import type { BigDataRef } from "../../lib/BigData";
+    import type { BigDataRef } from "$lib/compositor/BigData";
 
     // Official NID for this node: image_loader
     export type ImageNodeType = Node<
@@ -16,7 +16,7 @@
 <script lang="ts">
     import { Handle, Position, type NodeProps, useSvelteFlow, useNodeConnections } from '@xyflow/svelte';
     import { Jimp } from "jimp";
-    import { fetchSocketDataTypeByName } from "../../lib/DataTypes";
+    import { fetchSocketDataTypeByName } from "$lib/compositor/DataTypes";
     import { projectOutputDataCache } from "$lib/stores/ProjectState";
     import { untrack } from "svelte";
     import { 
@@ -25,7 +25,7 @@
         storeJimpImage, 
         isBigDataRef, 
         autoConvertToBigData,
-    } from "../../lib/BigData";
+    } from "$lib/compositor/BigData";
 
     import NodeWrapper from '$lib/components/NodeWrapper.svelte';
 

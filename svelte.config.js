@@ -31,8 +31,6 @@ export default {
             strict: false,
         }),
         files: {
-            // Exclude examplesAndDocs from being processed by SvelteKit
-            lib: 'src/lib',
             routes: 'src/routes',
         },
     },

@@ -1,12 +1,12 @@
-import type { NodeBluePrintControllerFactoryInterface } from '../../routes/app/lib/NodeBluePrint.js';
-import { FirestoreNodeBluePrintControllerFactoryInterface } from '../../routes/app/lib/FirestoreNodeBluePrint.js';
+import type { NodeBluePrintControllerFactoryInterface } from '$lib/compositor/NodeBluePrint.js';
+import { FirestoreNodeBluePrintControllerFactoryInterface } from '$lib/compositor/FirestoreNodeBluePrint.js';
 import {
     NumberSocketParamsBuilder,
     StringSocketParamsBuilder,
     JIMPImageSocketParamsBuilder,
     GenericSocketParamsBuilder,
-} from '../../routes/app/lib/SocketParamBuilders.js';
-import { STANDARD_DATATYPES } from '../../routes/app/lib/DataTypes.js';
+} from '$lib/compositor/SocketParamBuilders.js';
+import { STANDARD_DATATYPES } from '$lib/compositor/DataTypes.js';
 
 const factory: NodeBluePrintControllerFactoryInterface =
     new FirestoreNodeBluePrintControllerFactoryInterface();

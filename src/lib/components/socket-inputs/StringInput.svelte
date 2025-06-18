@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { StringSocketParams } from '../../../routes/app/lib/SocketParamBuilders';
+    import type { StringSocketParams } from '$lib/compositor/SocketParamBuilders';
     
     export let value: string = '';
     export let params: StringSocketParams | undefined = undefined;

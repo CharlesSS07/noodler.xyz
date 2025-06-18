@@ -15,7 +15,7 @@
  */
 
 import { beforeEach, describe, expect, test } from 'vitest';
-import { executeFlowGraph } from '../routes/app/lib/Interpreter';
+import { executeFlowGraph } from '$lib/compositor/Interpreter';
 import type { Node, Edge } from '@xyflow/svelte';
 import { projectOutputDataCache } from '$lib/stores/ProjectState';
 

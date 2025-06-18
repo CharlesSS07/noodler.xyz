@@ -15,7 +15,7 @@
 
 <script lang="ts">
     import { Handle, Position, type NodeProps, useSvelteFlow } from '@xyflow/svelte';
-    import { fetchSocketDataTypeByName } from "../../lib/DataTypes";
+    import { fetchSocketDataTypeByName } from "$lib/compositor/DataTypes";
 
     let { id, data }: NodeProps<HtmlRendererNodeType> = $props();
     

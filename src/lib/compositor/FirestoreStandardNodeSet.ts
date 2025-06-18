@@ -14,7 +14,7 @@ import {
     htmlNodes,
     fileNodes,
     basicMathNodes,
-} from '../../../lib/standardNodes/index.js';
+} from '../standardNodes';
 
 export async function generateStandardNodeSuite() {
     const opBuilders = [
@@ -39,5 +39,5 @@ export async function generateStandardNodeSuite() {
     ];
     await Promise.all(opBuilders);
 
-    console.log('All STD lib nodes added.');
+    console.log('All STD compositor nodes added.');
 }

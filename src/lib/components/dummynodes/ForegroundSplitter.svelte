@@ -21,7 +21,7 @@
 <script lang="ts">
     import { type NodeProps } from '@xyflow/svelte';
     import NodeWrapper from "$lib/components/NodeWrapper.svelte";
-    import SocketStem from "$lib/components/SocketStem.svelte";
+    import { Handle } from '@xyflow/svelte';
     
     let { id, data }: NodeProps<ForegroundSplitterType> = $props();
 
@@ -121,7 +121,7 @@
 
 <NodeWrapper title={nodeTitle} description={nodeDescription} label="Foreground Splitter">
     <!-- Input Sockets -->
-    <SocketStem 
+    <Handle 
         type="target"
         socketType="image/jimp"
         label="Source Image"
@@ -132,9 +132,9 @@
             <span class="socket-label">Source Image</span>
             <span class="socket-type">image/jimp</span>
         </div>
-    </SocketStem>
+    </Handle>
     
-    <SocketStem 
+    <Handle 
         type="target"
         socketType="string"
         label="Mask Prompt"
@@ -145,7 +145,7 @@
             <span class="socket-label">Mask Prompt</span>
             <span class="socket-type">string</span>
         </div>
-    </SocketStem>
+    </Handle>
 
     <!-- Node Content -->
     <div class="splitter-content">
@@ -220,7 +220,7 @@
     </div>
 
     <!-- Output Sockets -->
-    <SocketStem 
+    <Handle 
         type="source"
         socketType="image/jimp"
         label="Foreground"
@@ -231,9 +231,9 @@
             <span class="socket-label">Foreground</span>
             <span class="socket-type">image/jimp</span>
         </div>
-    </SocketStem>
+    </Handle>
     
-    <SocketStem 
+    <Handle 
         type="source"
         socketType="image/jimp"
         label="Background Mask"
@@ -244,7 +244,7 @@
             <span class="socket-label">Background Mask</span>
             <span class="socket-type">image/jimp</span>
         </div>
-    </SocketStem>
+    </Handle>
 </NodeWrapper>
 
 <style>

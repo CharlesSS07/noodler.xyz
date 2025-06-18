@@ -15,7 +15,7 @@ import type {
     OutputSocketModel,
 } from './SocketModels.js';
 import { getAuth, signInAnonymously, type User } from 'firebase/auth';
-import { app } from '../../../firebase';
+import { app } from '../../firebase';
 import { OutputSocketDataCache } from './OutputSocketDataCache';
 
 // Test configuration
