@@ -9,16 +9,20 @@
     // Calculate the percentage for the gradient
     let percentage = $derived(((value - min) / (max - min)) * 100);
 
-    function handleClick(e) {
+    function handleMouseDown(e) {
         // Stop event from bubbling to node
-        e.stopPropagation();
-        startEditing();
-    }
-
-    function handleDrag(e) {
-        // Stop event from bubbling to node
+        e.preventDefault();
         e.stopPropagation();
         
+        // Add document listeners for dragging
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+        
+        // Also handle the initial position
+        handleMouseMove(e);
+    }
+
+    function handleMouseMove(e) {
         if (sliderElement) {
             const rect = sliderElement.getBoundingClientRect();
             const x = e.clientX - rect.left;
@@ -31,6 +35,17 @@
             // Ensure value stays within bounds
             value = Math.max(min, Math.min(max, steppedValue));
         }
+    }
+
+    function handleMouseUp() {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+    }
+
+    function handleDoubleClick(e) {
+        // Stop event from bubbling to node
+        e.stopPropagation();
+        startEditing();
     }
 
     function startEditing() {
@@ -91,9 +106,8 @@
             {:else}
                 <div
                         bind:this={sliderElement}
-                        on:click={handleClick}
-                        on:drag={handleDrag}
-                        draggable="true"
+                        on:mousedown={handleMouseDown}
+                        on:dblclick={handleDoubleClick}
                         class="relative w-full h-8 rounded-full cursor-pointer select-none overflow-hidden border border-gray-300 bg-gray-100"
                         style="background: linear-gradient(to right, #3b82f6 0%, #3b82f6 {percentage}%, #e5e7eb {percentage}%, #e5e7eb 100%)"
                 >
