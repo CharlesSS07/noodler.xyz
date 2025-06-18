@@ -12,18 +12,17 @@
     } from "@xyflow/svelte";
     import '@xyflow/svelte/dist/style.css';
     import NoteNode from "../../nodes/NoteNode.svelte";
-    import StemNode from "$lib/components/StemNodeOld.svelte";
     import ImageNode from "../../nodes/images/ImageNode.svelte";
     import HTMLRendererNode from "../../nodes/html/HTMLRendererNode.svelte";
     import TextTemplateFillinNode from "../../nodes/text/TextTemplateFillinNode.svelte";
     import TextEditorNode from "../../nodes/text/TextEditorMarkdownNode.svelte";
 
     // Import our custom demo nodes
-    import ForegroundSplitter from "../dummynodes/ForegroundSplitter.svelte";
-    import BackgroundGenerator from "../dummynodes/BackgroundGenerator.svelte";
-    import SmartCompositor from "../dummynodes/SmartCompositor.svelte";
-    import CompositeGenerator from "../dummynodes/CompositeGenerator.svelte";
-    import StringToImageConverter from "../dummynodes/StringToImageConverter.svelte";
+    import ForegroundSplitter from "$lib/components/dummynodes/ForegroundSplitter.svelte";
+    import BackgroundGenerator from "$lib/components/dummynodes/BackgroundGenerator.svelte";
+    import SmartCompositor from "$lib/components/dummynodes/SmartCompositor.svelte";
+    import CompositeGenerator from "$lib/components/dummynodes/CompositeGenerator.svelte";
+    import StringToImageConverter from "$lib/components/dummynodes/StringToImageConverter.svelte";
     import EmailSignup from "../../../../components/EmailSignup.svelte";
     import BugReportButton from "../../../../components/BugReportButton.svelte";
     
@@ -33,7 +32,7 @@
     import { Play, RefreshCw, Download, ArrowLeft, Layout } from "lucide-svelte";
     import ELK from 'elkjs/lib/elk.bundled.js';
     import { Position } from "@xyflow/svelte";
-    import TextEditorRawNode from "../../nodes/text/TextEditorRawNode.svelte";
+    import StemNode from "$lib/components/StemNode.svelte";
 
     // Demo workflow nodes
     let nodes = $state.raw<Node[]>([
@@ -59,7 +58,7 @@ This demo showcases real-world AI image processing capabilities!`
         },
         {
             id: 'image-url-input',
-            type: 'textEditorRaw',
+            type: 'markdownTextEditor',
             position: { x: 50, y: 300 },
             data: {
                 input: { inputText: 'https://example.com/sample-photo.jpg' }
@@ -98,7 +97,7 @@ This demo showcases real-world AI image processing capabilities!`
         },
         {
             id: 'mask-prompt',
-            type: 'textEditorRaw',
+            type: 'markdownTextEditor',
             position: { x: 50, y: 450 },
             data: {
                 input: { inputText: 'person, subject, main focus' }
@@ -116,7 +115,7 @@ This demo showcases real-world AI image processing capabilities!`
         },
         {
             id: 'background-style',
-            type: 'textEditorRaw',
+            type: 'markdownTextEditor',
             position: { x: 50, y: 600 },
             data: {
                 input: { inputText: 'futuristic cyberpunk cityscape' }
@@ -126,7 +125,7 @@ This demo showcases real-world AI image processing capabilities!`
         },
         {
             id: 'background-details',
-            type: 'textEditorRaw',
+            type: 'markdownTextEditor',
             position: { x: 50, y: 750 },
             data: {
                 input: { inputText: 'neon lights, rain, night atmosphere' }
@@ -147,7 +146,7 @@ This demo showcases real-world AI image processing capabilities!`
         },
         {
             id: 'quality-settings',
-            type: 'textEditorRaw',
+            type: 'markdownTextEditor',
             position: { x: 50, y: 900 },
             data: {
                 input: { inputText: '8k resolution, dramatic lighting' }
@@ -165,7 +164,7 @@ This demo showcases real-world AI image processing capabilities!`
         },
         {
             id: 'composition-prompt',
-            type: 'textEditorRaw',
+            type: 'markdownTextEditor',
             position: { x: 50, y: 1050 },
             data: {
                 input: { inputText: 'realistic lighting, natural shadows, seamless integration' }
@@ -257,7 +256,6 @@ Each step uses state-of-the-art AI models for professional-quality results.
         html: HTMLRendererNode,
         textTemplate: TextTemplateFillinNode,
         markdownTextEditor: TextEditorNode,
-        textEditorRaw: TextEditorRawNode,
         stringToImageConverter: StringToImageConverter,
         foregroundSplitter: ForegroundSplitter,
         backgroundGenerator: BackgroundGenerator,

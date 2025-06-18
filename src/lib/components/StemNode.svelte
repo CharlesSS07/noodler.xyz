@@ -7,7 +7,7 @@
             input: Record<string, unknown>,
             output: Record<string, unknown>,
         },
-        'node-dna'
+        'node-stem'
     >;
 </script>
 

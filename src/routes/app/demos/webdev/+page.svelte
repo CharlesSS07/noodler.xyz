@@ -6,11 +6,10 @@
 	import ELK from 'elkjs/lib/elk.bundled.js';
 
 	// Import custom nodes
-	import HtmlTagNode from '../dummynodes/HtmlTagNode.svelte';
-	import HtmlBoilerplateNode from '../dummynodes/HtmlBoilerplateNode.svelte';
-	import WebNavbarNode from '../dummynodes/WebNavbarNode.svelte';
-	import LlmContentGenerator from '../dummynodes/LlmContentGenerator.svelte';
-	import StemNode from "$lib/components/StemNodeOld.svelte";
+	import HtmlTagNode from '$lib/components/dummynodes/HtmlTagNode.svelte';
+	import HtmlBoilerplateNode from '$lib/components/dummynodes/HtmlBoilerplateNode.svelte';
+	import WebNavbarNode from '$lib/components/dummynodes/WebNavbarNode.svelte';
+	import LlmContentGenerator from '$lib/components/dummynodes/LlmContentGenerator.svelte';
 	import EmailSignup from "../../../../components/EmailSignup.svelte";
 	import BugReportButton from "../../../../components/BugReportButton.svelte";
 

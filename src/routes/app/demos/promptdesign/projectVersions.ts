@@ -38,7 +38,7 @@ export const nodesVersion2 = [
     },
     {
         id: 'product_name',
-        type: 'textEditorRaw',
+        type: 'markdownTextEditor',
         data: {
             input: {
                 inputText: 'noodler.xyz',
@@ -64,7 +64,7 @@ export const nodesVersion2 = [
     },
     {
         id: 'target_audience',
-        type: 'textEditorRaw',
+        type: 'markdownTextEditor',
         data: {
             input: {
                 inputText: 'Artists, Gen AI Ops, and AI Engineers',
@@ -90,7 +90,7 @@ export const nodesVersion2 = [
     },
     {
         id: 'campaign_goal',
-        type: 'textEditorRaw',
+        type: 'markdownTextEditor',
         data: {
             input: {
                 inputText:
@@ -117,7 +117,7 @@ export const nodesVersion2 = [
     },
     {
         id: 'key_features',
-        type: 'textEditorRaw',
+        type: 'markdownTextEditor',
         data: {
             input: {
                 inputText:
@@ -144,7 +144,7 @@ export const nodesVersion2 = [
     },
     {
         id: 'call_to_action',
-        type: 'textEditorRaw',
+        type: 'markdownTextEditor',
         data: {
             input: {
                 inputText:
@@ -171,7 +171,7 @@ export const nodesVersion2 = [
     },
     {
         id: 'tone_and_style',
-        type: 'textEditorRaw',
+        type: 'markdownTextEditor',
         data: {
             input: {
                 inputText: 'engaging, informative, slightly humorous',
@@ -197,7 +197,7 @@ export const nodesVersion2 = [
     },
     {
         id: 'word_count_range',
-        type: 'textEditorRaw',
+        type: 'markdownTextEditor',
         data: {
             input: {
                 inputText: '250-300 words',
@@ -223,7 +223,7 @@ export const nodesVersion2 = [
     },
     {
         id: 'output_format',
-        type: 'textEditorRaw',
+        type: 'markdownTextEditor',
         data: {
             input: {
                 inputText: 'linkedin connection request',
@@ -249,7 +249,7 @@ export const nodesVersion2 = [
     },
     {
         id: 'role_instruction',
-        type: 'textEditorRaw',
+        type: 'markdownTextEditor',
         data: {
             input: {
                 inputText:

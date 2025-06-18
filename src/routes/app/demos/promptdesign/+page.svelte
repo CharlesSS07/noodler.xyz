@@ -12,12 +12,11 @@
     } from "@xyflow/svelte";
     import '@xyflow/svelte/dist/style.css';
     import NoteNode from "../../nodes/NoteNode.svelte";
-    import StemNode from "$lib/components/StemNodeOld.svelte";
     import ImageNode from "../../nodes/images/ImageNode.svelte";
     import HTMLRendererNode from "../../nodes/html/HTMLRendererNode.svelte";
     import TextTemplateFillinNode from "../../nodes/text/TextTemplateFillinNode.svelte";
     import TextEditorNode from "../../nodes/text/TextEditorMarkdownNode.svelte";
-    import MagicTextTransformLLM from "../dummynodes/TextFormatterLLM.svelte";
+    import MagicTextTransformLLM from "$lib/components/dummynodes/TextFormatterLLM.svelte";
     import "$lib/css/nodes.css";
     import ELK from 'elkjs/lib/elk.bundled.js';
     import { onMount } from "svelte";
@@ -27,7 +26,7 @@
     import BugReportButton from "../../../../components/BugReportButton.svelte";
     import { Play, RefreshCw, Download, ArrowLeft } from "lucide-svelte";
     import { Panel } from "@xyflow/svelte";
-    import TextEditorRawNode from "../../nodes/text/TextEditorRawNode.svelte";
+    import StemNode from "$lib/components/StemNode.svelte";
 
     let nodes = $state.raw<Node[]>(nodesVersion2);
 
@@ -40,7 +39,6 @@
         html: HTMLRendererNode,
         textTemplate: TextTemplateFillinNode,
         textEditor: TextEditorNode,
-        textEditorRaw: TextEditorRawNode,
         textTransformLLM: MagicTextTransformLLM
     };
 

@@ -14,7 +14,7 @@
 <script lang="ts">
     import NodeWrapper from "$lib/components/NodeWrapper.svelte";
     import {Handle, type NodeProps, Position} from "@xyflow/svelte";
-    import {fetchSocketDataTypeByName} from "../../lib/DataTypes";
+    import {fetchSocketDataTypeByName} from "../../../routes/app/lib/DataTypes";
     import SocketStem from "$lib/components/SocketStem.svelte";
 
     let { id, data }: NodeProps<MagicTextTransformNodeType> = $props();

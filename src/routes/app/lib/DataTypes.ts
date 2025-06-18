@@ -11,21 +11,6 @@ function baseSocketStyle(color: string): string {
     return `background-color: ${color}; border-color: ${color};`;
 }
 
-export const DATATYPE_UNKNOWN = {
-    name: 'unknown',
-    style: baseSocketStyle('#FF00FF'), // magenta because that's like a missing asset in a video game
-    description:
-        'Represents an unknown object. This could be anything. Introspect to find out.',
-    type: 'unknown',
-};
-export const DATATYPE_UNREGISTERED = {
-    name: 'unregistered',
-    style: baseSocketStyle('#ff0000'),
-    description:
-        'Represents an unknown object. This could be anything. Introspect to find out.',
-    type: 'unknown',
-};
-
 export const STANDARD_DATATYPES = {
     NUMBER: 'number',
     STRING: 'string',
@@ -37,57 +22,82 @@ export const STANDARD_DATATYPES = {
     IMAGE_JIMP: 'image/jimp',
     IMAGE_BASE64: 'image/base64',
     TENSOR: 'Tensor',
-}
+
+    UNKNOWN: 'unknown',
+    UNREGISTER: 'unregistered',
+};
+
+export const DATATYPE_UNKNOWN = {
+    name: STANDARD_DATATYPES.UNKNOWN,
+    style: baseSocketStyle('#FF00FF'), // magenta because that's like a missing asset in a video game
+    description:
+        'Represents an unknown object. This could be anything. Introspect to find out.',
+    type: 'unknown',
+};
+export const DATATYPE_UNREGISTERED = {
+    name: STANDARD_DATATYPES.UNREGISTER,
+    style: baseSocketStyle('#ff0000'),
+    description:
+        'Represents an unknown object. This could be anything. Introspect to find out.',
+    type: 'unknown',
+};
 
 const standardDataTypes: SocketDataType[] = [
     DATATYPE_UNREGISTERED,
     DATATYPE_UNKNOWN,
     {
-        name: 'number',
+        name: STANDARD_DATATYPES.NUMBER,
         style: baseSocketStyle('#e74c3c'),
         description: 'Holds a standard JavaScript number.',
         type: 'number',
     },
     {
-        name: 'string',
+        name: STANDARD_DATATYPES.STRING,
         style: baseSocketStyle('#3498db'),
         description: 'Holds a standard JavaScript string of text.',
         type: 'string',
     },
     {
-        name: 'text',
+        name: STANDARD_DATATYPES.TEXT,
         style: baseSocketStyle('#3498db'),
         description: 'Holds a standard JavaScript string of text.',
         type: 'string',
     },
     {
-        name: 'boolean',
+        name: STANDARD_DATATYPES.BOOLEAN,
         style: baseSocketStyle('#9b59b6'),
         description: 'Holds a boolean value (true or false).',
         type: 'boolean',
     },
     {
-        name: 'object',
+        name: STANDARD_DATATYPES.OBJECT,
         style: baseSocketStyle('#f39c12'),
         description: 'Holds a standard JavaScript object.',
         type: 'object',
     },
     {
-        name: 'File',
+        name: STANDARD_DATATYPES.FILE,
         style: baseSocketStyle('#8e44ad'),
         description: 'Represents a file or file-like object.',
         type: 'File',
     },
     {
-        name: 'image/jimp',
+        name: STANDARD_DATATYPES.IMAGE_JIMP,
         style: baseSocketStyle('#00b900'),
         description:
             'Represents an image stored as a JIMP (JS image processing library) object.',
         type: 'JimpInstance',
     },
     {
-        name: 'Tensor',
-        style: baseSocketStyle('#00b900'),
+        name: STANDARD_DATATYPES.IMAGE_BASE64,
+        style: baseSocketStyle('#b0b900'),
+        description:
+            'Represents an image stored as a JIMP (JS image processing library) object.',
+        type: 'JimpInstance',
+    },
+    {
+        name: STANDARD_DATATYPES.TENSOR,
+        style: baseSocketStyle('#00adb9'),
         description:
             'Represents an nd-array (tfjs).',
         type: 'tf.tensor',

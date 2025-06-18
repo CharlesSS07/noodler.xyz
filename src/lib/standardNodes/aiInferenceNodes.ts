@@ -111,46 +111,6 @@ export async function aiInferenceNodes() {
         outputs.set('image', result);
     `;
 
-    // IMAGE CLASSIFICATION NODE
-    const imageClassification = await factory.initOfficialNodeBluePrint(
-        'ai_image_classification'
-    );
-    imageClassification.title = 'AI Image Classification';
-    imageClassification.documentation =
-        'Classifies images into categories using AI models.';
-
-    imageClassification.newInputSocket('image', {
-        label: 'Image',
-        documentation: 'Image to classify.',
-        type: STANDARD_DATATYPES.IMAGE_JIMP,
-        params: new JIMPImageSocketParamsBuilder().build(),
-    });
-
-    imageClassification.newInputSocket('model', {
-        label: 'Model',
-        documentation: 'Classification model to use.',
-        type: STANDARD_DATATYPES.STRING,
-        params: new StringSocketParamsBuilder(
-            'google/vit-base-patch16-224'
-        ).build(),
-    });
-
-    imageClassification.newOutputSocket('results', {
-        label: 'Classification Results',
-        documentation:
-            'Array of classification results with labels and scores.',
-        type: 'unknown',
-    });
-
-    imageClassification.code = `
-        const aiService = await utils.APIConnectionManager.getConnector("ai_inference").getAPI();
-        const results = await aiService.imageClassification({
-            inputs: inputs.image,
-            model: inputs.model
-        });
-        outputs.set('results', results);
-    `;
-
     // OBJECT DETECTION NODE
     const objectDetection = await factory.initOfficialNodeBluePrint(
         'ai_object_detection'
@@ -602,90 +562,6 @@ export async function aiInferenceNodes() {
         outputs.set('similarities', results);
     `;
 
-    // CONVERSATIONAL NODE
-    const conversational =
-        await factory.initOfficialNodeBluePrint('ai_conversational');
-    conversational.title = 'AI Conversational';
-    conversational.documentation = 'Generates conversational responses.';
-
-    conversational.newInputSocket('text', {
-        label: 'Message',
-        documentation: 'Current message in the conversation.',
-        type: STANDARD_DATATYPES.STRING,
-        params: new StringSocketParamsBuilder(
-            'Hello, how can you help me today?'
-        )
-            .asSentence()
-            .build(),
-    });
-
-    conversational.newInputSocket('past_user_inputs', {
-        label: 'Past User Inputs',
-        documentation: 'Previous user messages (as JSON array).',
-        type: 'unknown',
-        params: new GenericSocketParamsBuilder([]).build(),
-    });
-
-    conversational.newInputSocket('generated_responses', {
-        label: 'Past Bot Responses',
-        documentation: 'Previous bot responses (as JSON array).',
-        type: 'unknown',
-        params: new GenericSocketParamsBuilder([]).build(),
-    });
-
-    conversational.newInputSocket('model', {
-        label: 'Model',
-        documentation: 'Conversational model to use.',
-        type: STANDARD_DATATYPES.STRING,
-        params: new StringSocketParamsBuilder(
-            'microsoft/DialoGPT-medium'
-        ).build(),
-    });
-
-    conversational.newInputSocket('max_length', {
-        label: 'Max Response Length',
-        documentation: 'Maximum length of the response.',
-        type: STANDARD_DATATYPES.NUMBER,
-        params: new NumberSocketParamsBuilder(100)
-            .setMin(10)
-            .setMax(500)
-            .build(),
-    });
-
-    conversational.newInputSocket('temperature', {
-        label: 'Temperature',
-        documentation: 'Response creativity (higher = more creative).',
-        type: STANDARD_DATATYPES.NUMBER,
-        params: new NumberSocketParamsBuilder(0.7)
-            .setMin(0.1)
-            .setMax(2.0)
-            .setStep(0.1)
-            .build(),
-    });
-
-    conversational.newOutputSocket('response', {
-        label: 'Bot Response',
-        documentation: 'Generated conversational response.',
-        type: STANDARD_DATATYPES.STRING,
-    });
-
-    conversational.code = `
-        const aiService = await utils.APIConnectionManager.getConnector("ai_inference").getAPI();
-        const result = await aiService.conversational({
-            inputs: {
-                past_user_inputs: Array.isArray(inputs.past_user_inputs) ? inputs.past_user_inputs : [],
-                generated_responses: Array.isArray(inputs.generated_responses) ? inputs.generated_responses : [],
-                text: inputs.text
-            },
-            model: inputs.model,
-            parameters: {
-                max_length: inputs.max_length,
-                temperature: inputs.temperature
-            }
-        });
-        outputs.set('response', result.generated_text);
-    `;
-
     // FEATURE EXTRACTION NODE
     const featureExtraction = await factory.initOfficialNodeBluePrint(
         'ai_feature_extraction'
@@ -716,7 +592,7 @@ export async function aiInferenceNodes() {
     featureExtraction.newOutputSocket('features', {
         label: 'Feature Vector',
         documentation: 'Extracted feature embeddings as numerical array.',
-        type: 'unknown',
+        type: STANDARD_DATATYPES.TENSOR,
     });
 
     featureExtraction.code = `
@@ -826,57 +702,4 @@ export async function aiInferenceNodes() {
         outputs.set('coordinates', result.coordinates);
     `;
 
-    // TOKEN CLASSIFICATION NODE
-    const tokenClassification = await factory.initOfficialNodeBluePrint(
-        'ai_token_classification'
-    );
-    tokenClassification.title = 'AI Token Classification';
-    tokenClassification.documentation =
-        'Classifies individual tokens in text (Named Entity Recognition).';
-
-    tokenClassification.newInputSocket('text', {
-        label: 'Text',
-        documentation: 'Text to analyze for named entities.',
-        type: STANDARD_DATATYPES.STRING,
-        params: new StringSocketParamsBuilder(
-            'Apple Inc. was founded by Steve Jobs in Cupertino.'
-        )
-            .asSentence()
-            .build(),
-    });
-
-    tokenClassification.newInputSocket('model', {
-        label: 'Model',
-        documentation: 'Token classification model to use.',
-        type: STANDARD_DATATYPES.STRING,
-        params: new StringSocketParamsBuilder(
-            'dbmdz/bert-large-cased-finetuned-conll03-english'
-        ).build(),
-    });
-
-    tokenClassification.newInputSocket('aggregation_strategy', {
-        label: 'Aggregation Strategy',
-        documentation: 'How to aggregate sub-word tokens.',
-        type: STANDARD_DATATYPES.STRING,
-        params: new StringSocketParamsBuilder('simple').build(),
-    });
-
-    tokenClassification.newOutputSocket('entities', {
-        label: 'Named Entities',
-        documentation:
-            'Array of detected named entities with labels and positions.',
-        type: 'unknown',
-    });
-
-    tokenClassification.code = `
-        const aiService = await utils.APIConnectionManager.getConnector("ai_inference").getAPI();
-        const results = await aiService.tokenClassification({
-            inputs: inputs.text,
-            model: inputs.model,
-            parameters: {
-                aggregation_strategy: inputs.aggregation_strategy
-            }
-        });
-        outputs.set('entities', results);
-    `;
 }

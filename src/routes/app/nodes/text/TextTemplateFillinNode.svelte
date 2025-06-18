@@ -1,5 +1,5 @@
 <script module lang="ts">
-    import { type Node } from '@xyflow/svelte';
+    import {type Node} from '@xyflow/svelte';
 
     // Official NID for this node: template
     export type TemplateFillinNodeType = Node<
@@ -22,12 +22,13 @@
         type NodeProps,
         NodeResizeControl
     } from '@xyflow/svelte';
-    import { fetchSocketDataTypeByName } from '../../lib/DataTypes';
+    import {fetchSocketDataTypeByName} from '../../lib/DataTypes';
     import {Tooltip} from "flowbite-svelte";
+    import NodeWrapper from "$lib/components/NodeWrapper.svelte";
 
-    let { id, data }: NodeProps<TemplateFillinNodeType> = $props();
+    let {id, data, selected}: NodeProps<TemplateFillinNodeType> = $props();
 
-    const { updateNodeData } = useSvelteFlow();
+    const {updateNodeData} = useSvelteFlow();
 
     const connections = useNodeConnections();
 
@@ -93,7 +94,7 @@
     // Handle textarea input
     function handleInput(event: Event) {
         const target = event.target as HTMLTextAreaElement;
-        updateNodeData(id, { template: target.value });
+        updateNodeData(id, {template: target.value});
     }
 
     // Auto-resize textarea based on scrollHeight, with a minimum height
@@ -131,34 +132,40 @@
     }
 </script>
 
-<div class="flex flex-col border-2 border-gray-300 rounded-lg bg-white relative">
+<NodeWrapper
+        label="Template"
+        documentation="Fill in your text with variables from links. Useful for prompt design."
+        isSelected={selected}
+>
+    <div class="flex flex-col border-2 border-gray-300 rounded-lg bg-white relative">
 
-    <NodeResizeControl
-            minWidth={100}
-            minHeight={50}
-            style="background: transparent; border: none;"
-    >
-        <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                stroke-width="2"
-                stroke="rgb(128, 128, 128)"
-                fill="none"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                style="position: absolute; right: 5px; bottom: 5px;"
+        <NodeResizeControl
+                minWidth={100}
+                minHeight={50}
+                style="background: transparent; border: none;"
         >
-            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-            <polyline points="16 20 20 20 20 16" />
-            <line x1="14" y1="14" x2="20" y2="20" />
-            <polyline points="8 4 4 4 4 8" />
-            <line x1="4" y1="4" x2="10" y2="10" />
-        </svg>
-    </NodeResizeControl>
+            <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    stroke-width="2"
+                    stroke="rgb(128, 128, 128)"
+                    fill="none"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    style="position: absolute; right: 5px; bottom: 5px;"
+            >
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <polyline points="16 20 20 20 20 16"/>
+                <line x1="14" y1="14" x2="20" y2="20"/>
+                <polyline points="8 4 4 4 4 8"/>
+                <line x1="4" y1="4" x2="10" y2="10"/>
+            </svg>
+        </NodeResizeControl>
 
-    <div class="p-3"> {#if isEditing}
+        <div class="p-3">
+            {#if isEditing}
             <textarea
                     bind:this={textareaRef}
                     value={data.template}
@@ -173,59 +180,60 @@
                     rows="3"
                     style="min-height: 60px;"
             ></textarea>
-    {:else}
-        <div
-                class="min-h-[60px] overflow-auto cursor-pointer hover:bg-gray-50 transition-colors"
-                on:click={handleClick}
-                role="button"
-                tabindex="0"
-                on:keydown={(e) => {
+            {:else}
+                <div
+                        class="min-h-[60px] overflow-auto cursor-pointer hover:bg-gray-50 transition-colors"
+                        on:click={handleClick}
+                        role="button"
+                        tabindex="0"
+                        on:keydown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
                         handleClick();
                     }
                 }}
-        >
-            {#if data.template.trim()}
-                <div class="template-display font-mono text-sm whitespace-pre-wrap">
-                    {@html highlightVariables(data.template)}
-                </div>
-            {:else}
-                <div class="text-gray-400 text-center flex flex-col items-center justify-center h-full">
-                    <svg class="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                        />
-                    </svg>
-                    <span class="text-sm">Click to edit template</span>
+                >
+                    {#if data.template.trim()}
+                        <div class="template-display font-mono text-sm whitespace-pre-wrap">
+                            {@html highlightVariables(data.template)}
+                        </div>
+                    {:else}
+                        <div class="text-gray-400 text-center flex flex-col items-center justify-center h-full">
+                            <svg class="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                />
+                            </svg>
+                            <span class="text-sm">Click to edit template</span>
+                        </div>
+                    {/if}
                 </div>
             {/if}
         </div>
-    {/if}
-    </div>
 
-    {#each templateVariables() as variable, index}
+        {#each templateVariables() as variable, index}
+            <Handle
+                    type="target"
+                    position={Position.Left}
+                    style="top:{5 + index * 10}%;{inputSocketStyle}"
+                    id='fillins_{variable}'
+                    class="socket-handle"
+            />
+            <Tooltip placement="left">{variable}</Tooltip>
+        {/each}
+
         <Handle
-                type="target"
-                position={Position.Left}
-                style="top:{5 + index * 10}%;{inputSocketStyle}"
-                id='fillins_{variable}'
+                type="source"
+                position={Position.Right}
+                style="top:50%;{outputSocketStyle}"
+                id="output"
                 class="socket-handle"
         />
-        <Tooltip placement="left">{variable}</Tooltip>
-    {/each}
-
-    <Handle
-            type="source"
-            position={Position.Right}
-            style="top:50%;{outputSocketStyle}"
-            id="output"
-            class="socket-handle"
-    />
-</div>
+    </div>
+</NodeWrapper>
 
 <style>
     .template-display :global(.variable-filled) {
