@@ -406,6 +406,7 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
         {nodeTypes}
         {colorMode}
         oninit={() => {}}
+        oninput={() => {console.log('input')}}
         fitView
     >
         <Background variant={BackgroundVariant.Dots} />

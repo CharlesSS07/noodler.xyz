@@ -1,13 +1,26 @@
 <script>
-    let { value = $bindable(50), min = 0, max = 100, step = 1 } = $props();
+    let { value = $bindable(), min = 0, max = 100, step = 1 } = $props();
+    
+    // Create a local reactive value that syncs with the bindable prop
+    let localValue = $state(value);
 
     let isEditing = false;
     let sliderElement;
     let inputElement;
     let editValue = '';
 
+    // Sync localValue with value prop changes
+    $effect(() => {
+        localValue = value;
+    });
+    
+    // Sync value prop with localValue changes
+    $effect(() => {
+        value = localValue;
+    });
+
     // Calculate the percentage for the gradient
-    let percentage = $derived(((value - min) / (max - min)) * 100);
+    let percentage = $derived((localValue - min) / (max - min) * 100);
 
     function handleMouseDown(e) {
         // Stop event from bubbling to node
@@ -33,7 +46,8 @@
             const steppedValue = Math.round(newValue / step) * step;
 
             // Ensure value stays within bounds
-            value = Math.max(min, Math.min(max, steppedValue));
+            const newBoundedValue = Math.max(min, Math.min(max, steppedValue));
+            localValue = newBoundedValue;
         }
     }
 
@@ -50,7 +64,7 @@
 
     function startEditing() {
         isEditing = true;
-        editValue = value.toString();
+        editValue = localValue.toString();
 
         // Focus the input after it's rendered
         setTimeout(() => {
@@ -72,7 +86,7 @@
     function finishEditing() {
         const newValue = parseFloat(editValue);
         if (!isNaN(newValue)) {
-            value = Math.max(min, Math.min(max, Math.round(newValue / step) * step));
+            localValue = Math.max(min, Math.min(max, Math.round(newValue / step) * step));
         }
         isEditing = false;
     }
@@ -114,7 +128,7 @@
                     <!-- Value display -->
                     <div class="absolute inset-0 flex items-center justify-center">
             <span class="text-sm font-medium text-white mix-blend-difference">
-              {value.toFixed(2)}
+              {localValue.toFixed(2)}
             </span>
                     </div>
                 </div>

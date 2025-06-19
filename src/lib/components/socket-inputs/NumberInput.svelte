@@ -1,9 +1,9 @@
 <script lang="ts">
     import type { NumberSocketParams } from '$lib/compositor/SocketParamBuilders';
-    import BlenderSlider from "$lib/components/socket-inputs/BlenderSlider.svelte";
+    import BlenderSlider from "../../../components/BlenderSlider.svelte";
 
-    let { 
-        value = $bindable(0), 
+    let {
+        value = $bindable(),
         params = undefined, 
         disabled = false, 
         socketId = '' 
@@ -38,48 +38,7 @@
 
 <div class="number-input">
     {#if (min!==undefined && max!==undefined)}
-<!--        <Label for="range-slider" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">-->
-<!--            Select Value: {value}-->
-<!--        </Label>-->
-
-<!--        <Range-->
-<!--                id="range-slider"-->
-<!--                bind:value={value}-->
-<!--                {min}-->
-<!--                {max}-->
-<!--                {step}-->
-<!--                class="mb-4"-->
-<!--        />-->
-<!--        <div class="flex justify-between text-xs text-gray-500">-->
-<!--            <span>{min}</span>-->
-<!--            <span>{max}</span>-->
-<!--        </div>-->
-        <BlenderSlider {value} {min} {max} {step}></BlenderSlider>
-<!--        <input-->
-<!--                type="number"-->
-<!--                bind:value={value}-->
-<!--                {min}-->
-<!--                {max}-->
-<!--                {step}-->
-<!--                {disabled}-->
-<!--                oninput={handleInput}-->
-<!--                class="socket-input number-input-field"-->
-<!--                style="width: 10%"-->
-<!--                placeholder="Enter number..."-->
-<!--                title="Socket: {socketId}"-->
-<!--        />-->
-<!--        <input-->
-<!--            type="range"-->
-<!--            bind:value={value}-->
-<!--            {min}-->
-<!--            {max}-->
-<!--            {step}-->
-<!--            {disabled}-->
-<!--            oninput={handleInput}-->
-<!--            class="socket-input number-input-field"-->
-<!--            placeholder="Enter number..."-->
-<!--            title="Socket: {socketId}"-->
-<!--        />-->
+        <BlenderSlider bind:value={value} {min} {max} {step}></BlenderSlider>
     {:else}
         <input
                 type="number"
@@ -97,7 +56,6 @@
     {#if params}
         <div class="input-hints">
             {#if min !== undefined && max !== undefined}
-                <span class="hint">Range: {min} - {max}</span>
             {:else if min !== undefined}
                 <span class="hint">Min: {min}</span>
             {:else if max !== undefined}
