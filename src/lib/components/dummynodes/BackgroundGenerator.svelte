@@ -19,7 +19,7 @@
 </script>
 
 <script lang="ts">
-    import { type NodeProps } from '@xyflow/svelte';
+    import { Handle, type NodeProps } from '@xyflow/svelte';
     import NodeWrapper from "$lib/components/NodeWrapper.svelte";
 
     let { id, data }: NodeProps<BackgroundGeneratorType> = $props();

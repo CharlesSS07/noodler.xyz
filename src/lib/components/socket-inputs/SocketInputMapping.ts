@@ -4,13 +4,13 @@
  */
 
 import type {Component} from 'svelte';
+import { STANDARD_DATATYPES } from '$lib/compositor/DataTypes';
 
 // Import all input components
 import NumberInput from './NumberInput.svelte';
 import StringInput from './StringInput.svelte';
 import BooleanInput from './BooleanInput.svelte';
 import FileInput from './FileInput.svelte';
-import JsonInput from './JsonInput.svelte';
 import EnumInput from './EnumInput.svelte';
 import ImageInput from './ImageInput.svelte';
 
@@ -23,41 +23,29 @@ export interface SocketInputMapping {
 export const SOCKET_INPUT_MAPPINGS: SocketInputMapping[] = [
     // Basic types
     {
-        dataType: 'number',
+        dataType: STANDARD_DATATYPES.NUMBER,
         component: NumberInput,
         description: 'Numeric input with min/max/step support',
     },
     {
-        dataType: 'string',
+        dataType: STANDARD_DATATYPES.STRING,
         component: StringInput,
         description: 'Text input with validation',
     },
     {
-        dataType: 'text',
+        dataType: STANDARD_DATATYPES.TEXT,
         component: StringInput,
         description: 'Text input (alias for string)',
     },
     {
-        dataType: 'boolean',
+        dataType: STANDARD_DATATYPES.BOOLEAN,
         component: BooleanInput,
         description: 'Checkbox for true/false values',
     },
 
-    // Complex types
+    // File types  
     {
-        dataType: 'json',
-        component: JsonInput,
-        description: 'JSON object editor',
-    },
-    {
-        dataType: 'object',
-        component: JsonInput,
-        description: 'Object editor (uses JSON format)',
-    },
-
-    // File types
-    {
-        dataType: 'file',
+        dataType: STANDARD_DATATYPES.FILE,
         component: FileInput,
         description: 'File upload input',
     },
@@ -74,12 +62,12 @@ export const SOCKET_INPUT_MAPPINGS: SocketInputMapping[] = [
 
     // Image types
     {
-        dataType: 'image/base64',
+        dataType: STANDARD_DATATYPES.IMAGE_BASE64,
         component: ImageInput,
         description: 'Image upload with base64 encoding',
     },
     {
-        dataType: 'image/jimp',
+        dataType: STANDARD_DATATYPES.IMAGE_JIMP,
         component: ImageInput,
         description: 'Image upload for JIMP processing',
     },
@@ -97,7 +85,7 @@ export const SOCKET_INPUT_MAPPINGS: SocketInputMapping[] = [
         description: 'Array type (not directly editable)',
     },
     {
-        dataType: 'unknown',
+        dataType: STANDARD_DATATYPES.UNKNOWN,
         component: StringInput,
         description: 'Unknown type (not directly editable)',
     },

@@ -16,9 +16,8 @@
 </script>
 
 <script lang="ts">
-    import { type NodeProps } from '@xyflow/svelte';
+    import { Handle, type NodeProps } from '@xyflow/svelte';
     import NodeWrapper from "$lib/components/NodeWrapper.svelte";
-    import { Handle } from '@xyflow/svelte';
     
     let { id, data }: NodeProps<WebNavbarNodeType> = $props();
 

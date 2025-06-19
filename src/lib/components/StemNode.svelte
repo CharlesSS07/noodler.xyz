@@ -51,6 +51,7 @@
                         label: socket.label,
                         id: socketId,
                         type: socket.type,
+                        documentation: socket.documentation,
                         value: data.input[socketId],
                         isConnected,
                         params: socket.params,
@@ -60,6 +61,7 @@
                         label: socket.label,
                         id: socketId,
                         type: socket.type,
+                        documentation: socket.documentation,
                         value: socket.params.default_value,
                         isConnected,
                         params: socket.params,
@@ -77,13 +79,15 @@
                     newOutputSockets.push({
                         label: socket.label,
                         id: socketId,
-                        type: socket.type
+                        type: socket.type,
+                        documentation: socket.documentation,
                     });
                 } else {
                     newOutputSockets.push({
                         label: socket.label,
                         id: socketId,
-                        type: socket.type
+                        type: socket.type,
+                        documentation: socket.documentation,
                     });
                 }
             }

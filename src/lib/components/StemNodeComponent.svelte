@@ -5,9 +5,9 @@
     interface Props {
         title?: string;
         tooltip?: string;
-        inputSockets?: {label: string, id: string, type: string, isConnected: boolean, params: InputSocketParams}[];
+        inputSockets?: {label: string, id: string, type: string, documentation: string, isConnected: boolean, params: InputSocketParams}[];
         inputValues?: Record<string, unknown>;
-        outputSockets?: {label: string, id: string, type: string}[];
+        outputSockets?: {label: string, id: string, type: string, documentation: string}[];
         executionTime?: number;
         errorMessage?: string | undefined;
         isSelected?: boolean;
@@ -27,12 +27,10 @@
     import NodeWrapper from '$lib/components/NodeWrapper.svelte';
 
     import '$lib/css/nodes.css';
-    import {fetchSocketDataTypeByName, type SocketDataType} from "$lib/compositor/DataTypes";
+    import {fetchSocketDataTypeByName} from "$lib/compositor/DataTypes";
     import {getInputComponentForDataType} from "$lib/components/socket-inputs/SocketInputMapping";
     import type {InputSocketParams} from "$lib/compositor/SocketModels";
     import {Tooltip} from "flowbite-svelte";
-    import {untrack} from "svelte";
-
 
 </script>
 
@@ -61,11 +59,14 @@
                         <Handle
                                 type="source"
                                 position={Position.Right}
-                                id="{outputSocket.id}"
+                                id={outputSocket.id}
                                 style={datatype?.style || ''}
                                 class="socket-handle"
                         />
-                        <Tooltip placement="top">{datatype?.description}</Tooltip>
+                        <Tooltip placement="top">
+                            <b>{outputSocket.label}</b>--{outputSocket.documentation}<br>
+                            <b>Type ({datatype?.name}):</b> {datatype?.description}
+                        </Tooltip>
                     {:catch error}
                         Error; could not load input socket: {JSON.stringify(error, null, 2)}
                     {/await}
@@ -91,12 +92,15 @@
                         <Handle
                                 type="target"
                                 position={Position.Left}
-                                id="{inputSocket.id}"
+                                id={inputSocket.id}
                                 class="socket-handle"
                                 style={datatype?.style || ''}
                                 isConnectable={!inputSocket.isConnected}
                         />
-                        <Tooltip placement="top">{datatype?.description}</Tooltip>
+                        <Tooltip placement="top">
+                            <b>{inputSocket.label}</b>--{inputSocket.documentation}<br>
+                            <b>Type ({datatype?.name}):</b> {datatype?.description}
+                        </Tooltip>
                     {:catch error}
                         Error; could not load input socket: {JSON.stringify(error, null, 2)}
                     {/await}
@@ -108,12 +112,9 @@
                                 <Component
                                     bind:value={
                                         () => {
-                                            // console.log('get', inputValues[inputSocket.id]);
                                             return inputValues[inputSocket.id];
                                         },
                                         (newValue) => {
-                                            // console.log('inputValues', inputValues);
-                                            // console.log('set', inputSocket.id, newValue, inputValues[inputSocket.id]);
                                             inputValues[inputSocket.id] = newValue;
                                             inputValues = inputValues; // reactive update
                                         }

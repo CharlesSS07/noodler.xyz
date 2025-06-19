@@ -47,23 +47,10 @@
             connected={false}
             tooltip="Formatted text, equivalent to messy text"
             disabled={false}
-            let:socketType={socketType}
-            let:label={label}
-            let:isRequired={isRequired}
-            let:socketStyle={socketStyle}
     >
         <div class="socket-content input-content">
-                            <span class="socket-label" class:required={isRequired}>
-                                {label}
-                                {#if isRequired}
-                                    <span class="required-indicator">*</span>
-                                {/if}
-                            </span>
-            {#if socketType}
-                                <span class="socket-type" style="{socketStyle}">
-                                    {socketType}
-                                </span>
-            {/if}
+            <span class="socket-label">Formatted Text</span>
+            <span class="socket-type">text</span>
         </div>
     </Handle>
 
@@ -76,23 +63,10 @@
             connected={false}
             tooltip="Messy Text to be formatted"
             disabled={false}
-            let:socketType={socketType}
-            let:label={label}
-            let:isRequired={isRequired}
-            let:socketStyle={socketStyle}
     >
         <div class="socket-content input-content">
-                            <span class="socket-label" class:required={isRequired}>
-                                {label}
-                                {#if isRequired}
-                                    <span class="required-indicator">*</span>
-                                {/if}
-                            </span>
-            {#if socketType}
-                                <span class="socket-type" style="{socketStyle}">
-                                    {socketType}
-                                </span>
-            {/if}
+            <span class="socket-label">Messy Text</span>
+            <span class="socket-type">text</span>
         </div>
     </Handle>
     <h2>Text Formatting Prompt/Guidlines</h2>

@@ -105,7 +105,9 @@ describe("HuggingFace API Real Integration Tests", () => {
         await questionAnswering(req, res);
 
         expect(res.statusCode).to.equal(400);
-        expect(res.data.error).to.equal("Missing inputs.question or inputs.context");
+        expect(res.data.error).to.equal(
+          "Missing inputs.question or inputs.context"
+        );
       });
     });
 
@@ -134,14 +136,23 @@ describe("HuggingFace API Real Integration Tests", () => {
         await fillMask(req, res);
 
         expect(res.statusCode).to.equal(400);
-        expect(res.data.error).to.equal("Missing inputs or [MASK] token not found");
+        expect(res.data.error).to.equal(
+          "Missing inputs or [MASK] token not found"
+        );
       });
     });
 
     describe("summarization", () => {
       it("should summarize long text with real API", async () => {
         const req = createMockRequest({
-          inputs: "My name is chuck. The tower is 324 metres (1,063 ft) tall, about the same height as an 81-storey building, and the tallest structure in Paris. Its base is square, measuring 125 metres (410 ft) on each side. During its construction, the Eiffel Tower surpassed the Washington Monument to become the tallest man-made structure in the world, a title it held for 41 years until the Chrysler Building in New York City was finished in 1930. It was the first structure to reach a height of 300 metres. Due to the addition of a broadcasting aerial at the top of the tower in 1957, it is now taller than the Chrysler Building by 5.2 metres (17 ft). Excluding transmitters, the Eiffel Tower is the second tallest free-standing structure in France after the Millau Viaduct.",
+          inputs: "My name is chuck. The tower is 324 metres (1,063 ft) " +
+            "tall, about the same height as an 81-storey building, and " +
+            "the tallest structure in Paris. Its base is square, measuring " +
+            "125 metres (410 ft) on each side. During its construction, the " +
+            "Eiffel Tower surpassed the Washington Monument to become the " +
+            "tallest man-made structure in the world, a title it held for " +
+            "41 years until the Chrysler Building in New York City was " +
+            "finished in 1930.",
           model: "facebook/bart-large-cnn",
         });
         const res = createMockResponse();
@@ -152,12 +163,15 @@ describe("HuggingFace API Real Integration Tests", () => {
         if (Array.isArray(res.data)) {
           expect(res.data[0]).to.have.property("summary_text");
           expect(res.data[0].summary_text).to.be.a("string");
-          expect(res.data[0].summary_text.length).to.be.below(req.body.inputs.length);
-          expect(res.data[0].summary_text.toLowerCase()).to.not.include("chuck");
+          expect(res.data[0].summary_text.length)
+            .to.be.below(req.body.inputs.length);
+          expect(res.data[0].summary_text.toLowerCase())
+            .to.not.include("chuck");
         } else {
           expect(res.data).to.have.property("summary_text");
           expect(res.data.summary_text).to.be.a("string");
-          expect(res.data.summary_text.length).to.be.below(req.body.inputs.length);
+          expect(res.data.summary_text.length)
+            .to.be.below(req.body.inputs.length);
           expect(res.data.summary_text.toLowerCase()).to.not.include("chuck");
         }
       }).timeout(15000);
@@ -250,7 +264,7 @@ describe("HuggingFace API Real Integration Tests", () => {
       it("should classify dog breed from image URL with real API", async () => {
         // Note: Image URL inference has content type issues
         const req = createMockRequest({
-          inputs: "https://picsum.photos/id/237/200/300", // Dog image URL from examples
+          inputs: "https://picsum.photos/id/237/200/300", // Dog image URL
           model: "skyau/dog-breed-classifier-vit",
         });
         const res = createMockResponse();
@@ -261,7 +275,7 @@ describe("HuggingFace API Real Integration Tests", () => {
         expect(res.data).to.be.an("array");
         expect(res.data[0]).to.have.property("label");
         expect(res.data[0]).to.have.property("score");
-        expect(res.data[0].label).to.include("retriever"); // Should detect some retriever breed
+        expect(res.data[0].label).to.include("retriever"); // Should detect
         expect(res.data[0].score).to.be.above(0.1);
       }).timeout(15000);
 
@@ -272,7 +286,9 @@ describe("HuggingFace API Real Integration Tests", () => {
         await imageClassification(req, res);
 
         expect(res.statusCode).to.equal(400);
-        expect(res.data.error).to.equal("Missing inputs field (base64 image or image URL)");
+        expect(res.data.error).to.equal(
+          "Missing inputs field (base64 image or image URL)"
+        );
       });
     });
 
@@ -293,34 +309,38 @@ describe("HuggingFace API Real Integration Tests", () => {
           expect(res.data[0]).to.have.property("label");
           expect(res.data[0]).to.have.property("score");
           expect(res.data[0]).to.have.property("box");
-          expect(res.data[0].box).to.have.all.keys("xmin", "ymin", "xmax", "ymax");
+          expect(res.data[0].box)
+            .to.have.all.keys("xmin", "ymin", "xmax", "ymax");
           expect(res.data[0].label).to.include("dog"); // Should detect dog
         }
       }).timeout(15000);
     });
 
     describe("tableQuestionAnswering", () => {
-      it("should answer questions about tabular data with real API", async () => {
-        const req = createMockRequest({
-          inputs: {
-            query: "How many stars does the transformers repository have?",
-            table: {
-              "Repository": ["Transformers", "Datasets", "Tokenizers"],
-              "Stars": ["36542", "4512", "3934"],
-              "Contributors": ["651", "77", "34"],
-              "Programming language": ["Python", "Python", "Rust, Python and NodeJS"],
+      it("should answer questions about tabular data with real API",
+        async () => {
+          const req = createMockRequest({
+            inputs: {
+              query: "How many stars does the transformers repository have?",
+              table: {
+                "Repository": ["Transformers", "Datasets", "Tokenizers"],
+                "Stars": ["36542", "4512", "3934"],
+                "Contributors": ["651", "77", "34"],
+                "Programming language": [
+                  "Python", "Python", "Rust, Python and NodeJS",
+                ],
+              },
             },
-          },
-          model: "google/tapas-base-finetuned-wtq",
-        });
-        const res = createMockResponse();
+            model: "google/tapas-base-finetuned-wtq",
+          });
+          const res = createMockResponse();
 
-        await tableQuestionAnswering(req, res);
+          await tableQuestionAnswering(req, res);
 
-        expect(res.statusCode).to.equal(200);
-        expect(res.data).to.have.property("answer");
-        expect(res.data.answer).to.include("36542");
-      }).timeout(15000);
+          expect(res.statusCode).to.equal(200);
+          expect(res.data).to.have.property("answer");
+          expect(res.data.answer).to.include("36542");
+        }).timeout(15000);
 
       it("should return error for missing query or table", async () => {
         const req = createMockRequest({
@@ -353,7 +373,8 @@ describe("HuggingFace API Real Integration Tests", () => {
         expect(res.data.image).to.be.a("string");
         expect(res.data.image).to.include("data:image/");
         expect(res.data.image).to.include("base64,");
-        expect(res.data.metadata.model).to.equal("black-forest-labs/FLUX.1-dev");
+        expect(res.data.metadata.model)
+          .to.equal("black-forest-labs/FLUX.1-dev");
         expect(res.data.metadata.prompt).to.equal("Astronaut riding a horse");
       }).timeout(30000);
     });
@@ -366,7 +387,9 @@ describe("HuggingFace API Real Integration Tests", () => {
         await automaticSpeechRecognition(req, res);
 
         expect(res.statusCode).to.equal(400);
-        expect(res.data.error).to.equal("Missing inputs field (base64 audio data)");
+        expect(res.data.error).to.equal(
+          "Missing inputs field (base64 audio data)"
+        );
       });
     });
   });
@@ -375,7 +398,8 @@ describe("HuggingFace API Real Integration Tests", () => {
     it("should return 500 for invalid auth token", async () => {
       sandbox.restore();
       sandbox = sinon.createSandbox();
-      sandbox.stub(admin.auth(), "verifyIdToken").rejects(new Error("Invalid token"));
+      sandbox.stub(admin.auth(), "verifyIdToken")
+        .rejects(new Error("Invalid token"));
 
       const req = createMockRequest({inputs: "test"});
       const res = createMockResponse();
@@ -387,7 +411,9 @@ describe("HuggingFace API Real Integration Tests", () => {
     });
 
     it("should return error for missing Authorization header", async () => {
-      const req = createMockRequest({inputs: "test"}, {authorization: undefined});
+      const req = createMockRequest(
+        {inputs: "test"}, {authorization: undefined}
+      );
       const res = createMockResponse();
 
       await textClassification(req, res);
@@ -402,7 +428,8 @@ describe("HuggingFace API Real Integration Tests", () => {
 
       await textClassification(req, res);
 
-      expect(res.headers["Access-Control-Allow-Origin"]).to.equal("https://noodeler.xyz");
+      expect(res.headers["Access-Control-Allow-Origin"])
+        .to.equal("https://noodeler.xyz");
       expect(res.headers["Access-Control-Allow-Methods"]).to.include("POST");
     });
   });
