@@ -11,6 +11,21 @@ export async function fileLoadingNodes() {
         await nodeBluePrintController.initOfficialNodeBluePrint('load_excel');
     loadExcel.title = 'Load Excel Spreadsheet';
     loadExcel.documentation = 'Display Excel Spreadsheet';
+    loadExcel.tags = [
+        'file',
+        'excel',
+        'xlsx',
+        'spreadsheet',
+        'data',
+        'loader',
+        'import',
+        'office',
+        'microsoft',
+        'tabular',
+        'cells',
+        'business',
+        'not-implemented'
+    ]
 
     await loadExcel.newInputSocket('xlsx_file', {
         label: '.xlsx',

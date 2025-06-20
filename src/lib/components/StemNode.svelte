@@ -5,26 +5,27 @@
         {
             nid: string;
             input: Record<string, unknown>,
+            error: string | undefined
         },
         'node-stem'
     >;
 </script>
 
 <script lang="ts">
-    import {type NodeProps, useNodeConnections, useSvelteFlow} from "@xyflow/svelte";
-    const {updateNodeData} = useSvelteFlow();
+    import {type NodeProps, useNodeConnections} from "@xyflow/svelte";
 
     import {docStore} from "sveltefire";
     import {firestore} from "../../firebase";
     import type {FirestoreNodeBluePrintModel} from "$lib/compositor/FirestoreNodeBluePrint";
     import StemNodeComponent from "$lib/components/StemNodeComponent.svelte";
     import {untrack} from "svelte";
-    import {projectActions} from "$lib/stores/ProjectState";
+    import {projectActions, projectOutputDataCache} from "$lib/stores/ProjectState";
 
     let {id, data, selected}: NodeProps<StemNodeType> = $props();
     let nodeBluePrint = docStore<FirestoreNodeBluePrintModel>(firestore, `nodes/${data.nid}`);
 
-    const connections = useNodeConnections();
+    // const connections = useNodeConnections();
+    const inputConnections = useNodeConnections({id, handleType: 'target'});
 
     let inputSockets = $state([]);
     let outputSockets = $state.raw([]);
@@ -38,7 +39,7 @@
 
                 // determine if this socket is connected
                 let isConnected = false;
-                for (const connection of connections.current) {
+                for (const connection of inputConnections.current) {
                     if (connection.target === id && connection.targetHandle === socketId) {
                         isConnected = true;
                         break;
@@ -95,20 +96,35 @@
         }
     });
 
-    // ensure data.inputs has all sockets and they at lease have devault value
+    // ensure data.inputs has all sockets and they at least has default values
     $effect(() => {
         const blueprint = $nodeBluePrint;
         if (blueprint?.input_sockets) {
             untrack(() => {
+                if (data.input===undefined) {
+                    data.input = {};
+                }
                 blueprint.input_socket_order.forEach((socketId) => {
-                    if ((data as Record<string, unknown>)[socketId]===undefined) {
-                        (data as Record<string, unknown>)[socketId] = blueprint.input_sockets[socketId].params.default_value;
+                    if (data.input[socketId]===undefined) {
+                        data.input[socketId] = blueprint.input_sockets[socketId].params.default_value;
                     }
                 });
                 console.log(id, data);
             });
         }
     });
+
+    // // show the error when an error happens on node execution
+    // $effect(() => {
+    //
+    // });
+    const unsubscribeSocket = projectOutputDataCache.useSocketStore(
+        id,
+        '__error__'
+    ).subscribe((socketData) => {
+        data.error = socketData as string;
+    });
+    // return unsubscribeSocket;
 
 </script>
 
@@ -117,15 +133,16 @@
             title={$nodeBluePrint.title}
             inputSockets={inputSockets}
             bind:inputValues={
-                () => data,
+                () => data.input,
                 (newData) => {
                     // tell firebase to sync
                     // updateNodeData(id, {input: newData});
-                    projectActions.updateNodeData(id, {...data, ...newData})
+                    projectActions.updateNodeData(id, {...data, input: {...data.input, ...newData}})
                 }
             }
             outputSockets={outputSockets}
             isSelected={selected}
             tooltip={$nodeBluePrint.documentation}
+            errorMessage={data.error}
     ></StemNodeComponent>
 {/if}

@@ -4,8 +4,10 @@
     // Official NID for this node: template
     export type TemplateFillinNodeType = Node<
         {
-            template: string; // The user-defined template string
-            fillins: string[],
+            input: {
+                template: string; // The user-defined template string
+                fillins: Record<string, string>
+            },
             nid?: string; // Should be set to 'template' when using official blueprint
         },
         'node-template-fillin'
@@ -18,40 +20,37 @@
         Position,
         useNodeConnections,
         useNodesData,
-        useSvelteFlow,
         type NodeProps,
         NodeResizeControl
     } from '@xyflow/svelte';
-    import {fetchSocketDataTypeByName} from '$lib/compositor/DataTypes';
+    import {fetchSocketDataTypeByName, STANDARD_DATATYPES} from '$lib/compositor/DataTypes';
     import {Tooltip} from "flowbite-svelte";
     import NodeWrapper from "$lib/components/NodeWrapper.svelte";
+    import {projectActions, projectOutputDataCache} from "$lib/stores/ProjectState.js";
+    import {untrack} from "svelte";
 
     let {id, data, selected}: NodeProps<TemplateFillinNodeType> = $props();
 
-    const {updateNodeData} = useSvelteFlow();
+    // initialize data if defaults not given
+    if (data.input === undefined) {
+        data.input = {template: "", fillins: {}};
+    }
+    if (data.input.template === undefined) {
+        data.input.template = "";
+    }
+    if (data.input.fillins === undefined) {
+        data.input.fillins = {'x': 'y'};
+    }
+    console.log('data.input', data.input);
 
-    const connections = useNodeConnections();
 
     // State for template handling
     let isEditing: boolean = $state(false);
     let textareaRef: HTMLTextAreaElement;
 
-    // Socket styling for string inputs and output
-    let inputSocketStyle = $state('');
-    let outputSocketStyle = $state('');
-    fetchSocketDataTypeByName('string').then((datatype) => {
-        inputSocketStyle = datatype?.style || '';
-    });
-    fetchSocketDataTypeByName('string').then((datatype) => {
-        outputSocketStyle = datatype?.style || '';
-    });
-
-    // Get all connected node data (though we'll use `data.input` which XYFlow handles)
-    let connectedNodesData = useNodesData(connections.current.map((conn) => conn.source));
-
     // Extract unique variables from template
     let templateVariables = $derived(() => {
-        const matches = data.template.match(/@(\w+)/g);
+        const matches = data.input.template.match(/@(\w+)/g);
         if (!matches) return [];
 
         // Get unique variable names (remove @ prefix and dedupe)
@@ -94,7 +93,8 @@
     // Handle textarea input
     function handleInput(event: Event) {
         const target = event.target as HTMLTextAreaElement;
-        updateNodeData(id, {template: target.value});
+        data.input.template = target.value;
+        projectActions.updateNodeData(id, {input: data.input});
     }
 
     // Auto-resize textarea based on scrollHeight, with a minimum height
@@ -113,19 +113,41 @@
         }
     });
 
-    // Check if a template variable has a connected value
-    function getTemplateVariable(varname: string): string | boolean {
-        if (data && data.input) {
-            // Check if the variable exists as a key in data.input and has a non-empty value
-            return typeof data.input[varname] === 'string' && data.input[varname] !== '';
+    const inputConnections = useNodeConnections({id, handleType: 'target'});
+    let hasInputConnection = $derived(inputConnections.current.length > 0);
+
+    $effect(() => {
+        if (hasInputConnection) {
+            inputConnections.current.forEach((conn) => {
+
+                untrack(() => {
+                    if (conn.sourceHandle) {
+                        const unsubscribeSocket = projectOutputDataCache.useSocketStore(
+                            conn.source,
+                            conn.sourceHandle
+                        ).subscribe((socketData) => {
+                            console.log('output socket data updated:', socketData, id)
+                            if (conn.targetHandle) {
+                                console.log(data.input, conn.targetHandle);
+                                const newFillin: Record<string, string> = {};
+                                newFillin[conn.targetHandle] = socketData as string;
+                                data.input.fillins = {...data.input.fillins, ...newFillin};
+                                projectActions.updateNodeData(id, {input: data.input});
+                            }
+                        });
+                        return unsubscribeSocket;
+                    }
+                });
+
+            });
         }
-        return false;
-    }
+    });
 
     // Highlight variables in display text
     function highlightVariables(text: string): string {
         return text.replace(/@(\w+)/g, (match, varName) => {
-            const hasValue = getTemplateVariable(varName);
+            // const hasValue = getTemplateVariable(varName);
+            const hasValue = false;
             const className = hasValue ? 'variable-filled' : 'variable-empty';
             return `<span class="${className}">${match}</span>`;
         });
@@ -166,20 +188,20 @@
 
         <div class="p-3">
             {#if isEditing}
-            <textarea
-                    bind:this={textareaRef}
-                    value={data.template}
-                    on:blur={handleBlur}
-                    on:keydown={handleKeydown}
-                    on:input={(e) => {
-                    handleInput(e);
-                    autoResize(e.target as HTMLTextAreaElement);
-                }}
-                    class="w-full border-0 outline-none resize-y font-mono text-sm"
-                    placeholder="Enter template with @variable placeholders..."
-                    rows="3"
-                    style="min-height: 60px;"
-            ></textarea>
+                <textarea
+                        bind:this={textareaRef}
+                        value={data.input.template}
+                        on:blur={handleBlur}
+                        on:keydown={handleKeydown}
+                        on:input={(e) => {
+                            handleInput(e);
+                            autoResize(e.target as HTMLTextAreaElement);
+                        }}
+                        class="w-full border-0 outline-none resize-y font-mono text-sm"
+                        placeholder="Enter template with @variable placeholders..."
+                        rows="3"
+                        style="min-height: 60px;"
+                ></textarea>
             {:else}
                 <div
                         class="min-h-[60px] overflow-auto cursor-pointer hover:bg-gray-50 transition-colors"
@@ -187,15 +209,15 @@
                         role="button"
                         tabindex="0"
                         on:keydown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        handleClick();
-                    }
-                }}
+                            if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                handleClick();
+                            }
+                        }}
                 >
-                    {#if data.template.trim()}
+                    {#if data.input.template.trim()}
                         <div class="template-display font-mono text-sm whitespace-pre-wrap">
-                            {@html highlightVariables(data.template)}
+                            {@html highlightVariables(data.input.template)}
                         </div>
                     {:else}
                         <div class="text-gray-400 text-center flex flex-col items-center justify-center h-full">
@@ -215,23 +237,45 @@
         </div>
 
         {#each templateVariables() as variable, index}
-            <Handle
-                    type="target"
-                    position={Position.Left}
-                    style="top:{5 + index * 10}%;{inputSocketStyle}"
-                    id='fillins_{variable}'
-                    class="socket-handle"
-            />
-            <Tooltip placement="left">{variable}</Tooltip>
+            <!--            <TargetSocket id={index.toString()} label={variable} type={STANDARD_DATATYPES.TEXT}-->
+            <!--                          documentation={'Fills in @'+variable}></TargetSocket>-->
+            {#await fetchSocketDataTypeByName(STANDARD_DATATYPES.TEXT)}
+                Loading Target Socket
+            {:then datatype}
+                <Handle
+                        type="target"
+                        position={Position.Left}
+                        id="{variable}"
+                        class="socket-handle"
+                        style="top: {30 * index}px;{datatype?.style || ''}"
+                />
+                <Tooltip placement="top">
+                    <b>{variable}</b>
+                </Tooltip>
+            {:catch error}
+                Error; could not load input socket: {JSON.stringify(error, null, 2)}
+            {/await}
         {/each}
 
-        <Handle
-                type="source"
-                position={Position.Right}
-                style="top:50%;{outputSocketStyle}"
-                id="output"
-                class="socket-handle"
-        />
+        <!--        <SourceSocket id="text" label="Text" type={STANDARD_DATATYPES.TEXT} documentation=''></SourceSocket>-->
+
+        {#await fetchSocketDataTypeByName(STANDARD_DATATYPES.TEXT)}
+            Loading Target Socket
+        {:then datatype}
+            <Handle
+                    type="source"
+                    position={Position.Right}
+                    id='text'
+                    style="top: 50%;{datatype?.style || ''}"
+                    class="socket-handle"
+            />
+            <Tooltip placement="top">
+                <b>Type ({datatype?.name}):</b> {datatype?.description}
+            </Tooltip>
+        {:catch error}
+            Error; could not load input socket: {JSON.stringify(error, null, 2)}
+        {/await}
+
     </div>
 </NodeWrapper>
 

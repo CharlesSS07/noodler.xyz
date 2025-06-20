@@ -15,6 +15,20 @@ export async function simpleImageModificationNodes() {
         await nodeBluePrintController.initOfficialNodeBluePrint('greyscale');
     grayscale.title = 'Greyscale';
     grayscale.documentation = 'Greyscales an image.';
+    grayscale.tags = [
+        'image',
+        'jimp',
+        'grayscale',
+        'greyscale',
+        'filter',
+        'color',
+        'monochrome',
+        'black-white',
+        'vintage',
+        'artistic',
+        'processing',
+        'desaturation'
+    ]
 
     await grayscale.newInputSocket('img', {
         label: 'Color Image',
@@ -38,6 +52,21 @@ outputs.set('img', img);
     const hsv = await nodeBluePrintController.initOfficialNodeBluePrint('hsv');
     hsv.title = 'HSV Shift Change';
     hsv.documentation = 'Shift hue, saturation, or value of the input image.';
+    hsv.tags = [
+        'image',
+        'jimp',
+        'hsv',
+        'hue',
+        'saturation',
+        'value',
+        'color',
+        'adjustment',
+        'brightness',
+        'vibrancy',
+        'color-correction',
+        'enhancement',
+        'artistic'
+    ]
 
     hsv.newInputSocket('img', {
         label: 'Input Image',

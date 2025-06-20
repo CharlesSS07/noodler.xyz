@@ -18,6 +18,21 @@ export async function specialtyDataInputDataNodes() {
         );
     rawTextEditor.title = 'Raw Text Editor';
     rawTextEditor.documentation = 'Displays or intakes text data.';
+    rawTextEditor.tags = [
+        'text',
+        'editor',
+        'input',
+        'raw',
+        'plain',
+        'string',
+        'basic',
+        'simple',
+        'content',
+        'typing',
+        'manual',
+        'fundamental'
+    ]
+    rawTextEditor.notSearchable();
 
     rawTextEditor.newInputSocket('inputText', {
         label: 'Text',
@@ -34,42 +49,6 @@ export async function specialtyDataInputDataNodes() {
 
     rawTextEditor.code = `outputs.set("outputText", inputs.inputText);`;
 
-    const completeTextHuggingfaceLLM =
-        await nodeBluePrintController.initOfficialNodeBluePrint(
-            'huggingface_complete_text'
-        );
-    completeTextHuggingfaceLLM.title = 'Raw Text Editor';
-    completeTextHuggingfaceLLM.documentation = 'Displays or intakes text data.';
-
-    completeTextHuggingfaceLLM.newInputSocket('text', {
-        label: 'Text',
-        documentation: 'Text to complete.',
-        type: STANDARD_DATATYPES.STRING,
-        params: new StringSocketParamsBuilder('').build(),
-    });
-
-    completeTextHuggingfaceLLM.newInputSocket('modelId', {
-        label: 'Model ID',
-        documentation: 'Hugginface Model ID',
-        type: STANDARD_DATATYPES.STRING,
-        params: new StringSocketParamsBuilder('').build(),
-    });
-
-    completeTextHuggingfaceLLM.newInputSocket('maxTokens', {
-        label: 'Max Tokens',
-        documentation: 'Largest number of tokens to allocate.',
-        type: STANDARD_DATATYPES.NUMBER,
-        params: new NumberSocketParamsBuilder(1000).build(),
-    });
-
-    completeTextHuggingfaceLLM.newOutputSocket('completed_text', {
-        label: 'Completed Text',
-        documentation: 'The prediced next tokens.',
-        type: STANDARD_DATATYPES.STRING,
-    });
-
-    completeTextHuggingfaceLLM.code = `console.error("completeTextHuggingfaceLLM node not implemented")`;
-
     const mdTextEditor =
         await nodeBluePrintController.initOfficialNodeBluePrint(
             'md_text_editor'
@@ -77,6 +56,21 @@ export async function specialtyDataInputDataNodes() {
     mdTextEditor.title = 'Markdown Text Editor';
     mdTextEditor.documentation =
         'Displays or intakes text data, rendered as markdown.';
+    mdTextEditor.tags = [
+        'text',
+        'markdown',
+        'editor',
+        'md',
+        'formatted',
+        'rich-text',
+        'documentation',
+        'github',
+        'readme',
+        'styling',
+        'headers',
+        'links'
+    ]
+    mdTextEditor.notSearchable();
 
     mdTextEditor.newInputSocket('text', {
         label: 'Text',
@@ -98,6 +92,21 @@ export async function specialtyDataInputDataNodes() {
     textTemplateFillin.title = 'Template Text';
     textTemplateFillin.documentation =
         'Replaces @x with the value of x, a string value. Filled in during computation.';
+    textTemplateFillin.tags = [
+        'text',
+        'template',
+        'substitution',
+        'variables',
+        'placeholder',
+        'dynamic',
+        'interpolation',
+        'replacement',
+        'fill-in',
+        'generation',
+        'incomplete',
+        'parametric'
+    ]
+    textTemplateFillin.notSearchable();
 
     textTemplateFillin.newInputSocket('template', {
         label: 'Text',
@@ -122,14 +131,34 @@ export async function specialtyDataInputDataNodes() {
     // should iterate through the keys of inputs.fillins and replace the keys in the text
     textTemplateFillin.code = `
 let filledIn = inputs.template;
-for ()
-outputs.set("text", inputs.text);
+console.log(inputs);
+for (const fillin in inputs.fillins) {
+    filledIn = filledIn.replaceAll('@'+fillin, inputs.fillins[fillin]);
+}
+console.log(filledIn);
+outputs.set("text", filledIn);
 `;
 
     const imageLoader =
         await nodeBluePrintController.initOfficialNodeBluePrint('image_loader');
     imageLoader.title = 'Image Loader';
     imageLoader.documentation = 'Read in an image from a socket/file.';
+    imageLoader.tags = [
+        'image',
+        'loader',
+        'file',
+        'jimp',
+        'upload',
+        'import',
+        'base64',
+        'buffer',
+        'graphics',
+        'input',
+        'conversion',
+        'reader'
+    ]
+    imageLoader.notSearchable();
+    imageLoader.input_spec_strict = false;
 
     imageLoader.newInputSocket('imageOrFileOrString', {
         label: 'Upload Image',
@@ -166,6 +195,21 @@ if (typeof imageOrFileOrString === 'string') {
         );
     htmlRenderer.title = 'HTML Renderer';
     htmlRenderer.documentation = 'Display arbitrary html in iframe.';
+    htmlRenderer.tags = [
+        'html',
+        'renderer',
+        'iframe',
+        'web',
+        'display',
+        'browser',
+        'dom',
+        'preview',
+        'sandbox',
+        'markup',
+        'ui',
+        'viewer'
+    ]
+    htmlRenderer.notSearchable();
 
     htmlRenderer.newInputSocket('html', {
         label: 'HTML',
@@ -194,6 +238,21 @@ outputs.set('image', img);
         );
     jsNode.title = 'JS Node';
     jsNode.documentation = 'Modify JS in a Node Environment';
+    jsNode.tags = [
+        'javascript',
+        'js',
+        'code',
+        'node',
+        'execution',
+        'runtime',
+        'scripting',
+        'programming',
+        'custom',
+        'logic',
+        'computation',
+        'flexible'
+    ]
+    jsNode.notSearchable();
 
     jsNode.newInputSocket('js_code', {
         label: 'JS',

@@ -11,6 +11,20 @@ export async function promptDesignNodes() {
         await nodeBluePrintController.initOfficialNodeBluePrint('join_text');
     joinText.title = 'Join Text (4)';
     joinText.documentation = "Join text. 'A'+'B'='AB'";
+    joinText.tags = [
+        'text',
+        'string',
+        'join',
+        'concatenation',
+        'merge',
+        'combine',
+        'prompt',
+        'assembly',
+        'composition',
+        'template',
+        'building',
+        'utility'
+    ]
 
     await joinText.newInputSocket('text1', {
         label: 'Text',
@@ -50,6 +64,20 @@ export async function promptDesignNodes() {
         await nodeBluePrintController.initOfficialNodeBluePrint('split_text');
     splitText.title = 'Split Text';
     splitText.documentation = 'Splits text by seperator (sep).';
+    splitText.tags = [
+        'text',
+        'string',
+        'split',
+        'separation',
+        'parsing',
+        'tokenization',
+        'delimiter',
+        'array',
+        'breakdown',
+        'segmentation',
+        'extraction',
+        'utility'
+    ]
 
     await splitText.newInputSocket('text', {
         label: 'Text',

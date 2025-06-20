@@ -15,8 +15,14 @@ export async function aiInferenceNodes() {
     // TEXT TO IMAGE NODE
     const textToImage =
         await factory.initOfficialNodeBluePrint('ai_text_to_image');
-    textToImage.title = 'AI Text to Image';
+    textToImage.title = 'Text to Image';
     textToImage.documentation = 'Generates an image from text using AI models.';
+    textToImage.tags = [
+        'ai', // for nodes that use ai
+        'image', // for nodes that handle images in any way
+        'remote', // for nodes that do operations using the cloud, not fully locally
+        'text' // for nodes that handle text
+    ]
 
     textToImage.newInputSocket('prompt', {
         label: 'Prompt',
@@ -118,6 +124,12 @@ export async function aiInferenceNodes() {
     objectDetection.title = 'AI Object Detection';
     objectDetection.documentation =
         'Detects objects in images with bounding boxes.';
+    objectDetection.tags = [
+        'ai',
+        'image',
+        'remote',
+        'detection'
+    ]
 
     objectDetection.newInputSocket('image', {
         label: 'Image',
@@ -171,6 +183,12 @@ export async function aiInferenceNodes() {
     textGeneration.title = 'AI Text Generation';
     textGeneration.documentation =
         'Generates text completions using language models.';
+    textGeneration.tags = [
+        'ai',
+        'text',
+        'remote',
+        'generation'
+    ]
 
     textGeneration.newInputSocket('prompt', {
         label: 'Text Prompt',
@@ -263,6 +281,12 @@ export async function aiInferenceNodes() {
     textClassification.title = 'AI Text Classification';
     textClassification.documentation =
         'Classifies text into categories (sentiment, topic, etc.).';
+    textClassification.tags = [
+        'ai',
+        'text',
+        'remote',
+        'classification'
+    ]
 
     textClassification.newInputSocket('text', {
         label: 'Text',
@@ -307,6 +331,12 @@ export async function aiInferenceNodes() {
     questionAnswering.title = 'AI Question Answering';
     questionAnswering.documentation =
         'Answers questions based on provided context.';
+    questionAnswering.tags = [
+        'ai',
+        'text',
+        'remote',
+        'qa'
+    ]
 
     questionAnswering.newInputSocket('question', {
         label: 'Question',
@@ -367,6 +397,12 @@ export async function aiInferenceNodes() {
         await factory.initOfficialNodeBluePrint('ai_summarization');
     summarization.title = 'AI Text Summarization';
     summarization.documentation = 'Summarizes long text into shorter versions.';
+    summarization.tags = [
+        'ai',
+        'text',
+        'remote',
+        'summarization'
+    ]
 
     summarization.newInputSocket('text', {
         label: 'Text to Summarize',
@@ -426,6 +462,12 @@ export async function aiInferenceNodes() {
         await factory.initOfficialNodeBluePrint('ai_translation');
     translation.title = 'AI Language Translation';
     translation.documentation = 'Translates text between languages.';
+    translation.tags = [
+        'ai',
+        'text',
+        'remote',
+        'translation'
+    ]
 
     translation.newInputSocket('text', {
         label: 'Text to Translate',
@@ -465,6 +507,12 @@ export async function aiInferenceNodes() {
     const fillMask = await factory.initOfficialNodeBluePrint('ai_fill_mask');
     fillMask.title = 'AI Fill Mask';
     fillMask.documentation = 'Predicts masked words in text.';
+    fillMask.tags = [
+        'ai',
+        'text',
+        'remote',
+        'prediction'
+    ]
 
     fillMask.newInputSocket('text', {
         label: 'Text with Mask',
@@ -514,6 +562,12 @@ export async function aiInferenceNodes() {
     sentenceSimilarity.title = 'AI Sentence Similarity';
     sentenceSimilarity.documentation =
         'Computes semantic similarity between sentences.';
+    sentenceSimilarity.tags = [
+        'ai',
+        'text',
+        'remote',
+        'similarity'
+    ]
 
     sentenceSimilarity.newInputSocket('source_sentence', {
         label: 'Source Sentence',
@@ -568,6 +622,12 @@ export async function aiInferenceNodes() {
     );
     featureExtraction.title = 'AI Feature Extraction';
     featureExtraction.documentation = 'Extracts feature embeddings from text.';
+    featureExtraction.tags = [
+        'ai',
+        'text',
+        'remote',
+        'embedding'
+    ]
 
     featureExtraction.newInputSocket('text', {
         label: 'Text',
@@ -611,6 +671,13 @@ export async function aiInferenceNodes() {
     automaticSpeechRecognition.title = 'AI Speech Recognition';
     automaticSpeechRecognition.documentation =
         'Converts audio to text using speech recognition.';
+    automaticSpeechRecognition.tags = [
+        'ai',
+        'audio',
+        'text',
+        'remote',
+        'recognition'
+    ]
 
     automaticSpeechRecognition.newInputSocket('audio_data', {
         label: 'Audio Data',
@@ -647,6 +714,13 @@ export async function aiInferenceNodes() {
     tableQuestionAnswering.title = 'AI Table Question Answering';
     tableQuestionAnswering.documentation =
         'Answers questions about tabular data.';
+    tableQuestionAnswering.tags = [
+        'ai',
+        'text',
+        'data',
+        'remote',
+        'qa'
+    ]
 
     tableQuestionAnswering.newInputSocket('question', {
         label: 'Question',

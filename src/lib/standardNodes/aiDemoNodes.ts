@@ -11,6 +11,20 @@ export async function aiDemoNodes() {
         await nodeBluePrintController.initOfficialNodeBluePrint('colorize');
     colorize.title = 'Colorize';
     colorize.documentation = 'Colorize a grayscale image.';
+    colorize.tags = [
+        'ai',
+        'image',
+        'colorize',
+        'colorization',
+        'grayscale',
+        'enhancement',
+        'computer-vision',
+        'restoration',
+        'artistic',
+        'ml',
+        'demo',
+        'not-implemented'
+    ]
 
     await colorize.newInputSocket('img', {
         label: 'Greyscale Image',
@@ -35,6 +49,20 @@ export async function aiDemoNodes() {
         );
     superResolution.title = 'Super Resolution / "Enhance"';
     superResolution.documentation = 'Increase the resolution image.';
+    superResolution.tags = [
+        'ai',
+        'image',
+        'super-resolution',
+        'enhancement',
+        'upscaling',
+        'quality',
+        'computer-vision',
+        'swin2sr',
+        'ml',
+        'demo',
+        'not-implemented',
+        'csi-enhance'
+    ]
 
     await superResolution.newInputSocket('img', {
         label: 'Low-res Image',
@@ -70,6 +98,20 @@ const output = await upscaler(url);
         'Separate Background & Foreground Object';
     objectBackgroundSeperation.documentation =
         'Separate a foreground object and infill the background, storing them in seperate images.';
+    objectBackgroundSeperation.tags = [
+        'ai',
+        'image',
+        'segmentation',
+        'background-removal',
+        'foreground',
+        'masking',
+        'object-detection',
+        'computer-vision',
+        'separation',
+        'alpha',
+        'inpainting',
+        'not-implemented'
+    ]
 
     await objectBackgroundSeperation.newInputSocket('img', {
         label: 'Image',

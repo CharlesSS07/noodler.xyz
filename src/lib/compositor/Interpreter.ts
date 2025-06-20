@@ -11,8 +11,6 @@ NodeAPIConnectorManager.registerAPIConnector(
     new AIInferenceAPIConnector('ai_inference')
 );
 
-class CyclicDependencyException extends Error {}
-
 export class OutputSocketAsyncReturner {
     /**
      * This is part of the input to a node.
@@ -155,33 +153,40 @@ export async function executeFlowGraph(
                     nodeBlueprint.inputSocketKeys
                 );
 
-                // Check for extra socket keys (inputDataSocketKeys - inputSocketKeysSpec)
-                const extraKeys = Array.from(inputDataSocketKeys).filter(
-                    (key) => !inputSocketKeysSpec.has(key)
-                );
-                if (extraKeys.length > 0) {
-                    throw new Error(
-                        `Extra socket keys supplied to input of node ${nodeId}: ${extraKeys.join(',')}`
+                if (nodeBlueprint.input_spec_strict) {
+                    // Check for extra socket keys (inputDataSocketKeys - inputSocketKeysSpec)
+                    const extraKeys = Array.from(inputDataSocketKeys).filter(
+                        (key) => !inputSocketKeysSpec.has(key)
                     );
+                    if (extraKeys.length > 0) {
+                        throw new Error(
+                            `Extra socket keys supplied to input of node ${nodeId}: ${extraKeys.join(',')}`
+                        );
+                    }
+
+                    // Check for missing socket keys (inputSocketKeysSpec - inputDataSocketKeys)
+                    const missingKeys = Array.from(inputSocketKeysSpec).filter(
+                        (key) => !inputDataSocketKeys.has(key)
+                    );
+                    if (missingKeys.length > 0) {
+                        throw new Error(
+                            `Missing socket keys to input of node ${nodeId}: ${missingKeys.join('.')}. Received: ${Array.from(inputDataSocketKeys).join('.')}`
+                        );
+                    }
+                    // TODO: input socket data type checking
                 }
 
-                // Check for missing socket keys (inputSocketKeysSpec - inputDataSocketKeys)
-                const missingKeys = Array.from(inputSocketKeysSpec).filter(
-                    (key) => !inputDataSocketKeys.has(key)
-                );
-                if (missingKeys.length > 0) {
-                    throw new Error(
-                        `Missing socket keys to input of node ${nodeId}: ${missingKeys.join('.')}`
-                    );
-                }
-                // TODO: input socket data type checking
+                console.log(`Calling node ${nodeId} of nid ${nodeBlueprint.nid} with args:`);
+                console.log(inputData)
 
                 // Execute the node
                 await nodeBlueprint.call(inputData, outputReturner).then(() => {
                     console.log(
-                        `Successfully resolved output socket for node ${nodeId}`
+                        `Successfully resolved output socket for node ${nodeId}, with data:`, outputReturner
                     );
-                    console.log(outputReturner);
+                }).catch((err) => {
+                    console.error(`Node execution ${nodeId} failed with error:`);
+                    throw err;
                 });
 
                 // Mark as executed
@@ -199,14 +204,14 @@ export async function executeFlowGraph(
                 // Execute ready nodes concurrently
                 await Promise.all(readyNodes.map(executeNode));
             } catch (error) {
-                console.error('Error while executing node');
-                console.error(error);
+                console.error('Error in pre or post node execution');
                 outputReturner.error(error);
                 throw error;
             }
         } catch (error) {
             executingNodes.delete(nodeId);
-            console.error(`Failed to execute node ${nodeId}:`, error);
+            console.error(`Failed to execute node ${nodeId}:`);
+            console.error(error);
             throw error;
         }
     };
@@ -283,6 +288,10 @@ async function getNodeInputData(
                     edge.source,
                     edge.sourceHandle
                 );
+
+                // if the targetHandle has a . in it, then it might be accessing the child attribute
+                // we should assign this child attribute if so
+                // this allows for opening up a socket / have it be assigned in different ways if it's not a primitive!
                 inputData[edge.targetHandle] = data;
             } catch (error) {
                 // Input not available yet - this shouldn't happen if dependencies are tracked correctly
@@ -297,6 +306,8 @@ async function getNodeInputData(
                 inputData[inputKey] = inputValue;
             }
         }
+    } else {
+        console.error(`Node ${nodeId} does not have an input data store.`);
     }
 
     // Temporary. This replaces every BigDataRef with the value in the database

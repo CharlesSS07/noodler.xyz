@@ -5,7 +5,7 @@ export const nodesVersion2 = [
         id: 'constraints_instruction_join_text_key_features_to_list',
         type: 'node',
         data: {
-            nid: 'official_node_join_text',
+            nid: 'join_text',
             input: {
                 text: '',
                 text1: '',

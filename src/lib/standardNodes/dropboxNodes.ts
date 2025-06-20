@@ -11,6 +11,20 @@ export async function dropboxNodes() {
         await nodeBluePrintController.initOfficialNodeBluePrint('save_dropbox');
     saveDropbox.title = 'Save to Dropbox';
     saveDropbox.documentation = 'Saves the image to Dropbox';
+    saveDropbox.tags = [
+        'dropbox',
+        'cloud',
+        'storage',
+        'save',
+        'upload',
+        'image',
+        'remote',
+        'backup',
+        'sync',
+        'oauth',
+        'not-implemented',
+        'file-sharing'
+    ]
 
     await saveDropbox.newInputSocket('image_file', {
         label: 'Image',
@@ -25,6 +39,20 @@ export async function dropboxNodes() {
         await nodeBluePrintController.initOfficialNodeBluePrint('load_dropbox');
     loadDropbox.title = 'Load from Dropbox';
     loadDropbox.documentation = 'Loads the Image from Dropbox';
+    loadDropbox.tags = [
+        'dropbox',
+        'cloud',
+        'storage',
+        'load',
+        'download',
+        'image',
+        'remote',
+        'fetch',
+        'sync',
+        'oauth',
+        'not-implemented',
+        'file-sharing'
+    ]
 
     await loadDropbox.newOutputSocket('image_file', {
         label: 'Image',

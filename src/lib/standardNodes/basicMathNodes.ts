@@ -12,6 +12,18 @@ export async function basicMathNodes() {
         await nodeBluePrintController.initOfficialNodeBluePrint('add');
     addNode.title = 'Add Numbers';
     addNode.documentation = 'Adds two numbers together';
+    addNode.tags = [
+        'math',
+        'arithmetic',
+        'basic',
+        'calculator',
+        'addition',
+        'numbers',
+        'computation',
+        'binary-operation',
+        'fundamental',
+        'elementary'
+    ]
 
     await addNode.newInputSocket('a', {
         label: 'Number A',
@@ -45,6 +57,18 @@ export async function basicMathNodes() {
         await nodeBluePrintController.initOfficialNodeBluePrint('subtract');
     subtractNode.title = 'Subtract Numbers';
     subtractNode.documentation = 'Subtracts second number from first number';
+    subtractNode.tags = [
+        'math',
+        'arithmetic',
+        'basic',
+        'calculator',
+        'subtraction',
+        'numbers',
+        'computation',
+        'binary-operation',
+        'fundamental',
+        'elementary'
+    ]
 
     await subtractNode.newInputSocket('a', {
         label: 'Number A',
@@ -78,6 +102,19 @@ export async function basicMathNodes() {
         await nodeBluePrintController.initOfficialNodeBluePrint('multiply');
     multiplyNode.title = 'Multiply Numbers';
     multiplyNode.documentation = 'Multiplies two numbers together';
+    multiplyNode.tags = [
+        'math',
+        'arithmetic',
+        'basic',
+        'calculator',
+        'multiplication',
+        'numbers',
+        'computation',
+        'binary-operation',
+        'fundamental',
+        'elementary',
+        'scaling'
+    ]
 
     await multiplyNode.newInputSocket('a', {
         label: 'Number A',
@@ -111,6 +148,20 @@ export async function basicMathNodes() {
         await nodeBluePrintController.initOfficialNodeBluePrint('divide');
     divideNode.title = 'Divide Numbers';
     divideNode.documentation = 'Divides first number by second number';
+    divideNode.tags = [
+        'math',
+        'arithmetic',
+        'basic',
+        'calculator',
+        'division',
+        'numbers',
+        'computation',
+        'binary-operation',
+        'fundamental',
+        'elementary',
+        'ratio',
+        'quotient'
+    ]
 
     await divideNode.newInputSocket('a', {
         label: 'Dividend',

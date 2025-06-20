@@ -13,6 +13,20 @@ export async function googleDriveNodes() {
     googleDrive.title = 'Google Drive';
     googleDrive.documentation =
         'Retrieves a file from a google drive. Requires access to the google drive.';
+    googleDrive.tags = [
+        'google',
+        'drive',
+        'cloud',
+        'storage',
+        'file',
+        'remote',
+        'download',
+        'fetch',
+        'oauth',
+        'authentication',
+        'gsuite',
+        'workspace'
+    ]
 
     await googleDrive.newInputSocket('account', {
         label: 'Google Account',
@@ -46,6 +60,20 @@ outputs.set('img', inputs.img);
     sendEmail.title = 'Send Email';
     sendEmail.documentation =
         'Retrieves a file from a google drive. Requires access to the google drive.';
+    sendEmail.tags = [
+        'email',
+        'google',
+        'gmail',
+        'send',
+        'communication',
+        'remote',
+        'smtp',
+        'message',
+        'notification',
+        'oauth',
+        'mail',
+        'correspondence'
+    ]
 
     await sendEmail.newInputSocket('account', {
         label: 'From Google Account',

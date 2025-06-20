@@ -92,6 +92,9 @@ export abstract class NodeBluePrint {
     abstract set title(title: string);
     abstract get title(): string;
 
+    abstract get input_spec_strict(): boolean;
+    abstract set input_spec_strict(spec_strict: boolean);
+
     abstract set code(title: string);
     abstract get code(): string;
 
@@ -100,6 +103,14 @@ export abstract class NodeBluePrint {
 
     abstract get official_note(): string;
     abstract set official_note(note: string);
+
+    abstract get searchable(): boolean;
+    abstract notSearchable(): void;
+    abstract isSearchable(): void;
+
+    abstract get tags(): string[];
+    abstract set tags(tags: string[]);
+
 }
 
 // Wrapper function to create a reactive store

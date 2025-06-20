@@ -1,5 +1,7 @@
 <script lang="ts">
 
+    import TextEditorRawNode from "$lib/components/nodes/text/TextEditorRawNode.svelte";
+
     let {project_key = 'project_key_not_assigned'} = $props<{ project_key?: string }>();
 
     import {
@@ -11,7 +13,7 @@
         type Node,
         type Edge,
         type ColorMode,
-        type Viewport, getViewportForBounds
+        type Viewport, type Connection
     } from '@xyflow/svelte';
     import '@xyflow/svelte/dist/style.css';
 
@@ -159,6 +161,7 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
         html: HTMLRendererNode,
         textTemplate: TextTemplateFillinNode,
         textEditorMd: TextEditorNode,
+        textEditorRaw: TextEditorRawNode,
         huggingfaceLLM: CompleteTextLLM,
     };
 
@@ -193,6 +196,17 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
                 markdown: '# New Note\n\nWrite your markdown here...'
             }
         },
+        {
+            id: 'textEditorRaw',
+            type: 'textEditorRaw',
+            title: 'Raw Text Editor',
+            description: 'Plain text editor no formatting',
+            category: 'Text',
+            defaultData: {
+                input: { inputText: '' },
+                nid: 'raw_text_editor'
+            }
+        },
         // {
         //     id: 'textEditor',
         //     type: 'textEditor',
@@ -211,8 +225,10 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
             description: 'Template with variable substitution',
             category: 'Text',
             defaultData: {
-                template: '@fillin_variable',
-                fillins: {},
+                input: {
+                    fillins: {},
+                    template: '@fillin_variable'
+                },
                 nid: 'template'
             }
         },
@@ -236,15 +252,7 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
                 input: { },
                 nid: 'image_loader'
             }
-        },
-        // {
-        //     id: 'huggingfaceLLM',
-        //     type: 'huggingfaceLLM',
-        //     title: 'HuggingFace LLM',
-        //     description: 'Text completion using HuggingFace models',
-        //     category: 'AI',
-        //     defaultData: { input: '', model: 'gpt2' }
-        // }
+        }
     ];
 
     // Node search functions
@@ -393,6 +401,25 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
     //     });
     // });
 
+    const isValidConnection = (connection: Connection) => {
+
+        // make sure the edge only has one connection.
+        // if it's already connected, it cannot connect again.
+        for (const conn of edges) {
+            if (connection.target === conn.target && connection.targetHandle == conn.targetHandle) {
+                console.log("rejecting connection: one connection per target socket")
+                return false;
+            }
+        }
+
+        // and also... (type checking not yet implemented)
+        // anything can connect to an unknown, and an unknown can connect to anything
+        // anything can connect to an unregisterd, and an unregisterd can connect to anything
+        // everything else can only connect to sockets of the same type or unknown or unregistered
+        // everything else can only recieve connections from sockets of the same type of unknown or unregistered
+        return true; // replace with logic which checks type of each socket
+    };
+
 </script>
 
 
@@ -403,6 +430,7 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
         bind:nodes
         bind:edges
         bind:viewport
+        {isValidConnection}
         {nodeTypes}
         {colorMode}
         oninit={() => {}}

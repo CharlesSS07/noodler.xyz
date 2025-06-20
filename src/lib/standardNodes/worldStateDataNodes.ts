@@ -11,6 +11,22 @@ export async function worldStateDataNodes() {
         await nodeBluePrintController.initOfficialNodeBluePrint('weather');
     weather.title = 'Weather at GPS Coordinate (Approximate)';
     weather.documentation = 'Returns the weather at a given GPS Coordinate';
+    weather.tags = [
+        'weather',
+        'gps',
+        'location',
+        'coordinates',
+        'climate',
+        'temperature',
+        'precipitation',
+        'wind',
+        'meteorology',
+        'api',
+        'remote',
+        'real-world',
+        'environmental',
+        'not-implemented'
+    ]
 
     await weather.newInputSocket('lat', {
         label: 'GPS Latitude',

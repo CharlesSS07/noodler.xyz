@@ -49,16 +49,6 @@ export const SOCKET_INPUT_MAPPINGS: SocketInputMapping[] = [
         component: FileInput,
         description: 'File upload input',
     },
-    {
-        dataType: 'csv',
-        component: FileInput,
-        description: 'CSV file upload',
-    },
-    {
-        dataType: 'tsv',
-        component: FileInput,
-        description: 'TSV file upload',
-    },
 
     // Image types
     {
@@ -78,21 +68,10 @@ export const SOCKET_INPUT_MAPPINGS: SocketInputMapping[] = [
         component: EnumInput,
         description: 'Dropdown selector for predefined options',
     },
-
-    {
-        dataType: 'array',
-        component: StringInput,
-        description: 'Array type (not directly editable)',
-    },
     {
         dataType: STANDARD_DATATYPES.UNKNOWN,
         component: StringInput,
         description: 'Unknown type (not directly editable)',
-    },
-    {
-        dataType: 'any',
-        component: StringInput,
-        description: 'Any type (not directly editable)',
     },
 ];
 

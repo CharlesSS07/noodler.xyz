@@ -12,6 +12,20 @@ export async function jsonNodes() {
     jsonEditorAndViewer.title = 'JSON';
     jsonEditorAndViewer.documentation =
         'Create, or view a single instance of a JSON object.';
+    jsonEditorAndViewer.tags = [
+        'json',
+        'data',
+        'object',
+        'editor',
+        'viewer',
+        'parser',
+        'structured',
+        'format',
+        'serialization',
+        'configuration',
+        'api-data',
+        'interchange'
+    ]
 
     await jsonEditorAndViewer.newInputSocket('jsonObject', {
         label: 'JSON',
@@ -38,6 +52,20 @@ export async function jsonNodes() {
         );
     jsonToString.title = 'JSON to Text';
     jsonToString.documentation = 'Stringify a JSON object.';
+    jsonToString.tags = [
+        'json',
+        'data',
+        'string',
+        'serialization',
+        'stringify',
+        'conversion',
+        'text',
+        'format',
+        'export',
+        'transform',
+        'encoding',
+        'api-ready'
+    ]
 
     await jsonToString.newInputSocket('jsonObject', {
         label: 'Object',

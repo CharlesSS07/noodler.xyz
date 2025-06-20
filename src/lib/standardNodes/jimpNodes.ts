@@ -17,6 +17,20 @@ export async function jimpNodes() {
         );
     newBlankImage.title = 'New Image';
     newBlankImage.documentation = 'Generates a new image from parameters.';
+    newBlankImage.tags = [
+        'image',
+        'jimp',
+        'generator',
+        'creation',
+        'blank',
+        'canvas',
+        'new',
+        'color',
+        'solid',
+        'background',
+        'dimensions',
+        'graphics'
+    ]
 
     await newBlankImage.newInputSocket('color', {
         label: 'Color',
@@ -54,6 +68,20 @@ export async function jimpNodes() {
         );
     resize.title = 'Resize Image';
     resize.documentation = 'Resizes a Jimp Image';
+    resize.tags = [
+        'image',
+        'jimp',
+        'resize',
+        'scale',
+        'dimensions',
+        'transform',
+        'width',
+        'height',
+        'processing',
+        'optimization',
+        'graphics',
+        'modification'
+    ]
 
     await resize.newInputSocket('image', {
         label: 'Image (JIMP)',

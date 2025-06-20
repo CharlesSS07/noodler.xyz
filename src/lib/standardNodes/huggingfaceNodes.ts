@@ -18,6 +18,20 @@ export async function huggingfaceNodes() {
         await nodeBluePrintController.initOfficialNodeBluePrint('promptdesign');
     llm.title = 'Large Language Model (Huggingface)';
     llm.documentation = 'Return output of LLM.';
+    llm.tags = [
+        'ai',
+        'llm',
+        'huggingface',
+        'text',
+        'generation',
+        'language-model',
+        'remote',
+        'completion',
+        'nlp',
+        'gpt',
+        'transformer',
+        'chat'
+    ]
 
     await llm.newInputSocket('hf_token', {
         label: 'Huggingface Login',
@@ -104,6 +118,20 @@ outputs.set('output_text_no_prompt', output.generated_text);
         );
     text_to_image.title = 'Text to Image (Huggingface)';
     text_to_image.documentation = 'Generates Image Given Text';
+    text_to_image.tags = [
+        'ai',
+        'image',
+        'text',
+        'huggingface',
+        'generation',
+        'diffusion',
+        'flux',
+        'remote',
+        'creative',
+        'artistic',
+        'stable-diffusion',
+        'prompt'
+    ]
 
     await text_to_image.newInputSocket('hf_token', {
         label: 'Huggingface Login',

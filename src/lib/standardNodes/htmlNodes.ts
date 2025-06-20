@@ -14,6 +14,20 @@ export async function htmlNodes() {
         await nodeBluePrintController.initOfficialNodeBluePrint('html_viewer');
     htmlViewer.title = 'Render HTML';
     htmlViewer.documentation = 'Display HTML from text.';
+    htmlViewer.tags = [
+        'html',
+        'web',
+        'render',
+        'display',
+        'viewer',
+        'markup',
+        'dom',
+        'frontend',
+        'browser',
+        'ui',
+        'presentation',
+        'visual'
+    ]
 
     await htmlViewer.newInputSocket('html', {
         label: 'HTML',
@@ -31,6 +45,20 @@ export async function htmlNodes() {
     htmlElement.title = 'HTML Elementify';
     htmlElement.documentation =
         'Wrap text in html element tags and unpack args into html tags.';
+    htmlElement.tags = [
+        'html',
+        'web',
+        'element',
+        'tag',
+        'wrapper',
+        'markup',
+        'dom',
+        'generator',
+        'builder',
+        'templating',
+        'structure',
+        'attributes'
+    ]
 
     await htmlElement.newInputSocket('tag', {
         label: 'Tag',
@@ -87,6 +115,21 @@ outputs.set('html', d);
     fetchURL.title = 'Fetch URL';
     fetchURL.documentation =
         'Fetches content from a given URL and returns it as plain text.';
+    fetchURL.tags = [
+        'web',
+        'http',
+        'fetch',
+        'url',
+        'remote',
+        'network',
+        'api',
+        'request',
+        'download',
+        'scraping',
+        'content',
+        'internet',
+        'external'
+    ]
 
     await fetchURL.newInputSocket('url', {
         label: 'URL',

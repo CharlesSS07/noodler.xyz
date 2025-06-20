@@ -16,6 +16,20 @@ export async function fileNodes() {
     loadCSV.title = 'CSV Loader';
     loadCSV.documentation =
         'Reads a CSV file and returns its raw content as plain text.';
+    loadCSV.tags = [
+        'file',
+        'csv',
+        'data',
+        'loader',
+        'import',
+        'spreadsheet',
+        'tabular',
+        'comma-separated',
+        'parser',
+        'text',
+        'database',
+        'excel'
+    ]
 
     await loadCSV.newInputSocket('file', {
         label: 'CSV File',
@@ -38,6 +52,20 @@ export async function fileNodes() {
     loadTSV.title = 'TSV Loader';
     loadTSV.documentation =
         'Reads a TSV (Tab-Separated Values) file and returns its raw content as plain text.';
+    loadTSV.tags = [
+        'file',
+        'tsv',
+        'data',
+        'loader',
+        'import',
+        'spreadsheet',
+        'tabular',
+        'tab-separated',
+        'parser',
+        'text',
+        'database',
+        'delimited'
+    ]
 
     await loadTSV.newInputSocket('file', {
         label: 'TSV File',

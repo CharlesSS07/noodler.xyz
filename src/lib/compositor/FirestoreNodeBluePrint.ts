@@ -36,9 +36,12 @@ export interface FirestoreNodeBluePrintModel {
     input_socket_order: Array<SocketID>;
     output_sockets: Record<string, OutputSocketModel>;
     output_socket_order: Array<string>;
+    input_spec_strict: boolean;
 
     trust_level: string;
     official_note: string;
+    searchable: boolean;
+    tags: string[];
 }
 
 export const DEFAULT_FIRESTORE_NODE_BLUEPRINT_MODEL = {
@@ -56,9 +59,12 @@ export const DEFAULT_FIRESTORE_NODE_BLUEPRINT_MODEL = {
     input_socket_order: [],
     output_sockets: {},
     output_socket_order: [],
+    input_spec_strict: true,
 
     trust_level: 'Uninitialized',
     official_note: 'This node was not set up properly.',
+    searchable: true,
+    tags: []
 } as FirestoreNodeBluePrintModel;
 
 const NODE_BLUEPRINTS_REF = collection(firestore, 'nodes');
@@ -195,6 +201,7 @@ export class NodeBluePrintInFirestore extends NodeBluePrint {
             input_socket_order: data.input_socket_order || [],
             output_sockets: data.output_sockets || {},
             output_socket_order: data.output_socket_order || [],
+            input_spec_strict: true,
             author_uid: data.author_uid || '',
             created_at: data.created_at?.toDate() || new Date(),
             predecessor_nid: data.predecessor_nid || 'root',
@@ -202,6 +209,8 @@ export class NodeBluePrintInFirestore extends NodeBluePrint {
             trust_level: data.trust_level || 'New',
             official_note: data.official_note || '',
             last_updated_at: data.last_updated_at?.toDate() || new Date(),
+            searchable: true,
+            tags: data.tags || [],
         };
     }
 
@@ -400,5 +409,38 @@ export class NodeBluePrintInFirestore extends NodeBluePrint {
         this.current.is_frozen = true;
         this.current.last_updated_at = new Date();
         await setDoc(this.getDoc(), this.current);
+    }
+
+    isSearchable(): void {
+        this.current.searchable = true;
+        this.update();
+    }
+
+    notSearchable(): void {
+        this.current.searchable = false;
+        this.update();
+    }
+
+    get searchable(): boolean {
+        return this.current.searchable;
+    }
+
+    get tags(): string[] {
+        return this.current.tags;
+    }
+
+    set tags(tags: string[]) {
+        this.current.tags = tags;
+        this.update();
+    }
+
+    get input_spec_strict(): boolean {
+        return this.current.input_spec_strict;
+    }
+
+    set input_spec_strict(value: boolean) {
+        this.assertNotFrozen();
+        this.current.input_spec_strict = value;
+        this.update();
     }
 }
