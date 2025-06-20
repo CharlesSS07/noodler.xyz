@@ -179,7 +179,7 @@ const imageOrFileOrString = inputs.imageOrFileOrString;
 if (typeof imageOrFileOrString === 'string') {
     // assume this is a base64 string
     const buffer = Buffer.from(imageOrFileOrString, 'base64');
-    outputs.set('image', await utils.Jimp.read(arrayBuffer));
+    outputs.set('image', await utils.Jimp.read(buffer));
 } else if (imageOrFileOrString instanceof File) {
     const arrayBuffer = await imageOrFileOrString.arrayBuffer();
     outputs.set('image', await utils.Jimp.read(arrayBuffer));
