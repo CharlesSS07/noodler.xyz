@@ -145,32 +145,33 @@ outputs.set('html', d);
     });
 
     fetchURL.code = `
-  try {
-    const url = inputs.url;
-    if (!url) {
-      throw new Error('URL is required');
-    }
-    
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(\`HTTP error! status: \${response.status}\`);
-    }
-    
-    // Check if the response is an image
-    const contentType = response.headers.get('content-type') || '';
-    if (contentType.startsWith('image/')) {
-      // For images, return as base64
-      const arrayBuffer = await response.arrayBuffer();
-      const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
-      outputs.set('text', base64);
-    } else {
-      // For other content, return as text
-      const text = await response.text();
-      outputs.set('text', text);
-    }
-  } catch (error) {
-    console.error('Fetch error:', error);
-    outputs.set('text', \`Error fetching URL: \${error.message}\`);
-  }
+const url = inputs.url;
+if (!url) {
+  throw new Error('URL is required');
+}
+
+const response = await fetch(url);
+if (!response.ok) {
+  throw new Error(\`HTTP error! status: \${response.status}\`);
+}
+
+// Check if the response is an image
+const contentType = response.headers.get('content-type') || '';
+if (contentType.startsWith('image/')) {
+    // For images, return as base64
+    const arrayBuffer = await response.arrayBuffer();
+    const blob = new Blob([arrayBuffer]);
+    const base64 = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result?.toString().split(',')[1] ?? '');
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+    outputs.set('text', base64);
+} else {
+    // For other content, return as text
+    const text = await response.text();
+    outputs.set('text', text);
+}
 `;
 }

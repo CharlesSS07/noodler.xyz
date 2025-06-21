@@ -6,7 +6,6 @@
         {
             input: {
                 template: string; // The user-defined template string
-                fillins: Record<string, string>
             },
             nid?: string; // Should be set to 'template' when using official blueprint
         },
@@ -33,16 +32,12 @@
 
     // initialize data if defaults not given
     if (data.input === undefined) {
-        data.input = {template: "", fillins: {}};
+        data.input = {template: ""};
     }
     if (data.input.template === undefined) {
         data.input.template = "";
     }
-    if (data.input.fillins === undefined) {
-        data.input.fillins = {'x': 'y'};
-    }
     console.log('data.input', data.input);
-
 
     // State for template handling
     let isEditing: boolean = $state(false);
@@ -113,35 +108,35 @@
         }
     });
 
-    const inputConnections = useNodeConnections({id, handleType: 'target'});
-    let hasInputConnection = $derived(inputConnections.current.length > 0);
+    // const inputConnections = useNodeConnections({id, handleType: 'target'});
+    // let hasInputConnection = $derived(inputConnections.current.length > 0);
 
-    $effect(() => {
-        if (hasInputConnection) {
-            inputConnections.current.forEach((conn) => {
-
-                untrack(() => {
-                    if (conn.sourceHandle) {
-                        const unsubscribeSocket = projectOutputDataCache.useSocketStore(
-                            conn.source,
-                            conn.sourceHandle
-                        ).subscribe((socketData) => {
-                            console.log('output socket data updated:', socketData, id)
-                            if (conn.targetHandle) {
-                                console.log(data.input, conn.targetHandle);
-                                const newFillin: Record<string, string> = {};
-                                newFillin[conn.targetHandle] = socketData as string;
-                                data.input.fillins = {...data.input.fillins, ...newFillin};
-                                projectActions.updateNodeData(id, {input: data.input});
-                            }
-                        });
-                        return unsubscribeSocket;
-                    }
-                });
-
-            });
-        }
-    });
+    // $effect(() => {
+    //     if (hasInputConnection) {
+    //         inputConnections.current.forEach((conn) => {
+    //
+    //             untrack(() => {
+    //                 if (conn.sourceHandle) {
+    //                     const unsubscribeSocket = projectOutputDataCache.useSocketStore(
+    //                         conn.source,
+    //                         conn.sourceHandle
+    //                     ).subscribe((socketData) => {
+    //                         console.log('output socket data updated:', socketData, id)
+    //                         if (conn.targetHandle) {
+    //                             console.log(data.input, conn.targetHandle);
+    //                             const newFillin: Record<string, string> = {};
+    //                             newFillin[conn.targetHandle] = socketData as string;
+    //                             data.input.fillins = {...data.input.fillins, ...newFillin};
+    //                             projectActions.updateNodeData(id, {input: data.input});
+    //                         }
+    //                     });
+    //                     return unsubscribeSocket;
+    //                 }
+    //             });
+    //
+    //         });
+    //     }
+    // });
 
     // Highlight variables in display text
     function highlightVariables(text: string): string {

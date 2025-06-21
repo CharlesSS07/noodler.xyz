@@ -95,9 +95,12 @@ export class FirestoreNodeBluePrintControllerFactoryInterface
             input_socket_order: [],
             output_sockets: {},
             output_socket_order: [],
+            input_spec_strict: true,
 
             trust_level: 'Official',
             official_note: '',
+            searchable: true,
+            tags: ['official']
         });
 
         return await this.getNodeBluePrintFromNID(nid);
@@ -124,9 +127,12 @@ export class FirestoreNodeBluePrintControllerFactoryInterface
             input_socket_order: [],
             output_sockets: {},
             output_socket_order: [],
+            input_spec_strict: true,
 
             trust_level: 'New',
             official_note: '',
+            searchable: true,
+            tags: []
         });
 
         return await this.getNodeBluePrintFromNID(nid);
@@ -201,14 +207,17 @@ export class NodeBluePrintInFirestore extends NodeBluePrint {
             input_socket_order: data.input_socket_order || [],
             output_sockets: data.output_sockets || {},
             output_socket_order: data.output_socket_order || [],
-            input_spec_strict: true,
+            input_spec_strict: data.input_spec_strict,
+
             author_uid: data.author_uid || '',
             created_at: data.created_at?.toDate() || new Date(),
             predecessor_nid: data.predecessor_nid || 'root',
             is_frozen: data.is_frozen as boolean,
+
             trust_level: data.trust_level || 'New',
             official_note: data.official_note || '',
             last_updated_at: data.last_updated_at?.toDate() || new Date(),
+
             searchable: true,
             tags: data.tags || [],
         };
@@ -383,7 +392,7 @@ export class NodeBluePrintInFirestore extends NodeBluePrint {
             );
         } catch (error) {
             console.error(`Error executing node ${this.nid}:`, error);
-            throw new Error(`Node execution failed: ${error}`);
+            throw new Error(`Error during execution of ${this.nid}: ${error}`);
         }
     }
 

@@ -776,4 +776,78 @@ export async function aiInferenceNodes() {
         outputs.set('coordinates', result.coordinates);
     `;
 
+    // AI IMAGE EDITOR NODE
+    const imageEditor = await factory.initOfficialNodeBluePrint('ai_image_editor');
+    imageEditor.title = 'AI Image Editor';
+    imageEditor.documentation = 'Applies AI-guided modifications to images based on text instructions.';
+    imageEditor.tags = [
+        'ai',
+        'image',
+        'text',
+        'remote',
+        'editing'
+    ]
+
+    imageEditor.newInputSocket('image', {
+        label: 'Source Image',
+        documentation: 'Original image to be modified.',
+        type: STANDARD_DATATYPES.IMAGE_JIMP,
+        params: new JIMPImageSocketParamsBuilder().build(),
+    });
+
+    imageEditor.newInputSocket('instructions', {
+        label: 'Edit Instructions',
+        documentation: 'Text describing how to modify the image (e.g., "make it darker", "add sunglasses", "change to winter scene").',
+        type: STANDARD_DATATYPES.STRING,
+        params: new StringSocketParamsBuilder('Make the image brighter and more colorful')
+            .asParagraph()
+            .build(),
+    });
+
+    imageEditor.newInputSocket('model', {
+        label: 'Model',
+        documentation: 'AI model for image editing (e.g., instruct-pix2pix models).',
+        type: STANDARD_DATATYPES.STRING,
+        params: new StringSocketParamsBuilder('timbrooks/instruct-pix2pix').build(),
+    });
+
+    imageEditor.newInputSocket('guidance_scale', {
+        label: 'Guidance Scale',
+        documentation: 'How closely to follow the edit instructions (higher = more adherent).',
+        type: STANDARD_DATATYPES.NUMBER,
+        params: new NumberSocketParamsBuilder(7.5)
+            .setMin(1)
+            .setMax(20)
+            .setStep(0.5)
+            .build(),
+    });
+
+    imageEditor.newInputSocket('image_guidance_scale', {
+        label: 'Image Guidance Scale',
+        documentation: 'How closely to preserve the original image structure.',
+        type: STANDARD_DATATYPES.NUMBER,
+        params: new NumberSocketParamsBuilder(1.5)
+            .setMin(1)
+            .setMax(10)
+            .setStep(0.1)
+            .build(),
+    });
+
+    imageEditor.newInputSocket('num_inference_steps', {
+        label: 'Inference Steps',
+        documentation: 'Number of denoising steps (higher = better quality, slower).',
+        type: STANDARD_DATATYPES.NUMBER,
+        params: new NumberSocketParamsBuilder(20).setMin(1).setMax(100).build(),
+    });
+
+    imageEditor.newOutputSocket('edited_image', {
+        label: 'Edited Image',
+        documentation: 'The AI-modified image based on the text instructions.',
+        type: STANDARD_DATATYPES.IMAGE_JIMP,
+    });
+
+    imageEditor.code = `
+        throw new Error('AI Image Editor node is not yet implemented. This node would use image-to-image models like InstructPix2Pix to apply text-based modifications to images.');
+    `;
+
 }

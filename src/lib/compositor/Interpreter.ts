@@ -39,7 +39,7 @@ export class OutputSocketAsyncReturner {
         }
     }
 
-    async error(error: unknown) {
+    async errorMessage(error: string) {
         this.dataCache.cache(this.node_id, '__error__', error);
     }
 }
@@ -129,6 +129,8 @@ export async function executeFlowGraph(
                 );
             }
 
+            console.log('nodeBlueprint.outputSocketKeys()', nodeBlueprint.outputSocketKeys())
+
             // Create output returner
             const outputSocketIds = new Set(nodeBlueprint.outputSocketKeys());
             // set up return data & error handling
@@ -147,20 +149,23 @@ export async function executeFlowGraph(
                     projectOutputDataCache
                 );
 
-                // Check that input data and node blueprint spec inputs align
-                const inputDataSocketKeys = new Set(Object.keys(inputData));
-                const inputSocketKeysSpec = new Set(
-                    nodeBlueprint.inputSocketKeys
-                );
+                console.log('nodeBlueprint', nodeBlueprint);
 
                 if (nodeBlueprint.input_spec_strict) {
+
+                    // Check that input data and node blueprint spec inputs align
+                    const inputDataSocketKeys = new Set(Object.keys(inputData));
+                    const inputSocketKeysSpec = new Set(
+                        nodeBlueprint.inputSocketKeys
+                    );
+
                     // Check for extra socket keys (inputDataSocketKeys - inputSocketKeysSpec)
                     const extraKeys = Array.from(inputDataSocketKeys).filter(
                         (key) => !inputSocketKeysSpec.has(key)
                     );
                     if (extraKeys.length > 0) {
                         throw new Error(
-                            `Extra socket keys supplied to input of node ${nodeId}: ${extraKeys.join(',')}`
+                            `Extra socket keys supplied to input of node ${nodeId}: ${extraKeys.join(',')}. Received: ${Array.from(inputDataSocketKeys).join('.')}`
                         );
                     }
 
@@ -177,13 +182,14 @@ export async function executeFlowGraph(
                 }
 
                 console.log(`Calling node ${nodeId} of nid ${nodeBlueprint.nid} with args:`);
-                console.log(inputData)
+                console.log(inputData);
 
                 // Execute the node
                 await nodeBlueprint.call(inputData, outputReturner).then(() => {
                     console.log(
                         `Successfully resolved output socket for node ${nodeId}, with data:`, outputReturner
                     );
+                    outputReturner.errorMessage(''); // clear error
                 }).catch((err) => {
                     console.error(`Node execution ${nodeId} failed with error:`);
                     throw err;
@@ -204,8 +210,15 @@ export async function executeFlowGraph(
                 // Execute ready nodes concurrently
                 await Promise.all(readyNodes.map(executeNode));
             } catch (error) {
-                console.error('Error in pre or post node execution');
-                outputReturner.error(error);
+                console.error('Error in pre or post node execution:');
+                console.error(error);
+                if (error instanceof Error) {
+                    outputReturner.errorMessage(`While executing ${nodeBlueprint.nid} id=${nodeId}:\n${error.message}`);
+                } else {
+                    outputReturner.errorMessage(`While executing ${nodeBlueprint.nid} id=${nodeId}:`+error); // !!! convert to string first!
+                    // error objects are some stupid fucking shit that can't be uploaded to firebase rtdb
+                    // wasted my whole fucking day figuring out Error objects cannot be serialized by JSON.stringify
+                }
                 throw error;
             }
         } catch (error) {

@@ -27,7 +27,7 @@
     import Logo from "../../components/Logo.svelte";
     import NodeSearch from "./NodeSearch.svelte";
     import BugReportButton from "../../components/BugReportButton.svelte";
-    import { Plus, Play, X, ChevronDown } from "lucide-svelte";
+    import { Plus, Play, X, ChevronDown, Download, RotateCcw } from "lucide-svelte";
     import { projectState, projectActions, projectSync } from "$lib/stores/ProjectState";
     import { executeFlowGraph } from "$lib/compositor/Interpreter";
     
@@ -103,7 +103,6 @@
     // Add default intro node when appropriate
     $effect(() => {
         if (isInitialized && hasLoadedFromFirebase && nodes.length === 0) {
-            const introNodeId = 'defaultIntroNodeId';
             addNode({
                 type: 'note',
                 data: {
@@ -122,7 +121,174 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
 5. FlowAI for developing flows`
                 },
                 position: {x: 0, y: 100}
-            }, introNodeId);
+            }, 'default-intro-node');
+
+            // Add demo image processing flow
+            // Comment node for the main flow
+            addNode({
+                type: 'note',
+                data: {
+                    markdown: `## Image Processing Demo Flow
+This demonstrates a comprehensive image processing pipeline:
+1. Fetch image from URL
+2. Load as JIMP for processing  
+3. Apply dual AI-based editing (two different AI passes)
+4. Additional HSV color adjustments
+5. View results in multiple ImageNode viewers`
+                },
+                position: {x: 600, y: 50}
+            }, 'default-flow-comment-main');
+
+            // Fetch URL node
+            addNode({
+                type: 'node',
+                data: {
+                    nid: 'fetch_url',
+                    input: {
+                        url: 'https://picsum.photos/400/300'
+                    },
+                    title: 'Fetch Image URL'
+                },
+                position: {x: 600, y: 200}
+            }, 'default-fetch-url-node');
+
+            // Image loader (handles base64 to JIMP conversion)
+            addNode({
+                type: 'image',
+                data: {
+                    nid: 'image_loader',
+                    input: {},
+                    title: 'Load as JIMP'
+                },
+                position: {x: 800, y: 200}
+            }, 'default-image-loader-node');
+
+            // AI Image Editor
+            addNode({
+                type: 'note',
+                data: {
+                    markdown: `**AI Image Editor (First Pass)**
+Demonstrates initial AI-based image editing with vibrant color enhancement`
+                },
+                position: {x: 1000, y: 150}
+            }, 'default-ai-editor-comment');
+
+            addNode({
+                type: 'node',
+                data: {
+                    nid: 'ai_image_editor',
+                    input: {
+                        instruction: 'Make the image more vibrant and colorful'
+                    },
+                    title: 'AI Image Editor'
+                },
+                position: {x: 1000, y: 200}
+            }, 'default-ai-image-editor-node');
+
+            // Image viewer
+            addNode({
+                type: 'image',
+                data: {
+                    nid: 'image_loader',
+                    input: {},
+                    title: 'Image Viewer'
+                },
+                position: {x: 1200, y: 200}
+            }, 'default-image-viewer-node');
+
+            // Secondary branch comment
+            addNode({
+                type: 'note',
+                data: {
+                    markdown: `## Secondary Processing Branch
+Demonstrates cascading AI image editing: AI Editor → Second AI Pass → HSV Color Adjustment`
+                },
+                position: {x: 1000, y: 350}
+            }, 'default-flow-comment-secondary');
+
+            // Second AI Image Editor
+            addNode({
+                type: 'node',
+                data: {
+                    nid: 'ai_image_editor',
+                    input: {
+                        instruction: 'Add artistic effects and enhance details'
+                    },
+                    title: 'AI Editor (2nd Pass)'
+                },
+                position: {x: 1000, y: 400}
+            }, 'default-ai-image-editor-2-node');
+
+            // HSV Shift filter
+            addNode({
+                type: 'node',
+                data: {
+                    nid: 'hsv',
+                    input: {
+                        hue: 30,
+                        saturation: 1.2,
+                        value: 1.1
+                    },
+                    title: 'HSV Color Shift'
+                },
+                position: {x: 1200, y: 400}
+            }, 'default-hsv-shift-node');
+
+            // Final image viewer for secondary branch
+            addNode({
+                type: 'image',
+                data: {
+                    nid: 'image_loader',
+                    input: {},
+                    title: 'Final Result'
+                },
+                position: {x: 1400, y: 400}
+            }, 'default-final-image-viewer-node');
+
+            // Add connections between nodes
+            // Main flow connections
+            // addEdge({
+            //     source: 'fetch-url-node',
+            //     sourceHandle: 'content-output',
+            //     target: 'image-loader-node',
+            //     targetHandle: 'src-input'
+            // });
+            //
+            // addEdge({
+            //     source: 'image-loader-node',
+            //     sourceHandle: 'image-output',
+            //     target: 'ai-image-editor-node',
+            //     targetHandle: 'image-input'
+            // });
+            //
+            // addEdge({
+            //     source: 'ai-image-editor-node',
+            //     sourceHandle: 'image-output',
+            //     target: 'image-viewer-node',
+            //     targetHandle: 'input'
+            // });
+            //
+            // // Secondary branch connections (from AI editor output)
+            // addEdge({
+            //     source: 'ai-image-editor-node',
+            //     sourceHandle: 'image-output',
+            //     target: 'ai-image-editor-2-node',
+            //     targetHandle: 'image-input'
+            // });
+            //
+            // addEdge({
+            //     source: 'ai-image-editor-2-node',
+            //     sourceHandle: 'image-output',
+            //     target: 'hsv-shift-node',
+            //     targetHandle: 'image-input'
+            // });
+            //
+            // addEdge({
+            //     source: 'hsv-shift-node',
+            //     sourceHandle: 'image-output',
+            //     target: 'final-image-viewer-node',
+            //     targetHandle: 'input'
+            // });
         }
     });
 
@@ -183,6 +349,7 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
 
     // Dropdown state
     let showNodeDropdown = $state(false);
+    let showActionDropdown = $state(false);
 
     // Available node types for dropdown
     const availableNodes = [
@@ -239,7 +406,8 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
             description: 'Renders HTML content in iframe',
             category: 'Display',
             defaultData: {
-                html: ''
+                input: {html: ''},
+                nid: 'html_renderer'
             }
         },
         {
@@ -288,7 +456,8 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
             data: {
                 nid: blueprintId,
                 input: {},
-                title: title
+                title: title,
+                errorMessage: ''
             }
         };
 
@@ -302,19 +471,21 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
             openNodeSearch(event);
         } else if (event.key === 'Escape') {
             showNodeDropdown = false;
+            showActionDropdown = false;
             showNodeSearch = false;
         }
     }
 
     // Handle click outside to close dropdown
     function handleClickOutside(event: MouseEvent): void {
-        if (showNodeDropdown) {
+        if (showNodeDropdown || showActionDropdown) {
             const target = event.target as HTMLElement;
             const dropdownButton = target.closest('.dropdown-btn');
             const dropdownMenu = target.closest('.dropdown-menu');
             
             if (!dropdownButton && !dropdownMenu) {
                 showNodeDropdown = false;
+                showActionDropdown = false;
             }
         }
     }
@@ -394,6 +565,42 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
         });
         return grouped;
     });
+
+    // Graph action functions
+    function downloadGraphState(): void {
+        const graphData = {
+            nodes: nodes,
+            edges: edges,
+            metadata: {
+                exportedAt: new Date().toISOString(),
+                projectId: project_key,
+                title: $projectState.title
+            }
+        };
+        
+        const dataStr = JSON.stringify(graphData, null, 2);
+        const dataBlob = new Blob([dataStr], {type: 'application/json'});
+        
+        const url = URL.createObjectURL(dataBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `graph-${project_key}-${new Date().toISOString().slice(0, 10)}.json`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        
+        showActionDropdown = false;
+    }
+
+    function resetProject(): void {
+        if (confirm('Are you sure you want to reset the project? This will delete all nodes and edges permanently.')) {
+            projectActions.resetProject();
+            nodes = [];
+            edges = [];
+            showActionDropdown = false;
+        }
+    }
 
     // onMount(() => {
     //     auth.authStateReady().then(() => {
@@ -528,6 +735,44 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
                     </button>
                 {/if}
                 -->
+            </div>
+        </Panel>
+
+        <Panel position="bottom-left">
+            <div class="action-panel">
+                <div class="relative">
+                    <button
+                        onclick={() => showActionDropdown = !showActionDropdown}
+                        class="control-btn dropdown-btn action-dropdown-btn"
+                        title="Graph actions"
+                    >
+                        <ChevronDown class="w-4 h-4" />
+                        Actions
+                    </button>
+                    
+                    {#if showActionDropdown}
+                        <div class="dropdown-menu action-dropdown-menu">
+                            <button
+                                onclick={downloadGraphState}
+                                class="dropdown-item action-dropdown-item"
+                                title="Download current graph state as JSON"
+                            >
+                                <Download class="w-4 h-4" />
+                                <span class="action-title">Download Graph State</span>
+                                <span class="action-description">Export nodes and edges as JSON</span>
+                            </button>
+                            <button
+                                onclick={resetProject}
+                                class="dropdown-item action-dropdown-item danger"
+                                title="Reset project and delete all data"
+                            >
+                                <RotateCcw class="w-4 h-4" />
+                                <span class="action-title">Reset Project</span>
+                                <span class="action-description">Delete all nodes and edges</span>
+                            </button>
+                        </div>
+                    {/if}
+                </div>
             </div>
         </Panel>
     </SvelteFlow>
@@ -868,5 +1113,81 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
 
     .relative {
         position: relative;
+    }
+
+    /* Action panel styles */
+    .action-panel {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .action-dropdown-btn {
+        background: #374151;
+        color: white;
+        border-color: #4b5563;
+    }
+
+    .action-dropdown-btn:hover:not(:disabled) {
+        background: #4b5563;
+        border-color: #6b7280;
+    }
+
+    .action-dropdown-menu {
+        position: absolute;
+        top: auto;
+        bottom: calc(100% + 0.5rem);
+        left: 0;
+        min-width: 280px;
+        max-height: 300px;
+        overflow-y: auto;
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        z-index: 1000;
+    }
+
+    .action-dropdown-item {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        text-align: left;
+        background: none;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.15s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .action-dropdown-item:hover {
+        background: #f3f4f6;
+    }
+
+    .action-dropdown-item.danger:hover {
+        background: #fef2f2;
+        color: #dc2626;
+    }
+
+    .action-dropdown-item .action-title {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #374151;
+        margin-bottom: 0.125rem;
+    }
+
+    .action-dropdown-item.danger .action-title {
+        color: inherit;
+    }
+
+    .action-dropdown-item .action-description {
+        font-size: 0.75rem;
+        color: #6b7280;
+        line-height: 1.3;
+    }
+
+    .action-dropdown-item > :global(svg) {
+        flex-shrink: 0;
     }
 </style>

@@ -14,8 +14,9 @@
 </script>
 
 <script lang="ts">
-    import { Handle, Position, type NodeProps, useSvelteFlow } from '@xyflow/svelte';
+    import {Handle, Position, type NodeProps, useSvelteFlow, useNodeConnections} from '@xyflow/svelte';
     import { fetchSocketDataTypeByName } from "$lib/compositor/DataTypes";
+    import {projectOutputDataCache} from "$lib/stores/ProjectState";
 
     let { id, data }: NodeProps<HtmlRendererNodeType> = $props();
     
@@ -125,6 +126,29 @@
             <span class="text-sm">Connect HTML input</span>
         </div>
     `;
+
+
+    const inputConnections = useNodeConnections({id, handleType: 'target'});
+    let hasInputConnection = $derived(inputConnections.current.length > 0);
+
+    $effect(() => {
+        if (hasInputConnection) {
+            // only one way to have an input connection to this node, so 0 index is a-ok
+            const source = inputConnections.current[0].source;
+            const sourceHandle = inputConnections.current[0].sourceHandle;
+            if (sourceHandle) {
+                const unsubscribeSocket = projectOutputDataCache.useSocketStore(
+                    source,
+                    sourceHandle
+                ).subscribe((socketData) => {
+                    console.log('output socket data updated:', socketData, id)
+                    inputHtml = socketData as string;
+                    updateIframeContent(inputHtml);
+                });
+                return unsubscribeSocket;
+            }
+        }
+    });
 </script>
 
 <div class="w-full h-[200px] relative">

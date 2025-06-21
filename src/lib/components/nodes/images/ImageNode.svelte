@@ -15,20 +15,16 @@
 
 <script lang="ts">
     import { Handle, Position, type NodeProps, useSvelteFlow, useNodeConnections } from '@xyflow/svelte';
-    import { Jimp } from "jimp";
     import { fetchSocketDataTypeByName } from "$lib/compositor/DataTypes";
     import { projectOutputDataCache } from "$lib/stores/ProjectState";
     import { untrack } from "svelte";
     import { 
         getBigData, 
-        storeImage, 
-        storeJimpImage, 
-        isBigDataRef, 
-        autoConvertToBigData,
+        storeImage,
+        isBigDataRef,
     } from "$lib/compositor/BigData";
 
     import NodeWrapper from '$lib/components/NodeWrapper.svelte';
-
 
     const { updateNodeData } = useSvelteFlow();
 

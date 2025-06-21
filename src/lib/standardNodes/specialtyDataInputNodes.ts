@@ -115,12 +115,8 @@ export async function specialtyDataInputDataNodes() {
         params: new StringSocketParamsBuilder('').build(),
     });
 
-    textTemplateFillin.newInputSocket('fillins', {
-        label: 'Text',
-        documentation: '',
-        type: 'Record<string, string>',
-        params: new GenericSocketParamsBuilder({}).build(),
-    });
+    textTemplateFillin.input_spec_strict = false;
+    // has dynamic sockets
 
     textTemplateFillin.newOutputSocket('text', {
         label: 'Filled in Template',
@@ -132,10 +128,12 @@ export async function specialtyDataInputDataNodes() {
     textTemplateFillin.code = `
 let filledIn = inputs.template;
 console.log(inputs);
-for (const fillin in inputs.fillins) {
-    filledIn = filledIn.replaceAll('@'+fillin, inputs.fillins[fillin]);
+for (const key in inputs) {
+    if (key !== 'template') {
+        filledIn = filledIn.replaceAll('@'+key, inputs[key]);
+    }
 }
-console.log(filledIn);
+console.log('filledIn', filledIn);
 outputs.set("text", filledIn);
 `;
 
@@ -158,7 +156,6 @@ outputs.set("text", filledIn);
         'reader'
     ]
     imageLoader.notSearchable();
-    imageLoader.input_spec_strict = false;
 
     imageLoader.newInputSocket('imageOrFileOrString', {
         label: 'Upload Image',
@@ -178,7 +175,7 @@ const imageOrFileOrString = inputs.imageOrFileOrString;
 
 if (typeof imageOrFileOrString === 'string') {
     // assume this is a base64 string
-    const buffer = Buffer.from(imageOrFileOrString, 'base64');
+    const buffer = Uint8Array.fromBase64(imageOrFileOrString);
     outputs.set('image', await utils.Jimp.read(buffer));
 } else if (imageOrFileOrString instanceof File) {
     const arrayBuffer = await imageOrFileOrString.arrayBuffer();
@@ -218,18 +215,7 @@ if (typeof imageOrFileOrString === 'string') {
         params: new StringSocketParamsBuilder('').build(),
     });
 
-    htmlRenderer.code = `
-console.log(inputs);
-const file = inputs.image;
-console.log("[image_loader] received file:", typeof file);
-
-const arrayBuffer = await file.arrayBuffer();
-
-// read image using Jimp
-const img = await utils.Jimp.read(arrayBuffer);
-
-outputs.set('image', img);
-`;
+    htmlRenderer.code = `console.log('html rendered', inputs.html)`;
 
 
     const jsNode =
