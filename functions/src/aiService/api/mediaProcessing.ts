@@ -1,4 +1,5 @@
 import * as functions from "firebase-functions";
+import Together from "together-ai";
 import {
   ImageClassificationRequest,
   ObjectDetectionRequest,
@@ -231,38 +232,32 @@ export const textToImage = functions.https.onRequest(async (req, res) => {
     await authenticateRequest(req);
 
     const {inputs, parameters}: TextToImageRequest = req.body;
-    const model = req.body.model || "black-forest-labs/FLUX.1-dev";
+    const model = req.body.model || "black-forest-labs/FLUX.1-kontext-pro";
 
     if (!validateInput(res, !!inputs,
       "Missing inputs field (text prompt)", req)) {
       return;
     }
 
-    const client = getHFClient();
-    const response = await wrapHFResponse(
-      client.textToImage({
-        model,
-        inputs,
-        parameters: {
-          num_inference_steps: 5,
-          ...parameters,
-        },
-      })
-    );
+    const together = new Together();
 
-    // Convert Blob to base64 string for JSON response
-    const blob = response.data as Blob;
-    const buffer = Buffer.from(await blob.arrayBuffer());
-    const base64Image = buffer.toString("base64");
-    const mimeType = blob.type || "image/png";
+    const response = await together.images.create({
+      model,
+      prompt: inputs,
+      steps: parameters?.num_inference_steps || 10,
+      n: parameters?.n || 1,
+      ...(parameters?.width && {width: parameters.width}),
+      ...(parameters?.height && {height: parameters.height}),
+    });
 
     res.status(200).json({
-      image: `data:${mimeType};base64,${base64Image}`,
+      image: `data:image/png;base64,${response.data[0].b64_json}`,
       metadata: {
         model,
         prompt: inputs,
         parameters: {
-          num_inference_steps: 5,
+          steps: parameters?.num_inference_steps || 10,
+          n: parameters?.n || 1,
           ...parameters,
         },
       },

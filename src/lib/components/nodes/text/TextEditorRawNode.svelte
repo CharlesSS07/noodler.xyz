@@ -17,28 +17,13 @@
     import {projectActions, projectOutputDataCache} from "$lib/stores/ProjectState";
     import {untrack} from "svelte";
     import {fetchSocketDataTypeByName, STANDARD_DATATYPES} from "$lib/compositor/DataTypes";
-    import TargetSocket from "$lib/components/sockets/TargetSocket.svelte";
-    import SourceSocket from "$lib/components/sockets/SourceSocket.svelte";
-    import NodeWrapper from "$lib/components/NodeWrapper.svelte";
+    import NodeWrapper from "$lib/components/nodeComponents/NodeWrapper.svelte";
     import {Tooltip} from "flowbite-svelte";
 
     let {id, data, selected}: NodeProps<PlainTextNodeType> = $props();
 
     const inputConnections = useNodeConnections({id, handleType: 'target'});
     let hasInputConnection = $derived(inputConnections.current.length > 0);
-
-    let inputText = $state(data.input.inputText || '');
-    let textarea: HTMLTextAreaElement;
-    $effect(() => {
-        projectActions.updateNodeData(untrack(() => id), {input: {inputText: inputText}});
-    });
-
-    $effect(() => {
-        if (data.input.inputText && textarea) {
-            inputText = data.input.inputText;
-            autoResize(textarea);
-        }
-    })
 
     // Update display value when connection source becomes avaliable
     let displayValue = $state('');
@@ -63,6 +48,19 @@
             }
         }
     });
+
+    let inputText = $state(data.input.inputText || '');
+    let textarea: HTMLTextAreaElement;
+    $effect(() => {
+        projectActions.updateNodeData(untrack(() => id), {input: {inputText: inputText}});
+    });
+
+    $effect(() => {
+        if (data.input.inputText && textarea) {
+            inputText = data.input.inputText;
+            autoResize(textarea);
+        }
+    })
 
     // Auto-resize effect
     $effect(() => {

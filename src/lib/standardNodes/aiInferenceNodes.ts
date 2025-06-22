@@ -847,6 +847,7 @@ export async function aiInferenceNodes() {
     });
 
     imageEditor.code = `
+        outputs.set("edited_image", inputs.image);
         throw new Error('AI Image Editor node is not yet implemented. This node would use image-to-image models like InstructPix2Pix to apply text-based modifications to images.');
     `;
 

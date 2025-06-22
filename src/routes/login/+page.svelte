@@ -1,4 +1,4 @@
-<!-- functions/routes/auth/FlowGraph.svelte -->
+<!-- functions/routes/auth/FlowGraphProject.svelte -->
 <script lang="ts">
 	import { userStore } from 'sveltefire';
 	import {

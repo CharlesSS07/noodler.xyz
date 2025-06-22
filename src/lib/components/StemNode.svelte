@@ -5,7 +5,7 @@
         {
             nid: string;
             input: Record<string, unknown>,
-            errorMessage: string
+            errorMessage: string;
         },
         'node-stem'
     >;
@@ -13,6 +13,7 @@
 
 <script lang="ts">
     import {type NodeProps, useNodeConnections, useSvelteFlow} from "@xyflow/svelte";
+
     let {updateNodeData} = useSvelteFlow();
 
 
@@ -21,12 +22,16 @@
     import type {FirestoreNodeBluePrintModel} from "$lib/compositor/FirestoreNodeBluePrint";
     import StemNodeComponent from "$lib/components/StemNodeComponent.svelte";
     import {untrack} from "svelte";
-    import {projectActions, projectOutputDataCache} from "$lib/stores/ProjectState";
+    import {projectActions} from "$lib/stores/ProjectState";
+    import NodeErrorDisplay from "$lib/components/nodeComponents/NodeErrorDisplay.svelte";
+    import NodeWrapper from "$lib/components/nodeComponents/NodeWrapper.svelte";
 
     let {id, data, selected}: NodeProps<StemNodeType> = $props();
     let nodeBluePrint = docStore<FirestoreNodeBluePrintModel>(firestore, `nodes/${data.nid}`);
 
-    // const connections = useNodeConnections();
+    if (!data.errorMessage)
+        data.errorMessage = '';
+
     const inputConnections = useNodeConnections({id, handleType: 'target'});
 
     let inputSockets = $state([]);
@@ -103,11 +108,11 @@
         const blueprint = $nodeBluePrint;
         if (blueprint?.input_sockets) {
             untrack(() => {
-                if (data.input===undefined) {
+                if (data.input === undefined) {
                     data.input = {};
                 }
                 blueprint.input_socket_order.forEach((socketId) => {
-                    if (data.input[socketId]===undefined) {
+                    if (data.input[socketId] === undefined) {
                         data.input[socketId] = blueprint.input_sockets[socketId].params.default_value;
                     }
                 });
@@ -116,64 +121,38 @@
         }
     });
 
-    // show the error when an error happens on node execution
-    // let error = $state('');
-    let nid = $state(data.nid);
-    let input = $state.raw(data.input || {});
-    let errorMessage = $state(data.errorMessage || '');
 
+    let errorMessage: string = $state('');
     $effect(() => {
-        // nid does not change
-        console.log(`data changed for ${id}`, data);
-        if (data.errorMessage) {
-            errorMessage = data.errorMessage;
+        console.log('errorMessage', errorMessage)
+        if (errorMessage !== undefined && errorMessage !== null) {
+            data.errorMessage = errorMessage;
         }
-        if (data.input) {
-            input = data.input;
-        }
-    });
-
-    $effect(() => {
-        console.log(`error changed for ${id}:`, errorMessage);
-    });
-
-    $effect(() => {
-        const unsubscribeSocket = projectOutputDataCache.useSocketStore(
-            id,
-            '__error__'
-        ).subscribe((socketData) => {
-            untrack(() => {
-                if (socketData) {
-                    console.log('displaying error', "error:"+socketData as string, JSON.stringify(socketData, null, 2), typeof socketData, socketData instanceof Error);
-                    updateNodeData(id, {errorMessage: ''+socketData as string});
-                    // projectActions.updateNodeData(id, {errorMessage: socketData as string});
-                    // data.error = socketData as string;
-                    // projectActions.updateNodeData(id, data);
-                    // projectActions.updateNodeData(id, { errorMessage: socketData as string });
-                    // projectActions.updateNodeData(id, { ...data, errorMessage: socketData as string });
-                }
-            });
-        });
-        return unsubscribeSocket;
-    });
+    })
 
 </script>
 
 {#if $nodeBluePrint}
-    <StemNodeComponent
-            title={$nodeBluePrint.title}
-            inputSockets={inputSockets}
-            bind:inputValues={
-                () => data.input,
-                (newData) => {
-                    // tell firebase to sync
-                    // updateNodeData(id, {input: newData});
-                    projectActions.updateNodeData(id, {...data, input: {...data.input, ...newData}})
+
+    <NodeWrapper
+            label={$nodeBluePrint.title}
+            documentation={$nodeBluePrint.documentation}
+            executionTime={0}
+            isSelected={selected}>
+        <StemNodeComponent
+                inputSockets={inputSockets}
+                bind:inputValues={
+                    () => data.input,
+                    (newData) => {
+                        // tell firebase to sync
+                        // updateNodeData(id, {input: newData});
+                        // projectActions.updateNodeData(id, {...data, input: {...data.input, ...newData}})
+                        data.input = {...data.input, ...newData};
+                    }
                 }
-            }
-            outputSockets={outputSockets}
-            isSelected={selected}
-            tooltip={$nodeBluePrint.documentation}
-            errorMessage={errorMessage}
-    ></StemNodeComponent>
+                outputSockets={outputSockets}
+        ></StemNodeComponent>
+        <NodeErrorDisplay {id} bind:errorMessage={errorMessage}></NodeErrorDisplay>
+
+    </NodeWrapper>
 {/if}

@@ -16,6 +16,19 @@
 
     const demos: Demo[] = [
         {
+            id: 'aiImgEditing',
+            title: 'AI Image Editing',
+            description: 'Procedurally composite images with AI',
+            icon: Image,
+            path: '/app/demos/aiImgEditing',
+            status: 'active',
+            features: [
+                'Multi-stage image transformation',
+                'AI Image Editing Node',
+                'Real-time preview'
+            ]
+        },
+        {
             id: 'promptdesign',
             title: 'Prompt Design Studio',
             description: 'Advanced visual prompt engineering with template composition, variable replacement, and LLM text transformation nodes.',
@@ -36,7 +49,7 @@
             description: 'Create stunning composite images by combining prompt engineering, image loading, and advanced diffusion-based modifications.',
             icon: Image,
             path: '/app/demos/imagegen',
-            status: 'beta',
+            status: 'coming-soon',
             features: [
                 'Multi-modal prompt composition',
                 'Image-to-image transformations',
@@ -51,7 +64,7 @@
             description: 'Complete webpage composition with AI-generated content, HTML components, and professional layouts.',
             icon: Globe,
             path: '/app/demos/webdev',
-            status: 'active',
+            status: 'coming-soon',
             features: [
                 'AI content generation',
                 'Modular HTML components',

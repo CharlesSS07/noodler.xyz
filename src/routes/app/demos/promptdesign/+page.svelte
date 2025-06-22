@@ -8,7 +8,7 @@
         MiniMap,
         type Node, Position,
         SvelteFlow,
-        useSvelteFlow
+        useSvelteFlow, useUpdateNodeInternals
     } from "@xyflow/svelte";
     import '@xyflow/svelte/dist/style.css';
     import NoteNode from "$lib/components/nodes/NoteNode.svelte";
@@ -27,10 +27,12 @@
     import { Play, RefreshCw, Download, ArrowLeft } from "lucide-svelte";
     import { Panel } from "@xyflow/svelte";
     import StemNode from "$lib/components/StemNode.svelte";
+    import TextEditorMarkdownNode from "$lib/components/nodes/text/TextEditorMarkdownNode.svelte";
+    import TextEditorRawNode from "$lib/components/nodes/text/TextEditorRawNode.svelte";
 
     let nodes = $state.raw<Node[]>(nodesVersion2);
 
-    let edges = $state.raw<Edge[]>([]);
+    let edges = $state.raw<Edge[]>([]);  // Start with empty edges
 
     const nodeTypes = {
         note: NoteNode,
@@ -38,7 +40,8 @@
         image: ImageNode,
         html: HTMLRendererNode,
         textTemplate: TextTemplateFillinNode,
-        textEditor: TextEditorNode,
+        textEditor: TextEditorRawNode,
+        markdownTextEditor: TextEditorMarkdownNode,
         textTransformLLM: MagicTextTransformLLM
     };
 
@@ -126,21 +129,27 @@
         // is often sufficient to let the initial render pass.
         // The on:init event is a good place to start, but the actual dimensions might not be set immediately.
         // Let's rely on a slightly delayed layout after init.
+        const updateNodeInternals = useUpdateNodeInternals();
+
+        updateNodeInternals();
+
         setTimeout(() => {
             handleFlowInit();
-        }, 200);
+            nodes.forEach(node => {
+                updateNodeInternals(node.id);
+            })
+        }, 200);  // Give more time for initial render
     });
+
 
 
     function handleFlowInit() {
         console.log('SvelteFlow has initialized!');
-        // After SvelteFlow initializes, we can attempt to get node dimensions.
-        // However, for this to work correctly, your custom Svelte nodes (`NoteNode`, `StemNode`, etc.)
-        // would need to expose their rendered `width` and `height` properties in a way that SvelteFlow
-        // can capture or that you can query from the DOM.
-        // Since we've hardcoded dimensions in the `nodes` array for this example,
-        // we can directly proceed with the layout.
-        edges = edgesVersion2;
+        // Delay edge loading to allow StemNode sockets to load from Firestore
+        setTimeout(() => {
+            console.log('Loading edges after StemNode socket initialization delay...');
+            edges = edgesVersion2;
+        }, 200);
         // onLayout('RIGHT');
     }
 
@@ -171,7 +180,7 @@
 </script>
 <div style="height: 100vh;">
 <!--    <button on:click={() => {console.log(nodes, edges);}}>Print Node State</button>-->
-    <SvelteFlow bind:nodes bind:edges {nodeTypes} {colorMode} fitView bind:this={svelteFlowInstance}>
+    <SvelteFlow bind:nodes bind:edges {nodeTypes} {colorMode} fitView bind:this={svelteFlowInstance} oninit={handleFlowInit}>
         <Controls/>
         <Background variant={BackgroundVariant.Dots}/>
         <MiniMap/>
@@ -243,15 +252,6 @@
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         backdrop-filter: blur(10px);
         border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    .email-signup-container {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        z-index: 1000;
-        transform: scale(0.8);
-        transform-origin: bottom right;
     }
 
     .header-content {
@@ -345,47 +345,18 @@
         background: rgba(220, 38, 38, 0.9);
     }
 
-    .export-btn {
-        background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-        color: white;
-    }
-
-    .export-btn:hover:not(:disabled) {
-        background: linear-gradient(135deg, #7c3aed, #6d28d9);
-    }
-
     :global(.btn-icon) {
         width: 1rem;
         height: 1rem;
     }
 
-    .info-panel {
-        background: rgba(255, 255, 255, 0.95);
-        padding: 1rem;
-        border-radius: 0.5rem;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        max-width: 300px;
-    }
-
-    .info-content h3 {
-        font-size: 1rem;
-        font-weight: 600;
-        color: #1f2937;
-        margin: 0 0 0.75rem 0;
-    }
-
-    .info-content ol {
-        font-size: 0.75rem;
-        color: #4b5563;
-        margin: 0;
-        padding-left: 1.25rem;
-        line-height: 1.5;
-    }
-
-    .info-content li {
-        margin-bottom: 0.25rem;
+    .email-signup-container {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000;
+        transform: scale(0.8);
+        transform-origin: bottom right;
     }
 
     @keyframes pulse {
@@ -400,10 +371,6 @@
         
         .header-content h1 {
             font-size: 1.25rem;
-        }
-        
-        .info-panel {
-            max-width: 250px;
         }
     }
 </style>

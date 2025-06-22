@@ -81,6 +81,7 @@ export const projectActions = {
             // Don't set dirty flag if we're setting the same data (prevents blocking Firebase loads)
             const isSameData =
                 JSON.stringify(state.nodes) === JSON.stringify(nodes);
+            console.log(isSameData, projectSync.isInitialLoadComplete());
             return {
                 ...state,
                 nodes,
@@ -206,7 +207,7 @@ class ProjectFirebaseSync {
     }
 
     // Start syncing a project
-    syncProject(projectId: string): void {
+    syncProject(projectId: string, onProjectSyncedCallback?: () => void): void {
         // Clean up previous listener
         this.cleanup();
 
@@ -256,6 +257,8 @@ class ProjectFirebaseSync {
                 // Mark that we've completed the initial load
                 if (!this.hasInitialLoad) {
                     this.hasInitialLoad = true;
+                    if (onProjectSyncedCallback)
+                        onProjectSyncedCallback();
                 }
             } else {
                 projectState.update((state) => ({
@@ -272,6 +275,8 @@ class ProjectFirebaseSync {
                 // Mark that we've completed the initial load
                 if (!this.hasInitialLoad) {
                     this.hasInitialLoad = true;
+                    if (onProjectSyncedCallback)
+                        onProjectSyncedCallback();
                 }
             }
         });

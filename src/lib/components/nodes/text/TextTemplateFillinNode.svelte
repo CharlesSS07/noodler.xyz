@@ -17,16 +17,13 @@
     import {
         Handle,
         Position,
-        useNodeConnections,
-        useNodesData,
         type NodeProps,
         NodeResizeControl
     } from '@xyflow/svelte';
     import {fetchSocketDataTypeByName, STANDARD_DATATYPES} from '$lib/compositor/DataTypes';
     import {Tooltip} from "flowbite-svelte";
-    import NodeWrapper from "$lib/components/NodeWrapper.svelte";
-    import {projectActions, projectOutputDataCache} from "$lib/stores/ProjectState.js";
-    import {untrack} from "svelte";
+    import NodeWrapper from "$lib/components/nodeComponents/NodeWrapper.svelte";
+    import {projectActions} from "$lib/stores/ProjectState.js";
 
     let {id, data, selected}: NodeProps<TemplateFillinNodeType> = $props();
 
@@ -37,7 +34,6 @@
     if (data.input.template === undefined) {
         data.input.template = "";
     }
-    console.log('data.input', data.input);
 
     // State for template handling
     let isEditing: boolean = $state(false);
@@ -107,36 +103,6 @@
             autoResize(textareaRef);
         }
     });
-
-    // const inputConnections = useNodeConnections({id, handleType: 'target'});
-    // let hasInputConnection = $derived(inputConnections.current.length > 0);
-
-    // $effect(() => {
-    //     if (hasInputConnection) {
-    //         inputConnections.current.forEach((conn) => {
-    //
-    //             untrack(() => {
-    //                 if (conn.sourceHandle) {
-    //                     const unsubscribeSocket = projectOutputDataCache.useSocketStore(
-    //                         conn.source,
-    //                         conn.sourceHandle
-    //                     ).subscribe((socketData) => {
-    //                         console.log('output socket data updated:', socketData, id)
-    //                         if (conn.targetHandle) {
-    //                             console.log(data.input, conn.targetHandle);
-    //                             const newFillin: Record<string, string> = {};
-    //                             newFillin[conn.targetHandle] = socketData as string;
-    //                             data.input.fillins = {...data.input.fillins, ...newFillin};
-    //                             projectActions.updateNodeData(id, {input: data.input});
-    //                         }
-    //                     });
-    //                     return unsubscribeSocket;
-    //                 }
-    //             });
-    //
-    //         });
-    //     }
-    // });
 
     // Highlight variables in display text
     function highlightVariables(text: string): string {

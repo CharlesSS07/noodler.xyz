@@ -13,7 +13,7 @@
 </script>
 
 <script lang="ts">
-    import NodeWrapper from "$lib/components/NodeWrapper.svelte";
+    import NodeWrapper from "$lib/components/nodeComponents/NodeWrapper.svelte";
     import {Handle, type NodeProps, Position, useSvelteFlow} from "@xyflow/svelte";
     import {fetchSocketDataTypeByName} from "$lib/compositor/DataTypes";
 

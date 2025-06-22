@@ -140,7 +140,7 @@ outputs.set('html', d);
 
     await fetchURL.newOutputSocket('text', {
         label: 'Fetched Content',
-        documentation: 'The plain text fetched from the URL.',
+        documentation: 'Plain text fetched from the URL. A blob in base64 format.',
         type: STANDARD_DATATYPES.STRING,
     });
 
@@ -163,7 +163,7 @@ if (contentType.startsWith('image/')) {
     const blob = new Blob([arrayBuffer]);
     const base64 = await new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result?.toString().split(',')[1] ?? '');
+      reader.onloadend = () => resolve(reader.result?.toString() ?? '');
       reader.onerror = reject;
       reader.readAsDataURL(blob);
     });

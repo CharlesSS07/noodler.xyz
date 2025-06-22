@@ -127,13 +127,11 @@ export async function specialtyDataInputDataNodes() {
     // should iterate through the keys of inputs.fillins and replace the keys in the text
     textTemplateFillin.code = `
 let filledIn = inputs.template;
-console.log(inputs);
 for (const key in inputs) {
     if (key !== 'template') {
         filledIn = filledIn.replaceAll('@'+key, inputs[key]);
     }
 }
-console.log('filledIn', filledIn);
 outputs.set("text", filledIn);
 `;
 
@@ -175,8 +173,8 @@ const imageOrFileOrString = inputs.imageOrFileOrString;
 
 if (typeof imageOrFileOrString === 'string') {
     // assume this is a base64 string
-    const buffer = Uint8Array.fromBase64(imageOrFileOrString);
-    outputs.set('image', await utils.Jimp.read(buffer));
+    // const buffer = Uint8Array.fromBase64(imageOrFileOrString);
+    outputs.set('image', await utils.Jimp.read(imageOrFileOrString));
 } else if (imageOrFileOrString instanceof File) {
     const arrayBuffer = await imageOrFileOrString.arrayBuffer();
     outputs.set('image', await utils.Jimp.read(arrayBuffer));

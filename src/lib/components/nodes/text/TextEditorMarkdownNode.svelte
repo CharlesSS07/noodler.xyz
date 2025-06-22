@@ -1,144 +1,170 @@
 <script module lang="ts">
-    import type { Node } from '@xyflow/svelte';
+    import type {Node} from '@xyflow/svelte';
 
     // Official NID for this node: md_text_editor
-    export type PlainTextNodeType = Node<
+    export type MarkdownTextNodeType = Node<
         {
-            currentText: string;
+            input: { text: string };
             nid?: string; // Should be set to 'md_text_editor' when using official blueprint
         },
-        'node-markdown-text'
+        'node-markdown-text-editor'
     >;
 </script>
 
 <script lang="ts">
-    import {
-        Handle,
-        Position,
-        useNodeConnections,
-        useSvelteFlow,
-        type NodeProps
-    } from '@xyflow/svelte';
+    import {Handle, Position, type NodeProps, useNodeConnections} from '@xyflow/svelte';
 
-    import { fetchSocketDataTypeByName } from '$lib/compositor/DataTypes';
-    import { untrack } from 'svelte';
-    import { marked } from 'marked'; // Import marked
+    import {projectActions, projectOutputDataCache} from "$lib/stores/ProjectState";
+    import {untrack} from "svelte";
+    import {fetchSocketDataTypeByName, STANDARD_DATATYPES} from "$lib/compositor/DataTypes";
+    import NodeWrapper from "$lib/components/nodeComponents/NodeWrapper.svelte";
+    import {Tooltip} from "flowbite-svelte";
+    import {marked} from 'marked';
 
-    let { id, data }: NodeProps<PlainTextNodeType> = $props();
+    let {id, data, selected}: NodeProps<MarkdownTextNodeType> = $props();
 
-    const { updateNodeData } = useSvelteFlow();
-    
-    // Set the official NID if not already set
-    if (!data.nid) {
-        updateNodeData(id, { nid: 'md_text_editor' });
-    }
-    const connections = useNodeConnections();
-    let socketStyle = $state('');
+    const inputConnections = useNodeConnections({id, handleType: 'target'});
+    let hasInputConnection = $derived(inputConnections.current.length > 0);
 
-    let isFocused = $state(false); // New state variable
-
-    // Handle style loading
-    fetchSocketDataTypeByName('string').then((datatype) => {
-        socketStyle = datatype?.style || '';
+    // Update display value when connection source becomes available
+    let displayValue = $state('');
+    $effect(() => {
+        if (hasInputConnection) {
+            // only one way to have an input connection to this node, so 0 index is a-ok
+            const source = inputConnections.current[0].source;
+            const sourceHandle = inputConnections.current[0].sourceHandle;
+            if (sourceHandle) {
+                const unsubscribeSocket = projectOutputDataCache.useSocketStore(
+                    source,
+                    sourceHandle
+                ).subscribe((socketData) => {
+                    console.log('output socket data updated:', socketData, id)
+                    if (typeof socketData === 'string')
+                        displayValue = socketData as string;
+                    else
+                        displayValue = '<<OBJECT>>\n' + JSON.stringify(socketData, null, 2);
+                });
+                return unsubscribeSocket;
+            }
+        }
     });
 
-    // Whether the input socket is connected
-    let hasInputConnection = $derived(
-        () => connections.current.some((conn) => conn.target === id && conn.targetHandle === 'input')
-    );
+    let inputText = $state(data.input.text || '');
+    let textarea: HTMLTextAreaElement;
+    let isEditing = $state(false);
 
-    // Handle manual input
-    function handleManualInput(event: Event) {
-        const text = (event.target as HTMLTextAreaElement).value;
-        updateNodeData(id, {
-            currentText: text
-        });
-    }
+    $effect(() => {
+        projectActions.updateNodeData(untrack(() => id), {input: {text: inputText}});
+    });
 
-    // Auto-resizing textarea
+    $effect(() => {
+        if (data.input.text && textarea) {
+            inputText = data.input.text;
+            autoResize(textarea);
+        }
+    })
+
+    // Auto-resize effect for textarea
+    $effect(() => {
+        if (textarea) {
+            autoResize(textarea);
+        }
+    });
+
     function autoResize(textarea: HTMLTextAreaElement) {
+        textarea.style.width = 'auto';
         textarea.style.height = 'auto';
-        textarea.style.height = Math.max(40, textarea.scrollHeight) + 'px';
+        textarea.style.height = textarea.scrollHeight + 'px';
     }
 
-    // let displayValue = $derived(
-    //     if (hasInputConnection()) {
-    //         connections.current[0].
-    //     }
-    // )
+    function startEditing() {
+        if (!hasInputConnection) {
+            isEditing = true;
+        }
+    }
+
+    function stopEditing() {
+        isEditing = false;
+    }
+
 </script>
 
-<div class="w-full h-fit relative">
-    <div
-            class="w-full border-2 border-gray-300 rounded-lg bg-white overflow-hidden"
-            tabindex="0"
-            onclick={() => {
-			if (!hasInputConnection()) {
-				isFocused = true;
-			}
-		}}
-            onfocus={() => {
-			if (!hasInputConnection()) {
-				isFocused = true;
-			}
-		}}
-    >
-        {#if isFocused && !hasInputConnection()}
-			<textarea
-                    value={data.currentText ?? ''}
-                    oninput={(e) => {
-					handleManualInput(e);
-					autoResize(e.target as HTMLTextAreaElement);
-				}}
-                    onblur={() => (isFocused = false)}
-                    class="w-full p-3 border-0 outline-none resize-none font-mono text-sm bg-white"
-                    placeholder="Enter plain text..."
-            ></textarea>
-        {:else}
-            <div
-                    class="w-full p-3 text-sm prose max-w-none"
-                    class:text-gray-700={hasInputConnection()}
-                    class:bg-gray-50={hasInputConnection()}
-                    class:bg-white={!hasInputConnection()}
-                    onclick={() => {
-					if (!hasInputConnection()) {
-						isFocused = true;
-					}
-				}}
-                    onkeypress={() => {
-					if (!hasInputConnection()) {
-						isFocused = true;
-					}
-				}}
-            >
-                {@html marked.parse(hasInputConnection() ? data.input?.text ?? '' : data.currentText ?? '')}
-            </div>
-        {/if}
+<NodeWrapper label="Markdown Text" isSelected={selected}>
+    <div class="relative">
+        <!-- Main content area -->
+        <div class="border-2 border-gray-300 rounded-lg bg-white overflow-hidden">
+            {#if hasInputConnection}
+                <!-- Connected input - show markdown rendered display value -->
+                <div class="w-fit p-3 prose max-w-none text-sm">
+                    {@html marked.parse(displayValue || 'No data supplied by link.')}
+                </div>
+            {:else if isEditing}
+                <!-- Editing mode - show textarea -->
+                <textarea
+                        bind:this={textarea}
+                        value={inputText}
+                        class="w-fit p-3 border-0 outline-none font-mono text-sm resize-none overflow-hidden"
+                        placeholder='Enter markdown text...'
+                        oninput={(e) => {
+                            const value = e.target.value;
+                            inputText = value;
+                            autoResize(e.target);
+                        }}
+                        onblur={stopEditing}
+                        onfocusout={stopEditing}
+                ></textarea>
+            {:else}
+                <!-- Display mode - show rendered markdown -->
+                <div 
+                    class="w-fit p-3 prose max-w-none text-sm cursor-pointer"
+                    onclick={startEditing}
+                    onkeypress={startEditing}
+                >
+                    {@html marked.parse(inputText || 'Click to enter markdown...')}
+                </div>
+            {/if}
+        </div>
+
+        <!-- Input handle -->
+        {#await fetchSocketDataTypeByName(STANDARD_DATATYPES.TEXT)}
+            Loading Target Socket
+        {:then datatype}
+            <Handle
+                    type="target"
+                    position={Position.Left}
+                    id="text"
+                    class="socket-handle"
+                    style="top: 50%;{datatype?.style || ''}"
+            />
+            <Tooltip placement="top">
+                <b>Type ({datatype?.name}):</b> {datatype?.description}
+            </Tooltip>
+        {:catch error}
+            Error; could not load input socket: {JSON.stringify(error, null, 2)}
+        {/await}
+
+        <!-- Output handle -->
+        {#await fetchSocketDataTypeByName(STANDARD_DATATYPES.TEXT)}
+            Loading Source Socket
+        {:then datatype}
+            <Handle
+                    type="source"
+                    position={Position.Right}
+                    id='text'
+                    style="top: 50%;{datatype?.style || ''}"
+                    class="socket-handle"
+            />
+            <Tooltip placement="top">
+                <b>Type ({datatype?.name}):</b> {datatype?.description}
+            </Tooltip>
+        {:catch error}
+            Error; could not load output socket: {JSON.stringify(error, null, 2)}
+        {/await}
+
     </div>
-
-    <Handle
-            type="target"
-            position={Position.Left}
-            style="top:50%;{socketStyle}"
-            id="input"
-            class="socket-handle"
-    />
-
-    <Handle
-            type="source"
-            position={Position.Right}
-            style="top:50%;{socketStyle}"
-            id="output"
-            class="socket-handle"
-    />
-</div>
+</NodeWrapper>
 
 <style>
-    .socket-handle {
-        width: 8px;
-        height: 8px;
-    }
-
     textarea::placeholder {
         color: #9ca3af;
         font-style: italic;

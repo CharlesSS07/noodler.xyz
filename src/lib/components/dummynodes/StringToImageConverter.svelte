@@ -18,7 +18,7 @@
 
 <script lang="ts">
     import { Handle, type NodeProps } from '@xyflow/svelte';
-    import NodeWrapper from "$lib/components/NodeWrapper.svelte";
+    import NodeWrapper from "$lib/components/nodeComponents/NodeWrapper.svelte";
 
     let { id, data }: NodeProps<StringToImageConverterType> = $props();
 

@@ -7,6 +7,7 @@
     export type ImageNodeType = Node<
         {
             input: { imageOrFileOrString: BigDataRef | string | null };
+            errorMessage: string,
             nid?: string; // Should be set to 'image_loader' when using official blueprint
         },
         'node-image'
@@ -24,7 +25,8 @@
         isBigDataRef,
     } from "$lib/compositor/BigData";
 
-    import NodeWrapper from '$lib/components/NodeWrapper.svelte';
+    import NodeWrapper from '$lib/components/nodeComponents/NodeWrapper.svelte';
+    import NodeErrorDisplay from "$lib/components/nodeComponents/NodeErrorDisplay.svelte";
 
     const { updateNodeData } = useSvelteFlow();
 
@@ -83,6 +85,24 @@
         }
     });
 
+    // recieve errors to display
+    $effect(() => {
+        console.log(id);
+        const unsubscribeSocket = projectOutputDataCache.useSocketStore(
+            id,
+            '__error__'
+        ).subscribe((socketData) => {
+            untrack(() => {
+                console.log(socketData)
+                if (socketData) {
+                    // console.log('displaying error', "error:"+socketData as string, JSON.stringify(socketData, null, 2), typeof socketData, socketData instanceof Error);
+                    updateNodeData(id, {errorMessage: ''+socketData as string});
+                }
+            });
+        });
+        return unsubscribeSocket;
+    });
+
     // Handle file selection
     async function handleFileSelect(event: Event) {
         const input = event.target as HTMLInputElement;
@@ -96,16 +116,6 @@
                 const bigDataRef = await storeImage(file);
                 loadedImageData = bigDataRef;
 
-                // // Optionally convert to Jimp for processing
-                // try {
-                //     const arrayBuffer = await file.arrayBuffer();
-                //     const jimp = await Jimp.fromBuffer(arrayBuffer);
-                //     const jimpRef = await storeJimpImage(jimp);
-                //     loadedImageData = jimpRef; // Use Jimp version as the primary data
-                //     console.log('Converted to Jimp and stored as BigData');
-                // } catch (jimpError) {
-                //     console.warn('Failed to convert to Jimp, using file data:', jimpError);
-                // }
             } catch (error) {
                 console.error('Error loading image:', error);
             }
@@ -234,6 +244,8 @@
             />
         {/if}
     </div>
+
+    <NodeErrorDisplay {id} bind:data={data}></NodeErrorDisplay>
 
     <!-- Input handle -->
     <Handle

@@ -1,7 +1,5 @@
 <script lang="ts">
 
-    import TextEditorRawNode from "$lib/components/nodes/text/TextEditorRawNode.svelte";
-
     let {project_key = 'project_key_not_assigned'} = $props<{ project_key?: string }>();
 
     import {
@@ -21,7 +19,6 @@
     import StemNode from '$lib/components/StemNode.svelte';
     import TextTemplateFillinNode from "$lib/components/nodes/text/TextTemplateFillinNode.svelte";
     import ImageNode from "$lib/components/nodes/images/ImageNode.svelte";
-    import TextEditorNode from "$lib/components/nodes/text/TextEditorMarkdownNode.svelte";
     import HTMLRendererNode from "$lib/components/nodes/html/HTMLRendererNode.svelte";
 
     import Logo from "../../components/Logo.svelte";
@@ -33,6 +30,8 @@
     
     // Import the existing nodes
     import CompleteTextLLM from "$lib/components/nodes/huggingface/CompleteTextLLM.svelte";
+    import TextEditorMarkdownNode from "$lib/components/nodes/text/TextEditorMarkdownNode.svelte";
+    import TextEditorRawNode from "$lib/components/nodes/text/TextEditorRawNode.svelte";
 
     let nodes = $state.raw<Node[]>([]);
 
@@ -123,172 +122,6 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
                 position: {x: 0, y: 100}
             }, 'default-intro-node');
 
-            // Add demo image processing flow
-            // Comment node for the main flow
-            addNode({
-                type: 'note',
-                data: {
-                    markdown: `## Image Processing Demo Flow
-This demonstrates a comprehensive image processing pipeline:
-1. Fetch image from URL
-2. Load as JIMP for processing  
-3. Apply dual AI-based editing (two different AI passes)
-4. Additional HSV color adjustments
-5. View results in multiple ImageNode viewers`
-                },
-                position: {x: 600, y: 50}
-            }, 'default-flow-comment-main');
-
-            // Fetch URL node
-            addNode({
-                type: 'node',
-                data: {
-                    nid: 'fetch_url',
-                    input: {
-                        url: 'https://picsum.photos/400/300'
-                    },
-                    title: 'Fetch Image URL'
-                },
-                position: {x: 600, y: 200}
-            }, 'default-fetch-url-node');
-
-            // Image loader (handles base64 to JIMP conversion)
-            addNode({
-                type: 'image',
-                data: {
-                    nid: 'image_loader',
-                    input: {},
-                    title: 'Load as JIMP'
-                },
-                position: {x: 800, y: 200}
-            }, 'default-image-loader-node');
-
-            // AI Image Editor
-            addNode({
-                type: 'note',
-                data: {
-                    markdown: `**AI Image Editor (First Pass)**
-Demonstrates initial AI-based image editing with vibrant color enhancement`
-                },
-                position: {x: 1000, y: 150}
-            }, 'default-ai-editor-comment');
-
-            addNode({
-                type: 'node',
-                data: {
-                    nid: 'ai_image_editor',
-                    input: {
-                        instruction: 'Make the image more vibrant and colorful'
-                    },
-                    title: 'AI Image Editor'
-                },
-                position: {x: 1000, y: 200}
-            }, 'default-ai-image-editor-node');
-
-            // Image viewer
-            addNode({
-                type: 'image',
-                data: {
-                    nid: 'image_loader',
-                    input: {},
-                    title: 'Image Viewer'
-                },
-                position: {x: 1200, y: 200}
-            }, 'default-image-viewer-node');
-
-            // Secondary branch comment
-            addNode({
-                type: 'note',
-                data: {
-                    markdown: `## Secondary Processing Branch
-Demonstrates cascading AI image editing: AI Editor → Second AI Pass → HSV Color Adjustment`
-                },
-                position: {x: 1000, y: 350}
-            }, 'default-flow-comment-secondary');
-
-            // Second AI Image Editor
-            addNode({
-                type: 'node',
-                data: {
-                    nid: 'ai_image_editor',
-                    input: {
-                        instruction: 'Add artistic effects and enhance details'
-                    },
-                    title: 'AI Editor (2nd Pass)'
-                },
-                position: {x: 1000, y: 400}
-            }, 'default-ai-image-editor-2-node');
-
-            // HSV Shift filter
-            addNode({
-                type: 'node',
-                data: {
-                    nid: 'hsv',
-                    input: {
-                        hue: 30,
-                        saturation: 1.2,
-                        value: 1.1
-                    },
-                    title: 'HSV Color Shift'
-                },
-                position: {x: 1200, y: 400}
-            }, 'default-hsv-shift-node');
-
-            // Final image viewer for secondary branch
-            addNode({
-                type: 'image',
-                data: {
-                    nid: 'image_loader',
-                    input: {},
-                    title: 'Final Result'
-                },
-                position: {x: 1400, y: 400}
-            }, 'default-final-image-viewer-node');
-
-            // Add connections between nodes
-            // Main flow connections
-            // addEdge({
-            //     source: 'fetch-url-node',
-            //     sourceHandle: 'content-output',
-            //     target: 'image-loader-node',
-            //     targetHandle: 'src-input'
-            // });
-            //
-            // addEdge({
-            //     source: 'image-loader-node',
-            //     sourceHandle: 'image-output',
-            //     target: 'ai-image-editor-node',
-            //     targetHandle: 'image-input'
-            // });
-            //
-            // addEdge({
-            //     source: 'ai-image-editor-node',
-            //     sourceHandle: 'image-output',
-            //     target: 'image-viewer-node',
-            //     targetHandle: 'input'
-            // });
-            //
-            // // Secondary branch connections (from AI editor output)
-            // addEdge({
-            //     source: 'ai-image-editor-node',
-            //     sourceHandle: 'image-output',
-            //     target: 'ai-image-editor-2-node',
-            //     targetHandle: 'image-input'
-            // });
-            //
-            // addEdge({
-            //     source: 'ai-image-editor-2-node',
-            //     sourceHandle: 'image-output',
-            //     target: 'hsv-shift-node',
-            //     targetHandle: 'image-input'
-            // });
-            //
-            // addEdge({
-            //     source: 'hsv-shift-node',
-            //     sourceHandle: 'image-output',
-            //     target: 'final-image-viewer-node',
-            //     targetHandle: 'input'
-            // });
         }
     });
 
@@ -326,7 +159,8 @@ Demonstrates cascading AI image editing: AI Editor → Second AI Pass → HSV Co
         image: ImageNode,
         html: HTMLRendererNode,
         textTemplate: TextTemplateFillinNode,
-        textEditorMd: TextEditorNode,
+        textEditor: TextEditorRawNode,
+        textEditorMd: TextEditorMarkdownNode,
         textEditorRaw: TextEditorRawNode,
         huggingfaceLLM: CompleteTextLLM,
     };
@@ -343,8 +177,6 @@ Demonstrates cascading AI image editing: AI Editor → Second AI Pass → HSV Co
 
     // Execution state
     let isExecuting = $state(false);
-    let showExecutionPanel = $state(false);
-    let executionLogs = $state<string[]>([]);
     let selectedExecutionNode = $state<string | null>(null);
 
     // Dropdown state
@@ -374,17 +206,17 @@ Demonstrates cascading AI image editing: AI Editor → Second AI Pass → HSV Co
                 nid: 'raw_text_editor'
             }
         },
-        // {
-        //     id: 'textEditor',
-        //     type: 'textEditor',
-        //     title: 'Text Editor',
-        //     description: 'Advanced text editor with formatting',
-        //     category: 'Text',
-        //     defaultData: {
-        //         input: { text: '' },
-        //         nid: 'md_text_editor'
-        //     }
-        // },
+        {
+            id: 'textEditor',
+            type: 'textEditor',
+            title: 'Text Editor',
+            description: 'Advanced text editor with formatting',
+            category: 'Text',
+            defaultData: {
+                input: { text: '' },
+                nid: 'md_text_editor'
+            }
+        },
         {
             id: 'textTemplate',
             type: 'textTemplate',
@@ -442,7 +274,6 @@ Demonstrates cascading AI image editing: AI Editor → Second AI Pass → HSV Co
 
     // Add a node to the flow from blueprint
     async function addNodeFromBlueprint(blueprintId: string, title: string): Promise<void> {
-        console.log(viewport)
         const centerX = (-viewport.x + (typeof window !== 'undefined' ? window.innerWidth : 800) / 2) / viewport.zoom;
         const centerY = (-viewport.y + (typeof window !== 'undefined' ? window.innerHeight : 600) / 2) / viewport.zoom;
 
@@ -495,10 +326,8 @@ Demonstrates cascading AI image editing: AI Editor → Second AI Pass → HSV Co
         if (isExecuting) return;
         
         isExecuting = true;
-        // showExecutionPanel = true; // DISABLED: Don't show execution panel anymore
         selectedExecutionNode = nodeId;
-        // executionLogs = [`Starting execution from node: ${nodeId}`]; // DISABLED: No longer logging
-        
+
         try {
             // NOTE: Console.log capture has been removed since we're not showing the execution panel
             // The execution logger was not particularly helpful and just clogged up the screen.
@@ -527,19 +356,11 @@ Demonstrates cascading AI image editing: AI Editor → Second AI Pass → HSV Co
         }
     }
 
-    function clearExecutionLogs(): void {
-        executionLogs = [];
-        showExecutionPanel = false;
-        selectedExecutionNode = null;
-    }
-
     // Dropdown functions
     function addNodeFromDropdown(nodeConfig: typeof availableNodes[0]): void {
-        console.log(viewport)
         const centerX = (-viewport.x + (typeof window !== 'undefined' ? window.innerWidth : 800) / 2) / viewport.zoom;
         const centerY = (-viewport.y + (typeof window !== 'undefined' ? window.innerHeight : 600) / 2) / viewport.zoom;
 
-        console.log(flowContainer);
         const newNode: Node = {
             id: `${nodeConfig.id}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
             type: nodeConfig.type,
@@ -667,7 +488,7 @@ Demonstrates cascading AI image editing: AI Editor → Second AI Pass → HSV Co
         <Panel position="top-right">
             <div class="controls-panel">
                 <BugReportButton size="md" />
-                
+
                 <button
                     onclick={executeFromSelectedNode}
                     class="control-btn execution-btn"
@@ -678,7 +499,7 @@ Demonstrates cascading AI image editing: AI Editor → Second AI Pass → HSV Co
                     <Play class="w-4 h-4" />
                     {isExecuting ? 'Executing...' : 'Execute'}
                 </button>
-                
+
                 <!-- Node Dropdown -->
                 <div class="relative">
                     <button
@@ -690,7 +511,7 @@ Demonstrates cascading AI image editing: AI Editor → Second AI Pass → HSV Co
                         Node Types
                         <ChevronDown class="w-3 h-3 ml-1" />
                     </button>
-                    
+
                     {#if showNodeDropdown}
                         <div class="dropdown-menu">
                             {#each Object.entries(nodesByCategory()) as [category, nodes]}
@@ -711,7 +532,7 @@ Demonstrates cascading AI image editing: AI Editor → Second AI Pass → HSV Co
                         </div>
                     {/if}
                 </div>
-                
+
                 <button
                     onclick={() => {
                         openNodeSearch();
@@ -722,19 +543,6 @@ Demonstrates cascading AI image editing: AI Editor → Second AI Pass → HSV Co
                     <Plus class="w-4 h-4" />
                     Search Nodes <small>(Tab)</small>
                 </button>
-                
-                <!-- DISABLED: Clear button removed since execution panel is disabled
-                {#if showExecutionPanel}
-                    <button
-                        onclick={clearExecutionLogs}
-                        class="control-btn clear-btn"
-                        title="Clear execution logs"
-                    >
-                        <X class="w-4 h-4" />
-                        Clear
-                    </button>
-                {/if}
-                -->
             </div>
         </Panel>
 
@@ -749,7 +557,7 @@ Demonstrates cascading AI image editing: AI Editor → Second AI Pass → HSV Co
                         <ChevronDown class="w-4 h-4" />
                         Actions
                     </button>
-                    
+
                     {#if showActionDropdown}
                         <div class="dropdown-menu action-dropdown-menu">
                             <button
@@ -775,6 +583,7 @@ Demonstrates cascading AI image editing: AI Editor → Second AI Pass → HSV Co
                 </div>
             </div>
         </Panel>
+
     </SvelteFlow>
 
     <!-- Node Search Modal -->
@@ -785,54 +594,6 @@ Demonstrates cascading AI image editing: AI Editor → Second AI Pass → HSV Co
         position={{x: '50vw', y: '20vw'}}
     />
 
-    <!-- 
-        EXECUTION PANEL DISABLED:
-        The execution console/logger has been removed because it's not particularly helpful 
-        right now and just clogs up the screen with verbose output. The execution still 
-        works fine - we just don't show the logging panel anymore.
-        
-        When execution logging becomes more useful (e.g. with better structured output,
-        error highlighting, step-by-step debugging, etc.), we can re-enable this panel.
-    -->
-    <!--
-    {#if showExecutionPanel}
-        <div class="execution-panel">
-            <div class="execution-header">
-                <h3>Flow Execution</h3>
-                <button class="close-btn" onclick={() => showExecutionPanel = false}>
-                    <X class="w-4 h-4" />
-                </button>
-            </div>
-            <div class="execution-content">
-                <div class="logs-section">
-                    <h4>Execution Logs:</h4>
-                    <div class="logs">
-                        {#each executionLogs as log}
-                            <div class="log-entry">{log}</div>
-                        {/each}
-                        {#if executionLogs.length === 0}
-                            <div class="log-entry">No logs yet...</div>
-                        {/if}
-                    </div>
-                </div>
-                
-                {#if selectedExecutionNode}
-                    <div class="results-section">
-                        <h4>Execution Status:</h4>
-                        <div class="results">
-                            <div class="result-entry">
-                                <span>Target Node: {selectedExecutionNode}</span>
-                                <span class="status" class:executing={isExecuting} class:completed={!isExecuting}>
-                                    {isExecuting ? 'Running' : 'Completed'}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                {/if}
-            </div>
-        </div>
-    {/if}
-    -->
 </div>
 
 <style>

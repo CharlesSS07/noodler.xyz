@@ -12,11 +12,12 @@
 </script>
 
 <script lang="ts">
-    import NodeWrapper from "$lib/components/NodeWrapper.svelte";
+    import NodeWrapper from "$lib/components/nodeComponents/NodeWrapper.svelte";
     import {Handle, type NodeProps, Position} from "@xyflow/svelte";
-    import {fetchSocketDataTypeByName} from "$lib/compositor/DataTypes";
+    import {fetchSocketDataTypeByName, STANDARD_DATATYPES} from "$lib/compositor/DataTypes";
+    import {Tooltip} from "flowbite-svelte";
 
-    let { id, data }: NodeProps<MagicTextTransformNodeType> = $props();
+    let { id, data, selected }: NodeProps<MagicTextTransformNodeType> = $props();
 
     // Initialize data structure if needed
     $effect(() => {
@@ -25,50 +26,57 @@
         if (!data.transformPrompt) data.transformPrompt = '';
         if (!data.nid) data.nid = 'demo_text_formatter_llm';
     });
-
-    let inputSocketStyle = $state('');
-    let outputSocketStyle = $state('');
-    fetchSocketDataTypeByName('string').then((datatype) => {
-        inputSocketStyle = datatype?.style || '';
-    });
-    fetchSocketDataTypeByName('string').then((datatype) => {
-        outputSocketStyle = datatype?.style || '';
-    });
 </script>
 
-<NodeWrapper label="Text Formatter LLM" documentation="Format text according to natural-language-based rules." >
+<NodeWrapper label="Text Formatter LLM" documentation="Format text according to natural-language-based rules." isSelected={selected}>
+    <div class="relative">
+        <!-- Input Socket -->
+        {#await fetchSocketDataTypeByName(STANDARD_DATATYPES.TEXT)}
+            Loading Input Socket
+        {:then datatype}
+            <Handle
+                    type="target"
+                    position={Position.Left}
+                    id="messy_text"
+                    class="socket-handle"
+                    style="top: 30%;{datatype?.style || ''}"
+            />
+            <Tooltip placement="top">
+                <b>Messy Text</b> - Text to be formatted<br>
+                <b>Type ({datatype?.name}):</b> {datatype?.description}
+            </Tooltip>
+        {:catch error}
+            Error loading input socket: {JSON.stringify(error, null, 2)}
+        {/await}
 
-    <Handle
-            type="source"
-            socket_id='formatted_text'
-            label="Formatted Text"
-            socketType="text"
-            required={false}
-            connected={false}
-            tooltip="Formatted text, equivalent to messy text"
-            disabled={false}
-    >
-        <div class="socket-content input-content">
-            <span class="socket-label">Formatted Text</span>
-            <span class="socket-type">text</span>
-        </div>
-    </Handle>
+        <!-- Output Socket -->
+        {#await fetchSocketDataTypeByName(STANDARD_DATATYPES.TEXT)}
+            Loading Output Socket
+        {:then datatype}
+            <Handle
+                    type="source"
+                    position={Position.Right}
+                    id="formatted_text"
+                    class="socket-handle"
+                    style="top: 30%;{datatype?.style || ''}"
+            />
+            <Tooltip placement="top">
+                <b>Formatted Text</b> - Formatted text output<br>
+                <b>Type ({datatype?.name}):</b> {datatype?.description}
+            </Tooltip>
+        {:catch error}
+            Error loading output socket: {JSON.stringify(error, null, 2)}
+        {/await}
 
-    <Handle
-            type="target"
-            socket_id='messy_text'
-            label="Messy Text"
-            socketType="text"
-            required={false}
-            connected={false}
-            tooltip="Messy Text to be formatted"
-            disabled={false}
-    >
-        <div class="socket-content input-content">
-            <span class="socket-label">Messy Text</span>
-            <span class="socket-type">text</span>
+        <!-- Node Content -->
+        <div class="p-3">
+            <h3 class="text-sm font-semibold mb-2">Text Formatting Guidelines</h3>
+            <textarea 
+                bind:value={data.transformPrompt} 
+                placeholder="Extract proper nouns. Return in list." 
+                rows="3"
+                class="w-full p-2 border border-gray-300 rounded text-sm resize-none"
+            ></textarea>
         </div>
-    </Handle>
-    <h2>Text Formatting Prompt/Guidlines</h2>
-    <textarea bind:value={data.transformPrompt} placeholder="Extract proper nouns. Return in list." rows="3"></textarea>
+    </div>
 </NodeWrapper>

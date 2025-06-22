@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { SignedIn, SignedOut } from 'sveltefire';
 	import { signInAnonymously } from 'firebase/auth';
-	import FlowGraph from '$lib/components/FlowGraph.svelte';
+	import FlowGraph from '$lib/components/FlowGraphProject.svelte';
 	import { goto } from '$app/navigation';
 	import { auth } from '../../firebase';
 	import '$lib/css/nodes.css';
 
 	import { FirebaseRTDBProjectCollection, type FirebaseRTDBProjectKey } from '$lib/compositor/FirebaseRTDBProjectController.js';
 	import type { ProjectCollectionInterface } from '$lib/compositor/ProjectInterfaces.js';
-	import { onMount } from "svelte";
+	import {onMount} from "svelte";
 
 	export const ACTIVE_PROJECT_COLLECTION: ProjectCollectionInterface<FirebaseRTDBProjectKey> =
 		new FirebaseRTDBProjectCollection();
@@ -45,15 +45,17 @@
 </script>
 
 <!--Project Key: {project_key}-->
-{#if project_key!==project_key_not_assigned}
+<!--{#if project_key!==project_key_not_assigned}-->
 	<!-- Allow direct access to projects with valid project_key for collaboration testing -->
-	<FlowGraph {project_key}></FlowGraph>
-{:else}
+<!--	<FlowGraph {project_key}></FlowGraph>-->
+<!--{:else}-->
 	<!-- Require auth only when creating new projects -->
-	<SignedIn>
-		<FlowGraph {project_key}></FlowGraph>
-	</SignedIn>
-{/if}
+<!--	<SignedIn>-->
+<!--		<FlowGraph {project_key}></FlowGraph>-->
+<!--	</SignedIn>-->
+<!--{/if}-->
+
+<FlowGraph {project_key}></FlowGraph>
 
 <SignedOut let:auth>
 	<style>

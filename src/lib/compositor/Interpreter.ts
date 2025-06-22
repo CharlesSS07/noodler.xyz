@@ -61,6 +61,7 @@ export async function executeFlowGraph(
 
     // 1. Build dependency graph
     const dependencyGraph = buildDependencyGraph(start_node_id, nodes, edges);
+    console.log('dependencyGraph', dependencyGraph);
     const relevantNodes = Array.from(dependencyGraph.keys());
 
     const nodeLookup = new Map<string, number>(
@@ -96,6 +97,8 @@ export async function executeFlowGraph(
         return dependencies.length === 0;
     });
 
+    console.log('sinkNodes', sinkNodes);
+
     // Track which nodes have been executed
     const executedNodes = new Set<string>();
     const executingNodes = new Set<string>();
@@ -129,8 +132,6 @@ export async function executeFlowGraph(
                 );
             }
 
-            console.log('nodeBlueprint.outputSocketKeys()', nodeBlueprint.outputSocketKeys())
-
             // Create output returner
             const outputSocketIds = new Set(nodeBlueprint.outputSocketKeys());
             // set up return data & error handling
@@ -148,8 +149,6 @@ export async function executeFlowGraph(
                     edges,
                     projectOutputDataCache
                 );
-
-                console.log('nodeBlueprint', nodeBlueprint);
 
                 if (nodeBlueprint.input_spec_strict) {
 
@@ -181,17 +180,17 @@ export async function executeFlowGraph(
                     // TODO: input socket data type checking
                 }
 
-                console.log(`Calling node ${nodeId} of nid ${nodeBlueprint.nid} with args:`);
+                console.log(`${nodeId} ▶️ (${nodeBlueprint.nid}) with args:`);
                 console.log(inputData);
 
                 // Execute the node
                 await nodeBlueprint.call(inputData, outputReturner).then(() => {
                     console.log(
-                        `Successfully resolved output socket for node ${nodeId}, with data:`, outputReturner
+                        `${nodeId} ✅`, outputReturner
                     );
                     outputReturner.errorMessage(''); // clear error
                 }).catch((err) => {
-                    console.error(`Node execution ${nodeId} failed with error:`);
+                    console.error(`${nodeId} ❌`);
                     throw err;
                 });
 
@@ -207,8 +206,16 @@ export async function executeFlowGraph(
                         isNodeReady(id)
                 );
 
-                // Execute ready nodes concurrently
-                await Promise.all(readyNodes.map(executeNode));
+                try {
+
+                    // Execute ready nodes concurrently
+                    await Promise.all(readyNodes.map(executeNode));
+
+                } catch (error) {
+                    console.error(error);
+                    // do not throw; this is the error of another node.
+                }
+
             } catch (error) {
                 console.error('Error in pre or post node execution:');
                 console.error(error);

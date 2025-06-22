@@ -138,9 +138,11 @@ export interface TextToImageRequest {
     model?: string;
     parameters?: {
         num_inference_steps?: number;
+        steps?: number; // Together API parameter
         guidance_scale?: number;
         negative_prompt?: string;
         height?: number;
         width?: number;
+        n?: number; // number of images to generate
     };
 }

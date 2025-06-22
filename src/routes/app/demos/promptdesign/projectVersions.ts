@@ -7,15 +7,10 @@ export const nodesVersion2 = [
         data: {
             nid: 'join_text',
             input: {
-                text: '',
                 text1: '',
                 text2: '',
                 text3: '',
                 text4: '',
-            },
-            currentText: '',
-            output: {
-                text: '',
             },
         },
         position: {
@@ -38,8 +33,9 @@ export const nodesVersion2 = [
     },
     {
         id: 'product_name',
-        type: 'markdownTextEditor',
+        type: 'textEditor',
         data: {
+            nid: 'raw_text_editor',
             input: {
                 inputText: 'noodler.xyz',
             },
@@ -64,8 +60,9 @@ export const nodesVersion2 = [
     },
     {
         id: 'target_audience',
-        type: 'markdownTextEditor',
+        type: 'textEditor',
         data: {
+            nid: 'raw_text_editor',
             input: {
                 inputText: 'Artists, Gen AI Ops, and AI Engineers',
             },
@@ -90,11 +87,11 @@ export const nodesVersion2 = [
     },
     {
         id: 'campaign_goal',
-        type: 'markdownTextEditor',
+        type: 'textEditor',
         data: {
+            nid: 'raw_text_editor',
             input: {
-                inputText:
-                    'Entertain, demonstrate product potential, build connections',
+                inputText: 'Entertain, demonstrate product potential, build connections',
             },
         },
         position: {
@@ -117,11 +114,11 @@ export const nodesVersion2 = [
     },
     {
         id: 'key_features',
-        type: 'markdownTextEditor',
+        type: 'textEditor',
         data: {
+            nid: 'raw_text_editor',
             input: {
-                inputText:
-                    'Flow-designer, no-code, no setup, plug-n-play interface, explainable, extendable',
+                inputText: 'Flow-designer, no-code, no setup, plug-n-play interface, explainable, extendable',
             },
         },
         position: {
@@ -144,11 +141,11 @@ export const nodesVersion2 = [
     },
     {
         id: 'call_to_action',
-        type: 'markdownTextEditor',
+        type: 'textEditor',
         data: {
+            nid: 'raw_text_editor',
             input: {
-                inputText:
-                    'build with me, democratize AI design, create art, visualize your code',
+                inputText: 'build with me, democratize AI design, create art, visualize your code',
             },
         },
         position: {
@@ -171,8 +168,9 @@ export const nodesVersion2 = [
     },
     {
         id: 'tone_and_style',
-        type: 'markdownTextEditor',
+        type: 'textEditor',
         data: {
+            nid: 'raw_text_editor',
             input: {
                 inputText: 'engaging, informative, slightly humorous',
             },
@@ -197,8 +195,9 @@ export const nodesVersion2 = [
     },
     {
         id: 'word_count_range',
-        type: 'markdownTextEditor',
+        type: 'textEditor',
         data: {
+            nid: 'raw_text_editor',
             input: {
                 inputText: '250-300 words',
             },
@@ -223,8 +222,9 @@ export const nodesVersion2 = [
     },
     {
         id: 'output_format',
-        type: 'markdownTextEditor',
+        type: 'textEditor',
         data: {
+            nid: 'raw_text_editor',
             input: {
                 inputText: 'linkedin connection request',
             },
@@ -249,11 +249,11 @@ export const nodesVersion2 = [
     },
     {
         id: 'role_instruction',
-        type: 'markdownTextEditor',
+        type: 'textEditor',
         data: {
+            nid: 'raw_text_editor',
             input: {
-                inputText:
-                    'You are an expert marketing content creator specializing in persuasive and engaging copy. Your task is to craft compelling content for a specific product launch.',
+                inputText: 'You are an expert marketing content creator specializing in persuasive and engaging copy. Your task is to craft compelling content for a specific product launch.',
             },
         },
         position: {
@@ -278,13 +278,9 @@ export const nodesVersion2 = [
         id: 'context_instruction',
         type: 'textTemplate',
         data: {
+            nid: 'template',
             input: {
-                text: '',
-            },
-            template:
-                'We are launching a new product called "@product_name". The primary goal of this campaign is to @campaign_goal. Our target audience is: @target_audience.',
-            output: {
-                text: 'We are launching a new product called "@product_name". The primary goal of this campaign is to @campaign_goal. Our target audience is: @target_audience.',
+                template: 'We are launching a new product called "@product_name". The primary goal of this campaign is to @campaign_goal. Our target audience is: @target_audience.',
             },
         },
         position: {
@@ -309,13 +305,9 @@ export const nodesVersion2 = [
         id: 'task_instruction',
         type: 'textTemplate',
         data: {
+            nid: 'template',
             input: {
-                text: '',
-            },
-            template:
-                'Your main objective is to write a detailed and persuasive @output_format that highlights the benefits of "@product_name".',
-            output: {
-                text: 'Your main objective is to write a detailed and persuasive @output_format that highlights the benefits of "@product_name".',
+                template: 'Your main objective is to write a detailed and persuasive @output_format that highlights the benefits of "@product_name".',
             },
         },
         position: {
@@ -340,13 +332,9 @@ export const nodesVersion2 = [
         id: 'constraints_instruction',
         type: 'textTemplate',
         data: {
+            nid: 'template',
             input: {
-                text: '',
-            },
-            template:
-                'Please adhere to the following guidelines:\nThe tone should be @tone_and_style.\nThe content should be approximately @word_count_range long.\nFocus on explaining *how* the product solves a problem for the target audience.\nIntegrate the following key features/benefits seamlessly:',
-            output: {
-                text: 'Please adhere to the following guidelines:\nThe tone should be @tone_and_style.\nThe content should be approximately @word_count_range long.\nFocus on explaining *how* the product solves a problem for the target audience.\nIntegrate the following key features/benefits seamlessly:',
+                template: 'Please adhere to the following guidelines:\nThe tone should be @tone_and_style.\nThe content should be approximately @word_count_range long.\nFocus on explaining *how* the product solves a problem for the target audience.\nIntegrate the following key features/benefits seamlessly:',
             },
         },
         position: {
@@ -371,12 +359,9 @@ export const nodesVersion2 = [
         id: 'key_features_to_list',
         type: 'textTransformLLM',
         data: {
+            nid: 'textTransformLLM',
             input: {
-                text: '',
-            },
-            currentText: '',
-            output: {
-                text: '',
+                messy_text: '',
             },
         },
         position: {
@@ -401,13 +386,9 @@ export const nodesVersion2 = [
         id: 'inclusion_instruction',
         type: 'textTemplate',
         data: {
+            nid: 'template',
             input: {
-                text: '',
-            },
-            template:
-                "- Ensure the call to action is prominent: '@call_to_action'.\n- Avoid jargon where possible, or explain it clearly if necessary.\n- Emphasize value proposition over just features.",
-            output: {
-                text: "- Ensure the call to action is prominent: '@call_to_action'.\n- Avoid jargon where possible, or explain it clearly if necessary.\n- Emphasize value proposition over just features.",
+                template: "- Ensure the call to action is prominent: '@call_to_action'.\n- Avoid jargon where possible, or explain it clearly if necessary.\n- Emphasize value proposition over just features.",
             },
         },
         position: {
@@ -432,13 +413,9 @@ export const nodesVersion2 = [
         id: 'format_specification',
         type: 'textTemplate',
         data: {
+            nid: 'template',
             input: {
-                text: '',
-            },
-            template:
-                'The output must be a well-structured @output_format with a catchy title, an engaging introduction, several body paragraphs, and a strong conclusion.',
-            output: {
-                text: 'The output must be a well-structured @output_format with a catchy title, an engaging introduction, several body paragraphs, and a strong conclusion.',
+                template: 'The output must be a well-structured @output_format with a catchy title, an engaging introduction, several body paragraphs, and a strong conclusion.',
             },
         },
         position: {
@@ -463,13 +440,9 @@ export const nodesVersion2 = [
         id: 'full_prompt',
         type: 'textTemplate',
         data: {
+            nid: 'template',
             input: {
-                text: '',
-            },
-            template:
-                '### Role:\n@role_instruction\n\n\n### Context:@context_instruction\n\n\n### Task:\n\n\n@task_instruction\n\n\n### Guidelines & Constraints:\n@constraints_instruction}\n\n@inclusion_instruction\n\n### Output Format:\n@format_specification\n\n\n### BEGIN CONTENT GENERATION ###\n',
-            output: {
-                text: '### Role:\n@role_instruction\n\n\n### Context:@context_instruction\n\n\n### Task:\n\n\n@task_instruction\n\n\n### Guidelines & Constraints:\n@constraints_instruction}\n\n@inclusion_instruction\n\n### Output Format:\n@format_specification\n\n\n### BEGIN CONTENT GENERATION ###\n',
+                template: '### Role:\n@role_instruction\n\n\n### Context:@context_instruction\n\n\n### Task:\n\n\n@task_instruction\n\n\n### Guidelines & Constraints:\n@constraints_instruction}\n\n@inclusion_instruction\n\n### Output Format:\n@format_specification\n\n\n### BEGIN CONTENT GENERATION ###\n',
             },
         },
         position: {
@@ -494,12 +467,9 @@ export const nodesVersion2 = [
         id: 'full_prompt_viewer',
         type: 'textEditor',
         data: {
+            nid: 'raw_text_editor',
             input: {
-                text: '',
-            },
-            currentText: '',
-            output: {
-                text: '',
+                inputText: '',
             },
         },
         position: {
@@ -746,27 +716,7 @@ export const edgesVersion2 = [
         sourceHandle: 'formatted_text',
         target: 'constraints_instruction_join_text_key_features_to_list',
         targetHandle: 'text2',
-        style: 'stroke:#D2D2D2; stroke-width:4;',
-        sourcePort: 'formatted_text',
-        targetPort: 'text2',
-        sections: [
-            {
-                id: '6_s0',
-                startPoint: {
-                    x: 837,
-                    y: 669,
-                },
-                endPoint: {
-                    x: 1162,
-                    y: 669,
-                },
-                incomingShape: 'key_features_to_list',
-                outgoingShape:
-                    'constraints_instruction_join_text_key_features_to_list',
-            },
-        ],
-        container: 'root',
-        selected: false,
+        style: { strokeWidth: 4, stroke: '#D2D2D2' },
     },
     {
         id: '7',
@@ -868,39 +818,10 @@ export const edgesVersion2 = [
     {
         id: '9b',
         source: 'constraints_instruction',
+        sourceHandle: 'text',
         target: 'constraints_instruction_join_text_key_features_to_list',
         targetHandle: 'text1',
-        style: 'stroke:#D2D2D2; stroke-width:4;',
-        sourcePort: 'default',
-        targetPort: 'text1',
-        sections: [
-            {
-                id: '9b_s0',
-                startPoint: {
-                    x: 962,
-                    y: 839,
-                },
-                endPoint: {
-                    x: 1162,
-                    y: 685,
-                },
-                bendPoints: [
-                    {
-                        x: 972,
-                        y: 839,
-                    },
-                    {
-                        x: 972,
-                        y: 685,
-                    },
-                ],
-                incomingShape: 'constraints_instruction',
-                outgoingShape:
-                    'constraints_instruction_join_text_key_features_to_list',
-            },
-        ],
-        container: 'root',
-        selected: false,
+        style: { strokeWidth: 4, stroke: '#D2D2D2' },
     },
     {
         id: '10',
@@ -1104,37 +1025,7 @@ export const edgesVersion2 = [
         sourceHandle: 'text',
         target: 'full_prompt',
         targetHandle: 'constraints_instruction',
-        style: 'stroke:#D2D2D2; stroke-width:4;',
-        sourcePort: 'text',
-        targetPort: 'constraints_instruction',
-        sections: [
-            {
-                id: 'f_s0',
-                startPoint: {
-                    x: 1362,
-                    y: 677,
-                },
-                endPoint: {
-                    x: 1662,
-                    y: 457,
-                },
-                bendPoints: [
-                    {
-                        x: 1582,
-                        y: 677,
-                    },
-                    {
-                        x: 1582,
-                        y: 457,
-                    },
-                ],
-                incomingShape:
-                    'constraints_instruction_join_text_key_features_to_list',
-                outgoingShape: 'full_prompt',
-            },
-        ],
-        container: 'root',
-        selected: false,
+        style: { strokeWidth: 4, stroke: '#D2D2D2' },
     },
     {
         id: 'g',
