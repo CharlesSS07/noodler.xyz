@@ -23,7 +23,7 @@ import { beforeEach, describe, expect, test } from 'vitest';
 import { executeFlowGraph } from './Interpreter';
 import type { Node, Edge } from '@xyflow/svelte';
 import { projectOutputDataCache } from '$lib/stores/ProjectState';
-import { FirestoreNodeBluePrintControllerFactoryInterface } from './FirestoreNodeBluePrint';
+import { FirestoreNodeBluePrintControllerFactoryInterface } from './nodes/firestore/FirestoreNodeBluePrint';
 
 describe('Interpreter Flow Graph Tests', () => {
     let mockNodes: Node[];
@@ -350,7 +350,7 @@ describe('Interpreter Flow Graph Tests', () => {
         const { getAuth, signInAnonymously } = await import('firebase/auth');
         const { app } = await import('../../firebase');
         const { FirestoreNodeBluePrintControllerFactoryInterface } =
-            await import('./FirestoreNodeBluePrint');
+            await import('./nodes/firestore/FirestoreNodeBluePrint');
 
         // Test Firebase connection
         const auth = getAuth(app);

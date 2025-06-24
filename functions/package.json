@@ -8,32 +8,26 @@
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
+    "genkitdevui": "source .env && export GEMINI_API_KEY=$GOOGLE_GENAI_API_KEY && genkit start -p 4001 -- npx tsx --watch src/index.ts",
     "logs": "firebase functions:log",
     "test": "mocha",
     "test:watch": "mocha --watch",
-    "test:unit": "mocha --require ts-node/register src/test/*.test.ts",
-    "test:utils": "mocha --require ts-node/register src/aiService/test/utils.test.ts",
-    "test:text": "mocha --require ts-node/register src/aiService/test/textProcessing.test.ts",
-    "test:media": "mocha --require ts-node/register src/aiService/test/mediaProcessing.test.ts",
-    "test:comprehensive": "npm run build && mocha lib/test/comprehensive-api.test.js --timeout 30000",
-    "test:stress": "npm run build && mocha lib/test/stress-tests.test.js --timeout 300000",
-    "test:quick-stress": "npm run build && mocha lib/test/quick-stress.test.js --timeout 60000",
-    "test:basic": "npm run build && mocha lib/test/simple.test.js --timeout 10000",
-    "test:integration": "mocha --require ts-node/register src/test/integration.test.ts --timeout 60000",
-    "test:integration:quick": "mocha --require ts-node/register src/test/integration.test.ts --timeout 60000 --grep 'text generation|text classification'",
-    "test:integration:working": "mocha --require ts-node/register --ignore 'src/test/*Processing.test.ts' src/aiService/test/working-integration.test.ts --timeout 90000"
+    "test:unit": "mocha --require ts-node/register src/test/*.test.ts"
   },
   "engines": {
     "node": "22"
   },
   "main": "lib/index.js",
   "dependencies": {
+    "@genkit-ai/firebase": "^1.13.0",
+    "@genkit-ai/googleai": "^1.13.0",
     "@huggingface/hub": "^2.2.0",
     "@huggingface/inference": "^4.0.4",
     "@types/uuid": "^10.0.0",
     "axios": "^1.9.0",
     "firebase-admin": "^12.6.0",
     "firebase-functions": "^6.0.1",
+    "genkit": "^1.13.0",
     "langchain": "^0.3.28",
     "together-ai": "^0.16.0",
     "uuid": "^11.1.0"

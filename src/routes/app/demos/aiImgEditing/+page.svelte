@@ -15,10 +15,16 @@
         last_updated_at: new Date(),
     }).then(() => {
         projectInitialized = true;
+        // image_1750474392374_pzoc0h7re
     });
 
 </script>
 
 {#if projectInitialized}
-    <FlowGraphProject {project_key}></FlowGraphProject>
+    <FlowGraphProject {project_key} onProjectReady={(context) => {
+        console.log(context);
+        setTimeout(() => {
+            context.executeFromNode('image_1750474392374_pzoc0h7re');
+        }, 500);
+    }}></FlowGraphProject>
 {/if}

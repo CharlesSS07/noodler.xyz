@@ -1,15 +1,9 @@
 import { type Node, type Edge } from '@xyflow/svelte';
-import { FirestoreNodeBluePrintControllerFactoryInterface } from './FirestoreNodeBluePrint';
+import { FirestoreNodeBluePrintControllerFactoryInterface } from './nodes/firestore/FirestoreNodeBluePrint';
 import type { NodeBluePrint } from './NodeBluePrint';
 import { OutputSocketDataCache } from './OutputSocketDataCache';
 import { projectOutputDataCache } from '$lib/stores/ProjectState';
 import { getBigData, type BigDataRef } from './BigData';
-import { NodeAPIConnectorManager } from './NodeAPIConnector/NodeAPIConnectorManager';
-import { AIInferenceAPIConnector } from './NodeAPIConnector/AIServiceConnector';
-
-NodeAPIConnectorManager.registerAPIConnector(
-    new AIInferenceAPIConnector('ai_inference')
-);
 
 export class OutputSocketAsyncReturner {
     /**
@@ -48,7 +42,7 @@ export async function executeFlowGraph(
     start_node_id: string,
     nodes: Node[],
     edges: Edge[]
-): Promise<{ success: boolean; errors?: any[] }> {
+): Promise<void> {
     /**
      * 1. Build a dependency graph of nodes that start_node_id depends on (ignore all others)
      * 2. Begin executing the source nodes, i.e. the nodes that everything depends on
@@ -237,12 +231,8 @@ export async function executeFlowGraph(
     };
 
     // Start execution with sink nodes
-    try {
-        await Promise.all(sinkNodes.map(executeNode));
-        return { success: true };
-    } catch (error) {
-        return { success: false, errors: [error] };
-    }
+    await Promise.all(sinkNodes.map(executeNode));
+    return Promise.resolve();
 }
 
 function buildDependencyGraph(
@@ -333,9 +323,7 @@ async function getNodeInputData(
     // Temporary. This replaces every BigDataRef with the value in the database
     for (const key in inputData) {
         // @ts-ignore
-        if (
-            inputData[key].hasOwnProperty('_type') &&
-            inputData[key]._type == 'bigdata_ref'
+        if (inputData[key].hasOwnProperty('_type') && inputData[key]._type == 'bigdata_ref'
         ) {
             inputData[key] = await getBigData(inputData[key] as BigDataRef);
         }

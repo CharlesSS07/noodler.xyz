@@ -2,25 +2,5 @@ import * as admin from "firebase-admin";
 
 admin.initializeApp();
 
-// Text Processing Endpoints
-export {
-  textGeneration,
-  textClassification,
-  tokenClassification,
-  questionAnswering,
-  fillMask,
-  summarization,
-  translation,
-  sentenceSimilarity,
-  conversational,
-  featureExtraction,
-} from "./aiService/api/textProcessing";
-
-// Media Processing Endpoints
-export {
-  imageClassification,
-  objectDetection,
-  automaticSpeechRecognition,
-  tableQuestionAnswering,
-  textToImage,
-} from "./aiService/api/mediaProcessing";
+// Genkit-based Content Summarization Flow
+export { summarizeContent } from "./genkitFlows/summarizationFlow";

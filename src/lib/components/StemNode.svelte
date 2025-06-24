@@ -6,6 +6,7 @@
             nid: string;
             input: Record<string, unknown>,
             errorMessage: string;
+            status: string;
         },
         'node-stem'
     >;
@@ -14,15 +15,11 @@
 <script lang="ts">
     import {type NodeProps, useNodeConnections, useSvelteFlow} from "@xyflow/svelte";
 
-    let {updateNodeData} = useSvelteFlow();
-
-
     import {docStore} from "sveltefire";
     import {firestore} from "../../firebase";
-    import type {FirestoreNodeBluePrintModel} from "$lib/compositor/FirestoreNodeBluePrint";
+    import type {FirestoreNodeBluePrintModel} from "$lib/compositor/nodes/firestore/FirestoreNodeBluePrint";
     import StemNodeComponent from "$lib/components/StemNodeComponent.svelte";
     import {untrack} from "svelte";
-    import {projectActions} from "$lib/stores/ProjectState";
     import NodeErrorDisplay from "$lib/components/nodeComponents/NodeErrorDisplay.svelte";
     import NodeWrapper from "$lib/components/nodeComponents/NodeWrapper.svelte";
 

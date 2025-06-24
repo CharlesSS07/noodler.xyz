@@ -1,6 +1,6 @@
 <script lang="ts">
 
-    let {project_key = 'project_key_not_assigned'} = $props<{ project_key?: string }>();
+    let {project_key = 'project_key_not_assigned', onProjectReady} = $props<{ project_key?: string; onProjectReady?: (context: any) => void }>();
 
     import {
         SvelteFlow,
@@ -91,6 +91,13 @@
                     // Mark that we've loaded data from Firebase
                     if (!hasLoadedFromFirebase) {
                         hasLoadedFromFirebase = true;
+                        // Call the optional oninit hook after project data is loaded
+                        if (onProjectReady) {
+                            onProjectReady({
+                                executeFromNode: executeFromNode,
+                                panTo: panTo
+                            });
+                        }
                     }
                 }
             }
@@ -334,12 +341,9 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
             // Execution still works fine - we just don't capture/display the logs anymore.
             
             await executeFlowGraph(nodeId, nodes, edges);
-            
-            // executionLogs = [...executionLogs, `✅ Execution completed successfully`]; // DISABLED
             console.log('✅ Execution completed successfully');
         } catch (error) {
             console.error('Execution failed:', error);
-            // executionLogs = [...executionLogs, `❌ Execution failed: ${error}`]; // DISABLED
         } finally {
             isExecuting = false;
         }
@@ -421,6 +425,11 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
             edges = [];
             showActionDropdown = false;
         }
+    }
+
+    function panTo(x: number, y: number): void {
+        viewport.x = x;
+        viewport.y = y;
     }
 
     // onMount(() => {

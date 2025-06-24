@@ -1,6 +1,6 @@
 import type { User } from 'firebase/auth';
 import { Jimp, type JimpInstance, JimpMime } from 'jimp';
-import { isUsingEmulators } from '../../firebase/index';
+import {auth, isUsingEmulators} from '../../firebase/index';
 import type {
     AIInferenceServiceConfig,
     AIInferenceError,
@@ -26,6 +26,14 @@ import type {
     ConversationalRequest,
     FeatureExtractionRequest,
 } from './AIInferenceTypes';
+
+export let aiServiceInstance: AIInferenceService | undefined;
+
+auth.onAuthStateChanged((user) => {
+    if (user) {
+        aiServiceInstance = new AIInferenceService({user});
+    }
+})
 
 export class AIInferenceService {
     private user: User;
@@ -76,12 +84,22 @@ export class AIInferenceService {
         });
 
         if (!response.ok) {
-            const error = await response
-                .json()
-                .catch(() => ({ error: 'Request failed' }));
-            const aiError: AIInferenceError = new Error(
-                error.error || 'Request failed'
-            );
+            const errorText = await response.text();
+            console.error('HTTP Error Response:', {
+                status: response.status,
+                statusText: response.statusText,
+                body: errorText
+            });
+            
+            let error;
+            try {
+                error = JSON.parse(errorText);
+            } catch {
+                error = { error: errorText || 'Request failed' };
+            }
+            
+            const errorMessage = error.error?.message || error.message || error.error || `HTTP ${response.status}: ${response.statusText}`;
+            const aiError: AIInferenceError = new Error(errorMessage);
             aiError.status = response.status;
             aiError.response = error;
             throw aiError;
@@ -233,6 +251,31 @@ export class AIInferenceService {
         return await this.makeRequest<number[][]>('featureExtraction', request);
     }
 
+    // GenKit-based endpoints
+    async summarize(request: {
+        content: string;
+        maxLength?: number;
+        style?: 'brief' | 'detailed' | 'bullet-points';
+    }): Promise<{
+        summary: string;
+        originalLength: number;
+        summaryLength: number;
+        compressionRatio: number;
+    }> {
+        // GenKit functions expect data to be wrapped in a 'data' field
+        const response = await this.makeRequest<{
+            result: {
+                summary: string;
+                originalLength: number;
+                summaryLength: number;
+                compressionRatio: number;
+            }
+        }>('summarizeContent', { data: request });
+        
+        // GenKit functions return data wrapped in a 'result' field
+        return response.result;
+    }
+
     // Configuration methods
     setBaseUrl(url: string): void {
         this.baseUrl = url;
@@ -246,3 +289,5 @@ export class AIInferenceService {
         this.user = user;
     }
 }
+
+

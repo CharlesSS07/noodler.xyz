@@ -13,7 +13,7 @@
         "test": "vitest run",
         "test:watch": "vitest",
         "test:api": "vitest run src/tests/NodeBlueprintAPI.test.ts",
-        "test:nodeblueprint": "vitest run src/lib/compositor/FirestoreNodeBluePrint.test.ts",
+        "test:nodeblueprint": "vitest run src/lib/compositor/nodes/firestore/FirestoreNodeBluePrint.test.ts",
         "test:nodeblueprintstress": "vitest run src/tests/NodeBlueprintStress.test.ts",
         "test:bigdata": "vitest run src/lib/compositor/BigData.test.ts src/routes/app/compositor/BigDataCleanup.test.ts",
         "test:quick": "vitest run src/tests/QuickAPITest.test.ts",
