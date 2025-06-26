@@ -362,8 +362,7 @@ describe('Interpreter Flow Graph Tests', () => {
 
         try {
             // Try to fetch the add node that should exist
-            const addNode =
-                await factory.getNodeBluePrintFromNID('add');
+            const addNode = await factory.getNodeBluePrintFromNID('add');
             console.log('✅ Successfully found add node:', addNode.title);
             expect(addNode).toBeDefined();
             expect(addNode.nid).toBe('add');
@@ -504,9 +503,7 @@ describe('Interpreter Flow Graph Tests', () => {
 
         // Use standard factory - should connect to emulator due to env vars and test Firebase import
         const factory = new FirestoreNodeBluePrintControllerFactoryInterface();
-        const n = await factory.getNodeBluePrintFromNID(
-            'jimp_new_blank_image'
-        );
+        const n = await factory.getNodeBluePrintFromNID('jimp_new_blank_image');
         console.log('[TEST DEBUG] Current node code:', n.code);
 
         // Verify the code uses utils.Jimp (should work now with emulator)

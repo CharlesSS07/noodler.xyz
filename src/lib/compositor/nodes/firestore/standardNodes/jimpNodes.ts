@@ -29,8 +29,8 @@ export async function jimpNodes() {
         'solid',
         'background',
         'dimensions',
-        'graphics'
-    ]
+        'graphics',
+    ];
 
     await newBlankImage.newInputSocket('color', {
         label: 'Color',
@@ -80,8 +80,8 @@ export async function jimpNodes() {
         'processing',
         'optimization',
         'graphics',
-        'modification'
-    ]
+        'modification',
+    ];
 
     await resize.newInputSocket('image', {
         label: 'Image (JIMP)',

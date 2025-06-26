@@ -19,8 +19,8 @@ import type {
 } from '../../SocketModels';
 import { OutputSocketAsyncReturner } from '../../Interpreter';
 import { Jimp } from 'jimp';
-import { AIInferenceService } from "$lib/services";
-import {aiServiceInstance} from "$lib/services/AIInferenceService";
+import { AIInferenceService } from '$lib/services';
+import { aiServiceInstance } from '$lib/services/AIInferenceService';
 
 export interface FirestoreNodeBluePrintModel {
     title: string;
@@ -64,7 +64,7 @@ export const DEFAULT_FIRESTORE_NODE_BLUEPRINT_MODEL = {
     trust_level: 'Uninitialized',
     official_note: 'This node was not set up properly.',
     searchable: true,
-    tags: []
+    tags: [],
 } as FirestoreNodeBluePrintModel;
 
 const NODE_BLUEPRINTS_REF = collection(firestore, 'nodes');
@@ -100,7 +100,7 @@ export class FirestoreNodeBluePrintControllerFactoryInterface
             trust_level: 'Official',
             official_note: '',
             searchable: true,
-            tags: ['official']
+            tags: ['official'],
         });
 
         return await this.getNodeBluePrintFromNID(nid);
@@ -132,7 +132,7 @@ export class FirestoreNodeBluePrintControllerFactoryInterface
             trust_level: 'New',
             official_note: '',
             searchable: true,
-            tags: []
+            tags: [],
         });
 
         return await this.getNodeBluePrintFromNID(nid);
@@ -367,7 +367,7 @@ export class NodeBluePrintInFirestore extends NodeBluePrint {
                 utils: {
                     // Add utility functions that nodes might need
                     Jimp: Jimp,
-                    aiServices: aiServiceInstance
+                    aiServices: aiServiceInstance,
                 },
                 console: console,
             };

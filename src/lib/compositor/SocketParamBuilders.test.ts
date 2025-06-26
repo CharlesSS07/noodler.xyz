@@ -12,7 +12,7 @@ import {
     type NumberSocketParams,
     type StringSocketParams,
     type JIMPSocketParams,
-    type ENUMSocketParams
+    type ENUMSocketParams,
 } from './SocketParamBuilders.js';
 
 describe('InputSocketParamBuilder', () => {
@@ -52,7 +52,9 @@ describe('GenericSocketParamsBuilder', () => {
 
     it('should throw error for undefined value', () => {
         const builder = new GenericSocketParamsBuilder('test');
-        expect(() => builder.check(undefined)).toThrow('value is undefined/null!');
+        expect(() => builder.check(undefined)).toThrow(
+            'value is undefined/null!'
+        );
     });
 
     it('should throw error for null value', () => {
@@ -117,13 +119,17 @@ describe('NumberSocketParamsBuilder', () => {
     it('should throw error for value greater than max', () => {
         const builder = new NumberSocketParamsBuilder(0);
         builder.setMax(10);
-        expect(() => builder.check(15)).toThrow('value should not be greater than max: 10');
+        expect(() => builder.check(15)).toThrow(
+            'value should not be greater than max: 10'
+        );
     });
 
     it('should throw error for value less than min', () => {
         const builder = new NumberSocketParamsBuilder(0);
         builder.setMin(5);
-        expect(() => builder.check(3)).toThrow('value should not be less than min: 5');
+        expect(() => builder.check(3)).toThrow(
+            'value should not be less than min: 5'
+        );
     });
 
     it('should throw error for value not matching step', () => {
@@ -138,25 +144,23 @@ describe('NumberSocketParamsBuilder', () => {
             .setMax(100)
             .setStep(0.1)
             .build();
-        
+
         expect(params).toEqual({
             default_value: 0,
             min: 0,
             max: 100,
-            step: 0.1
+            step: 0.1,
         });
     });
 
     it('should build params with partial values', () => {
-        const params = new NumberSocketParamsBuilder(5)
-            .setMin(1)
-            .build();
-        
+        const params = new NumberSocketParamsBuilder(5).setMin(1).build();
+
         expect(params).toEqual({
             default_value: 5,
             min: 1,
             max: null,
-            step: null
+            step: null,
         });
     });
 });
@@ -216,7 +220,9 @@ describe('StringSocketParamsBuilder', () => {
     it('should throw error for string shorter than min characters', () => {
         const builder = new StringSocketParamsBuilder('');
         builder.setMinCharacters(10);
-        expect(() => builder.check('short')).toThrow('fewer characters than minCharacters: 5 < 10');
+        expect(() => builder.check('short')).toThrow(
+            'fewer characters than minCharacters: 5 < 10'
+        );
     });
 
     it('should build params', () => {
@@ -224,13 +230,13 @@ describe('StringSocketParamsBuilder', () => {
             .setMinCharacters(5)
             .setMaxCharacters(100)
             .build();
-        
+
         expect(params).toEqual({
             default_value: 'default',
             isSensitive: false,
             minCharacters: 5,
             maxCharacters: 100,
-            numRows: null
+            numRows: null,
         });
     });
 });
@@ -238,7 +244,9 @@ describe('StringSocketParamsBuilder', () => {
 describe('JIMPImageSocketParamsBuilder', () => {
     it('should create builder with empty image default', () => {
         const builder = new JIMPImageSocketParamsBuilder();
-        expect(builder.getDefaultValue()).toBe(JIMPImageSocketParamsBuilder.EMPTY_IMAGE);
+        expect(builder.getDefaultValue()).toBe(
+            JIMPImageSocketParamsBuilder.EMPTY_IMAGE
+        );
     });
 
     it('should hide image display', () => {
@@ -261,17 +269,17 @@ describe('JIMPImageSocketParamsBuilder', () => {
 
     it('should throw error for empty image', () => {
         const builder = new JIMPImageSocketParamsBuilder();
-        expect(() => builder.check(JIMPImageSocketParamsBuilder.EMPTY_IMAGE)).toThrow('value is the empty image');
+        expect(() =>
+            builder.check(JIMPImageSocketParamsBuilder.EMPTY_IMAGE)
+        ).toThrow('value is the empty image');
     });
 
     it('should build params', () => {
-        const params = new JIMPImageSocketParamsBuilder()
-            .hide()
-            .build();
-        
+        const params = new JIMPImageSocketParamsBuilder().hide().build();
+
         expect(params).toEqual({
             default_value: JIMPImageSocketParamsBuilder.EMPTY_IMAGE,
-            displayImage: false
+            displayImage: false,
         });
     });
 });
@@ -285,11 +293,15 @@ describe('ENUMSocketParamBuilder', () => {
     });
 
     it('should throw error for empty options', () => {
-        expect(() => new ENUMSocketParamBuilder([])).toThrow('options must not be empty');
+        expect(() => new ENUMSocketParamBuilder([])).toThrow(
+            'options must not be empty'
+        );
     });
 
     it('should throw error for single option', () => {
-        expect(() => new ENUMSocketParamBuilder(['only one'])).toThrow('options must not be empty');
+        expect(() => new ENUMSocketParamBuilder(['only one'])).toThrow(
+            'options must not be empty'
+        );
     });
 
     it('should remove duplicate options', () => {
@@ -304,16 +316,18 @@ describe('ENUMSocketParamBuilder', () => {
 
     it('should throw error for invalid option', () => {
         const builder = new ENUMSocketParamBuilder(['option1', 'option2']);
-        expect(() => builder.check('invalid')).toThrow('value should be in enum options; illegal value');
+        expect(() => builder.check('invalid')).toThrow(
+            'value should be in enum options; illegal value'
+        );
     });
 
     it('should build params', () => {
         const options = ['red', 'green', 'blue'];
         const params = new ENUMSocketParamBuilder(options).build();
-        
+
         expect(params).toEqual({
             default_value: 'red',
-            options: ['red', 'green', 'blue']
+            options: ['red', 'green', 'blue'],
         });
     });
 });
@@ -321,7 +335,9 @@ describe('ENUMSocketParamBuilder', () => {
 describe('CSVSocketParamsBuilder', () => {
     it('should create builder with empty file default', () => {
         const builder = new CSVSocketParamsBuilder();
-        expect(builder.getDefaultValue()).toBe(CSVSocketParamsBuilder.EMPTY_FILE);
+        expect(builder.getDefaultValue()).toBe(
+            CSVSocketParamsBuilder.EMPTY_FILE
+        );
     });
 
     it('should check valid file without throwing', () => {
@@ -332,13 +348,17 @@ describe('CSVSocketParamsBuilder', () => {
 
     it('should throw error for empty file placeholder', () => {
         const builder = new CSVSocketParamsBuilder();
-        expect(() => builder.check(CSVSocketParamsBuilder.EMPTY_FILE)).toThrow('Value is the empty CSV placeholder.');
+        expect(() => builder.check(CSVSocketParamsBuilder.EMPTY_FILE)).toThrow(
+            'Value is the empty CSV placeholder.'
+        );
     });
 
     it('should throw error for non-CSV file', () => {
         const builder = new CSVSocketParamsBuilder();
         const mockFile = new File(['data'], 'test.txt', { type: 'text/plain' });
-        expect(() => builder.check(mockFile)).toThrow('Expected a .csv file, got "test.txt"');
+        expect(() => builder.check(mockFile)).toThrow(
+            'Expected a .csv file, got "test.txt"'
+        );
     });
 
     it('should throw error for empty file size', () => {
@@ -349,13 +369,15 @@ describe('CSVSocketParamsBuilder', () => {
 
     it('should throw error for invalid type', () => {
         const builder = new CSVSocketParamsBuilder();
-        expect(() => builder.check(123 as any)).toThrow('Expected a File object or placeholder.');
+        expect(() => builder.check(123 as any)).toThrow(
+            'Expected a File object or placeholder.'
+        );
     });
 
     it('should build params', () => {
         const params = new CSVSocketParamsBuilder().build();
         expect(params).toEqual({
-            default_value: CSVSocketParamsBuilder.EMPTY_FILE
+            default_value: CSVSocketParamsBuilder.EMPTY_FILE,
         });
     });
 });
@@ -363,41 +385,53 @@ describe('CSVSocketParamsBuilder', () => {
 describe('TSVSocketParamsBuilder', () => {
     it('should create builder with empty file default', () => {
         const builder = new TSVSocketParamsBuilder();
-        expect(builder.getDefaultValue()).toBe(TSVSocketParamsBuilder.EMPTY_FILE);
+        expect(builder.getDefaultValue()).toBe(
+            TSVSocketParamsBuilder.EMPTY_FILE
+        );
     });
 
     it('should check valid file without throwing', () => {
         const builder = new TSVSocketParamsBuilder();
-        const mockFile = new File(['data'], 'test.tsv', { type: 'text/tab-separated-values' });
+        const mockFile = new File(['data'], 'test.tsv', {
+            type: 'text/tab-separated-values',
+        });
         expect(() => builder.check(mockFile)).not.toThrow();
     });
 
     it('should throw error for empty file placeholder', () => {
         const builder = new TSVSocketParamsBuilder();
-        expect(() => builder.check(TSVSocketParamsBuilder.EMPTY_FILE)).toThrow('Value is the empty TSV placeholder.');
+        expect(() => builder.check(TSVSocketParamsBuilder.EMPTY_FILE)).toThrow(
+            'Value is the empty TSV placeholder.'
+        );
     });
 
     it('should throw error for non-TSV file', () => {
         const builder = new TSVSocketParamsBuilder();
         const mockFile = new File(['data'], 'test.txt', { type: 'text/plain' });
-        expect(() => builder.check(mockFile)).toThrow('Expected a .tsv file, got "test.txt"');
+        expect(() => builder.check(mockFile)).toThrow(
+            'Expected a .tsv file, got "test.txt"'
+        );
     });
 
     it('should throw error for empty file size', () => {
         const builder = new TSVSocketParamsBuilder();
-        const mockFile = new File([], 'test.tsv', { type: 'text/tab-separated-values' });
+        const mockFile = new File([], 'test.tsv', {
+            type: 'text/tab-separated-values',
+        });
         expect(() => builder.check(mockFile)).toThrow('TSV file is empty.');
     });
 
     it('should throw error for invalid type', () => {
         const builder = new TSVSocketParamsBuilder();
-        expect(() => builder.check(123 as any)).toThrow('Expected a File object or placeholder.');
+        expect(() => builder.check(123 as any)).toThrow(
+            'Expected a File object or placeholder.'
+        );
     });
 
     it('should build params', () => {
         const params = new TSVSocketParamsBuilder().build();
         expect(params).toEqual({
-            default_value: TSVSocketParamsBuilder.EMPTY_FILE
+            default_value: TSVSocketParamsBuilder.EMPTY_FILE,
         });
     });
 });
@@ -405,7 +439,12 @@ describe('TSVSocketParamsBuilder', () => {
 describe('CropParamSocketParamsBuilder', () => {
     it('should create builder with default crop params', () => {
         const builder = new CropParamSocketParamsBuilder();
-        expect(builder.getDefaultValue()).toEqual({ x: 0, y: 0, width: 100, height: 100 });
+        expect(builder.getDefaultValue()).toEqual({
+            x: 0,
+            y: 0,
+            width: 100,
+            height: 100,
+        });
     });
 
     it('should check valid crop params without throwing', () => {
@@ -417,31 +456,39 @@ describe('CropParamSocketParamsBuilder', () => {
     it('should throw error for zero width', () => {
         const builder = new CropParamSocketParamsBuilder();
         const invalidCrop = { x: 0, y: 0, width: 0, height: 100 };
-        expect(() => builder.check(invalidCrop)).toThrow('Crop object must have positive width, height');
+        expect(() => builder.check(invalidCrop)).toThrow(
+            'Crop object must have positive width, height'
+        );
     });
 
     it('should throw error for zero height', () => {
         const builder = new CropParamSocketParamsBuilder();
         const invalidCrop = { x: 0, y: 0, width: 100, height: 0 };
-        expect(() => builder.check(invalidCrop)).toThrow('Crop object must have positive width, height');
+        expect(() => builder.check(invalidCrop)).toThrow(
+            'Crop object must have positive width, height'
+        );
     });
 
     it('should throw error for negative width', () => {
         const builder = new CropParamSocketParamsBuilder();
         const invalidCrop = { x: 0, y: 0, width: -10, height: 100 };
-        expect(() => builder.check(invalidCrop)).toThrow('Crop object must have positive width, height');
+        expect(() => builder.check(invalidCrop)).toThrow(
+            'Crop object must have positive width, height'
+        );
     });
 
     it('should throw error for negative height', () => {
         const builder = new CropParamSocketParamsBuilder();
         const invalidCrop = { x: 0, y: 0, width: 100, height: -10 };
-        expect(() => builder.check(invalidCrop)).toThrow('Crop object must have positive width, height');
+        expect(() => builder.check(invalidCrop)).toThrow(
+            'Crop object must have positive width, height'
+        );
     });
 
     it('should build params', () => {
         const params = new CropParamSocketParamsBuilder().build();
         expect(params).toEqual({
-            default_value: { x: 0, y: 0, width: 100, height: 100 }
+            default_value: { x: 0, y: 0, width: 100, height: 100 },
         });
     });
 });

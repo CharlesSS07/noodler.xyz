@@ -24,8 +24,8 @@ export async function jsonNodes() {
         'serialization',
         'configuration',
         'api-data',
-        'interchange'
-    ]
+        'interchange',
+    ];
 
     await jsonEditorAndViewer.newInputSocket('jsonObject', {
         label: 'JSON',
@@ -64,8 +64,8 @@ export async function jsonNodes() {
         'export',
         'transform',
         'encoding',
-        'api-ready'
-    ]
+        'api-ready',
+    ];
 
     await jsonToString.newInputSocket('jsonObject', {
         label: 'Object',

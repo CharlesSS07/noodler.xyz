@@ -123,12 +123,12 @@ export class NumberSocketParamsBuilder extends GenericSocketParamsBuilder<
     }
 
     build(): NumberSocketParams {
-    	return {
-    		default_value: this.params.default_value,
-    		min: this.params.min,
-    		max: this.params.max,
-    		step: this.params.step,
-    	};
+        return {
+            default_value: this.params.default_value,
+            min: this.params.min,
+            max: this.params.max,
+            step: this.params.step,
+        };
     }
 }
 
@@ -214,13 +214,13 @@ export class StringSocketParamsBuilder extends GenericSocketParamsBuilder<
     }
 
     build(): StringSocketParams {
-    	return {
-    		default_value: this.params.default_value,
-    		isSensitive: this.params.isSensitive,
-    		minCharacters: this.params.minCharacters,
-    		maxCharacters: this.params.maxCharacters,
-    		numRows: this.params.numRows,
-    	};
+        return {
+            default_value: this.params.default_value,
+            isSensitive: this.params.isSensitive,
+            minCharacters: this.params.minCharacters,
+            maxCharacters: this.params.maxCharacters,
+            numRows: this.params.numRows,
+        };
     }
 }
 
@@ -261,8 +261,8 @@ export class JIMPImageSocketParamsBuilder extends GenericSocketParamsBuilder<
 
     build(): JIMPSocketParams {
         return {
-        	default_value: this.params.default_value,
-        	displayImage: this.params.displayImage,
+            default_value: this.params.default_value,
+            displayImage: this.params.displayImage,
         };
     }
 }
@@ -303,8 +303,8 @@ export class ENUMSocketParamBuilder extends GenericSocketParamsBuilder<
 
     build(): ENUMSocketParams {
         return {
-        	default_value: this.params.default_value,
-        	options: this.params.options,
+            default_value: this.params.default_value,
+            options: this.params.options,
         };
     }
 }

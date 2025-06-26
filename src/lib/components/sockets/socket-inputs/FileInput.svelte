@@ -44,7 +44,7 @@
         bind:this={fileInput}
         type="file"
         accept={acceptedTypes}
-        onchange={handleFileSelect}
+        on:change={handleFileSelect}
         class="hidden-file-input"
         {disabled}
         title="Socket: {socketId}"
@@ -60,7 +60,7 @@
                 {#if !disabled}
                     <button 
                         class="clear-button"
-                        onclick={clearFile}
+                        on:click={clearFile}
                         type="button"
                     >
                         ×
@@ -70,7 +70,7 @@
         {:else}
             <button 
                 class="select-button"
-                onclick={triggerFileSelect}
+                on:click={triggerFileSelect}
                 {disabled}
                 type="button"
             >

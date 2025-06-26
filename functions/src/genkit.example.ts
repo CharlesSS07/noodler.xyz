@@ -34,14 +34,20 @@ const generatePoemFlow = ai.defineFlow(
 
 
 // always wrap the flows in this!
-import {onCallGenkit} from "firebase-functions/https";
+import {onCall} from "firebase-functions/https";
 // export const generatePoem = onCallGenkit(generatePoemFlow);
 
 
 // this makes sure a flow is only callable by specific people
-export const generatePoem = onCallGenkit(
+export const generatePoem = onCall(
   {
-    authPolicy: (auth) => auth?.token?.email_verified,
-  }, // make sure they are logged in, and have a verified email.
-  generatePoemFlow,
+    // No specific options needed for basic auth check
+  },
+  async (request) => {
+    // Check if user is logged in and has verified email
+    if (!request.auth?.token?.email_verified) {
+      throw new Error("Authentication required with verified email");
+    }
+    return await generatePoemFlow(request.data);
+  }
 );

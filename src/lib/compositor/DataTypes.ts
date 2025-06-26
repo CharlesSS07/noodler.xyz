@@ -1,4 +1,3 @@
-
 export type SocketDataType = {
     name: string; // name is the unique identifier. there are no ids because then we could have overlapping names
     style: string;
@@ -98,8 +97,7 @@ const standardDataTypes: SocketDataType[] = [
     {
         name: STANDARD_DATATYPES.TENSOR,
         style: baseSocketStyle('#00adb9'),
-        description:
-            'Represents an nd-array (tfjs).',
+        description: 'Represents an nd-array (tfjs).',
         type: 'tf.tensor',
     },
 ];

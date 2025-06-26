@@ -2,7 +2,10 @@
 import {gemini15Flash, googleAI} from "@genkit-ai/googleai";
 import {genkit, z} from "genkit";
 
-import {onCallGenkit} from "firebase-functions/https";
+import {onCall} from "firebase-functions/https";
+// import config from "../config";
+// import {defineSecret} from "firebase-functions/params";
+// const googleAIapiKey = defineSecret("GEMINI_API_KEY");
 
 // Configure Genkit instance
 const ai = genkit({
@@ -74,13 +77,8 @@ export const contentSummarizationFlow = ai.defineFlow(
 );
 
 // Export the function wrapped with onCallGenkit for Firebase Functions
-export const summarizeContent = onCallGenkit(
-  {
-    // authPolicy: (auth) => auth?.token?.email_verified,
-    authPolicy: (auth) => {
-      // Allow authenticated users (including anonymous) for testing
-      return !!auth?.uid;
-    },
-  },
-  contentSummarizationFlow
+export const summarizeContent = onCall(
+  async (request) => {
+    return await contentSummarizationFlow(request.data);
+  }
 );

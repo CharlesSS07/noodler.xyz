@@ -22,8 +22,8 @@ export async function basicMathNodes() {
         'computation',
         'binary-operation',
         'fundamental',
-        'elementary'
-    ]
+        'elementary',
+    ];
 
     await addNode.newInputSocket('a', {
         label: 'Number A',
@@ -67,8 +67,8 @@ export async function basicMathNodes() {
         'computation',
         'binary-operation',
         'fundamental',
-        'elementary'
-    ]
+        'elementary',
+    ];
 
     await subtractNode.newInputSocket('a', {
         label: 'Number A',
@@ -113,8 +113,8 @@ export async function basicMathNodes() {
         'binary-operation',
         'fundamental',
         'elementary',
-        'scaling'
-    ]
+        'scaling',
+    ];
 
     await multiplyNode.newInputSocket('a', {
         label: 'Number A',
@@ -160,8 +160,8 @@ export async function basicMathNodes() {
         'fundamental',
         'elementary',
         'ratio',
-        'quotient'
-    ]
+        'quotient',
+    ];
 
     await divideNode.newInputSocket('a', {
         label: 'Dividend',

@@ -1,7 +1,7 @@
 /**
  * Unit tests for AI Inference Nodes
  * Tests AI inference nodes by calling them through the Firestore node blueprint system
- * 
+ *
  * These tests use the real AI inference service without mocking
  */
 
@@ -20,7 +20,7 @@ describe('AI Inference Nodes Unit Tests', () => {
         nodes = [];
         edges = [];
         await projectOutputDataCache.clear();
-        
+
         // Sign in anonymously for Firebase auth
         await signInAnonymously(auth);
     });
@@ -31,7 +31,6 @@ describe('AI Inference Nodes Unit Tests', () => {
 
     describe('Text Processing AI Nodes', () => {
         test('AI Fill Mask Node', async () => {
-
             nodes = [
                 {
                     id: 'ai-fill-mask-test',
@@ -42,32 +41,37 @@ describe('AI Inference Nodes Unit Tests', () => {
                         input: {
                             text: 'The weather today is [MASK].',
                             model: 'bert-base-uncased',
-                            top_k: 5
+                            top_k: 5,
                         },
                     },
                 },
             ];
 
-            const result = await executeFlowGraph('ai-fill-mask-test', nodes, edges);
-            
+            const result = await executeFlowGraph(
+                'ai-fill-mask-test',
+                nodes,
+                edges
+            );
+
             expect(result.success).toBe(true);
-            
+
             // Check that we got predictions output
-            const outputData = await projectOutputDataCache.get('ai-fill-mask-test', 'predictions');
+            const outputData = await projectOutputDataCache.get(
+                'ai-fill-mask-test',
+                'predictions'
+            );
             expect(outputData).toBeDefined();
             expect(Array.isArray(outputData)).toBe(true);
             expect(outputData.length).toBeGreaterThan(0);
-            
+
             // Each prediction should have a token_str and score
             if (outputData.length > 0) {
                 expect(outputData[0]).toHaveProperty('token_str');
                 expect(outputData[0]).toHaveProperty('score');
                 expect(typeof outputData[0].score).toBe('number');
             }
-            
+
             console.log('Fill mask predictions:', outputData);
         });
-
     });
-
 });

@@ -3,7 +3,7 @@
  * This defines which UI component should be used for each socket data type
  */
 
-import type {Component} from 'svelte';
+import type { Component } from 'svelte';
 import { STANDARD_DATATYPES } from '$lib/compositor/DataTypes';
 
 // Import all input components
@@ -43,7 +43,7 @@ export const SOCKET_INPUT_MAPPINGS: SocketInputMapping[] = [
         description: 'Checkbox for true/false values',
     },
 
-    // File types  
+    // File types
     {
         dataType: STANDARD_DATATYPES.FILE,
         component: FileInput,

@@ -8,7 +8,8 @@ import {
     jimpNodes,
     jsonNodes,
     htmlNodes,
-    basicMathNodes, nlpNodes,
+    basicMathNodes,
+    nlpNodes,
 } from './standardNodes';
 
 export async function generateStandardNodeSuite() {
@@ -23,7 +24,7 @@ export async function generateStandardNodeSuite() {
         jsonNodes(),
         htmlNodes(),
         basicMathNodes(),
-        nlpNodes()
+        nlpNodes(),
     ];
     await Promise.all(opBuilders);
 

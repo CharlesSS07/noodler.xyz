@@ -36,11 +36,19 @@ const aiNodes = [
             temperature: { type: 'number', required: false },
             do_sample: { type: 'boolean', required: false },
             top_k: { type: 'number', required: false },
-            top_p: { type: 'number', required: false }
+            top_p: { type: 'number', required: false },
         },
-        input_socket_order: ['prompt', 'model', 'max_length', 'temperature', 'do_sample', 'top_k', 'top_p'],
+        input_socket_order: [
+            'prompt',
+            'model',
+            'max_length',
+            'temperature',
+            'do_sample',
+            'top_k',
+            'top_p',
+        ],
         output_sockets: {
-            generated_text: { type: 'text' }
+            generated_text: { type: 'text' },
         },
         output_socket_order: ['generated_text'],
         author_uid: 'official',
@@ -50,7 +58,7 @@ const aiNodes = [
         last_updated_at: new Date(),
         is_frozen: false,
         predecessor_nid: 'root',
-        official_note: ''
+        official_note: '',
     },
     {
         nid: 'ai_text_classification',
@@ -59,11 +67,11 @@ const aiNodes = [
         user_defined_code: '',
         input_sockets: {
             text: { type: 'text', required: true },
-            model: { type: 'text', required: false }
+            model: { type: 'text', required: false },
         },
         input_socket_order: ['text', 'model'],
         output_sockets: {
-            results: { type: 'object' }
+            results: { type: 'object' },
         },
         output_socket_order: ['results'],
         author_uid: 'official',
@@ -73,7 +81,7 @@ const aiNodes = [
         last_updated_at: new Date(),
         is_frozen: false,
         predecessor_nid: 'root',
-        official_note: ''
+        official_note: '',
     },
     {
         nid: 'ai_question_answering',
@@ -83,12 +91,12 @@ const aiNodes = [
         input_sockets: {
             question: { type: 'text', required: true },
             context: { type: 'text', required: true },
-            model: { type: 'text', required: false }
+            model: { type: 'text', required: false },
         },
         input_socket_order: ['question', 'context', 'model'],
         output_sockets: {
             answer: { type: 'text' },
-            score: { type: 'number' }
+            score: { type: 'number' },
         },
         output_socket_order: ['answer', 'score'],
         author_uid: 'official',
@@ -98,7 +106,7 @@ const aiNodes = [
         last_updated_at: new Date(),
         is_frozen: false,
         predecessor_nid: 'root',
-        official_note: ''
+        official_note: '',
     },
     {
         nid: 'ai_summarization',
@@ -109,11 +117,11 @@ const aiNodes = [
             text: { type: 'text', required: true },
             model: { type: 'text', required: false },
             max_length: { type: 'number', required: false },
-            min_length: { type: 'number', required: false }
+            min_length: { type: 'number', required: false },
         },
         input_socket_order: ['text', 'model', 'max_length', 'min_length'],
         output_sockets: {
-            summary: { type: 'text' }
+            summary: { type: 'text' },
         },
         output_socket_order: ['summary'],
         author_uid: 'official',
@@ -123,7 +131,7 @@ const aiNodes = [
         last_updated_at: new Date(),
         is_frozen: false,
         predecessor_nid: 'root',
-        official_note: ''
+        official_note: '',
     },
     {
         nid: 'ai_translation',
@@ -132,11 +140,11 @@ const aiNodes = [
         user_defined_code: '',
         input_sockets: {
             text: { type: 'text', required: true },
-            model: { type: 'text', required: false }
+            model: { type: 'text', required: false },
         },
         input_socket_order: ['text', 'model'],
         output_sockets: {
-            translated_text: { type: 'text' }
+            translated_text: { type: 'text' },
         },
         output_socket_order: ['translated_text'],
         author_uid: 'official',
@@ -146,8 +154,8 @@ const aiNodes = [
         last_updated_at: new Date(),
         is_frozen: false,
         predecessor_nid: 'root',
-        official_note: ''
-    }
+        official_note: '',
+    },
 ];
 
 async function populateAINodes() {

@@ -2,7 +2,8 @@
 import {gemini15Flash, googleAI} from "@genkit-ai/googleai";
 import {genkit, z} from "genkit";
 
-import {onCallGenkit} from "firebase-functions/https";
+import {onCall} from "firebase-functions/https";
+// import config from "../config";
 
 // Configure Genkit instance
 const ai = genkit({
@@ -57,13 +58,12 @@ export const llmFlow = ai.defineFlow(
 );
 
 // Export the function wrapped with onCallGenkit for Firebase Functions
-export const callLLM = onCallGenkit(
-  {
-    // authPolicy: (auth) => auth?.token?.email_verified,
-    authPolicy: (auth) => {
-      // Allow authenticated users (including anonymous) for testing
-      return !!auth?.uid;
-    },
-  },
-  llmFlow
+export const callLLM = onCall(
+  async (request) => {
+    // Check authentication - allow authenticated users for testing
+    if (!request.auth?.uid) {
+      throw new Error("Authentication required");
+    }
+    return await llmFlow(request.data);
+  }
 );

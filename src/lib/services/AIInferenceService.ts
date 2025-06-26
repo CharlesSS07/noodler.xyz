@@ -1,6 +1,7 @@
 import type { User } from 'firebase/auth';
+import { httpsCallable } from 'firebase/functions';
 import { Jimp, type JimpInstance, JimpMime } from 'jimp';
-import {auth, isUsingEmulators} from '../../firebase/index';
+import { auth, functions } from '../../firebase';
 import type {
     AIInferenceServiceConfig,
     AIInferenceError,
@@ -33,24 +34,15 @@ export let aiServiceInstance: AIInferenceService | undefined;
 
 auth.onAuthStateChanged((user) => {
     if (user) {
-        aiServiceInstance = new AIInferenceService({user});
+        aiServiceInstance = new AIInferenceService({ user });
     }
-})
+});
 
 export class AIInferenceService {
     private user: User;
-    private baseUrl: string;
 
     constructor(config: AIInferenceServiceConfig) {
         this.user = config.user;
-        // Use emulator URL when running locally, production URL otherwise
-        if (config.functionUrl) {
-            this.baseUrl = config.functionUrl;
-        } else if (isUsingEmulators) {
-            this.baseUrl = 'http://127.0.0.1:5001/chuck-65c6e/us-central1';
-        } else {
-            this.baseUrl = 'https://us-central1-chuck-65c6e.cloudfunctions.net';
-        }
     }
 
     // Utility methods for JIMP conversion
@@ -71,52 +63,40 @@ export class AIInferenceService {
         return await Jimp.read(buffer);
     }
 
-    private async makeRequest<T>(endpoint: string, data: any): Promise<T> {
-        const idToken = await this.user.getIdToken();
+    private async callFirebaseFunction<T>(
+        functionName: string,
+        data: any
+    ): Promise<T> {
+        try {
+            console.log(
+                `Calling Firebase function: ${functionName}`,
+                JSON.stringify(data)
+            );
 
-        console.log('ai inference service request data', JSON.stringify(data));
+            const callable = httpsCallable(functions, functionName);
+            const result = await callable(data);
 
-        const response = await fetch(`${this.baseUrl}/${endpoint}`, {
-            method: 'POST',
-            headers: {
-                Authorization: `Bearer ${idToken}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data),
-        });
+            console.log(
+                `Firebase function ${functionName} response:`,
+                result.data
+            );
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('HTTP Error Response:', {
-                status: response.status,
-                statusText: response.statusText,
-                body: errorText
-            });
-            
-            let error;
-            try {
-                error = JSON.parse(errorText);
-            } catch {
-                error = { error: errorText || 'Request failed' };
-            }
-            
-            const errorMessage = error.error?.message || error.message || error.error || `HTTP ${response.status}: ${response.statusText}`;
-            const aiError: AIInferenceError = new Error(errorMessage);
-            aiError.status = response.status;
-            aiError.response = error;
+            return result.data as T;
+        } catch (error: any) {
+            console.error(`Firebase function ${functionName} error:`, error);
+
+            const aiError: AIInferenceError = new Error(
+                error.message || `Function ${functionName} failed`
+            );
+            aiError.status = error.code || 'unknown';
+            aiError.response = error.details || error;
             throw aiError;
         }
-
-        const ret = await response.json();
-
-        console.log('ai inference service request data', ret);
-
-        return ret;
     }
 
     // Text-to-Image Generation
     async textToImage(request: TextToImageRequest): Promise<JimpInstance> {
-        const response = await this.makeRequest<TextToImageResponse>(
+        const response = await this.callFirebaseFunction<TextToImageResponse>(
             'textToImage',
             request
         );
@@ -135,7 +115,7 @@ export class AIInferenceService {
                     : request.inputs,
         };
 
-        return await this.makeRequest<ClassificationResult[]>(
+        return await this.callFirebaseFunction<ClassificationResult[]>(
             'imageClassification',
             processedRequest
         );
@@ -152,7 +132,7 @@ export class AIInferenceService {
                     : request.inputs,
         };
 
-        return await this.makeRequest<DetectionResult[]>(
+        return await this.callFirebaseFunction<DetectionResult[]>(
             'objectDetection',
             processedRequest
         );
@@ -161,7 +141,7 @@ export class AIInferenceService {
     async automaticSpeechRecognition(
         request: AutomaticSpeechRecognitionRequest
     ): Promise<SpeechRecognitionResult> {
-        return await this.makeRequest<SpeechRecognitionResult>(
+        return await this.callFirebaseFunction<SpeechRecognitionResult>(
             'automaticSpeechRecognition',
             request
         );
@@ -170,7 +150,7 @@ export class AIInferenceService {
     async tableQuestionAnswering(
         request: TableQuestionAnsweringRequest
     ): Promise<TableQAResult> {
-        return await this.makeRequest<TableQAResult>(
+        return await this.callFirebaseFunction<TableQAResult>(
             'tableQuestionAnswering',
             request
         );
@@ -179,7 +159,7 @@ export class AIInferenceService {
     async textClassification(
         request: TextClassificationRequest
     ): Promise<ClassificationResult[][]> {
-        return await this.makeRequest<ClassificationResult[][]>(
+        return await this.callFirebaseFunction<ClassificationResult[][]>(
             'textClassification',
             request
         );
@@ -188,26 +168,29 @@ export class AIInferenceService {
     async tokenClassification(
         request: TokenClassificationRequest
     ): Promise<any[]> {
-        return await this.makeRequest<any[]>('tokenClassification', request);
+        return await this.callFirebaseFunction<any[]>(
+            'tokenClassification',
+            request
+        );
     }
 
     async questionAnswering(
         request: QuestionAnsweringRequest
     ): Promise<QuestionAnsweringResult> {
-        return await this.makeRequest<QuestionAnsweringResult>(
+        return await this.callFirebaseFunction<QuestionAnsweringResult>(
             'questionAnswering',
             request
         );
     }
 
     async fillMask(request: FillMaskRequest): Promise<any[]> {
-        return await this.makeRequest<any[]>('fillMask', request);
+        return await this.callFirebaseFunction<any[]>('fillMask', request);
     }
 
     async translation(
         request: TranslationRequest
     ): Promise<{ translation_text: string }[]> {
-        return await this.makeRequest<{ translation_text: string }[]>(
+        return await this.callFirebaseFunction<{ translation_text: string }[]>(
             'translation',
             request
         );
@@ -216,13 +199,16 @@ export class AIInferenceService {
     async sentenceSimilarity(
         request: SentenceSimilarityRequest
     ): Promise<number[]> {
-        return await this.makeRequest<number[]>('sentenceSimilarity', request);
+        return await this.callFirebaseFunction<number[]>(
+            'sentenceSimilarity',
+            request
+        );
     }
 
     async conversational(
         request: ConversationalRequest
     ): Promise<{ generated_text: string }> {
-        return await this.makeRequest<{ generated_text: string }>(
+        return await this.callFirebaseFunction<{ generated_text: string }>(
             'conversational',
             request
         );
@@ -231,7 +217,10 @@ export class AIInferenceService {
     async featureExtraction(
         request: FeatureExtractionRequest
     ): Promise<number[][]> {
-        return await this.makeRequest<number[][]>('featureExtraction', request);
+        return await this.callFirebaseFunction<number[][]>(
+            'featureExtraction',
+            request
+        );
     }
 
     // GenKit-based endpoints
@@ -245,18 +234,15 @@ export class AIInferenceService {
         summaryLength: number;
         compressionRatio: number;
     }> {
-        // GenKit functions expect data to be wrapped in a 'data' field
-        const response = await this.makeRequest<{
-            result: {
-                summary: string;
-                originalLength: number;
-                summaryLength: number;
-                compressionRatio: number;
-            }
-        }>('summarizeContent', { data: request });
-        
-        // GenKit functions return data wrapped in a 'result' field
-        return response.result;
+        // Use callable function for Genkit-based functions
+        const response = await this.callFirebaseFunction<{
+            summary: string;
+            originalLength: number;
+            summaryLength: number;
+            compressionRatio: number;
+        }>('summarizeContent', request);
+
+        return response;
     }
 
     async callLLM(request: {
@@ -268,41 +254,26 @@ export class AIInferenceService {
         promptLength: number;
         responseLength: number;
     }> {
-        // GenKit functions expect data to be wrapped in a 'data' field
-        const response = await this.makeRequest<{
-            result: {
-                response: string;
-                promptLength: number;
-                responseLength: number;
-            }
-        }>('callLLM', { data: request });
-        
-        // GenKit functions return data wrapped in a 'result' field
-        return response.result;
+        // Use callable function for Genkit-based functions
+        const response = await this.callFirebaseFunction<{
+            response: string;
+            promptLength: number;
+            responseLength: number;
+        }>('callLLM', request);
+
+        return response;
     }
 
-    async formatText(request: TextFormattingRequest): Promise<TextFormattingResponse> {
-        // GenKit functions expect data to be wrapped in a 'data' field
-        const response = await this.makeRequest<{
-            result: TextFormattingResponse
-        }>('textFormatingLLM', { data: request });
-        
-        // GenKit functions return data wrapped in a 'result' field
-        return response.result;
-    }
+    async formatText(
+        request: TextFormattingRequest
+    ): Promise<TextFormattingResponse> {
+        // Use callable function for Genkit-based functions
+        const response =
+            await this.callFirebaseFunction<TextFormattingResponse>(
+                'textFormatingLLM',
+                request
+            );
 
-    // Configuration methods
-    setBaseUrl(url: string): void {
-        this.baseUrl = url;
-    }
-
-    getBaseUrl(): string {
-        return this.baseUrl;
-    }
-
-    updateUser(user: User): void {
-        this.user = user;
+        return response;
     }
 }
-
-

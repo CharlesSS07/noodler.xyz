@@ -256,8 +256,7 @@ class ProjectFirebaseSync {
                 // Mark that we've completed the initial load
                 if (!this.hasInitialLoad) {
                     this.hasInitialLoad = true;
-                    if (onProjectSyncedCallback)
-                        onProjectSyncedCallback();
+                    if (onProjectSyncedCallback) onProjectSyncedCallback();
                 }
             } else {
                 projectState.update((state) => ({
@@ -274,8 +273,7 @@ class ProjectFirebaseSync {
                 // Mark that we've completed the initial load
                 if (!this.hasInitialLoad) {
                     this.hasInitialLoad = true;
-                    if (onProjectSyncedCallback)
-                        onProjectSyncedCallback();
+                    if (onProjectSyncedCallback) onProjectSyncedCallback();
                 }
             }
         });

@@ -26,8 +26,8 @@ export async function htmlNodes() {
         'browser',
         'ui',
         'presentation',
-        'visual'
-    ]
+        'visual',
+    ];
 
     await htmlViewer.newInputSocket('html', {
         label: 'HTML',
@@ -57,8 +57,8 @@ export async function htmlNodes() {
         'builder',
         'templating',
         'structure',
-        'attributes'
-    ]
+        'attributes',
+    ];
 
     await htmlElement.newInputSocket('tag', {
         label: 'Tag',
@@ -128,8 +128,8 @@ outputs.set('html', d);
         'scraping',
         'content',
         'internet',
-        'external'
-    ]
+        'external',
+    ];
 
     await fetchURL.newInputSocket('url', {
         label: 'URL',
@@ -140,7 +140,8 @@ outputs.set('html', d);
 
     await fetchURL.newOutputSocket('text', {
         label: 'Fetched Content',
-        documentation: 'Plain text fetched from the URL. A blob in base64 format.',
+        documentation:
+            'Plain text fetched from the URL. A blob in base64 format.',
         type: STANDARD_DATATYPES.STRING,
     });
 

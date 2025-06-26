@@ -66,9 +66,7 @@ export class ComputedDataCache {
     /**
      * Get a reactive store for a specific nodes error output
      */
-    useNodeErrorStore(
-        node_key: string,
-    ): Readable<unknown | null> {
+    useNodeErrorStore(node_key: string): Readable<unknown | null> {
         const key = socketInstanceKey(node_key, '__error__');
 
         return derived(this.dataStore, ($data) => {
@@ -79,9 +77,7 @@ export class ComputedDataCache {
     /**
      * Get a reactive store for a specific nodes error output
      */
-    useNodeExecutionStatusStore(
-        node_key: string,
-    ): Readable<unknown | null> {
+    useNodeExecutionStatusStore(node_key: string): Readable<unknown | null> {
         const key = socketInstanceKey(node_key, '__exec_status__');
 
         return derived(this.dataStore, ($data) => {

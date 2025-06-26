@@ -21,8 +21,8 @@ export async function aiInferenceNodes() {
         'ai', // for nodes that use ai
         'image', // for nodes that handle images in any way
         'remote', // for nodes that do operations using the cloud, not fully locally
-        'text' // for nodes that handle text
-    ]
+        'text', // for nodes that handle text
+    ];
 
     textToImage.newInputSocket('prompt', {
         label: 'Prompt',
@@ -124,12 +124,7 @@ export async function aiInferenceNodes() {
     objectDetection.title = 'AI Object Detection';
     objectDetection.documentation =
         'Detects objects in images with bounding boxes.';
-    objectDetection.tags = [
-        'ai',
-        'image',
-        'remote',
-        'detection'
-    ]
+    objectDetection.tags = ['ai', 'image', 'remote', 'detection'];
 
     objectDetection.newInputSocket('image', {
         label: 'Image',
@@ -183,12 +178,7 @@ export async function aiInferenceNodes() {
     textGeneration.title = 'AI Text Generation';
     textGeneration.documentation =
         'Generates text completions using language models.';
-    textGeneration.tags = [
-        'ai',
-        'text',
-        'remote',
-        'generation'
-    ]
+    textGeneration.tags = ['ai', 'text', 'remote', 'generation'];
 
     textGeneration.newInputSocket('prompt', {
         label: 'Text Prompt',
@@ -281,12 +271,7 @@ export async function aiInferenceNodes() {
     textClassification.title = 'AI Text Classification';
     textClassification.documentation =
         'Classifies text into categories (sentiment, topic, etc.).';
-    textClassification.tags = [
-        'ai',
-        'text',
-        'remote',
-        'classification'
-    ]
+    textClassification.tags = ['ai', 'text', 'remote', 'classification'];
 
     textClassification.newInputSocket('text', {
         label: 'Text',
@@ -331,12 +316,7 @@ export async function aiInferenceNodes() {
     questionAnswering.title = 'AI Question Answering';
     questionAnswering.documentation =
         'Answers questions based on provided context.';
-    questionAnswering.tags = [
-        'ai',
-        'text',
-        'remote',
-        'qa'
-    ]
+    questionAnswering.tags = ['ai', 'text', 'remote', 'qa'];
 
     questionAnswering.newInputSocket('question', {
         label: 'Question',
@@ -397,12 +377,7 @@ export async function aiInferenceNodes() {
         await factory.initOfficialNodeBluePrint('ai_summarization');
     summarization.title = 'AI Text Summarization';
     summarization.documentation = 'Summarizes long text into shorter versions.';
-    summarization.tags = [
-        'ai',
-        'text',
-        'remote',
-        'summarization'
-    ]
+    summarization.tags = ['ai', 'text', 'remote', 'summarization'];
 
     summarization.newInputSocket('text', {
         label: 'Text to Summarize',
@@ -462,12 +437,7 @@ export async function aiInferenceNodes() {
         await factory.initOfficialNodeBluePrint('ai_translation');
     translation.title = 'AI Language Translation';
     translation.documentation = 'Translates text between languages.';
-    translation.tags = [
-        'ai',
-        'text',
-        'remote',
-        'translation'
-    ]
+    translation.tags = ['ai', 'text', 'remote', 'translation'];
 
     translation.newInputSocket('text', {
         label: 'Text to Translate',
@@ -507,12 +477,7 @@ export async function aiInferenceNodes() {
     const fillMask = await factory.initOfficialNodeBluePrint('ai_fill_mask');
     fillMask.title = 'AI Fill Mask';
     fillMask.documentation = 'Predicts masked words in text.';
-    fillMask.tags = [
-        'ai',
-        'text',
-        'remote',
-        'prediction'
-    ]
+    fillMask.tags = ['ai', 'text', 'remote', 'prediction'];
 
     fillMask.newInputSocket('text', {
         label: 'Text with Mask',
@@ -562,12 +527,7 @@ export async function aiInferenceNodes() {
     sentenceSimilarity.title = 'AI Sentence Similarity';
     sentenceSimilarity.documentation =
         'Computes semantic similarity between sentences.';
-    sentenceSimilarity.tags = [
-        'ai',
-        'text',
-        'remote',
-        'similarity'
-    ]
+    sentenceSimilarity.tags = ['ai', 'text', 'remote', 'similarity'];
 
     sentenceSimilarity.newInputSocket('source_sentence', {
         label: 'Source Sentence',
@@ -622,12 +582,7 @@ export async function aiInferenceNodes() {
     );
     featureExtraction.title = 'AI Feature Extraction';
     featureExtraction.documentation = 'Extracts feature embeddings from text.';
-    featureExtraction.tags = [
-        'ai',
-        'text',
-        'remote',
-        'embedding'
-    ]
+    featureExtraction.tags = ['ai', 'text', 'remote', 'embedding'];
 
     featureExtraction.newInputSocket('text', {
         label: 'Text',
@@ -676,8 +631,8 @@ export async function aiInferenceNodes() {
         'audio',
         'text',
         'remote',
-        'recognition'
-    ]
+        'recognition',
+    ];
 
     automaticSpeechRecognition.newInputSocket('audio_data', {
         label: 'Audio Data',
@@ -714,13 +669,7 @@ export async function aiInferenceNodes() {
     tableQuestionAnswering.title = 'AI Table Question Answering';
     tableQuestionAnswering.documentation =
         'Answers questions about tabular data.';
-    tableQuestionAnswering.tags = [
-        'ai',
-        'text',
-        'data',
-        'remote',
-        'qa'
-    ]
+    tableQuestionAnswering.tags = ['ai', 'text', 'data', 'remote', 'qa'];
 
     tableQuestionAnswering.newInputSocket('question', {
         label: 'Question',
@@ -777,16 +726,12 @@ export async function aiInferenceNodes() {
     `;
 
     // AI IMAGE EDITOR NODE
-    const imageEditor = await factory.initOfficialNodeBluePrint('ai_image_editor');
+    const imageEditor =
+        await factory.initOfficialNodeBluePrint('ai_image_editor');
     imageEditor.title = 'AI Image Editor';
-    imageEditor.documentation = 'Applies AI-guided modifications to images based on text instructions.';
-    imageEditor.tags = [
-        'ai',
-        'image',
-        'text',
-        'remote',
-        'editing'
-    ]
+    imageEditor.documentation =
+        'Applies AI-guided modifications to images based on text instructions.';
+    imageEditor.tags = ['ai', 'image', 'text', 'remote', 'editing'];
 
     imageEditor.newInputSocket('image', {
         label: 'Source Image',
@@ -797,23 +742,30 @@ export async function aiInferenceNodes() {
 
     imageEditor.newInputSocket('instructions', {
         label: 'Edit Instructions',
-        documentation: 'Text describing how to modify the image (e.g., "make it darker", "add sunglasses", "change to winter scene").',
+        documentation:
+            'Text describing how to modify the image (e.g., "make it darker", "add sunglasses", "change to winter scene").',
         type: STANDARD_DATATYPES.STRING,
-        params: new StringSocketParamsBuilder('Make the image brighter and more colorful')
+        params: new StringSocketParamsBuilder(
+            'Make the image brighter and more colorful'
+        )
             .asParagraph()
             .build(),
     });
 
     imageEditor.newInputSocket('model', {
         label: 'Model',
-        documentation: 'AI model for image editing (e.g., instruct-pix2pix models).',
+        documentation:
+            'AI model for image editing (e.g., instruct-pix2pix models).',
         type: STANDARD_DATATYPES.STRING,
-        params: new StringSocketParamsBuilder('timbrooks/instruct-pix2pix').build(),
+        params: new StringSocketParamsBuilder(
+            'timbrooks/instruct-pix2pix'
+        ).build(),
     });
 
     imageEditor.newInputSocket('guidance_scale', {
         label: 'Guidance Scale',
-        documentation: 'How closely to follow the edit instructions (higher = more adherent).',
+        documentation:
+            'How closely to follow the edit instructions (higher = more adherent).',
         type: STANDARD_DATATYPES.NUMBER,
         params: new NumberSocketParamsBuilder(7.5)
             .setMin(1)
@@ -835,7 +787,8 @@ export async function aiInferenceNodes() {
 
     imageEditor.newInputSocket('num_inference_steps', {
         label: 'Inference Steps',
-        documentation: 'Number of denoising steps (higher = better quality, slower).',
+        documentation:
+            'Number of denoising steps (higher = better quality, slower).',
         type: STANDARD_DATATYPES.NUMBER,
         params: new NumberSocketParamsBuilder(20).setMin(1).setMax(100).build(),
     });
@@ -854,20 +807,17 @@ export async function aiInferenceNodes() {
     // Prompt LLM NODE (GenKit-based)
     const callLLM = await factory.initOfficialNodeBluePrint('ai_llm');
     callLLM.title = 'LLM Text Completion';
-    callLLM.documentation = 'General-purpose large language model for text generation and completion using Google Gemini.';
-    callLLM.tags = [
-        'ai',
-        'text',
-        'remote',
-        'llm',
-        'genkit'
-    ]
+    callLLM.documentation =
+        'General-purpose large language model for text generation and completion using Google Gemini.';
+    callLLM.tags = ['ai', 'text', 'remote', 'llm', 'genkit'];
 
     callLLM.newInputSocket('prompt', {
         label: 'Prompt',
         documentation: 'Text prompt to send to the language model.',
         type: STANDARD_DATATYPES.STRING,
-        params: new StringSocketParamsBuilder('What is artificial intelligence?')
+        params: new StringSocketParamsBuilder(
+            'What is artificial intelligence?'
+        )
             .asParagraph()
             .build(),
     });
@@ -884,7 +834,8 @@ export async function aiInferenceNodes() {
 
     callLLM.newInputSocket('temperature', {
         label: 'Temperature',
-        documentation: 'Controls randomness in generation (0.0 = deterministic, 2.0 = very creative).',
+        documentation:
+            'Controls randomness in generation (0.0 = deterministic, 2.0 = very creative).',
         type: STANDARD_DATATYPES.NUMBER,
         params: new NumberSocketParamsBuilder(0.7)
             .setMin(0.0)
@@ -921,5 +872,4 @@ export async function aiInferenceNodes() {
         outputs.set('promptLength', result.promptLength);
         outputs.set('responseLength', result.responseLength);
     `;
-
 }

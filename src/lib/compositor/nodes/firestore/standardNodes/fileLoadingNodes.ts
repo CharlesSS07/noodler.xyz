@@ -24,21 +24,64 @@ export async function fileLoadingNodes() {
         'tabular',
         'cells',
         'business',
-        'not-implemented'
-    ]
+        'not-implemented',
+    ];
 
-    await loadExcel.newInputSocket('xlsx_file', {
+    loadExcel.newInputSocket('xlsx_file', {
         label: '.xlsx',
         documentation: 'Excel File',
         type: STANDARD_DATATYPES.FILE,
         params: new JIMPImageSocketParamsBuilder().build(),
     });
 
-    await loadExcel.newOutputSocket('json', {
+    loadExcel.newOutputSocket('json', {
         label: 'JSON dict',
         documentation: 'Json dictionary of spreadsheet',
         type: 'json',
     });
 
     loadExcel.code = "console.error('Not Implemented');";
+
+    const loadPDF =
+        await nodeBluePrintController.initOfficialNodeBluePrint('load_pdf');
+    loadPDF.title = 'Load PDF Document';
+    loadPDF.documentation = 'Extract text and metadata from PDF files';
+    loadPDF.tags = [
+        'file',
+        'pdf',
+        'document',
+        'text',
+        'loader',
+        'import',
+        'adobe',
+        'extraction',
+        'content',
+        'portable',
+        'not-implemented',
+    ];
+
+    loadPDF.newInputSocket('pdf_file', {
+        label: '.pdf',
+        documentation: 'PDF File',
+        type: STANDARD_DATATYPES.FILE,
+        params: new JIMPImageSocketParamsBuilder().build(),
+    });
+
+    loadPDF.newOutputSocket('text', {
+        label: 'Text Content',
+        documentation: 'Extracted text from PDF',
+        type: STANDARD_DATATYPES.STRING,
+    });
+
+    loadPDF.newOutputSocket('metadata', {
+        label: 'Metadata',
+        documentation: 'PDF metadata (title, author, etc.)',
+        type: STANDARD_DATATYPES.OBJECT,
+    });
+
+    loadPDF.code = `const pdf = require('pdf-parse');
+const data = await pdf(inputs.pdf_file);
+outputs.set("text", data.text);
+outputs.set("metadata", data.metadata);
+`;
 }

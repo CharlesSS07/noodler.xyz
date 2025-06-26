@@ -1,12 +1,12 @@
 /**
  * Comprehensive Image Processing Integration Test
- * 
+ *
  * This test file chains together multiple image processing operations:
  * 1. Fetch URL node - loads an image from the internet
  * 2. Image Loader node - converts the fetched data to JimpInstance
  * 3. HSV node - applies color transformations
  * 4. Other JIMP operations - applies various image modifications
- * 
+ *
  * Each component is tested individually first, then integrated together
  * to create a complete image processing pipeline.
  */
@@ -50,13 +50,15 @@ describe('Image Processing Integration Tests', () => {
                 'fetch-url-test',
                 'text'
             );
-            
+
             // The fetch URL node now actually fetches images and returns base64 data
             expect(result).toBeDefined();
             expect(typeof result).toBe('string');
             expect(result.length).toBeGreaterThan(100); // Should be substantial base64 data
             // JPEG images typically start with /9j/ in base64
-            expect(result.startsWith('/9j/') || result.startsWith('iVBOR')).toBe(true);
+            expect(
+                result.startsWith('/9j/') || result.startsWith('iVBOR')
+            ).toBe(true);
         }, 10000); // Extended timeout for network request
 
         test('Fetch URL node: fetch different image size', async () => {
@@ -75,20 +77,26 @@ describe('Image Processing Integration Tests', () => {
             mockEdges = [];
 
             await executeFlowGraph('simulate-fetch', mockNodes, mockEdges);
-            const result = await projectOutputDataCache.get('simulate-fetch', 'text');
-            
+            const result = await projectOutputDataCache.get(
+                'simulate-fetch',
+                'text'
+            );
+
             // Verify fetch functionality with different image
             expect(result).toBeDefined();
             expect(typeof result).toBe('string');
             expect(result.length).toBeGreaterThan(50); // Should contain substantial data
             // Should be valid base64 image data
-            expect(result.startsWith('/9j/') || result.startsWith('iVBOR')).toBe(true);
+            expect(
+                result.startsWith('/9j/') || result.startsWith('iVBOR')
+            ).toBe(true);
         }, 10000); // Extended timeout for network request
 
         test('Image Loader node: convert base64 to JIMP instance', async () => {
             // Test with a minimal 1x1 red pixel PNG in base64
-            const testImageBase64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==';
-            
+            const testImageBase64 =
+                'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==';
+
             mockNodes = [
                 {
                     id: 'image-loader-test',
@@ -103,8 +111,11 @@ describe('Image Processing Integration Tests', () => {
             mockEdges = [];
 
             await executeFlowGraph('image-loader-test', mockNodes, mockEdges);
-            const result = await projectOutputDataCache.get('image-loader-test', 'image');
-            
+            const result = await projectOutputDataCache.get(
+                'image-loader-test',
+                'image'
+            );
+
             expect(result).toBeDefined();
             expect(result.bitmap).toBeDefined();
             expect(result.bitmap.width).toBe(1);
@@ -128,10 +139,10 @@ describe('Image Processing Integration Tests', () => {
                     position: { x: 200, y: 0 },
                     data: {
                         nid: 'hsv',
-                        input: { 
+                        input: {
                             hue: 180, // Shift hue by 180 degrees (red to cyan)
                             saturation: 25, // Increase saturation
-                            value: 10 // Brighten slightly
+                            value: 10, // Brighten slightly
                         },
                     },
                 },
@@ -147,8 +158,11 @@ describe('Image Processing Integration Tests', () => {
             ];
 
             await executeFlowGraph('hsv-transform', mockNodes, mockEdges);
-            const result = await projectOutputDataCache.get('hsv-transform', 'img');
-            
+            const result = await projectOutputDataCache.get(
+                'hsv-transform',
+                'img'
+            );
+
             expect(result).toBeDefined();
             expect(result.bitmap?.width).toBe(50);
             expect(result.bitmap?.height).toBe(50);
@@ -187,7 +201,7 @@ describe('Image Processing Integration Tests', () => {
 
             await executeFlowGraph('greyscale', mockNodes, mockEdges);
             const result = await projectOutputDataCache.get('greyscale', 'img');
-            
+
             expect(result).toBeDefined();
             expect(result.bitmap?.width).toBe(30);
             expect(result.bitmap?.height).toBe(30);
@@ -226,7 +240,7 @@ describe('Image Processing Integration Tests', () => {
 
             await executeFlowGraph('resize', mockNodes, mockEdges);
             const result = await projectOutputDataCache.get('resize', 'image');
-            
+
             expect(result).toBeDefined();
             expect(result.bitmap?.width).toBe(75);
             expect(result.bitmap?.height).toBe(125);
@@ -255,10 +269,10 @@ describe('Image Processing Integration Tests', () => {
                     position: { x: 200, y: 0 },
                     data: {
                         nid: 'hsv',
-                        input: { 
+                        input: {
                             hue: 90, // Shift orange towards green
                             saturation: 30, // Boost saturation
-                            value: 5 // Slight brightness increase
+                            value: 5, // Slight brightness increase
                         },
                     },
                 },
@@ -292,9 +306,18 @@ describe('Image Processing Integration Tests', () => {
             await executeFlowGraph('make-greyscale', mockNodes, mockEdges);
 
             // Verify each step
-            const originalImage = await projectOutputDataCache.get('create-image', 'image');
-            const hsvAdjusted = await projectOutputDataCache.get('hsv-adjust', 'img');
-            const finalGreyscale = await projectOutputDataCache.get('make-greyscale', 'img');
+            const originalImage = await projectOutputDataCache.get(
+                'create-image',
+                'image'
+            );
+            const hsvAdjusted = await projectOutputDataCache.get(
+                'hsv-adjust',
+                'img'
+            );
+            const finalGreyscale = await projectOutputDataCache.get(
+                'make-greyscale',
+                'img'
+            );
 
             expect(originalImage.bitmap?.width).toBe(64);
             expect(hsvAdjusted.bitmap?.width).toBe(64);
@@ -328,10 +351,10 @@ describe('Image Processing Integration Tests', () => {
                     position: { x: 300, y: 0 },
                     data: {
                         nid: 'hsv',
-                        input: { 
+                        input: {
                             hue: 240, // Shift towards blue
                             saturation: 15, // Reduce saturation slightly
-                            value: 8 // Brighten
+                            value: 8, // Brighten
                         },
                     },
                 },
@@ -372,23 +395,35 @@ describe('Image Processing Integration Tests', () => {
             await executeFlowGraph('final-greyscale', mockNodes, mockEdges);
 
             // Verify the complete pipeline
-            const original = await projectOutputDataCache.get('create-image', 'image');
-            const resized = await projectOutputDataCache.get('resize-first', 'image');
-            const colorized = await projectOutputDataCache.get('hsv-colorize', 'img');
-            const final = await projectOutputDataCache.get('final-greyscale', 'img');
+            const original = await projectOutputDataCache.get(
+                'create-image',
+                'image'
+            );
+            const resized = await projectOutputDataCache.get(
+                'resize-first',
+                'image'
+            );
+            const colorized = await projectOutputDataCache.get(
+                'hsv-colorize',
+                'img'
+            );
+            const final = await projectOutputDataCache.get(
+                'final-greyscale',
+                'img'
+            );
 
             // Original dimensions
             expect(original.bitmap?.width).toBe(100);
             expect(original.bitmap?.height).toBe(100);
-            
+
             // After resize
             expect(resized.bitmap?.width).toBe(80);
             expect(resized.bitmap?.height).toBe(120);
-            
+
             // After HSV (dimensions unchanged)
             expect(colorized.bitmap?.width).toBe(80);
             expect(colorized.bitmap?.height).toBe(120);
-            
+
             // Final result (dimensions unchanged)
             expect(final.bitmap?.width).toBe(80);
             expect(final.bitmap?.height).toBe(120);
@@ -430,10 +465,10 @@ describe('Image Processing Integration Tests', () => {
                     position: { x: 600, y: 0 },
                     data: {
                         nid: 'hsv',
-                        input: { 
+                        input: {
                             hue: 45, // Yellow shift
                             saturation: 25,
-                            value: 10
+                            value: 10,
                         },
                     },
                 },
@@ -478,36 +513,55 @@ describe('Image Processing Integration Tests', () => {
                 },
             ];
 
-            await executeFlowGraph('greyscale-fetched-image', mockNodes, mockEdges);
+            await executeFlowGraph(
+                'greyscale-fetched-image',
+                mockNodes,
+                mockEdges
+            );
 
             // Verify each stage of the pipeline
-            const fetchedData = await projectOutputDataCache.get('fetch-internet-image', 'text');
-            const loadedImage = await projectOutputDataCache.get('load-fetched-image', 'image');  
-            const resizedImage = await projectOutputDataCache.get('resize-fetched-image', 'image');
-            const hsvImage = await projectOutputDataCache.get('hsv-fetched-image', 'img');
-            const finalImage = await projectOutputDataCache.get('greyscale-fetched-image', 'img');
+            const fetchedData = await projectOutputDataCache.get(
+                'fetch-internet-image',
+                'text'
+            );
+            const loadedImage = await projectOutputDataCache.get(
+                'load-fetched-image',
+                'image'
+            );
+            const resizedImage = await projectOutputDataCache.get(
+                'resize-fetched-image',
+                'image'
+            );
+            const hsvImage = await projectOutputDataCache.get(
+                'hsv-fetched-image',
+                'img'
+            );
+            const finalImage = await projectOutputDataCache.get(
+                'greyscale-fetched-image',
+                'img'
+            );
 
             // Verify the fetch worked
             expect(fetchedData).toBeDefined();
             expect(typeof fetchedData).toBe('string');
             expect(fetchedData.length).toBeGreaterThan(100);
-            
+
             // Verify image loading worked
             expect(loadedImage).toBeDefined();
             expect(loadedImage.bitmap).toBeDefined();
             expect(loadedImage.bitmap.width).toBe(150); // Original fetched size
             expect(loadedImage.bitmap.height).toBe(150);
-            
+
             // Verify resize worked
             expect(resizedImage).toBeDefined();
             expect(resizedImage.bitmap?.width).toBe(100);
             expect(resizedImage.bitmap?.height).toBe(100);
-            
+
             // Verify HSV transformation
             expect(hsvImage).toBeDefined();
             expect(hsvImage.bitmap?.width).toBe(100);
             expect(hsvImage.bitmap?.height).toBe(100);
-            
+
             // Verify final greyscale conversion
             expect(finalImage).toBeDefined();
             expect(finalImage.bitmap?.width).toBe(100);
@@ -518,9 +572,10 @@ describe('Image Processing Integration Tests', () => {
             // Since the fetch_url node currently doesn't fetch actual data,
             // we'll test the image processing pipeline using direct image creation
             // and base64 image loading to simulate what would happen with fetched data
-            
-            const testImageBase64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==';
-            
+
+            const testImageBase64 =
+                'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==';
+
             mockNodes = [
                 // Simulate what fetch would return by directly providing base64
                 {
@@ -547,10 +602,10 @@ describe('Image Processing Integration Tests', () => {
                     position: { x: 400, y: 0 },
                     data: {
                         nid: 'hsv',
-                        input: { 
+                        input: {
                             hue: 120, // Green shift
                             saturation: 40,
-                            value: 15
+                            value: 15,
                         },
                     },
                 },
@@ -591,27 +646,39 @@ describe('Image Processing Integration Tests', () => {
             await executeFlowGraph('final-gray', mockNodes, mockEdges);
 
             // Verify each stage of the pipeline
-            const loadedImage = await projectOutputDataCache.get('load-image', 'image');  
-            const resizedImage = await projectOutputDataCache.get('resize-loaded', 'image');
-            const hsvImage = await projectOutputDataCache.get('hsv-color', 'img');
-            const finalImage = await projectOutputDataCache.get('final-gray', 'img');
-            
+            const loadedImage = await projectOutputDataCache.get(
+                'load-image',
+                'image'
+            );
+            const resizedImage = await projectOutputDataCache.get(
+                'resize-loaded',
+                'image'
+            );
+            const hsvImage = await projectOutputDataCache.get(
+                'hsv-color',
+                'img'
+            );
+            const finalImage = await projectOutputDataCache.get(
+                'final-gray',
+                'img'
+            );
+
             // Verify image loading worked
             expect(loadedImage).toBeDefined();
             expect(loadedImage.bitmap).toBeDefined();
             expect(loadedImage.bitmap.width).toBe(1); // Original test image is 1x1
             expect(loadedImage.bitmap.height).toBe(1);
-            
+
             // Verify resize worked
             expect(resizedImage).toBeDefined();
             expect(resizedImage.bitmap?.width).toBe(50);
             expect(resizedImage.bitmap?.height).toBe(50);
-            
+
             // Verify HSV transformation
             expect(hsvImage).toBeDefined();
             expect(hsvImage.bitmap?.width).toBe(50);
             expect(hsvImage.bitmap?.height).toBe(50);
-            
+
             // Verify final greyscale conversion
             expect(finalImage).toBeDefined();
             expect(finalImage.bitmap?.width).toBe(50);
@@ -654,7 +721,7 @@ describe('Image Processing Integration Tests', () => {
                         input: {},
                     },
                 },
-                // Chain 2: Resize -> HSV  
+                // Chain 2: Resize -> HSV
                 {
                     id: 'resize-chain2',
                     type: 'node',
@@ -712,18 +779,27 @@ describe('Image Processing Integration Tests', () => {
             await executeFlowGraph('hsv-chain2', mockNodes, mockEdges);
 
             // Verify source image
-            const source = await projectOutputDataCache.get('source-image', 'image');
+            const source = await projectOutputDataCache.get(
+                'source-image',
+                'image'
+            );
             expect(source.bitmap?.width).toBe(60);
             expect(source.bitmap?.height).toBe(60);
 
             // Verify Chain 1 results
             const hsv1 = await projectOutputDataCache.get('hsv-chain1', 'img');
-            const grey1 = await projectOutputDataCache.get('grey-chain1', 'img');
+            const grey1 = await projectOutputDataCache.get(
+                'grey-chain1',
+                'img'
+            );
             expect(hsv1.bitmap?.width).toBe(60);
             expect(grey1.bitmap?.width).toBe(60);
 
             // Verify Chain 2 results
-            const resize2 = await projectOutputDataCache.get('resize-chain2', 'image');
+            const resize2 = await projectOutputDataCache.get(
+                'resize-chain2',
+                'image'
+            );
             const hsv2 = await projectOutputDataCache.get('hsv-chain2', 'img');
             expect(resize2.bitmap?.width).toBe(40);
             expect(resize2.bitmap?.height).toBe(80);
@@ -752,8 +828,12 @@ describe('Image Processing Integration Tests', () => {
             mockEdges = [];
 
             // The system handles errors gracefully and returns error information
-            const result = await executeFlowGraph('bad-image-data', mockNodes, mockEdges);
-            
+            const result = await executeFlowGraph(
+                'bad-image-data',
+                mockNodes,
+                mockEdges
+            );
+
             // Should return an error result rather than throwing
             expect(result).toBeDefined();
             expect(result.success).toBe(false);
@@ -777,8 +857,12 @@ describe('Image Processing Integration Tests', () => {
             mockEdges = [];
 
             // The system handles missing inputs gracefully
-            const result = await executeFlowGraph('hsv-no-input', mockNodes, mockEdges);
-            
+            const result = await executeFlowGraph(
+                'hsv-no-input',
+                mockNodes,
+                mockEdges
+            );
+
             // Should return an error result for missing required input
             expect(result).toBeDefined();
             expect(result.success).toBe(false);
@@ -803,10 +887,10 @@ describe('Image Processing Integration Tests', () => {
                     position: { x: 200, y: 0 },
                     data: {
                         nid: 'hsv',
-                        input: { 
+                        input: {
                             hue: 999, // Invalid hue value (should be 0-360)
                             saturation: -50, // Invalid negative saturation
-                            value: 200 // Invalid value (should be 0-100)
+                            value: 200, // Invalid value (should be 0-100)
                         },
                     },
                 },
@@ -822,8 +906,12 @@ describe('Image Processing Integration Tests', () => {
             ];
 
             // The HSV node with invalid values should fail gracefully
-            const result = await executeFlowGraph('invalid-hsv', mockNodes, mockEdges);
-            
+            const result = await executeFlowGraph(
+                'invalid-hsv',
+                mockNodes,
+                mockEdges
+            );
+
             // Should return an error result due to invalid HSV values
             expect(result).toBeDefined();
             expect(result.success).toBe(false);
@@ -904,12 +992,15 @@ describe('Image Processing Integration Tests', () => {
             await executeFlowGraph('grey-large', mockNodes, mockEdges);
             const endTime = Date.now();
 
-            const result = await projectOutputDataCache.get('grey-large', 'img');
-            
+            const result = await projectOutputDataCache.get(
+                'grey-large',
+                'img'
+            );
+
             expect(result).toBeDefined();
             expect(result.bitmap?.width).toBe(150);
             expect(result.bitmap?.height).toBe(150);
-            
+
             // Processing should complete in reasonable time (under 5 seconds)
             expect(endTime - startTime).toBeLessThan(5000);
         });

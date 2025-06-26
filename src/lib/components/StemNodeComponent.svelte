@@ -64,6 +64,7 @@
                                             inputValues = inputValues; // reactive update
                                         }
                                     }
+                                    socketId={inputSocket.id}
                                     {...{...(inputSocket.options || {}), params: inputSocket.params}}
                             />
                             <!--{JSON.stringify(inputSocket.params, null, 2)}-->

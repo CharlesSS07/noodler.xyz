@@ -66,6 +66,7 @@
         "jimp": "^1.6.0",
         "lucide-svelte": "^0.511.0",
         "marked": "^15.0.12",
+        "pdf-parse": "^1.1.1",
         "sveltefire": "^0.4.5",
         "uuid": "^11.1.0"
     },

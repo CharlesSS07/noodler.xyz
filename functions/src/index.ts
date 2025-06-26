@@ -10,3 +10,10 @@ export {callLLM} from "./genkitFlows/llmFlow";
 
 // Genkit-based Text Formatting LLM Flow
 export {textFormatingLLM} from "./genkitFlows/textFormatingLLMFlow";
+
+// Health Check Functions
+export {
+  publicHealthCheck,
+  authenticatedHealthCheck,
+  verifiedEmailHealthCheck,
+} from "./healthchecks";

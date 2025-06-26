@@ -30,8 +30,8 @@ export async function specialtyDataInputDataNodes() {
         'content',
         'typing',
         'manual',
-        'fundamental'
-    ]
+        'fundamental',
+    ];
     rawTextEditor.notSearchable();
 
     rawTextEditor.newInputSocket('inputText', {
@@ -68,7 +68,7 @@ export async function specialtyDataInputDataNodes() {
         'readme',
         'styling',
         'headers',
-        'links'
+        'links',
     ];
     mdTextEditor.notSearchable();
 
@@ -104,8 +104,8 @@ export async function specialtyDataInputDataNodes() {
         'fill-in',
         'generation',
         'incomplete',
-        'parametric'
-    ]
+        'parametric',
+    ];
     textTemplateFillin.notSearchable();
 
     textTemplateFillin.newInputSocket('template', {
@@ -151,8 +151,8 @@ outputs.set("text", filledIn);
         'graphics',
         'input',
         'conversion',
-        'reader'
-    ]
+        'reader',
+    ];
     imageLoader.notSearchable();
 
     imageLoader.newInputSocket('imageOrFileOrString', {
@@ -202,8 +202,8 @@ if (typeof imageOrFileOrString === 'string') {
         'sandbox',
         'markup',
         'ui',
-        'viewer'
-    ]
+        'viewer',
+    ];
     htmlRenderer.notSearchable();
 
     htmlRenderer.newInputSocket('html', {
@@ -215,11 +215,8 @@ if (typeof imageOrFileOrString === 'string') {
 
     htmlRenderer.code = `console.log('html rendered', inputs.html)`;
 
-
     const jsNode =
-        await nodeBluePrintController.initOfficialNodeBluePrint(
-            'js'
-        );
+        await nodeBluePrintController.initOfficialNodeBluePrint('js');
     jsNode.title = 'JS Node';
     jsNode.documentation = 'Modify JS in a Node Environment';
     jsNode.tags = [
@@ -234,8 +231,8 @@ if (typeof imageOrFileOrString === 'string') {
         'custom',
         'logic',
         'computation',
-        'flexible'
-    ]
+        'flexible',
+    ];
     jsNode.notSearchable();
 
     jsNode.newInputSocket('js_code', {

@@ -25,8 +25,8 @@ export async function googleDriveNodes() {
         'oauth',
         'authentication',
         'gsuite',
-        'workspace'
-    ]
+        'workspace',
+    ];
 
     await googleDrive.newInputSocket('account', {
         label: 'Google Account',
@@ -72,8 +72,8 @@ outputs.set('img', inputs.img);
         'notification',
         'oauth',
         'mail',
-        'correspondence'
-    ]
+        'correspondence',
+    ];
 
     await sendEmail.newInputSocket('account', {
         label: 'From Google Account',

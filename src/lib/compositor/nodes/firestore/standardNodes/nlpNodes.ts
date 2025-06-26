@@ -11,17 +11,20 @@ const factory: NodeBluePrintControllerFactoryInterface =
 
 export async function nlpNodes() {
     // GENKIT SUMMARIZATION NODE
-    const genkitSummarization = await factory.initOfficialNodeBluePrint('genkit_summarization');
+    const genkitSummarization = await factory.initOfficialNodeBluePrint(
+        'genkit_summarization'
+    );
     genkitSummarization.title = 'GenKit Summarization';
-    genkitSummarization.documentation = 'Advanced text summarization using Google GenKit with Gemini AI.';
+    genkitSummarization.documentation =
+        'Advanced text summarization using Google GenKit with Gemini AI.';
     genkitSummarization.tags = [
         'ai',
         'text',
         'remote',
         'summarization',
         'genkit',
-        'gemini'
-    ]
+        'gemini',
+    ];
 
     genkitSummarization.newInputSocket('content', {
         label: 'Content to Summarize',
@@ -42,7 +45,8 @@ export async function nlpNodes() {
 
     genkitSummarization.newInputSocket('style', {
         label: 'Summary Style',
-        documentation: 'Style of summarization: brief, detailed, or bullet-points.',
+        documentation:
+            'Style of summarization: brief, detailed, or bullet-points.',
         type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder('brief').build(),
     });
@@ -92,17 +96,19 @@ export async function nlpNodes() {
     `;
 
     // TEXT FORMATTER LLM NODE
-    const textFormatterLLM = await factory.initOfficialNodeBluePrint('text_formatter_llm');
+    const textFormatterLLM =
+        await factory.initOfficialNodeBluePrint('text_formatter_llm');
     textFormatterLLM.title = 'Text Formatter LLM';
-    textFormatterLLM.documentation = 'Format and restructure text content using LLM-powered formatting rules and styles.';
+    textFormatterLLM.documentation =
+        'Format and restructure text content using LLM-powered formatting rules and styles.';
     textFormatterLLM.tags = [
         'ai',
         'text',
         'remote',
         'formatting',
         'llm',
-        'style'
-    ]
+        'style',
+    ];
 
     textFormatterLLM.newInputSocket('content', {
         label: 'Content to Format',
@@ -113,14 +119,16 @@ export async function nlpNodes() {
 
     textFormatterLLM.newInputSocket('formatStyle', {
         label: 'Format Style',
-        documentation: 'Formatting style: markdown, html, plain, bullet-points, numbered-list, or custom.',
+        documentation:
+            'Formatting style: markdown, html, plain, bullet-points, numbered-list, or custom.',
         type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder('markdown').build(),
     });
 
     textFormatterLLM.newInputSocket('customInstructions', {
         label: 'Custom Instructions',
-        documentation: 'Custom formatting instructions when format style is set to "custom".',
+        documentation:
+            'Custom formatting instructions when format style is set to "custom".',
         type: STANDARD_DATATYPES.STRING,
         params: new StringSocketParamsBuilder('').asParagraph().build(),
     });

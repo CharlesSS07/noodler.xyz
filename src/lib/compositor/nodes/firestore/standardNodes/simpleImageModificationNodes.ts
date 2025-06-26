@@ -10,7 +10,6 @@ const nodeBluePrintController: NodeBluePrintControllerFactoryInterface =
     new FirestoreNodeBluePrintControllerFactoryInterface();
 
 export async function simpleImageModificationNodes() {
-
     const grayscale =
         await nodeBluePrintController.initOfficialNodeBluePrint('greyscale');
     grayscale.title = 'Greyscale';
@@ -27,8 +26,8 @@ export async function simpleImageModificationNodes() {
         'vintage',
         'artistic',
         'processing',
-        'desaturation'
-    ]
+        'desaturation',
+    ];
 
     await grayscale.newInputSocket('img', {
         label: 'Color Image',
@@ -65,8 +64,8 @@ outputs.set('img', img);
         'vibrancy',
         'color-correction',
         'enhancement',
-        'artistic'
-    ]
+        'artistic',
+    ];
 
     hsv.newInputSocket('img', {
         label: 'Input Image',

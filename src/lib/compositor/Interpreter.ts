@@ -145,7 +145,6 @@ export async function executeFlowGraph(
                 );
 
                 if (nodeBlueprint.input_spec_strict) {
-
                     // Check that input data and node blueprint spec inputs align
                     const inputDataSocketKeys = new Set(Object.keys(inputData));
                     const inputSocketKeysSpec = new Set(
@@ -178,15 +177,16 @@ export async function executeFlowGraph(
                 console.log(inputData);
 
                 // Execute the node
-                await nodeBlueprint.call(inputData, outputReturner).then(() => {
-                    console.log(
-                        `${nodeId} ✅`, outputReturner
-                    );
-                    outputReturner.errorMessage(''); // clear error
-                }).catch((err) => {
-                    console.error(`${nodeId} ❌`);
-                    throw err;
-                });
+                await nodeBlueprint
+                    .call(inputData, outputReturner)
+                    .then(() => {
+                        console.log(`${nodeId} ✅`, outputReturner);
+                        outputReturner.errorMessage(''); // clear error
+                    })
+                    .catch((err) => {
+                        console.error(`${nodeId} ❌`);
+                        throw err;
+                    });
 
                 // Mark as executed
                 executedNodes.add(nodeId);
@@ -201,22 +201,24 @@ export async function executeFlowGraph(
                 );
 
                 try {
-
                     // Execute ready nodes concurrently
                     await Promise.all(readyNodes.map(executeNode));
-
                 } catch (error) {
                     console.error(error);
                     // do not throw; this is the error of another node.
                 }
-
             } catch (error) {
                 console.error('Error in pre or post node execution:');
                 console.error(error);
                 if (error instanceof Error) {
-                    outputReturner.errorMessage(`While executing ${nodeBlueprint.nid} id=${nodeId}:\n${error.message}`);
+                    outputReturner.errorMessage(
+                        `While executing ${nodeBlueprint.nid} id=${nodeId}:\n${error.message}`
+                    );
                 } else {
-                    outputReturner.errorMessage(`While executing ${nodeBlueprint.nid} id=${nodeId}:`+error); // !!! convert to string first!
+                    outputReturner.errorMessage(
+                        `While executing ${nodeBlueprint.nid} id=${nodeId}:` +
+                            error
+                    ); // !!! convert to string first!
                     // error objects are some stupid fucking shit that can't be uploaded to firebase rtdb
                     // wasted my whole fucking day figuring out Error objects cannot be serialized by JSON.stringify
                 }
@@ -323,7 +325,10 @@ async function getNodeInputData(
     // Temporary. This replaces every BigDataRef with the value in the database
     for (const key in inputData) {
         // @ts-ignore
-        if (inputData[key].hasOwnProperty('_type') && inputData[key]._type == 'bigdata_ref') {
+        if (
+            inputData[key].hasOwnProperty('_type') &&
+            inputData[key]._type == 'bigdata_ref'
+        ) {
             inputData[key] = await getBigData(inputData[key] as BigDataRef);
         }
     }

@@ -1,6 +1,7 @@
 import {gemini15Flash, googleAI} from "@genkit-ai/googleai";
 import {genkit, z} from "genkit";
-import {onCallGenkit} from "firebase-functions/https";
+import {onCall} from "firebase-functions/https";
+// import config from "../config";
 
 const ai = genkit({
   plugins: [googleAI()],
@@ -109,6 +110,12 @@ function getOutputTypeInstruction(outputType: string): string {
   }
 }
 
-export const textFormatingLLM = onCallGenkit({
-  authPolicy: (auth) => !!auth?.uid,
-}, textFormatingLLMFlow);
+export const textFormatingLLM = onCall(
+  async (request) => {
+    // Check authentication
+    if (!request.auth?.uid) {
+      throw new Error("Authentication required");
+    }
+    return await textFormatingLLMFlow(request.data);
+  }
+);

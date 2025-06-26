@@ -110,7 +110,6 @@ export abstract class NodeBluePrint {
 
     abstract get tags(): string[];
     abstract set tags(tags: string[]);
-
 }
 
 // Wrapper function to create a reactive store

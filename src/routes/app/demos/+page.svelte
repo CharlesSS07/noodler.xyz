@@ -1,5 +1,4 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
     import Logo from '../../../components/Logo.svelte';
     import BugReportButton from '../../../components/BugReportButton.svelte';
     import { Play, Image, MessageSquare, Wand2, Sparkles, Globe } from 'lucide-svelte';
@@ -29,11 +28,11 @@
             ]
         },
         {
-            id: 'promptdesignOld',
+            id: 'promptdesign',
             title: 'Prompt Design Studio',
             description: 'Advanced visual prompt engineering with template composition, variable replacement, and LLM text transformation nodes.',
             icon: MessageSquare,
-            path: '/app/demos/promptdesignOld',
+            path: '/app/demos/promptdesign',
             status: 'active',
             features: [
                 'Visual prompt templating',

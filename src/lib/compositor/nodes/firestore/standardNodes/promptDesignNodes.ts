@@ -23,8 +23,8 @@ export async function promptDesignNodes() {
         'composition',
         'template',
         'building',
-        'utility'
-    ]
+        'utility',
+    ];
 
     await joinText.newInputSocket('text1', {
         label: 'Text',
@@ -76,8 +76,8 @@ export async function promptDesignNodes() {
         'breakdown',
         'segmentation',
         'extraction',
-        'utility'
-    ]
+        'utility',
+    ];
 
     await splitText.newInputSocket('text', {
         label: 'Text',

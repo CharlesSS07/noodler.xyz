@@ -180,9 +180,9 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
                     position: { x: 0, y: 0 },
                     data: {
                         nid: 'template',
-                        input: { 
+                        input: {
                             template: 'Hello @name, welcome to @place!',
-                            fillins: { name: 'Alice', place: 'Wonderland' }
+                            fillins: { name: 'Alice', place: 'Wonderland' },
                         },
                     },
                 },
@@ -271,7 +271,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
 
             await executeFlowGraph('new-image', mockNodes, mockEdges);
             const result = await projectOutputDataCache.get(
-                'new-image',              
+                'new-image',
                 'image'
             );
             expect(result).toBeDefined();
@@ -596,7 +596,11 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
             mockEdges = [];
 
             // This should return an error result instead of throwing
-            const result = await executeFlowGraph('invalid-json-test', mockNodes, mockEdges);
+            const result = await executeFlowGraph(
+                'invalid-json-test',
+                mockNodes,
+                mockEdges
+            );
             expect(result.success).toBe(false);
             expect(result.errors).toBeDefined();
             expect(result.errors.length).toBeGreaterThan(0);
@@ -883,7 +887,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
             expect(result1).toBe(30);
             expect(result2).toBe(70);
             expect(finalResult).toBe(30 * 70); // 2100
-            
+
             // Note: add-3 is not connected to the execution flow so it was not executed
             expect(endTime - startTime).toBeLessThan(2000); // Should complete efficiently
         });
