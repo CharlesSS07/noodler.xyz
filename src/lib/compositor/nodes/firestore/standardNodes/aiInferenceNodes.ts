@@ -851,4 +851,75 @@ export async function aiInferenceNodes() {
         throw new Error('AI Image Editor node is not yet implemented. This node would use image-to-image models like InstructPix2Pix to apply text-based modifications to images.');
     `;
 
+    // Prompt LLM NODE (GenKit-based)
+    const callLLM = await factory.initOfficialNodeBluePrint('ai_llm');
+    callLLM.title = 'LLM Text Completion';
+    callLLM.documentation = 'General-purpose large language model for text generation and completion using Google Gemini.';
+    callLLM.tags = [
+        'ai',
+        'text',
+        'remote',
+        'llm',
+        'genkit'
+    ]
+
+    callLLM.newInputSocket('prompt', {
+        label: 'Prompt',
+        documentation: 'Text prompt to send to the language model.',
+        type: STANDARD_DATATYPES.STRING,
+        params: new StringSocketParamsBuilder('What is artificial intelligence?')
+            .asParagraph()
+            .build(),
+    });
+
+    callLLM.newInputSocket('maxTokens', {
+        label: 'Max Tokens',
+        documentation: 'Maximum number of tokens to generate.',
+        type: STANDARD_DATATYPES.NUMBER,
+        params: new NumberSocketParamsBuilder(1024)
+            .setMin(1)
+            .setMax(4096)
+            .build(),
+    });
+
+    callLLM.newInputSocket('temperature', {
+        label: 'Temperature',
+        documentation: 'Controls randomness in generation (0.0 = deterministic, 2.0 = very creative).',
+        type: STANDARD_DATATYPES.NUMBER,
+        params: new NumberSocketParamsBuilder(0.7)
+            .setMin(0.0)
+            .setMax(2.0)
+            .setStep(0.1)
+            .build(),
+    });
+
+    callLLM.newOutputSocket('response', {
+        label: 'LLM Response',
+        documentation: 'Generated text response from the language model.',
+        type: STANDARD_DATATYPES.STRING,
+    });
+
+    callLLM.newOutputSocket('promptLength', {
+        label: 'Prompt Length',
+        documentation: 'Length of the input prompt in characters.',
+        type: STANDARD_DATATYPES.NUMBER,
+    });
+
+    callLLM.newOutputSocket('responseLength', {
+        label: 'Response Length',
+        documentation: 'Length of the generated response in characters.',
+        type: STANDARD_DATATYPES.NUMBER,
+    });
+
+    callLLM.code = `
+        const result = await utils.aiServices.callLLM({
+            prompt: inputs.prompt,
+            maxTokens: inputs.maxTokens,
+            temperature: inputs.temperature
+        });
+        outputs.set('response', result.response);
+        outputs.set('promptLength', result.promptLength);
+        outputs.set('responseLength', result.responseLength);
+    `;
+
 }

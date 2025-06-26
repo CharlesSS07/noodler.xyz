@@ -21,7 +21,7 @@
 </script>
 
 {#if projectInitialized}
-    <FlowGraphProject {project_key} onProjectReady={(context) => {
+    <FlowGraphProject {project_key} onProjectReadyCallback={async (context) => {
         console.log(context);
         setTimeout(() => {
             context.executeFromNode('image_1750474392374_pzoc0h7re');

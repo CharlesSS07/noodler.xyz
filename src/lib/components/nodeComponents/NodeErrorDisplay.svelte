@@ -40,18 +40,18 @@
     //
     // });
 
-    const unsubscribeSocket = projectOutputDataCache.useSocketStore(
-        id,
-        '__error__'
-    ).subscribe((socketData) => {
-        untrack(() => {
-            console.log(socketData)
-            if (socketData !== undefined && socketData !== null) {
-                console.log('displaying error', "error:"+socketData as string, JSON.stringify(socketData, null, 2), typeof socketData, socketData instanceof Error);
-                errorMessage = ''+socketData as string;
-            }
-        });
-    });
+    const unsubscribeSocket = projectOutputDataCache.useNodeErrorStore(id).subscribe(
+        (socketData) => {
+            untrack(() => {
+                // console.log(socketData)
+                if (socketData !== undefined && socketData !== null) {
+                    // console.log('displaying error', "error:"+socketData as string, JSON.stringify(socketData, null, 2), typeof socketData, socketData instanceof Error);
+                    // use '' to forcefully convert Error to string
+                    errorMessage = ''+socketData as string;
+                }
+            });
+        }
+    );
     // return unsubscribeSocket;
 </script>
 

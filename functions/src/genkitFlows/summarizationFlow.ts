@@ -1,79 +1,86 @@
 // Content Summarization Flow using Genkit
-import { gemini15Flash, googleAI } from '@genkit-ai/googleai';
-import { genkit, z } from 'genkit';
+import {gemini15Flash, googleAI} from "@genkit-ai/googleai";
+import {genkit, z} from "genkit";
 
-import { onCallGenkit } from 'firebase-functions/https';
+import {onCallGenkit} from "firebase-functions/https";
 
 // Configure Genkit instance
 const ai = genkit({
-    plugins: [googleAI()], // Will use GOOGLE_GENAI_API_KEY env var
-    model: gemini15Flash, // set default model
+  plugins: [googleAI()], // Will use GOOGLE_GENAI_API_KEY env var
+  model: gemini15Flash, // set default model
 });
 
 // Input schema for summarization
 const SummarizationInput = z.object({
-    content: z.string().min(1, "Content cannot be empty"),
-    maxLength: z.number().optional().default(150),
-    style: z.enum(['brief', 'detailed', 'bullet-points']).optional().default('brief')
+  content: z.string().min(1, "Content cannot be empty"),
+  maxLength: z.number().optional().default(150),
+  style: z.enum(["brief", "detailed", "bullet-points"])
+    .optional().default("brief"),
 });
 
 // Output schema for summarization
 const SummarizationOutput = z.object({
-    summary: z.string(),
-    originalLength: z.number(),
-    summaryLength: z.number(),
-    compressionRatio: z.number()
+  summary: z.string(),
+  originalLength: z.number(),
+  summaryLength: z.number(),
+  compressionRatio: z.number(),
 });
 
 // Define the content summarization flow
 export const contentSummarizationFlow = ai.defineFlow(
-    {
-        name: 'contentSummarization',
-        inputSchema: SummarizationInput,
-        outputSchema: SummarizationOutput,
-    },
-    async (input) => {
-        const { content, maxLength = 150, style = 'brief' } = input;
-        
-        // Create prompt based on style preference
-        let prompt = '';
-        switch (style) {
-            case 'brief':
-                prompt = `Provide a brief summary of the following content in approximately ${maxLength} words or less:\n\n${content}`;
-                break;
-            case 'detailed':
-                prompt = `Provide a detailed summary of the following content, capturing key points and important details in approximately ${maxLength} words:\n\n${content}`;
-                break;
-            case 'bullet-points':
-                prompt = `Summarize the following content as bullet points, highlighting the main ideas:\n\n${content}`;
-                break;
-        }
+  {
+    name: "contentSummarization",
+    inputSchema: SummarizationInput,
+    outputSchema: SummarizationOutput,
+  },
+  async (input) => {
+    const {content, maxLength = 150, style = "brief"} = input;
 
-        // Generate summary using Gemini
-        const { text } = await ai.generate(prompt);
-        
-        // Calculate metrics
-        const originalLength = content.length;
-        const summaryLength = text.length;
-        const compressionRatio = Math.round((summaryLength / originalLength) * 100) / 100;
-
-        return {
-            summary: text,
-            originalLength,
-            summaryLength,
-            compressionRatio
-        };
+    // Create prompt based on style preference
+    let prompt = "";
+    switch (style) {
+    case "brief":
+      prompt = "Provide a brief summary of the following content in " +
+        `approximately ${maxLength} words or less:\n\n${content}`;
+      break;
+    case "detailed":
+      prompt = "Provide a detailed summary of the following content, " +
+        "capturing key points and important details in approximately " +
+        `${maxLength} words:\n\n${content}`;
+      break;
+    case "bullet-points":
+      prompt = "Summarize the following content as bullet points, " +
+        `highlighting the main ideas:\n\n${content}`;
+      break;
     }
+
+    // Generate summary using Gemini
+    const {text} = await ai.generate(prompt);
+
+    // Calculate metrics
+    const originalLength = content.length;
+    const summaryLength = text.length;
+    const compressionRatio = Math.round(
+      (summaryLength / originalLength) * 100
+    ) / 100;
+
+    return {
+      summary: text,
+      originalLength,
+      summaryLength,
+      compressionRatio,
+    };
+  }
 );
 
 // Export the function wrapped with onCallGenkit for Firebase Functions
 export const summarizeContent = onCallGenkit(
-    {
-        // authPolicy: (auth) => auth?.token?.email_verified, // Require verified email
-        authPolicy: (auth) => {
-            // Allow authenticated users (including anonymous) for testing
-            return !!auth?.uid;
-        },
+  {
+    // authPolicy: (auth) => auth?.token?.email_verified,
+    authPolicy: (auth) => {
+      // Allow authenticated users (including anonymous) for testing
+      return !!auth?.uid;
     },
-    contentSummarizationFlow
+  },
+  contentSummarizationFlow
 );

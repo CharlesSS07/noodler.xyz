@@ -69,7 +69,7 @@ export async function specialtyDataInputDataNodes() {
         'styling',
         'headers',
         'links'
-    ]
+    ];
     mdTextEditor.notSearchable();
 
     mdTextEditor.newInputSocket('text', {

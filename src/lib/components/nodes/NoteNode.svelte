@@ -8,7 +8,7 @@
 				markdown: string;
 				nid?: string; // Optional - this node typically doesn't use official blueprints
 			},
-			'node-dna'
+			'node-note'
 	>;
 </script>
 
@@ -16,12 +16,12 @@
 	import { marked } from 'marked';
 	import {type NodeProps, useSvelteFlow} from "@xyflow/svelte";
 	import { untrack } from 'svelte';
-	import TallTextArea from "$lib/components/TallTextArea.svelte";
-
 
 	let { id, data }: NodeProps<NoteNodeType> = $props();
 	const { updateNodeData } = useSvelteFlow();
 
+	let inputText = $state(data.markdown || '');
+	let textarea: HTMLTextAreaElement;
 	let isEditing = $state(false);
 
 	// Configure marked for better styling
@@ -30,38 +30,65 @@
 		gfm: true
 	});
 
-	function parseMarkdown(text: string): string {
-		// updateNodeData(id, {
-		// 	markdown: text
-		// });
-		return marked(text, {async: false});
+	// Update node data when inputText changes
+	$effect(() => {
+		updateNodeData(untrack(() => id), { markdown: inputText });
+	});
+
+	// Sync with external data changes
+	$effect(() => {
+		if (data.markdown && textarea) {
+			inputText = data.markdown;
+			autoResize(textarea);
+		}
+	});
+
+	// Auto-resize effect for textarea
+	$effect(() => {
+		if (textarea) {
+			autoResize(textarea);
+		}
+	});
+
+	function autoResize(textarea: HTMLTextAreaElement) {
+		textarea.style.width = 'auto';
+		textarea.style.height = 'auto';
+		textarea.style.height = textarea.scrollHeight + 'px';
 	}
 
-	function handleClick() {
+	function startEditing() {
 		isEditing = true;
 	}
 
-	function handleBlur() {
+	function stopEditing() {
 		isEditing = false;
-	}
-
-	function handleKeydown(event: KeyboardEvent) {
-		if (event.key === 'Escape') {
-			isEditing = false;
-			(event.target as HTMLElement).blur();
-		}
 	}
 </script>
 
-<div class="sticky-note" on:click={handleClick} on:keydown={handleKeydown}>
+<div class="sticky-note">
 	{#if isEditing}
-		<TallTextArea
-			bind:textContent={data.markdown}
-			on:blur={handleBlur}
-		></TallTextArea>
+		<!-- Editing mode - show textarea -->
+		<textarea
+			bind:this={textarea}
+			value={inputText}
+			class="note-textarea"
+			placeholder="Click to enter markdown..."
+			oninput={(e) => {
+				const value = e.target.value;
+				inputText = value;
+				autoResize(e.target);
+			}}
+			onblur={stopEditing}
+			onfocusout={stopEditing}
+		></textarea>
 	{:else}
-		<div class="markdown-preview">
-			{@html parseMarkdown(data.markdown)}
+		<!-- Display mode - show rendered markdown -->
+		<div 
+			class="markdown-preview"
+			onclick={startEditing}
+			onkeypress={startEditing}
+		>
+			{@html marked.parse(inputText || 'Click to enter markdown...')}
 		</div>
 	{/if}
 </div>
@@ -73,7 +100,7 @@
 		height: fit-content;
 		background: linear-gradient(135deg, #fff59d 0%, #fff176 100%);
 		border: 1px solid #f9a825;
-		border-radius: 4px;
+		border-radius: 0px;
 		padding: 8px;
 		box-shadow:
 			0 4px 8px rgba(249, 168, 37, 0.2),
@@ -104,7 +131,7 @@
 	/*    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);*/
 	/*}*/
 
-	.markdown-editor {
+	.note-textarea {
 		width: 100%;
 		min-height: 168px;
 		height: fit-content;
@@ -116,9 +143,14 @@
 		font-size: 14px;
 		line-height: 1.5;
 		color: #333;
-		overflow: auto; /* Optional: Add scrollbars if content exceeds max-height */
-		white-space: pre-wrap; /* Preserve line breaks and wrap text */
-		word-wrap: break-word; /* Break long words to fit within the container */
+		overflow: hidden;
+		white-space: pre-wrap;
+		word-wrap: break-word;
+	}
+
+	.note-textarea::placeholder {
+		color: #9ca3af;
+		font-style: italic;
 	}
 
 	.markdown-preview {
@@ -126,6 +158,7 @@
 		font-size: 14px;
 		line-height: 1.5;
 		overflow-wrap: break-word;
+		cursor: pointer;
 	}
 
 	.markdown-preview :global(h1),
@@ -180,7 +213,7 @@
 	.markdown-preview :global(code) {
 		background: rgba(0, 0, 0, 0.1);
 		padding: 2px 4px;
-		border-radius: 3px;
+		border-radius: 0px;
 		font-family: 'Courier New', monospace;
 		font-size: 12px;
 	}
@@ -188,7 +221,7 @@
 	.markdown-preview :global(pre) {
 		background: rgba(0, 0, 0, 0.1);
 		padding: 8px;
-		border-radius: 4px;
+		border-radius: 0px;
 		overflow-x: auto;
 		margin: 8px 0;
 	}

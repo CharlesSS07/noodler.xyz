@@ -7,6 +7,7 @@
         label: string;
         documentation?: string;
         executionTime?: number;
+        errorEncountered?: boolean;
         isSelected?: boolean;
     }
 
@@ -14,6 +15,7 @@
         label,
         documentation,
         executionTime = 0,
+        errorEncountered = false,
         isSelected = false
     }: NodeWrapperProps = $props();
 </script>
@@ -43,11 +45,11 @@
             <!-- Execution info -->
             {#if executionTime > 0}
                 <div class="execution-info">
-                    <span class="execution-time">{executionTime}ms</span>
+                    <span class="execution-time" class:errorEncountered={'error'} >{executionTime}ms</span>
                 </div>
             {:else}
                 <div class="execution-info">
-                    <span class="execution-time">idle</span>
+                    <span class="execution-time" class:errorEncountered={'error'} >idle</span>
                 </div>
             {/if}
         </div>
@@ -67,5 +69,9 @@
 </div>
 
 <style>
+
+    .error {
+        text-color: #ff0000;
+    }
 
 </style>

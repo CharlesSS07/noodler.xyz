@@ -45,17 +45,9 @@
 </script>
 
 <!--Project Key: {project_key}-->
-<!--{#if project_key!==project_key_not_assigned}-->
-	<!-- Allow direct access to projects with valid project_key for collaboration testing -->
-<!--	<FlowGraph {project_key}></FlowGraph>-->
-<!--{:else}-->
-	<!-- Require auth only when creating new projects -->
-<!--	<SignedIn>-->
-<!--		<FlowGraph {project_key}></FlowGraph>-->
-<!--	</SignedIn>-->
-<!--{/if}-->
-
-<FlowGraph {project_key}></FlowGraph>
+{#if project_key!==project_key_not_assigned}
+	<FlowGraph {project_key}></FlowGraph>
+{/if}
 
 <SignedOut let:auth>
 	<style>

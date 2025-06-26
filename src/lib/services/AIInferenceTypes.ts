@@ -171,6 +171,23 @@ export interface FeatureExtractionRequest extends AIInferenceRequest {
     parameters?: any;
 }
 
+// Text Formatting interfaces
+export interface TextFormattingRequest {
+    text: string;
+    formatRules: string;
+    outputType?: 'plain' | 'markdown' | 'html' | 'json' | 'structured';
+    preserveContent?: boolean;
+    maxOutputLength?: number;
+}
+
+export interface TextFormattingResponse {
+    formattedText: string;
+    originalLength: number;
+    formattedLength: number;
+    compressionRatio: number;
+    formatApplied: string;
+}
+
 // Service configuration
 export interface AIInferenceServiceConfig {
     user: User;

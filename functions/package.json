@@ -21,8 +21,6 @@
   "dependencies": {
     "@genkit-ai/firebase": "^1.13.0",
     "@genkit-ai/googleai": "^1.13.0",
-    "@huggingface/hub": "^2.2.0",
-    "@huggingface/inference": "^4.0.4",
     "@types/uuid": "^10.0.0",
     "axios": "^1.9.0",
     "firebase-admin": "^12.6.0",

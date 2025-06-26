@@ -16,7 +16,7 @@ import type {
 } from '../../SocketModels.js';
 import { getAuth, signInAnonymously, type User } from 'firebase/auth';
 import { app } from '../../../../firebase';
-import { OutputSocketDataCache } from '../../OutputSocketDataCache';
+import { ComputedDataCache } from '../../ComputedDataCache';
 
 // Test configuration
 const TEST_CONFIG = {
@@ -623,7 +623,7 @@ describe('FirestoreNodeBluePrint Test Suite', () => {
 
             await new Promise((resolve) => setTimeout(resolve, 500));
 
-            const dataCache = new OutputSocketDataCache();
+            const dataCache = new ComputedDataCache();
             const outputReturner = new OutputSocketAsyncReturner(
                 dataCache,
                 testNode.nid,
@@ -645,7 +645,7 @@ describe('FirestoreNodeBluePrint Test Suite', () => {
 
             await new Promise((resolve) => setTimeout(resolve, 500));
 
-            const dataCache = new OutputSocketDataCache();
+            const dataCache = new ComputedDataCache();
             const outputReturner = new OutputSocketAsyncReturner(
                 dataCache,
                 testNode.nid,
@@ -671,7 +671,7 @@ describe('FirestoreNodeBluePrint Test Suite', () => {
 
             await new Promise((resolve) => setTimeout(resolve, 500));
 
-            const dataCache = new OutputSocketDataCache();
+            const dataCache = new ComputedDataCache();
             const outputReturner = new OutputSocketAsyncReturner(
                 dataCache,
                 testNode.nid,
@@ -708,7 +708,7 @@ describe('FirestoreNodeBluePrint Test Suite', () => {
 
             await new Promise((resolve) => setTimeout(resolve, 500));
 
-            const dataCache = new OutputSocketDataCache();
+            const dataCache = new ComputedDataCache();
             const outputReturner = new OutputSocketAsyncReturner(
                 dataCache,
                 testNode.nid,

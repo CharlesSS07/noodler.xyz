@@ -10,7 +10,7 @@
  * - HTML Operations (html_viewer, html_elementify, fetch_url)
  * - File Operations (load_csv, load_tsv, image_loader)
  * - Date/Time Operations (datetime_parser, datetime_constructor)
- * - API Operations (promptdesign, text_to_image)
+ * - API Operations (promptdesignOld, text_to_image)
  * - Utility Operations (weather, colorize, super_resolution, object_background_seperation)
  */
 

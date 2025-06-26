@@ -167,6 +167,440 @@ describe('AIInferenceService Tests', () => {
     });
 
     // ========================================
+    // GenKit callLLM Tests
+    // ========================================
+
+    describe('genkitCallLLM', () => {
+        test('should call LLM with default parameters', async () => {
+            const testPrompt = 'What is the capital of France?';
+
+            const result = await aiService.callLLM({
+                prompt: testPrompt
+            });
+
+            expect(result).toBeDefined();
+            expect(result.response).toBeDefined();
+            expect(typeof result.response).toBe('string');
+            expect(result.response.length).toBeGreaterThan(0);
+            expect(result.promptLength).toBe(testPrompt.length);
+            expect(result.responseLength).toBe(result.response.length);
+
+            console.log('callLLM result:', {
+                promptLength: result.promptLength,
+                responseLength: result.responseLength,
+                response: result.response
+            });
+        }, TEST_TIMEOUT);
+
+        test('should call LLM with custom parameters', async () => {
+            const testPrompt = 'Write a short poem about nature.';
+
+            const result = await aiService.callLLM({
+                prompt: testPrompt,
+                maxTokens: 50,
+                temperature: 0.7
+            });
+
+            expect(result).toBeDefined();
+            expect(result.response).toBeDefined();
+            expect(typeof result.response).toBe('string');
+            expect(result.response.length).toBeGreaterThan(0);
+            expect(result.promptLength).toBe(testPrompt.length);
+            expect(result.responseLength).toBe(result.response.length);
+
+            console.log('callLLM with custom parameters:', {
+                prompt: testPrompt,
+                response: result.response,
+                responseLength: result.responseLength
+            });
+        }, TEST_TIMEOUT);
+
+        test('should handle complex prompts', async () => {
+            const complexPrompt = `
+                Please analyze the following scenario and provide a recommendation:
+                A company is deciding between two software solutions. Solution A costs $10,000 upfront 
+                with $500/month maintenance. Solution B costs $5,000 upfront with $800/month maintenance.
+                They plan to use it for 3 years. Which is more cost-effective?
+            `;
+
+            const result = await aiService.callLLM({
+                prompt: complexPrompt,
+                maxTokens: 200
+            });
+
+            expect(result).toBeDefined();
+            expect(result.response).toBeDefined();
+            expect(typeof result.response).toBe('string');
+            expect(result.response.length).toBeGreaterThan(0);
+            expect(result.promptLength).toBe(complexPrompt.length);
+
+            console.log('Complex prompt result:', {
+                promptLength: result.promptLength,
+                responseLength: result.responseLength,
+                response: result.response.substring(0, 200) + '...'
+            });
+        }, TEST_TIMEOUT);
+
+        test('should handle empty prompt gracefully', async () => {
+            await expect(aiService.callLLM({
+                prompt: ''
+            })).rejects.toThrow();
+        }, TEST_TIMEOUT);
+
+        test('should handle network errors gracefully', async () => {
+            // Create service with invalid base URL to simulate network error
+            const invalidService = new AIInferenceService({ 
+                user: auth.currentUser!,
+                functionUrl: 'http://invalid-url-that-should-fail.com'
+            });
+
+            await expect(invalidService.callLLM({
+                prompt: 'Test prompt'
+            })).rejects.toThrow();
+        }, TEST_TIMEOUT);
+
+        test('should handle different temperature values', async () => {
+            const testPrompt = 'Generate a creative story opening sentence.';
+
+            // Test low temperature (more deterministic)
+            const lowTempResult = await aiService.callLLM({
+                prompt: testPrompt,
+                temperature: 0.1
+            });
+
+            // Test high temperature (more creative)
+            const highTempResult = await aiService.callLLM({
+                prompt: testPrompt,
+                temperature: 0.9
+            });
+
+            expect(lowTempResult.response).toBeDefined();
+            expect(highTempResult.response).toBeDefined();
+            expect(typeof lowTempResult.response).toBe('string');
+            expect(typeof highTempResult.response).toBe('string');
+
+            console.log('Temperature comparison:', {
+                lowTemp: lowTempResult.response,
+                highTemp: highTempResult.response
+            });
+        }, TEST_TIMEOUT);
+
+        test('should handle different max token limits', async () => {
+            const testPrompt = 'Explain artificial intelligence in detail.';
+
+            // Test with small token limit
+            const shortResult = await aiService.callLLM({
+                prompt: testPrompt,
+                maxTokens: 20
+            });
+
+            // Test with larger token limit
+            const longResult = await aiService.callLLM({
+                prompt: testPrompt,
+                maxTokens: 100
+            });
+
+            expect(shortResult.response).toBeDefined();
+            expect(longResult.response).toBeDefined();
+            expect(shortResult.responseLength).toBeLessThanOrEqual(longResult.responseLength);
+
+            console.log('Max tokens comparison:', {
+                shortResponse: shortResult.response,
+                longResponse: longResult.response.substring(0, 200) + '...',
+                shortLength: shortResult.responseLength,
+                longLength: longResult.responseLength
+            });
+        }, TEST_TIMEOUT);
+    });
+
+    // ========================================
+    // GenKit Text Formatting Tests
+    // ========================================
+
+    describe('formatText', () => {
+        test('should format text with default parameters', async () => {
+            const testText = 'Machine learning is a subset of artificial intelligence. It uses algorithms to analyze data and make predictions.';
+            const formatRules = 'Convert to a numbered list with each sentence as a separate item';
+
+            const result = await aiService.formatText({
+                text: testText,
+                formatRules: formatRules
+            });
+
+            expect(result).toBeDefined();
+            expect(result.formattedText).toBeDefined();
+            expect(typeof result.formattedText).toBe('string');
+            expect(result.formattedText.length).toBeGreaterThan(0);
+            expect(result.originalLength).toBe(testText.length);
+            expect(result.formattedLength).toBe(result.formattedText.length);
+            expect(result.compressionRatio).toBeGreaterThan(0);
+            expect(result.formatApplied).toBeDefined();
+
+            console.log('Text formatting result:', {
+                originalLength: result.originalLength,
+                formattedLength: result.formattedLength,
+                compressionRatio: result.compressionRatio,
+                formattedText: result.formattedText
+            });
+        }, TEST_TIMEOUT);
+
+        test('should format text with markdown output type', async () => {
+            const testText = 'Deep learning uses neural networks. It processes complex patterns. Applications include image recognition and natural language processing.';
+            const formatRules = 'Convert to markdown with headers and bullet points';
+
+            const result = await aiService.formatText({
+                text: testText,
+                formatRules: formatRules,
+                outputType: 'markdown'
+            });
+
+            expect(result).toBeDefined();
+            expect(result.formattedText).toBeDefined();
+            expect(typeof result.formattedText).toBe('string');
+            expect(result.formattedText.length).toBeGreaterThan(0);
+            expect(result.formatApplied).toContain('markdown');
+
+            console.log('Markdown formatting result:', {
+                formattedText: result.formattedText,
+                formatApplied: result.formatApplied
+            });
+        }, TEST_TIMEOUT);
+
+        test('should format text with html output type', async () => {
+            const testText = 'Artificial intelligence encompasses machine learning and deep learning. These technologies enable computers to perform human-like tasks.';
+            const formatRules = 'Convert to HTML with proper paragraph and list tags';
+
+            const result = await aiService.formatText({
+                text: testText,
+                formatRules: formatRules,
+                outputType: 'html'
+            });
+
+            expect(result).toBeDefined();
+            expect(result.formattedText).toBeDefined();
+            expect(typeof result.formattedText).toBe('string');
+            expect(result.formattedText.length).toBeGreaterThan(0);
+            expect(result.formatApplied).toContain('html');
+
+            console.log('HTML formatting result:', {
+                formattedText: result.formattedText,
+                formatApplied: result.formatApplied
+            });
+        }, TEST_TIMEOUT);
+
+        test('should format text with json output type', async () => {
+            const testText = 'Natural language processing enables computers to understand human language. Computer vision allows machines to interpret visual information.';
+            const formatRules = 'Convert to JSON with key-value pairs for each concept';
+
+            const result = await aiService.formatText({
+                text: testText,
+                formatRules: formatRules,
+                outputType: 'json'
+            });
+
+            expect(result).toBeDefined();
+            expect(result.formattedText).toBeDefined();
+            expect(typeof result.formattedText).toBe('string');
+            expect(result.formattedText.length).toBeGreaterThan(0);
+            expect(result.formatApplied).toContain('json');
+
+            console.log('JSON formatting result:', {
+                formattedText: result.formattedText,
+                formatApplied: result.formatApplied
+            });
+        }, TEST_TIMEOUT);
+
+        test('should format text with structured output type', async () => {
+            const testText = 'Data science combines statistics, programming, and domain expertise. It involves data collection, cleaning, analysis, and visualization.';
+            const formatRules = 'Organize into clear sections with headers';
+
+            const result = await aiService.formatText({
+                text: testText,
+                formatRules: formatRules,
+                outputType: 'structured'
+            });
+
+            expect(result).toBeDefined();
+            expect(result.formattedText).toBeDefined();
+            expect(typeof result.formattedText).toBe('string');
+            expect(result.formattedText.length).toBeGreaterThan(0);
+            expect(result.formatApplied).toContain('structured');
+
+            console.log('Structured formatting result:', {
+                formattedText: result.formattedText,
+                formatApplied: result.formatApplied
+            });
+        }, TEST_TIMEOUT);
+
+        test('should respect preserveContent setting', async () => {
+            const testText = 'Machine learning algorithms can be supervised, unsupervised, or reinforcement learning. Each type serves different purposes and applications.';
+            const formatRules = 'Summarize into 2 key points';
+
+            const preserveResult = await aiService.formatText({
+                text: testText,
+                formatRules: formatRules,
+                preserveContent: true
+            });
+
+            const condensedResult = await aiService.formatText({
+                text: testText,
+                formatRules: formatRules,
+                preserveContent: false
+            });
+
+            expect(preserveResult).toBeDefined();
+            expect(condensedResult).toBeDefined();
+            expect(preserveResult.formattedText).toBeDefined();
+            expect(condensedResult.formattedText).toBeDefined();
+
+            console.log('Content preservation comparison:', {
+                preserved: preserveResult.formattedText,
+                condensed: condensedResult.formattedText
+            });
+        }, TEST_TIMEOUT);
+
+        test('should respect maxOutputLength setting', async () => {
+            const testText = 'The field of artificial intelligence has grown exponentially in recent years, encompassing machine learning, deep learning, natural language processing, computer vision, and robotics.';
+            const formatRules = 'Reformat with line breaks after each concept';
+
+            const result = await aiService.formatText({
+                text: testText,
+                formatRules: formatRules,
+                maxOutputLength: 100
+            });
+
+            expect(result).toBeDefined();
+            expect(result.formattedText).toBeDefined();
+            expect(typeof result.formattedText).toBe('string');
+            expect(result.formattedText.length).toBeLessThanOrEqual(120); // Allow some tolerance
+
+            console.log('Max length formatting result:', {
+                originalLength: result.originalLength,
+                formattedLength: result.formattedLength,
+                formattedText: result.formattedText
+            });
+        }, TEST_TIMEOUT);
+
+        test('should handle complex formatting rules', async () => {
+            const testText = 'Cloud computing provides on-demand access to computing resources. It offers scalability, flexibility, and cost-effectiveness for businesses.';
+            const formatRules = 'Break into individual words, number each word, and format as a vertical list with proper spacing';
+
+            const result = await aiService.formatText({
+                text: testText,
+                formatRules: formatRules,
+                outputType: 'structured'
+            });
+
+            expect(result).toBeDefined();
+            expect(result.formattedText).toBeDefined();
+            expect(typeof result.formattedText).toBe('string');
+            expect(result.formattedText.length).toBeGreaterThan(0);
+
+            console.log('Complex formatting result:', {
+                formattedText: result.formattedText,
+                compressionRatio: result.compressionRatio
+            });
+        }, TEST_TIMEOUT);
+
+        test('should handle empty text gracefully', async () => {
+            await expect(aiService.formatText({
+                text: '',
+                formatRules: 'Format as list'
+            })).rejects.toThrow();
+        }, TEST_TIMEOUT);
+
+        test('should handle empty format rules gracefully', async () => {
+            await expect(aiService.formatText({
+                text: 'Some text',
+                formatRules: ''
+            })).rejects.toThrow();
+        }, TEST_TIMEOUT);
+
+        test('should handle network errors gracefully', async () => {
+            const invalidService = new AIInferenceService({ 
+                user: auth.currentUser!,
+                functionUrl: 'http://invalid-url-that-should-fail.com'
+            });
+
+            await expect(invalidService.formatText({
+                text: 'Test text',
+                formatRules: 'Format as list'
+            })).rejects.toThrow();
+        }, TEST_TIMEOUT);
+
+        test('should calculate compression ratio correctly', async () => {
+            const shortText = 'AI is transformative.';
+            const formatRules = 'Add prefix "Formatted: " to the text';
+
+            const result = await aiService.formatText({
+                text: shortText,
+                formatRules: formatRules
+            });
+
+            expect(result.originalLength).toBe(shortText.length);
+            expect(result.formattedLength).toBe(result.formattedText.length);
+            expect(result.compressionRatio).toBe(
+                Math.round((result.formattedLength / result.originalLength) * 100) / 100
+            );
+
+            console.log('Compression ratio test:', {
+                originalLength: result.originalLength,
+                formattedLength: result.formattedLength,
+                compressionRatio: result.compressionRatio
+            });
+        }, TEST_TIMEOUT);
+
+        test('should handle expansion ratio correctly', async () => {
+            const shortText = 'ML.';
+            const formatRules = 'Expand the abbreviation and add detailed explanation';
+
+            const result = await aiService.formatText({
+                text: shortText,
+                formatRules: formatRules
+            });
+
+            expect(result.originalLength).toBe(shortText.length);
+            expect(result.formattedLength).toBe(result.formattedText.length);
+            expect(result.compressionRatio).toBeGreaterThan(1); // Should be expansion
+
+            console.log('Expansion ratio test:', {
+                originalText: shortText,
+                formattedText: result.formattedText,
+                compressionRatio: result.compressionRatio
+            });
+        }, TEST_TIMEOUT);
+
+        test('should handle different output types with same content', async () => {
+            const testText = 'Blockchain technology provides decentralized, secure, and transparent transactions.';
+            const formatRules = 'List the key benefits mentioned';
+
+            const outputTypes = ['plain', 'markdown', 'html', 'structured'] as const;
+            const results = await Promise.all(
+                outputTypes.map(outputType => 
+                    aiService.formatText({
+                        text: testText,
+                        formatRules: formatRules,
+                        outputType: outputType
+                    })
+                )
+            );
+
+            results.forEach((result, index) => {
+                expect(result).toBeDefined();
+                expect(result.formattedText).toBeDefined();
+                expect(result.formatApplied).toContain(outputTypes[index]);
+            });
+
+            console.log('Output type comparison:', {
+                plain: results[0].formattedText,
+                markdown: results[1].formattedText,
+                html: results[2].formattedText,
+                structured: results[3].formattedText
+            });
+        }, TEST_TIMEOUT);
+    });
+
+    // ========================================
     // GenKitSummarizationNode Integration Tests
     // ========================================
 

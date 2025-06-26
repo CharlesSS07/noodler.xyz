@@ -9,7 +9,7 @@ import {
     type DatabaseReference,
 } from 'firebase/database';
 import type { Node, Edge } from '@xyflow/svelte';
-import { OutputSocketDataCache } from '$lib/compositor/OutputSocketDataCache';
+import { ComputedDataCache } from '$lib/compositor/ComputedDataCache';
 
 // Project state interface
 export interface ProjectState {
@@ -18,7 +18,7 @@ export interface ProjectState {
     description: string;
     nodes: Node[];
     edges: Edge[];
-    outputs: OutputSocketDataCache;
+    outputs: ComputedDataCache;
     lastSyncTime: Date | null;
     isDirty: boolean; // Has unsaved changes
     isSyncing: boolean;
@@ -31,7 +31,7 @@ const initialProjectState: ProjectState = {
     description: '',
     nodes: [],
     edges: [],
-    outputs: new OutputSocketDataCache(),
+    outputs: new ComputedDataCache(),
     lastSyncTime: null,
     isDirty: false,
     isSyncing: false,
@@ -50,8 +50,8 @@ export const projectEdges: Readable<Edge[]> = derived(
     projectState,
     ($state) => $state.edges
 );
-export const projectOutputDataCache: OutputSocketDataCache =
-    new OutputSocketDataCache();
+export const projectOutputDataCache: ComputedDataCache =
+    new ComputedDataCache();
 // = derived(projectState, $state => $state.outputs);
 export const projectTitle: Readable<string> = derived(
     projectState,
@@ -81,7 +81,6 @@ export const projectActions = {
             // Don't set dirty flag if we're setting the same data (prevents blocking Firebase loads)
             const isSameData =
                 JSON.stringify(state.nodes) === JSON.stringify(nodes);
-            console.log(isSameData, projectSync.isInitialLoadComplete());
             return {
                 ...state,
                 nodes,
@@ -115,7 +114,7 @@ export const projectActions = {
         }));
     },
 
-    setOutputs: (outputs: OutputSocketDataCache): void => {
+    setOutputs: (outputs: ComputedDataCache): void => {
         projectState.update((state) => ({
             ...state,
             outputs: outputs,

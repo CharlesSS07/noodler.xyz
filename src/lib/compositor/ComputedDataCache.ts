@@ -19,7 +19,7 @@ function parseSocketInstanceKey(key: string): SocketInstance {
     return { node_key, socket_id };
 }
 
-export class OutputSocketDataCache {
+export class ComputedDataCache {
     private data: Map<string, unknown> = new Map<string, unknown>();
 
     // Main reactive store that triggers updates when the data map changes
@@ -64,9 +64,35 @@ export class OutputSocketDataCache {
     }
 
     /**
+     * Get a reactive store for a specific nodes error output
+     */
+    useNodeErrorStore(
+        node_key: string,
+    ): Readable<unknown | null> {
+        const key = socketInstanceKey(node_key, '__error__');
+
+        return derived(this.dataStore, ($data) => {
+            return $data.has(key) ? $data.get(key) : null;
+        });
+    }
+
+    /**
+     * Get a reactive store for a specific nodes error output
+     */
+    useNodeExecutionStatusStore(
+        node_key: string,
+    ): Readable<unknown | null> {
+        const key = socketInstanceKey(node_key, '__exec_status__');
+
+        return derived(this.dataStore, ($data) => {
+            return $data.has(key) ? $data.get(key) : 'idle';
+        });
+    }
+
+    /**
      * Get a reactive store for all sockets belonging to a specific node
      */
-    getNodeSocketsStore(node_key: string): Readable<Map<string, unknown>> {
+    getNodeStore(node_key: string): Readable<Map<string, unknown>> {
         return derived(this.dataStore, ($data) => {
             const nodeData = new Map<string, unknown>();
 

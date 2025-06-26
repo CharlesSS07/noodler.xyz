@@ -25,6 +25,8 @@ import type {
     SentenceSimilarityRequest,
     ConversationalRequest,
     FeatureExtractionRequest,
+    TextFormattingRequest,
+    TextFormattingResponse,
 } from './AIInferenceTypes';
 
 export let aiServiceInstance: AIInferenceService | undefined;
@@ -174,16 +176,6 @@ export class AIInferenceService {
         );
     }
 
-    // Text Processing Endpoints
-    async textGeneration(
-        request: TextGenerationRequest
-    ): Promise<{ generated_text: string }[]> {
-        return await this.makeRequest<{ generated_text: string }[]>(
-            'textGeneration',
-            request
-        );
-    }
-
     async textClassification(
         request: TextClassificationRequest
     ): Promise<ClassificationResult[][]> {
@@ -210,15 +202,6 @@ export class AIInferenceService {
 
     async fillMask(request: FillMaskRequest): Promise<any[]> {
         return await this.makeRequest<any[]>('fillMask', request);
-    }
-
-    async summarization(
-        request: SummarizationRequest
-    ): Promise<{ summary_text: string }[]> {
-        return await this.makeRequest<{ summary_text: string }[]>(
-            'summarization',
-            request
-        );
     }
 
     async translation(
@@ -271,6 +254,38 @@ export class AIInferenceService {
                 compressionRatio: number;
             }
         }>('summarizeContent', { data: request });
+        
+        // GenKit functions return data wrapped in a 'result' field
+        return response.result;
+    }
+
+    async callLLM(request: {
+        prompt: string;
+        maxTokens?: number;
+        temperature?: number;
+    }): Promise<{
+        response: string;
+        promptLength: number;
+        responseLength: number;
+    }> {
+        // GenKit functions expect data to be wrapped in a 'data' field
+        const response = await this.makeRequest<{
+            result: {
+                response: string;
+                promptLength: number;
+                responseLength: number;
+            }
+        }>('callLLM', { data: request });
+        
+        // GenKit functions return data wrapped in a 'result' field
+        return response.result;
+    }
+
+    async formatText(request: TextFormattingRequest): Promise<TextFormattingResponse> {
+        // GenKit functions expect data to be wrapped in a 'data' field
+        const response = await this.makeRequest<{
+            result: TextFormattingResponse
+        }>('textFormatingLLM', { data: request });
         
         // GenKit functions return data wrapped in a 'result' field
         return response.result;

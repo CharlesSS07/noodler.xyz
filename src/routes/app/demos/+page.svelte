@@ -29,11 +29,11 @@
             ]
         },
         {
-            id: 'promptdesign',
+            id: 'promptdesignOld',
             title: 'Prompt Design Studio',
             description: 'Advanced visual prompt engineering with template composition, variable replacement, and LLM text transformation nodes.',
             icon: MessageSquare,
-            path: '/app/demos/promptdesign',
+            path: '/app/demos/promptdesignOld',
             status: 'active',
             features: [
                 'Visual prompt templating',

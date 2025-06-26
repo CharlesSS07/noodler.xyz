@@ -53,6 +53,7 @@
     let textarea: HTMLTextAreaElement;
     let isEditing = $state(false);
 
+    // Initialize without triggering update
     $effect(() => {
         projectActions.updateNodeData(untrack(() => id), {input: {text: inputText}});
     });

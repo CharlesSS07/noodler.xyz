@@ -27,6 +27,8 @@
 
     let {id, data, selected}: NodeProps<TemplateFillinNodeType> = $props();
 
+    console.log(id)
+
     // initialize data if defaults not given
     if (data.input === undefined) {
         data.input = {template: ""};
@@ -85,7 +87,7 @@
     function handleInput(event: Event) {
         const target = event.target as HTMLTextAreaElement;
         data.input.template = target.value;
-        projectActions.updateNodeData(id, {input: data.input});
+        // projectActions.updateNodeData(id, {input: data.input});
     }
 
     // Auto-resize textarea based on scrollHeight, with a minimum height

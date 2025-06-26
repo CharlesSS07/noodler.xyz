@@ -1,12 +1,10 @@
-<!--Renders HTML content from text input-->
-<!--Takes HTML string as input and displays the rendered HTML-->
 <script module lang="ts">
-    import { type Node } from '@xyflow/svelte';
+    import type {Node} from '@xyflow/svelte';
 
     // Official NID for this node: html_renderer
     export type HtmlRendererNodeType = Node<
         {
-            input: {html: string};
+            input: { html: string };
             nid?: string; // Should be set to 'html_renderer' when using official blueprint
         },
         'node-html-renderer'
@@ -14,31 +12,54 @@
 </script>
 
 <script lang="ts">
-    import {Handle, Position, type NodeProps, useSvelteFlow, useNodeConnections} from '@xyflow/svelte';
-    import { fetchSocketDataTypeByName } from "$lib/compositor/DataTypes";
+    import {Handle, Position, type NodeProps, useNodeConnections} from '@xyflow/svelte';
+
     import {projectOutputDataCache} from "$lib/stores/ProjectState";
+    import {fetchSocketDataTypeByName, STANDARD_DATATYPES} from "$lib/compositor/DataTypes";
+    import NodeWrapper from "$lib/components/nodeComponents/NodeWrapper.svelte";
+    import {Tooltip} from "flowbite-svelte";
 
-    let { id, data }: NodeProps<HtmlRendererNodeType> = $props();
-    
-    const { updateNodeData } = useSvelteFlow();
-    
-    // Set the official NID if not already set
-    if (!data.nid) {
-        updateNodeData(id, { nid: 'html_renderer' });
-    }
+    let {id, data, selected}: NodeProps<HtmlRendererNodeType> = $props();
 
-    // State for HTML handling
-    let inputHtml: string = $state('');
-    let iframeRef: HTMLIFrameElement;
+    const inputConnections = useNodeConnections({id, handleType: 'target'});
+    let hasInputConnection = $derived(inputConnections.current.length > 0);
 
-    // Socket styling
-    let socketStyle = $state('');
-    fetchSocketDataTypeByName('text').then((datatype) => {
-        socketStyle = datatype?.style || '';
+    // Update display value when connection source becomes available
+    let displayValue = $state('');
+    let hasValidData = $state(false);
+    $effect(() => {
+        if (hasInputConnection) {
+            // only one way to have an input connection to this node, so 0 index is a-ok
+            const source = inputConnections.current[0].source;
+            const sourceHandle = inputConnections.current[0].sourceHandle;
+            if (sourceHandle) {
+                const unsubscribeSocket = projectOutputDataCache.useSocketStore(
+                    source,
+                    sourceHandle
+                ).subscribe((socketData) => {
+                    console.log('output socket data updated:', socketData, id)
+                    
+                    // Check if we have valid data (not null, undefined, or empty)
+                    if (socketData === null || socketData === undefined || socketData === '') {
+                        hasValidData = false;
+                        displayValue = '';
+                    } else if (typeof socketData === 'string') {
+                        displayValue = socketData as string;
+                        hasValidData = true;
+                    } else {
+                        displayValue = '<<OBJECT>>\n' + JSON.stringify(socketData, null, 2);
+                        hasValidData = true;
+                    }
+                });
+                return unsubscribeSocket;
+            }
+        } else {
+            hasValidData = false;
+            displayValue = '';
+        }
     });
 
-    // Computed values
-    let hasInputHtml = $derived(inputHtml.trim() !== '');
+    let iframeRef: HTMLIFrameElement;
 
     // Update iframe content when HTML changes
     function updateIframeContent(html: string) {
@@ -97,131 +118,76 @@
         }
     }
 
-    // Handle input HTML changes (from connected nodes)
-    $effect(() => {
-        if (data.input.html && typeof data.input.html === 'string') {
-            inputHtml = data.input.html;
-            updateIframeContent(inputHtml);
-        } else {
-            inputHtml = '';
-            updateIframeContent('<div style="text-align: center; color: #999; padding: 20px;">No HTML input</div>');
-        }
-    });
-
     // Initialize iframe when mounted
     function handleIframeLoad() {
-        if (hasInputHtml) {
-            updateIframeContent(inputHtml);
+        if (hasInputConnection && hasValidData) {
+            updateIframeContent(displayValue);
         } else {
-            updateIframeContent('<div style="text-align: center; color: #999; padding: 20px;">No HTML input</div>');
+            updateIframeContent('<div style="text-align: center; color: #999; padding: 20px;">Waiting for data...</div>');
         }
     }
 
-    // Fallback HTML for when there's no input
-    let fallbackHtml = `
-        <div class="flex flex-col items-center justify-center h-full text-gray-400">
-            <svg class="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-            </svg>
-            <span class="text-sm">Connect HTML input</span>
-        </div>
-    `;
-
-
-    const inputConnections = useNodeConnections({id, handleType: 'target'});
-    let hasInputConnection = $derived(inputConnections.current.length > 0);
-
+    // Update iframe when display value changes (only for connected inputs with valid data)
     $effect(() => {
-        if (hasInputConnection) {
-            // only one way to have an input connection to this node, so 0 index is a-ok
-            const source = inputConnections.current[0].source;
-            const sourceHandle = inputConnections.current[0].sourceHandle;
-            if (sourceHandle) {
-                const unsubscribeSocket = projectOutputDataCache.useSocketStore(
-                    source,
-                    sourceHandle
-                ).subscribe((socketData) => {
-                    console.log('output socket data updated:', socketData, id)
-                    inputHtml = socketData as string;
-                    updateIframeContent(inputHtml);
-                });
-                return unsubscribeSocket;
-            }
+        if (iframeRef && hasInputConnection && hasValidData) {
+            updateIframeContent(displayValue);
+        } else if (iframeRef && hasInputConnection && !hasValidData) {
+            updateIframeContent('<div style="text-align: center; color: #999; padding: 20px;">Waiting for data...</div>');
         }
     });
+
 </script>
 
-<div class="w-full h-[200px] relative">
-    <!-- HTML Renderer Display with Iframe -->
-    <div class="w-full h-full border-2 border-gray-300 rounded-lg bg-white overflow-hidden">
-        {#if !hasInputHtml}
-            <!-- Show fallback when no input -->
-            <div class="w-full h-full flex flex-col items-center justify-center text-gray-400">
-                <svg class="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                </svg>
-                <span class="text-sm">Connect HTML input</span>
-            </div>
-        {:else}
-            <!-- Sandboxed iframe for HTML content -->
-            <iframe
+<NodeWrapper label="HTML Renderer" isSelected={selected}>
+    <div class="relative">
+        <!-- Main content area -->
+        <div class="border-2 border-gray-300 rounded-lg bg-white overflow-hidden w-80 h-48">
+            {#if hasInputConnection}
+                <!-- Connected input - show iframe with display value -->
+                <iframe
                     bind:this={iframeRef}
-                    on:load={handleIframeLoad}
+                    onload={handleIframeLoad}
                     title="HTML Renderer"
                     sandbox="allow-same-origin"
                     class="w-full h-full border-0"
                     style="background: white;"
-            ></iframe>
-        {/if}
-    </div>
+                ></iframe>
+            {:else}
+                <!-- No connection - show placeholder -->
+                <div class="w-full h-full flex flex-col items-center justify-center text-gray-400">
+                    <svg class="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                    </svg>
+                    <span class="text-sm">Connect HTML input</span>
+                </div>
+            {/if}
+        </div>
 
-    <!-- Input handle for HTML text -->
-    <Handle
-            type="target"
-            position={Position.Left}
-            style="top:50%;{socketStyle}"
-            id="html"
-            class="socket-handle"
-    />
-</div>
+        <!-- Input handle -->
+        {#await fetchSocketDataTypeByName(STANDARD_DATATYPES.TEXT)}
+            Loading Target Socket
+        {:then datatype}
+            <Handle
+                    type="target"
+                    position={Position.Left}
+                    id="html"
+                    class="socket-handle"
+                    style="top: 50%;{datatype?.style || ''}"
+            />
+            <Tooltip placement="top">
+                <b>Type ({datatype?.name}):</b> {datatype?.description}
+            </Tooltip>
+        {:catch error}
+            Error; could not load input socket: {JSON.stringify(error, null, 2)}
+        {/await}
+
+
+    </div>
+</NodeWrapper>
 
 <style>
-    /*.html-content {*/
-    /*    width: 100%;*/
-    /*    height: 100%;*/
-    /*    font-family: inherit;*/
-    /*}*/
-
-    /*!* Ensure rendered HTML fits within the container *!*/
-    /*.html-content :global(*) {*/
-    /*    max-width: 100%;*/
-    /*    box-sizing: border-box;*/
-    /*}*/
-
-    /*!* Style for common HTML elements to ensure good visibility *!*/
-    /*.html-content :global(h1, h2, h3, h4, h5, h6) {*/
-    /*    margin: 0.5em 0;*/
-    /*    line-height: 1.2;*/
-    /*}*/
-
-    /*.html-content :global(p) {*/
-    /*    margin: 0.5em 0;*/
-    /*    line-height: 1.4;*/
-    /*}*/
-
-    /*.html-content :global(ul, ol) {*/
-    /*    margin: 0.5em 0;*/
-    /*    padding-left: 1.5em;*/
-    /*}*/
-
-    /*.html-content :global(img) {*/
-    /*    max-width: 100%;*/
-    /*    height: auto;*/
-    /*}*/
-
-    /*!* Ensure text doesn't overflow *!*/
-    /*.html-content :global(div, span) {*/
-    /*    word-wrap: break-word;*/
-    /*    overflow-wrap: break-word;*/
-    /*}*/
+    textarea::placeholder {
+        color: #9ca3af;
+        font-style: italic;
+    }
 </style>

@@ -51,6 +51,8 @@
 
     let inputText = $state(data.input.inputText || '');
     let textarea: HTMLTextAreaElement;
+
+    // Initialize without triggering update
     $effect(() => {
         projectActions.updateNodeData(untrack(() => id), {input: {inputText: inputText}});
     });
@@ -114,27 +116,6 @@
             {/if}
         </div>
 
-        <!--{#await fetchSocketDataTypeByName(STANDARD_DATATYPES.TEXT)}-->
-        <!--    Loading Socket-->
-        <!--{:then datatype}-->
-        <!--    <Handle-->
-        <!--            type="target"-->
-        <!--            position={Position.Left}-->
-        <!--            id='inputText'-->
-        <!--            class="socket-handle"-->
-        <!--            style={datatype?.style || ''}-->
-        <!--            isConnectable={!inputSocket.isConnected}-->
-        <!--    />-->
-        <!--    <Tooltip placement="top">-->
-        <!--        <b>{inputSocket.label}</b>&#45;&#45;{inputSocket.documentation}<br>-->
-        <!--        <b>Type ({datatype?.name}):</b> {datatype?.description}-->
-        <!--    </Tooltip>-->
-        <!--{:catch error}-->
-        <!--    Error; could not load input socket: {JSON.stringify(error, null, 2)}-->
-        <!--{/await}-->
-
-<!--        <TargetSocket id='inputText' label="" type={STANDARD_DATATYPES.TEXT} documentation="Text to display."></TargetSocket>-->
-
         {#await fetchSocketDataTypeByName(STANDARD_DATATYPES.TEXT)}
             Loading Target Socket
         {:then datatype}
@@ -170,9 +151,6 @@
         {:catch error}
             Error; could not load input socket: {JSON.stringify(error, null, 2)}
         {/await}
-<!--        <SourceSocket id="outputText" label="" type={STANDARD_DATATYPES.TEXT}-->
-<!--                      documentation="Text from input."></SourceSocket>-->
-
     </div>
 </NodeWrapper>
 

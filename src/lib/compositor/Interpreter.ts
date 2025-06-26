@@ -1,7 +1,7 @@
 import { type Node, type Edge } from '@xyflow/svelte';
 import { FirestoreNodeBluePrintControllerFactoryInterface } from './nodes/firestore/FirestoreNodeBluePrint';
 import type { NodeBluePrint } from './NodeBluePrint';
-import { OutputSocketDataCache } from './OutputSocketDataCache';
+import { ComputedDataCache } from './ComputedDataCache';
 import { projectOutputDataCache } from '$lib/stores/ProjectState';
 import { getBigData, type BigDataRef } from './BigData';
 
@@ -9,12 +9,12 @@ export class OutputSocketAsyncReturner {
     /**
      * This is part of the input to a node.
      */
-    dataCache: OutputSocketDataCache;
+    dataCache: ComputedDataCache;
     node_id: string;
     outputKeys: Set<string>;
 
     constructor(
-        dataCache: OutputSocketDataCache,
+        dataCache: ComputedDataCache,
         node_id: string,
         outputs: Set<string>
     ) {
@@ -271,7 +271,7 @@ async function getNodeInputData(
     nodeId: string,
     nodes: Node[],
     edges: Edge[],
-    dataCache: OutputSocketDataCache
+    dataCache: ComputedDataCache
 ): Promise<Record<string, unknown>> {
     /**
      * Collect all input data for a node from connected output sockets and node's internal data
@@ -323,8 +323,7 @@ async function getNodeInputData(
     // Temporary. This replaces every BigDataRef with the value in the database
     for (const key in inputData) {
         // @ts-ignore
-        if (inputData[key].hasOwnProperty('_type') && inputData[key]._type == 'bigdata_ref'
-        ) {
+        if (inputData[key].hasOwnProperty('_type') && inputData[key]._type == 'bigdata_ref') {
             inputData[key] = await getBigData(inputData[key] as BigDataRef);
         }
     }

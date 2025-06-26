@@ -1,12 +1,12 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { get } from 'svelte/store';
-import { OutputSocketDataCache } from './OutputSocketDataCache';
+import { ComputedDataCache } from './ComputedDataCache';
 
 describe('OutputSocketDataCache', () => {
-    let cache: OutputSocketDataCache;
+    let cache: ComputedDataCache;
 
     beforeEach(() => {
-        cache = new OutputSocketDataCache();
+        cache = new ComputedDataCache();
     });
 
     describe('Basic Operations', () => {
@@ -101,7 +101,7 @@ describe('OutputSocketDataCache', () => {
         });
 
         it('should provide reactive node sockets store', async () => {
-            const nodeSocketsStore = cache.getNodeSocketsStore('node1');
+            const nodeSocketsStore = cache.getNodeStore('node1');
 
             // Initially should be empty
             expect(get(nodeSocketsStore).size).toBe(0);

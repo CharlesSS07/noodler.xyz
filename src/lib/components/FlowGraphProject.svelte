@@ -1,6 +1,11 @@
 <script lang="ts">
 
-    let {project_key = 'project_key_not_assigned', onProjectReady} = $props<{ project_key?: string; onProjectReady?: (context: any) => void }>();
+    import project from "../../routes/app/demos/aiImgEditing/project";
+
+    let {project_key = 'project_key_not_assigned', onProjectReadyCallback} = $props<{
+        project_key?: string;
+        onProjectReadyCallback?: (context: any) => Promise<void>
+    }>();
 
     import {
         SvelteFlow,
@@ -24,10 +29,10 @@
     import Logo from "../../components/Logo.svelte";
     import NodeSearch from "./NodeSearch.svelte";
     import BugReportButton from "../../components/BugReportButton.svelte";
-    import { Plus, Play, X, ChevronDown, Download, RotateCcw } from "lucide-svelte";
-    import { projectState, projectActions, projectSync } from "$lib/stores/ProjectState";
-    import { executeFlowGraph } from "$lib/compositor/Interpreter";
-    
+    import {Plus, Play, X, ChevronDown, Download, RotateCcw} from "lucide-svelte";
+    import {projectState, projectActions, projectSync} from "$lib/stores/ProjectState";
+    import {executeFlowGraph} from "$lib/compositor/Interpreter";
+
     // Import the existing nodes
     import CompleteTextLLM from "$lib/components/nodes/huggingface/CompleteTextLLM.svelte";
     import TextEditorMarkdownNode from "$lib/components/nodes/text/TextEditorMarkdownNode.svelte";
@@ -38,13 +43,51 @@
     let edges = $state.raw<Edge[]>([]);
 
     // Track project sync state
-    let isInitialized = false;
-    let hasLoadedFromFirebase = false;
+    let isInitialized = $state(false);
+    let hasLoadedFromFirebase = $state(false);
+
+    function setupDefaultProject() {
+        addNode({
+            type: 'note',
+            data: {
+                markdown: `# Welcome to noodler.xyz!
+A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
+
+* Pan around by clicking and dragging on the canvas.
+* Scroll to zoom.
+* Add a node by clicking on one of the buttons above. Wire nodes together to create flow functionality.
+
+## TODO:
+1. Node search tool --> KNN over embeddings of node code, name, and descriptions. Also just plain old text comparison.
+2. More standard nodes
+3. Oauth integrations to cut costs
+4. NodeAI for developing new nodes
+5. FlowAI for developing flows`
+            },
+            position: {x: 0, y: 0}
+        }, 'default-intro-node');
+    }
+
+    function onProjectLoaded() {
+
+        if (nodes.length === 0) { // if this is an empty project
+            setupDefaultProject();
+        }
+
+        if (onProjectReadyCallback) {
+            onProjectReadyCallback({
+                executeFromNode: executeFromNode
+            });
+        }
+    }
 
     // Initialize project sync when project_key changes
     $effect(() => {
         if (project_key && project_key !== 'project_key_not_assigned') {
-            projectSync.syncProject(project_key);
+            projectSync.syncProject(project_key, () => {
+                onProjectLoaded();
+                hasLoadedFromFirebase = true;
+            });
             isInitialized = true;
         }
 
@@ -87,49 +130,11 @@
                     if (JSON.stringify(edges) !== JSON.stringify(stateEdges)) {
                         edges = [...stateEdges];
                     }
-                    
-                    // Mark that we've loaded data from Firebase
-                    if (!hasLoadedFromFirebase) {
-                        hasLoadedFromFirebase = true;
-                        // Call the optional oninit hook after project data is loaded
-                        if (onProjectReady) {
-                            onProjectReady({
-                                executeFromNode: executeFromNode,
-                                panTo: panTo
-                            });
-                        }
-                    }
                 }
             }
         });
 
         return unsubscribe;
-    });
-
-    // Add default intro node when appropriate
-    $effect(() => {
-        if (isInitialized && hasLoadedFromFirebase && nodes.length === 0) {
-            addNode({
-                type: 'note',
-                data: {
-                    markdown: `# Welcome to noodler.xyz!
-A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
-
-* Pan around by clicking and dragging on the canvas.
-* Scroll to zoom.
-* Add a node by clicking on one of the buttons above. Wire nodes together to create flow functionality.
-
-## TODO:
-1. Node search tool --> KNN over embeddings of node code, name, and descriptions. Also just plain old text comparison.
-2. More standard nodes
-3. Oauth integrations to cut costs
-4. NodeAI for developing new nodes
-5. FlowAI for developing flows`
-                },
-                position: {x: 0, y: 100}
-            }, 'default-intro-node');
-
-        }
     });
 
     // Helper functions for manual node operations
@@ -166,7 +171,6 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
         image: ImageNode,
         html: HTMLRendererNode,
         textTemplate: TextTemplateFillinNode,
-        textEditor: TextEditorRawNode,
         textEditorMd: TextEditorMarkdownNode,
         textEditorRaw: TextEditorRawNode,
         huggingfaceLLM: CompleteTextLLM,
@@ -178,13 +182,10 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
     let showNodeSearch = $state(false);
 
     // Add a variable to store the viewport
-    let viewport: Viewport = $state({ x: 0, y: 0, zoom: 1 });
-
-    let flowContainer: HTMLDivElement;
+    let viewport: Viewport = $state({x: 0, y: 0, zoom: 1});
 
     // Execution state
     let isExecuting = $state(false);
-    let selectedExecutionNode = $state<string | null>(null);
 
     // Dropdown state
     let showNodeDropdown = $state(false);
@@ -209,25 +210,25 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
             description: 'Plain text editor no formatting',
             category: 'Text',
             defaultData: {
-                input: { inputText: '' },
+                input: {inputText: ''},
                 nid: 'raw_text_editor'
             }
         },
         {
-            id: 'textEditor',
-            type: 'textEditor',
-            title: 'Text Editor',
-            description: 'Advanced text editor with formatting',
+            id: 'textEditorMd',
+            type: 'textEditorMd',
+            title: 'Markdown Text Editor',
+            description: 'Text editor with markdown formatting',
             category: 'Text',
             defaultData: {
-                input: { text: '' },
+                input: {text: ''},
                 nid: 'md_text_editor'
             }
         },
         {
             id: 'textTemplate',
             type: 'textTemplate',
-            title: 'Text',
+            title: 'Text Template',
             description: 'Template with variable substitution',
             category: 'Text',
             defaultData: {
@@ -256,7 +257,7 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
             description: 'Image display and processing',
             category: 'Media',
             defaultData: {
-                input: { },
+                input: {},
                 nid: 'image_loader'
             }
         }
@@ -264,15 +265,12 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
 
     // Node search functions
     function openNodeSearch(event?: KeyboardEvent | MouseEvent): void {
-        if (flowContainer) {
-            const rect = flowContainer.getBoundingClientRect();
-        }
         showNodeSearch = true;
     }
 
     // Handle node selection from search
     async function handleNodeSelected(event: CustomEvent<{ nodeId: string; title: string }>): Promise<void> {
-        const { nodeId, title } = event.detail;
+        const {nodeId, title} = event.detail;
         showNodeSearch = false;
 
         // Create a new node instance from the blueprint
@@ -285,7 +283,7 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
         const centerY = (-viewport.y + (typeof window !== 'undefined' ? window.innerHeight : 600) / 2) / viewport.zoom;
 
         const newNode: Node = {
-            id: `node_${Date.now()}_${Math.random().toString(36).substring(2, 2+9)}`,
+            id: `node_${Date.now()}_${Math.random().toString(36).substring(2, 2 + 9)}`,
             type: 'node', // Use StemNode for blueprint-based nodes
             position: {
                 x: centerX - 100, // Offset slightly from center
@@ -320,7 +318,7 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
             const target = event.target as HTMLElement;
             const dropdownButton = target.closest('.dropdown-btn');
             const dropdownMenu = target.closest('.dropdown-menu');
-            
+
             if (!dropdownButton && !dropdownMenu) {
                 showNodeDropdown = false;
                 showActionDropdown = false;
@@ -331,15 +329,14 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
     // Execution functions
     async function executeFromNode(nodeId: string): Promise<void> {
         if (isExecuting) return;
-        
+
         isExecuting = true;
-        selectedExecutionNode = nodeId;
 
         try {
             // NOTE: Console.log capture has been removed since we're not showing the execution panel
             // The execution logger was not particularly helpful and just clogged up the screen.
             // Execution still works fine - we just don't capture/display the logs anymore.
-            
+
             await executeFlowGraph(nodeId, nodes, edges);
             console.log('✅ Execution completed successfully');
         } catch (error) {
@@ -402,10 +399,10 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
                 title: $projectState.title
             }
         };
-        
+
         const dataStr = JSON.stringify(graphData, null, 2);
         const dataBlob = new Blob([dataStr], {type: 'application/json'});
-        
+
         const url = URL.createObjectURL(dataBlob);
         const link = document.createElement('a');
         link.href = url;
@@ -414,7 +411,7 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
-        
+
         showActionDropdown = false;
     }
 
@@ -426,17 +423,6 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
             showActionDropdown = false;
         }
     }
-
-    function panTo(x: number, y: number): void {
-        viewport.x = x;
-        viewport.y = y;
-    }
-
-    // onMount(() => {
-    //     auth.authStateReady().then(() => {
-    //
-    //     });
-    // });
 
     const isValidConnection = (connection: Connection) => {
 
@@ -459,151 +445,159 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
 
 </script>
 
+<svelte:window onkeydown={handleKeydown} onclick={handleClickOutside}/>
 
-<svelte:window onkeydown={handleKeydown} onclick={handleClickOutside} />
 
-<div class="flowgraph-container" bind:this={flowContainer}>
-    <SvelteFlow
-        bind:nodes
-        bind:edges
-        bind:viewport
-        {isValidConnection}
-        {nodeTypes}
-        {colorMode}
-        oninit={() => {}}
-        oninput={() => {console.log('input')}}
-        fitView
-    >
-        <Background variant={BackgroundVariant.Dots} />
-        <Controls />
-        <MiniMap />
+{#if hasLoadedFromFirebase}
 
-        <Panel position="top-left">
-            <div class="project-info">
-                <Logo size={3} />
-                {#if $projectState.title}
-                    <h3 class="text-lg font-semibold">{$projectState.title}</h3>
-                {/if}
-                {#if $projectState.isDirty}
-                    <span class="text-xs text-orange-500">• Unsaved changes</span>
-                {:else if $projectState.isSyncing}
-                    <span class="text-xs text-blue-500">• Syncing...</span>
-                {:else}
-                    <span class="text-xs text-green-500">• Saved</span>
-                {/if}
-            </div>
-        </Panel>
+    <div class="flowgraph-container">
+        <SvelteFlow
+                bind:nodes
+                bind:edges
+                bind:viewport
+                {isValidConnection}
+                {nodeTypes}
+                {colorMode}
+                oninit={() => {}}
+                oninput={() => {console.log('input')}}
+                fitView
+        >
+            <Background variant={BackgroundVariant.Dots}/>
+            <Controls/>
+            <MiniMap/>
 
-        <Panel position="top-right">
-            <div class="controls-panel">
-                <BugReportButton size="md" />
-
-                <button
-                    onclick={executeFromSelectedNode}
-                    class="control-btn execution-btn"
-                    class:executing={isExecuting}
-                    disabled={isExecuting}
-                    title="Execute from selected node"
-                >
-                    <Play class="w-4 h-4" />
-                    {isExecuting ? 'Executing...' : 'Execute'}
-                </button>
-
-                <!-- Node Dropdown -->
-                <div class="relative">
-                    <button
-                        onclick={() => showNodeDropdown = !showNodeDropdown}
-                        class="control-btn dropdown-btn"
-                        title="Add existing node types"
-                    >
-                        <Plus class="w-4 h-4" />
-                        Node Types
-                        <ChevronDown class="w-3 h-3 ml-1" />
-                    </button>
-
-                    {#if showNodeDropdown}
-                        <div class="dropdown-menu">
-                            {#each Object.entries(nodesByCategory()) as [category, nodes]}
-                                <div class="dropdown-category">
-                                    <div class="category-header">{category}</div>
-                                    {#each nodes as node}
-                                        <button
-                                            onclick={() => addNodeFromDropdown(node)}
-                                            class="dropdown-item"
-                                            title={node.description}
-                                        >
-                                            <span class="node-title">{node.title}</span>
-                                            <span class="node-description">{node.description}</span>
-                                        </button>
-                                    {/each}
-                                </div>
-                            {/each}
-                        </div>
+            <Panel position="top-left">
+                <div class="project-info">
+                    <Logo size={3}/>
+                    {#if $projectState.title}
+                        <h3 class="text-lg font-semibold">{$projectState.title}</h3>
+                    {/if}
+                    {#if $projectState.isDirty}
+                        <span class="text-xs text-orange-500">• Unsaved changes</span>
+                    {:else if $projectState.isSyncing}
+                        <span class="text-xs text-blue-500">• Syncing...</span>
+                    {:else}
+                        <span class="text-xs text-green-500">• Saved</span>
                     {/if}
                 </div>
+            </Panel>
 
-                <button
-                    onclick={() => {
+            <Panel position="top-right">
+                <div class="controls-panel">
+                    <BugReportButton size="md"/>
+
+                    <button
+                            onclick={executeFromSelectedNode}
+                            class="control-btn execution-btn"
+                            class:executing={isExecuting}
+                            disabled={isExecuting}
+                            title="Execute from selected node"
+                    >
+                        <Play class="w-4 h-4"/>
+                        {isExecuting ? 'Executing...' : 'Execute'}
+                    </button>
+
+                    <!-- Node Dropdown -->
+                    <div class="relative">
+                        <button
+                                onclick={() => showNodeDropdown = !showNodeDropdown}
+                                class="control-btn dropdown-btn"
+                                title="Add existing node types"
+                        >
+                            <Plus class="w-4 h-4"/>
+                            Node Types
+                            <ChevronDown class="w-3 h-3 ml-1"/>
+                        </button>
+
+                        {#if showNodeDropdown}
+                            <div class="dropdown-menu">
+                                {#each Object.entries(nodesByCategory()) as [category, nodes]}
+                                    <div class="dropdown-category">
+                                        <div class="category-header">{category}</div>
+                                        {#each nodes as node}
+                                            <button
+                                                    onclick={() => addNodeFromDropdown(node)}
+                                                    class="dropdown-item"
+                                                    title={node.description}
+                                            >
+                                                <span class="node-title">{node.title}</span>
+                                                <span class="node-description">{node.description}</span>
+                                            </button>
+                                        {/each}
+                                    </div>
+                                {/each}
+                            </div>
+                        {/if}
+                    </div>
+
+                    <button
+                            onclick={() => {
                         openNodeSearch();
                     }}
-                    class="control-btn"
-                    title="Search all nodes (Tab)"
-                >
-                    <Plus class="w-4 h-4" />
-                    Search Nodes <small>(Tab)</small>
-                </button>
-            </div>
-        </Panel>
-
-        <Panel position="bottom-left">
-            <div class="action-panel">
-                <div class="relative">
-                    <button
-                        onclick={() => showActionDropdown = !showActionDropdown}
-                        class="control-btn dropdown-btn action-dropdown-btn"
-                        title="Graph actions"
+                            class="control-btn"
+                            title="Search all nodes (Tab)"
                     >
-                        <ChevronDown class="w-4 h-4" />
-                        Actions
+                        <Plus class="w-4 h-4"/>
+                        Search Nodes <small>(Tab)</small>
                     </button>
-
-                    {#if showActionDropdown}
-                        <div class="dropdown-menu action-dropdown-menu">
-                            <button
-                                onclick={downloadGraphState}
-                                class="dropdown-item action-dropdown-item"
-                                title="Download current graph state as JSON"
-                            >
-                                <Download class="w-4 h-4" />
-                                <span class="action-title">Download Graph State</span>
-                                <span class="action-description">Export nodes and edges as JSON</span>
-                            </button>
-                            <button
-                                onclick={resetProject}
-                                class="dropdown-item action-dropdown-item danger"
-                                title="Reset project and delete all data"
-                            >
-                                <RotateCcw class="w-4 h-4" />
-                                <span class="action-title">Reset Project</span>
-                                <span class="action-description">Delete all nodes and edges</span>
-                            </button>
-                        </div>
-                    {/if}
                 </div>
-            </div>
-        </Panel>
+            </Panel>
 
-    </SvelteFlow>
+            <Panel position="bottom-left">
+                <div class="action-panel">
+                    <div class="relative">
+                        <button
+                                onclick={() => showActionDropdown = !showActionDropdown}
+                                class="control-btn dropdown-btn action-dropdown-btn"
+                                title="Graph actions"
+                        >
+                            <ChevronDown class="w-4 h-4"/>
+                            Actions
+                        </button>
 
-    <!-- Node Search Modal -->
-    <NodeSearch
-        bind:isOpen={showNodeSearch}
-        on:nodeSelected={handleNodeSelected}
-        on:close={() => showNodeSearch = false}
-        position={{x: '50vw', y: '20vw'}}
-    />
+                        {#if showActionDropdown}
+                            <div class="dropdown-menu action-dropdown-menu">
+                                <button
+                                        onclick={downloadGraphState}
+                                        class="dropdown-item action-dropdown-item"
+                                        title="Download current graph state as JSON"
+                                >
+                                    <Download class="w-4 h-4"/>
+                                    <span class="action-title">Download Graph State</span>
+                                    <span class="action-description">Export nodes and edges as JSON</span>
+                                </button>
+                                <button
+                                        onclick={resetProject}
+                                        class="dropdown-item action-dropdown-item danger"
+                                        title="Reset project and delete all data"
+                                >
+                                    <RotateCcw class="w-4 h-4"/>
+                                    <span class="action-title">Reset Project</span>
+                                    <span class="action-description">Delete all nodes and edges</span>
+                                </button>
+                            </div>
+                        {/if}
+                    </div>
+                </div>
+            </Panel>
 
-</div>
+        </SvelteFlow>
+
+        <!-- Node Search Modal -->
+        <NodeSearch
+                bind:isOpen={showNodeSearch}
+                on:nodeSelected={handleNodeSelected}
+                on:close={() => showNodeSearch = false}
+                position={{x: '50vw', y: '20vw'}}
+        />
+
+    </div>
+
+{:else }
+
+    isInitialized: {isInitialized} hasLoadedFromFirebase: {hasLoadedFromFirebase}
+
+{/if}
 
 <style>
     .flowgraph-container {

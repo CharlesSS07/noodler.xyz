@@ -6,14 +6,13 @@
             nid: string;
             input: Record<string, unknown>,
             errorMessage: string;
-            status: string;
         },
         'node-stem'
     >;
 </script>
 
 <script lang="ts">
-    import {type NodeProps, useNodeConnections, useSvelteFlow} from "@xyflow/svelte";
+    import {type NodeProps, useNodeConnections} from "@xyflow/svelte";
 
     import {docStore} from "sveltefire";
     import {firestore} from "../../firebase";
@@ -22,6 +21,7 @@
     import {untrack} from "svelte";
     import NodeErrorDisplay from "$lib/components/nodeComponents/NodeErrorDisplay.svelte";
     import NodeWrapper from "$lib/components/nodeComponents/NodeWrapper.svelte";
+    import {projectOutputDataCache} from "$lib/stores/ProjectState";
 
     let {id, data, selected}: NodeProps<StemNodeType> = $props();
     let nodeBluePrint = docStore<FirestoreNodeBluePrintModel>(firestore, `nodes/${data.nid}`);
@@ -125,7 +125,28 @@
         if (errorMessage !== undefined && errorMessage !== null) {
             data.errorMessage = errorMessage;
         }
-    })
+    });
+
+    let executionTime: number = 0;
+    const unsubscribeSocket = projectOutputDataCache.useNodeExecutionStatusStore(id).subscribe(
+        (executionStatus) => {
+            untrack(() => {
+                console.log(executionStatus)
+                if (executionStatus !== undefined && executionStatus !== null && typeof executionStatus === "string") {
+                    const executionStatusString: string = executionStatus as string;
+                    const executedAtPrefix = 'Executed at ';
+                    if (executionStatusString.startsWith(executedAtPrefix)) {
+                        executionTime = Date.now() - parseInt(executionStatusString.substring(executedAtPrefix.length));
+                    } else if (executionStatusString === 'idle') {
+                        executionTime = 0;
+                    }
+                } else {
+                    console.warn(`Received invalid execution status`, executionStatus);
+                }
+            });
+        }
+    );
+    // return unsubscribeSocket;
 
 </script>
 
@@ -134,7 +155,8 @@
     <NodeWrapper
             label={$nodeBluePrint.title}
             documentation={$nodeBluePrint.documentation}
-            executionTime={0}
+            executionTime={executionTime}
+            errorEncountered={data.errorMessage!==''}
             isSelected={selected}>
         <StemNodeComponent
                 inputSockets={inputSockets}
