@@ -3,8 +3,8 @@ import type {
     InputSocketParams,
     OutputSocketModel,
     SocketID,
-} from './SocketModels.js';
-import { OutputSocketAsyncReturner } from './Interpreter';
+} from '../SocketModels.js';
+import { OutputSocketAsyncReturner } from '../Interpreter';
 import { writable, type Writable } from 'svelte/store';
 
 export interface NodeBluePrintControllerFactoryInterface {

@@ -14,11 +14,12 @@
 <script lang="ts">
     import {Handle, Position, type NodeProps, useNodeConnections} from '@xyflow/svelte';
 
-    import {projectActions, projectOutputDataCache} from "$lib/stores/ProjectState";
+    import {projectActions, projectComputedDataCache} from "$lib/stores/ProjectState";
     import {untrack} from "svelte";
     import {fetchSocketDataTypeByName, STANDARD_DATATYPES} from "$lib/compositor/DataTypes";
     import NodeWrapper from "$lib/components/nodeComponents/NodeWrapper.svelte";
-    import {Tooltip} from "flowbite-svelte";
+    import {Tooltip, Button} from "flowbite-svelte";
+    import {Copy, Check} from 'lucide-svelte';
     import {marked} from 'marked';
 
     let {id, data, selected}: NodeProps<MarkdownTextNodeType> = $props();
@@ -34,7 +35,7 @@
             const source = inputConnections.current[0].source;
             const sourceHandle = inputConnections.current[0].sourceHandle;
             if (sourceHandle) {
-                const unsubscribeSocket = projectOutputDataCache.useSocketStore(
+                const unsubscribeSocket = projectComputedDataCache.useSocketStore(
                     source,
                     sourceHandle
                 ).subscribe((socketData) => {
@@ -52,6 +53,7 @@
     let inputText = $state(data.input.text || '');
     let textarea: HTMLTextAreaElement;
     let isEditing = $state(false);
+    let copySuccess = $state(false);
 
     // Initialize without triggering update
     $effect(() => {
@@ -88,6 +90,30 @@
         isEditing = false;
     }
 
+    async function copyToClipboard(): Promise<void> {
+        try {
+            await navigator.clipboard.writeText(displayValue);
+            copySuccess = true;
+            setTimeout(() => {
+                copySuccess = false;
+            }, 2000);
+        } catch (err) {
+            console.error('Failed to copy:', err);
+        }
+    }
+
+    async function copyInputToClipboard(): Promise<void> {
+        try {
+            await navigator.clipboard.writeText(inputText);
+            copySuccess = true;
+            setTimeout(() => {
+                copySuccess = false;
+            }, 2000);
+        } catch (err) {
+            console.error('Failed to copy:', err);
+        }
+    }
+
 </script>
 
 <NodeWrapper label="Markdown Text" isSelected={selected}>
@@ -96,8 +122,29 @@
         <div class="border-2 border-gray-300 rounded-lg bg-white overflow-hidden">
             {#if hasInputConnection}
                 <!-- Connected input - show markdown rendered display value -->
-                <div class="w-fit p-3 prose max-w-none text-sm">
-                    {@html marked.parse(displayValue || 'No data supplied by link.')}
+                <div class="relative group">
+                    <div class="w-fit p-3 prose max-w-none text-sm">
+                        {@html marked.parse(displayValue || 'No data supplied by link.')}
+                    </div>
+                    <!-- Copy button - only visible when connected and has content -->
+                    {#if displayValue}
+                        <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button
+                                size="xs"
+                                color="light"
+                                outline
+                                onclick={copyToClipboard}
+                                title="Copy content to clipboard"
+                                class="shadow-sm"
+                            >
+                                {#if copySuccess}
+                                    <Check size={12} />
+                                {:else}
+                                    <Copy size={12} />
+                                {/if}
+                            </Button>
+                        </div>
+                    {/if}
                 </div>
             {:else if isEditing}
                 <!-- Editing mode - show textarea -->
@@ -116,12 +163,36 @@
                 ></textarea>
             {:else}
                 <!-- Display mode - show rendered markdown -->
-                <div 
-                    class="w-fit p-3 prose max-w-none text-sm cursor-pointer"
-                    onclick={startEditing}
-                    onkeypress={startEditing}
-                >
-                    {@html marked.parse(inputText || 'Click to enter markdown...')}
+                <div class="relative group">
+                    <div 
+                        class="w-fit p-3 prose max-w-none text-sm cursor-pointer"
+                        onclick={startEditing}
+                        onkeypress={startEditing}
+                    >
+                        {@html marked.parse(inputText || 'Click to enter markdown...')}
+                    </div>
+                    <!-- Copy button - only visible when there's content -->
+                    {#if inputText}
+                        <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button
+                                size="xs"
+                                color="light"
+                                outline
+                                onclick={(e) => {
+                                    e.stopPropagation();
+                                    copyInputToClipboard();
+                                }}
+                                title="Copy content to clipboard"
+                                class="shadow-sm"
+                            >
+                                {#if copySuccess}
+                                    <Check size={12} />
+                                {:else}
+                                    <Copy size={12} />
+                                {/if}
+                            </Button>
+                        </div>
+                    {/if}
                 </div>
             {/if}
         </div>
@@ -135,7 +206,7 @@
                     position={Position.Left}
                     id="text"
                     class="socket-handle"
-                    style="top: 50%;{datatype?.style || ''}"
+                    style="top: 20px;{datatype?.style || ''}"
             />
             <Tooltip placement="top">
                 <b>Type ({datatype?.name}):</b> {datatype?.description}
@@ -152,7 +223,7 @@
                     type="source"
                     position={Position.Right}
                     id='text'
-                    style="top: 50%;{datatype?.style || ''}"
+                    style="top: 20px;{datatype?.style || ''}"
                     class="socket-handle"
             />
             <Tooltip placement="top">

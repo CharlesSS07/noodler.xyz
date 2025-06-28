@@ -22,7 +22,7 @@
 import { beforeEach, describe, expect, test } from 'vitest';
 import { executeFlowGraph } from './Interpreter';
 import type { Node, Edge } from '@xyflow/svelte';
-import { projectOutputDataCache } from '$lib/stores/ProjectState';
+import { projectComputedDataCache } from '$lib/stores/ProjectState';
 import { FirestoreNodeBluePrintControllerFactoryInterface } from './nodes/firestore/FirestoreNodeBluePrint';
 
 describe('Interpreter Flow Graph Tests', () => {
@@ -34,7 +34,7 @@ describe('Interpreter Flow Graph Tests', () => {
         mockNodes = [];
         mockEdges = [];
         // Clear the output data cache before each test
-        await projectOutputDataCache.clear();
+        await projectComputedDataCache.clear();
     });
 
     test('Simple addition: 9 + 6 = 15', async () => {
@@ -60,7 +60,7 @@ describe('Interpreter Flow Graph Tests', () => {
         await executeFlowGraph('const-9', mockNodes, mockEdges);
 
         // The result should be computed and stored in the output data cache
-        const result = await projectOutputDataCache.get('const-9', 'result');
+        const result = await projectComputedDataCache.get('const-9', 'result');
         expect(result).toBe(15);
     });
 
@@ -102,14 +102,14 @@ describe('Interpreter Flow Graph Tests', () => {
         await executeFlowGraph('add-outer', mockNodes, mockEdges);
 
         // Check intermediate result: 5 + 6 = 11
-        const innerResult = await projectOutputDataCache.get(
+        const innerResult = await projectComputedDataCache.get(
             'add-inner',
             'result'
         );
         expect(innerResult).toBe(11);
 
         // Check final result: 9 + 11 = 20
-        const outerResult = await projectOutputDataCache.get(
+        const outerResult = await projectComputedDataCache.get(
             'add-outer',
             'result'
         );
@@ -167,19 +167,19 @@ describe('Interpreter Flow Graph Tests', () => {
         await executeFlowGraph('multiply-final', mockNodes, mockEdges);
 
         // Check all intermediate results
-        const innerResult = await projectOutputDataCache.get(
+        const innerResult = await projectComputedDataCache.get(
             'add-inner',
             'result'
         );
         expect(innerResult).toBe(11); // 5 + 6
 
-        const middleResult = await projectOutputDataCache.get(
+        const middleResult = await projectComputedDataCache.get(
             'add-middle',
             'result'
         );
         expect(middleResult).toBe(20); // 9 + 11
 
-        const finalResult = await projectOutputDataCache.get(
+        const finalResult = await projectComputedDataCache.get(
             'multiply-final',
             'result'
         );
@@ -203,7 +203,7 @@ describe('Interpreter Flow Graph Tests', () => {
 
         await executeFlowGraph('divide-test', mockNodes, mockEdges);
 
-        const result = await projectOutputDataCache.get(
+        const result = await projectComputedDataCache.get(
             'divide-test',
             'result'
         );
@@ -251,7 +251,7 @@ describe('Interpreter Flow Graph Tests', () => {
 
         await executeFlowGraph('subtract-test', mockNodes, mockEdges);
 
-        const result = await projectOutputDataCache.get(
+        const result = await projectComputedDataCache.get(
             'subtract-test',
             'result'
         );
@@ -309,15 +309,15 @@ describe('Interpreter Flow Graph Tests', () => {
         await executeFlowGraph('multiply-combined', mockNodes, mockEdges);
 
         // First addition: 3 + 4 = 7
-        const add1Result = await projectOutputDataCache.get('add-1', 'result');
+        const add1Result = await projectComputedDataCache.get('add-1', 'result');
         expect(add1Result).toBe(7);
 
         // Second addition: 10 + 20 = 30
-        const add2Result = await projectOutputDataCache.get('add-2', 'result');
+        const add2Result = await projectComputedDataCache.get('add-2', 'result');
         expect(add2Result).toBe(30);
 
         // Final multiplication: 7 * 30 = 210
-        const multiplyResult = await projectOutputDataCache.get(
+        const multiplyResult = await projectComputedDataCache.get(
             'multiply-combined',
             'result'
         );
@@ -341,7 +341,7 @@ describe('Interpreter Flow Graph Tests', () => {
 
         await executeFlowGraph('standalone', mockNodes, mockEdges);
 
-        const result = await projectOutputDataCache.get('standalone', 'result');
+        const result = await projectComputedDataCache.get('standalone', 'result');
         expect(result).toBe(2);
     });
 
@@ -383,24 +383,24 @@ describe('Interpreter Flow Graph Tests', () => {
     // Working tests that don't require Firestore nodes
     test('Should clear output data cache properly', async () => {
         // Test that the cache clearing functionality works
-        await projectOutputDataCache.cache(
+        await projectComputedDataCache.cache(
             'test-node',
             'test-socket',
             'test-value'
         );
 
         // Verify data is stored
-        const storedValue = await projectOutputDataCache.get(
+        const storedValue = await projectComputedDataCache.get(
             'test-node',
             'test-socket'
         );
         expect(storedValue).toBe('test-value');
 
         // Clear the cache
-        await projectOutputDataCache.clear();
+        await projectComputedDataCache.clear();
 
         // Verify data is cleared
-        expect(projectOutputDataCache.has('test-node', 'test-socket')).toBe(
+        expect(projectComputedDataCache.has('test-node', 'test-socket')).toBe(
             false
         );
     });
@@ -512,15 +512,15 @@ describe('Interpreter Flow Graph Tests', () => {
         await executeFlowGraph('greyscale', mockNodes, mockEdges);
 
         // Verify the pipeline executed successfully
-        const originalImage = await projectOutputDataCache.get(
+        const originalImage = await projectComputedDataCache.get(
             'new-image',
             'image'
         );
-        const hsvImage = await projectOutputDataCache.get(
+        const hsvImage = await projectComputedDataCache.get(
             'hsv-transform',
             'img'
         );
-        const greyscaleImage = await projectOutputDataCache.get(
+        const greyscaleImage = await projectComputedDataCache.get(
             'greyscale',
             'img'
         );
@@ -580,11 +580,11 @@ describe('Interpreter Flow Graph Tests', () => {
 
         await executeFlowGraph('image-viewer', mockNodes, mockEdges);
 
-        const originalImage = await projectOutputDataCache.get(
+        const originalImage = await projectComputedDataCache.get(
             'new-image',
             'image'
         );
-        const viewedImage = await projectOutputDataCache.get(
+        const viewedImage = await projectComputedDataCache.get(
             'image-viewer',
             'img'
         );

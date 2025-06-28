@@ -17,7 +17,7 @@
 <script lang="ts">
     import { Handle, Position, type NodeProps, useSvelteFlow, useNodeConnections } from '@xyflow/svelte';
     import { fetchSocketDataTypeByName } from "$lib/compositor/DataTypes";
-    import { projectOutputDataCache } from "$lib/stores/ProjectState";
+    import { projectComputedDataCache } from "$lib/stores/ProjectState";
     import { untrack } from "svelte";
     import { 
         getBigData, 
@@ -52,7 +52,7 @@
     let sourceSocket = $derived(inputConnections.current[0]?.sourceHandle || 'input');
     $effect(() => {
         if (hasInputConnection) {
-            const unsubscribeSocket = projectOutputDataCache.useSocketStore(
+            const unsubscribeSocket = projectComputedDataCache.useSocketStore(
                 sourceNode,
                 sourceSocket
             ).subscribe(async (socketData) => {
@@ -88,7 +88,7 @@
     // recieve errors to display
     $effect(() => {
         console.log(id);
-        const unsubscribeSocket = projectOutputDataCache.useSocketStore(
+        const unsubscribeSocket = projectComputedDataCache.useSocketStore(
             id,
             '__error__'
         ).subscribe((socketData) => {

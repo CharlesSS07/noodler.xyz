@@ -50,7 +50,7 @@ export const projectEdges: Readable<Edge[]> = derived(
     projectState,
     ($state) => $state.edges
 );
-export const projectOutputDataCache: ComputedDataCache =
+export const projectComputedDataCache: ComputedDataCache =
     new ComputedDataCache();
 // = derived(projectState, $state => $state.outputs);
 export const projectTitle: Readable<string> = derived(

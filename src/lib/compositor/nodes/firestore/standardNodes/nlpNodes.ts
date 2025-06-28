@@ -1,4 +1,4 @@
-import type { NodeBluePrintControllerFactoryInterface } from '$lib/compositor/NodeBluePrint.js';
+import type { NodeBluePrintControllerFactoryInterface } from '$lib/compositor/nodes/NodeBluePrint.js';
 import { FirestoreNodeBluePrintControllerFactoryInterface } from '$lib/compositor/nodes/firestore/FirestoreNodeBluePrint.js';
 import {
     NumberSocketParamsBuilder,

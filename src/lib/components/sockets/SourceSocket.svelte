@@ -4,15 +4,15 @@
 
     interface Props {
         id: string;
-        label: string;
-        type: string;
+        label?: string;
+        datatype: string;
         documentation: string;
     }
 
     let {
         id,
-        label = 'Untitled Socket',
-        type = 'text',
+        label,
+        datatype = 'unknown',
         documentation = 'Missing Documentation!'
     }: Props = $props();
 
@@ -25,28 +25,30 @@
 
 <div class="socket-container">
 
-    <div class="output-text-container">
-        <span class="socket-label">{label}</span>
-        {#if type}
-        <span class="socket-type" >
-            {type}
-        </span>
-        {/if}
-    </div>
+    {#if label}
+        <div class="output-text-container">
+            <span class="socket-label">{label}</span>
+            {#if datatype}
+                <span class="socket-type" >
+                    {datatype}
+                </span>
+            {/if}
+        </div>
+    {/if}
 
-    {#await fetchSocketDataTypeByName(type)}
-        Loading Target Socket {label} of type {type}
-    {:then datatype}
+    {#await fetchSocketDataTypeByName(datatype)}
+        Loading Target Socket {label} of type {datatype}
+    {:then datatypeInfo}
         <Handle
                 type="source"
                 position={Position.Right}
                 id={id}
-                style={datatype?.style || ''}
+                style={datatypeInfo?.style || ''}
                 class="socket-handle"
         />
         <Tooltip placement="top">
-            <b>{label}</b>--{documentation}<br>
-            <b>Type ({datatype?.name}):</b> {datatype?.description}
+            <b>{label}</b>--{documentation}<br><br>
+            <b>Type ({datatypeInfo?.name}):</b> {datatypeInfo?.description}
         </Tooltip>
     {:catch error}
         Error; could not load input socket: {JSON.stringify(error, null, 2)}

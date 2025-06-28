@@ -310,6 +310,72 @@ export class ENUMSocketParamBuilder extends GenericSocketParamsBuilder<
 }
 
 /**
+ * FileSocketParamsBuilder handles validation logic for generic file inputs with BigData support.
+ * Files are stored locally using BigData references instead of in RTDB.
+ * It uses null as the default value to indicate no file is selected.
+ */
+export interface FileSocketParams extends InputSocketParams {
+    acceptedFileTypes: string[];
+}
+
+export class FileSocketParamsBuilder extends GenericSocketParamsBuilder<
+    File | string | null,
+    FileSocketParams
+> {
+    static EMPTY_FILE = 'empty_file';
+
+    constructor(acceptedTypes?: string[]) {
+        super(null);
+        this.params.acceptedFileTypes = acceptedTypes || [];
+    }
+
+    params: FileSocketParams = new (class implements FileSocketParams {
+        default_value: null = null;
+        acceptedFileTypes: string[] = [];
+    })();
+
+    setAcceptedTypes(types: string[]) {
+        this.params.acceptedFileTypes = types;
+        return this;
+    }
+
+    /**
+     * Validates the given value as a valid File input.
+     *
+     * @param {File | string | null} value - The value to check (File, BigData ref, or null).
+     * @throws {Error} If the value is invalid.
+     */
+    check(value: File | string | null) {
+        // Allow null values (no file selected)
+        if (value === null || value === undefined) {
+            return;
+        }
+
+        if (value === FileSocketParamsBuilder.EMPTY_FILE) {
+            throw new Error('Value is the empty file placeholder');
+        }
+
+        if (typeof value !== 'string' && !(value instanceof File)) {
+            throw new Error('Value must be a File object, BigData reference string, or null');
+        }
+
+        if (value instanceof File && this.params.acceptedFileTypes.length > 0) {
+            const fileExt = '.' + value.name.split('.').pop()?.toLowerCase();
+            if (!this.params.acceptedFileTypes.includes(fileExt)) {
+                throw new Error(`File type ${fileExt} not accepted. Expected: ${this.params.acceptedFileTypes.join(', ')}`);
+            }
+        }
+    }
+
+    build(): FileSocketParams {
+        return {
+            default_value: this.params.default_value,
+            acceptedFileTypes: this.params.acceptedFileTypes || [],
+        };
+    }
+}
+
+/**
  * CSVSocketConfig handles validation logic for CSV file inputs.
  * It supports both actual File objects and placeholder strings.
  */

@@ -14,7 +14,7 @@
 import { beforeEach, describe, expect, test } from 'vitest';
 import { executeFlowGraph } from '$lib/compositor/Interpreter';
 import type { Node, Edge } from '@xyflow/svelte';
-import { projectOutputDataCache } from '$lib/stores/ProjectState';
+import { projectComputedDataCache } from '$lib/stores/ProjectState';
 
 describe('Image Processing Integration Tests', () => {
     let mockNodes: Node[];
@@ -23,7 +23,7 @@ describe('Image Processing Integration Tests', () => {
     beforeEach(async () => {
         mockNodes = [];
         mockEdges = [];
-        await projectOutputDataCache.clear();
+        await projectComputedDataCache.clear();
     });
 
     // ========================================
@@ -46,7 +46,7 @@ describe('Image Processing Integration Tests', () => {
             mockEdges = [];
 
             await executeFlowGraph('fetch-url-test', mockNodes, mockEdges);
-            const result = await projectOutputDataCache.get(
+            const result = await projectComputedDataCache.get(
                 'fetch-url-test',
                 'text'
             );
@@ -77,7 +77,7 @@ describe('Image Processing Integration Tests', () => {
             mockEdges = [];
 
             await executeFlowGraph('simulate-fetch', mockNodes, mockEdges);
-            const result = await projectOutputDataCache.get(
+            const result = await projectComputedDataCache.get(
                 'simulate-fetch',
                 'text'
             );
@@ -111,7 +111,7 @@ describe('Image Processing Integration Tests', () => {
             mockEdges = [];
 
             await executeFlowGraph('image-loader-test', mockNodes, mockEdges);
-            const result = await projectOutputDataCache.get(
+            const result = await projectComputedDataCache.get(
                 'image-loader-test',
                 'image'
             );
@@ -158,7 +158,7 @@ describe('Image Processing Integration Tests', () => {
             ];
 
             await executeFlowGraph('hsv-transform', mockNodes, mockEdges);
-            const result = await projectOutputDataCache.get(
+            const result = await projectComputedDataCache.get(
                 'hsv-transform',
                 'img'
             );
@@ -200,7 +200,7 @@ describe('Image Processing Integration Tests', () => {
             ];
 
             await executeFlowGraph('greyscale', mockNodes, mockEdges);
-            const result = await projectOutputDataCache.get('greyscale', 'img');
+            const result = await projectComputedDataCache.get('greyscale', 'img');
 
             expect(result).toBeDefined();
             expect(result.bitmap?.width).toBe(30);
@@ -239,7 +239,7 @@ describe('Image Processing Integration Tests', () => {
             ];
 
             await executeFlowGraph('resize', mockNodes, mockEdges);
-            const result = await projectOutputDataCache.get('resize', 'image');
+            const result = await projectComputedDataCache.get('resize', 'image');
 
             expect(result).toBeDefined();
             expect(result.bitmap?.width).toBe(75);
@@ -306,15 +306,15 @@ describe('Image Processing Integration Tests', () => {
             await executeFlowGraph('make-greyscale', mockNodes, mockEdges);
 
             // Verify each step
-            const originalImage = await projectOutputDataCache.get(
+            const originalImage = await projectComputedDataCache.get(
                 'create-image',
                 'image'
             );
-            const hsvAdjusted = await projectOutputDataCache.get(
+            const hsvAdjusted = await projectComputedDataCache.get(
                 'hsv-adjust',
                 'img'
             );
-            const finalGreyscale = await projectOutputDataCache.get(
+            const finalGreyscale = await projectComputedDataCache.get(
                 'make-greyscale',
                 'img'
             );
@@ -395,19 +395,19 @@ describe('Image Processing Integration Tests', () => {
             await executeFlowGraph('final-greyscale', mockNodes, mockEdges);
 
             // Verify the complete pipeline
-            const original = await projectOutputDataCache.get(
+            const original = await projectComputedDataCache.get(
                 'create-image',
                 'image'
             );
-            const resized = await projectOutputDataCache.get(
+            const resized = await projectComputedDataCache.get(
                 'resize-first',
                 'image'
             );
-            const colorized = await projectOutputDataCache.get(
+            const colorized = await projectComputedDataCache.get(
                 'hsv-colorize',
                 'img'
             );
-            const final = await projectOutputDataCache.get(
+            const final = await projectComputedDataCache.get(
                 'final-greyscale',
                 'img'
             );
@@ -520,23 +520,23 @@ describe('Image Processing Integration Tests', () => {
             );
 
             // Verify each stage of the pipeline
-            const fetchedData = await projectOutputDataCache.get(
+            const fetchedData = await projectComputedDataCache.get(
                 'fetch-internet-image',
                 'text'
             );
-            const loadedImage = await projectOutputDataCache.get(
+            const loadedImage = await projectComputedDataCache.get(
                 'load-fetched-image',
                 'image'
             );
-            const resizedImage = await projectOutputDataCache.get(
+            const resizedImage = await projectComputedDataCache.get(
                 'resize-fetched-image',
                 'image'
             );
-            const hsvImage = await projectOutputDataCache.get(
+            const hsvImage = await projectComputedDataCache.get(
                 'hsv-fetched-image',
                 'img'
             );
-            const finalImage = await projectOutputDataCache.get(
+            const finalImage = await projectComputedDataCache.get(
                 'greyscale-fetched-image',
                 'img'
             );
@@ -646,19 +646,19 @@ describe('Image Processing Integration Tests', () => {
             await executeFlowGraph('final-gray', mockNodes, mockEdges);
 
             // Verify each stage of the pipeline
-            const loadedImage = await projectOutputDataCache.get(
+            const loadedImage = await projectComputedDataCache.get(
                 'load-image',
                 'image'
             );
-            const resizedImage = await projectOutputDataCache.get(
+            const resizedImage = await projectComputedDataCache.get(
                 'resize-loaded',
                 'image'
             );
-            const hsvImage = await projectOutputDataCache.get(
+            const hsvImage = await projectComputedDataCache.get(
                 'hsv-color',
                 'img'
             );
-            const finalImage = await projectOutputDataCache.get(
+            const finalImage = await projectComputedDataCache.get(
                 'final-gray',
                 'img'
             );
@@ -779,7 +779,7 @@ describe('Image Processing Integration Tests', () => {
             await executeFlowGraph('hsv-chain2', mockNodes, mockEdges);
 
             // Verify source image
-            const source = await projectOutputDataCache.get(
+            const source = await projectComputedDataCache.get(
                 'source-image',
                 'image'
             );
@@ -787,8 +787,8 @@ describe('Image Processing Integration Tests', () => {
             expect(source.bitmap?.height).toBe(60);
 
             // Verify Chain 1 results
-            const hsv1 = await projectOutputDataCache.get('hsv-chain1', 'img');
-            const grey1 = await projectOutputDataCache.get(
+            const hsv1 = await projectComputedDataCache.get('hsv-chain1', 'img');
+            const grey1 = await projectComputedDataCache.get(
                 'grey-chain1',
                 'img'
             );
@@ -796,11 +796,11 @@ describe('Image Processing Integration Tests', () => {
             expect(grey1.bitmap?.width).toBe(60);
 
             // Verify Chain 2 results
-            const resize2 = await projectOutputDataCache.get(
+            const resize2 = await projectComputedDataCache.get(
                 'resize-chain2',
                 'image'
             );
-            const hsv2 = await projectOutputDataCache.get('hsv-chain2', 'img');
+            const hsv2 = await projectComputedDataCache.get('hsv-chain2', 'img');
             expect(resize2.bitmap?.width).toBe(40);
             expect(resize2.bitmap?.height).toBe(80);
             expect(hsv2.bitmap?.width).toBe(40);
@@ -992,7 +992,7 @@ describe('Image Processing Integration Tests', () => {
             await executeFlowGraph('grey-large', mockNodes, mockEdges);
             const endTime = Date.now();
 
-            const result = await projectOutputDataCache.get(
+            const result = await projectComputedDataCache.get(
                 'grey-large',
                 'img'
             );

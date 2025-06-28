@@ -7,7 +7,7 @@ import {
     createNodeBluePrintStore,
     NodeBluePrint,
     updateNodeBluePrintStore,
-} from '../../NodeBluePrint.js';
+} from '../NodeBluePrint.js';
 import { OutputSocketAsyncReturner } from '../../Interpreter.js';
 import type {
     InputSocketModel,

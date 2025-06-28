@@ -9,7 +9,7 @@ import { firestore } from '../../../../firebase';
 import {
     NodeBluePrint,
     type NodeBluePrintControllerFactoryInterface,
-} from '../../NodeBluePrint.js';
+} from '../NodeBluePrint.js';
 import { v4 as uuidv4 } from 'uuid';
 import type {
     InputSocketModel,
@@ -18,9 +18,7 @@ import type {
     SocketID,
 } from '../../SocketModels';
 import { OutputSocketAsyncReturner } from '../../Interpreter';
-import { Jimp } from 'jimp';
-import { AIInferenceService } from '$lib/services';
-import { aiServiceInstance } from '$lib/services/AIInferenceService';
+import {utils} from "../NodeUtilsEnvironment";
 
 export interface FirestoreNodeBluePrintModel {
     title: string;
@@ -364,11 +362,7 @@ export class NodeBluePrintInFirestore extends NodeBluePrint {
             const executionContext = {
                 inputs,
                 outputs,
-                utils: {
-                    // Add utility functions that nodes might need
-                    Jimp: Jimp,
-                    aiServices: aiServiceInstance,
-                },
+                utils: utils,
                 console: console,
             };
 

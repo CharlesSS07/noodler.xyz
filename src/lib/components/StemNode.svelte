@@ -21,7 +21,7 @@
     import {untrack} from "svelte";
     import NodeErrorDisplay from "$lib/components/nodeComponents/NodeErrorDisplay.svelte";
     import NodeWrapper from "$lib/components/nodeComponents/NodeWrapper.svelte";
-    import {projectOutputDataCache} from "$lib/stores/ProjectState";
+    import {projectComputedDataCache} from "$lib/stores/ProjectState";
 
     let {id, data, selected}: NodeProps<StemNodeType> = $props();
     let nodeBluePrint = docStore<FirestoreNodeBluePrintModel>(firestore, `nodes/${data.nid}`);
@@ -128,7 +128,7 @@
     });
 
     let executionTime: number = 0;
-    const unsubscribeSocket = projectOutputDataCache.useNodeExecutionStatusStore(id).subscribe(
+    const unsubscribeSocket = projectComputedDataCache.useNodeExecutionStatusStore(id).subscribe(
         (executionStatus) => {
             untrack(() => {
                 console.log(executionStatus)
@@ -161,7 +161,7 @@
         <StemNodeComponent
                 inputSockets={inputSockets}
                 bind:inputValues={
-                    () => data.input,
+                    () => data.input || {},
                     (newData) => {
                         // tell firebase to sync
                         // updateNodeData(id, {input: newData});

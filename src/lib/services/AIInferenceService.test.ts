@@ -8,7 +8,7 @@
 import { beforeEach, describe, expect, test } from 'vitest';
 import { executeFlowGraph } from '$lib/compositor/Interpreter';
 import type { Node, Edge } from '@xyflow/svelte';
-import { projectOutputDataCache } from '$lib/stores/ProjectState';
+import { projectComputedDataCache } from '$lib/stores/ProjectState';
 import { auth } from '../../firebase';
 import { signInAnonymously } from 'firebase/auth';
 import { AIInferenceService } from './AIInferenceService';
@@ -24,7 +24,7 @@ describe('AIInferenceService Tests', () => {
     beforeEach(async () => {
         nodes = [];
         edges = [];
-        await projectOutputDataCache.clear();
+        await projectComputedDataCache.clear();
 
         // Sign in anonymously for Firebase auth
         const userCredential = await signInAnonymously(auth);
@@ -798,19 +798,19 @@ describe('AIInferenceService Tests', () => {
                 );
 
                 // Check outputs
-                const summary = await projectOutputDataCache.get(
+                const summary = await projectComputedDataCache.get(
                     'genkit-summarization-test',
                     'summary'
                 );
-                const originalLength = await projectOutputDataCache.get(
+                const originalLength = await projectComputedDataCache.get(
                     'genkit-summarization-test',
                     'originalLength'
                 );
-                const summaryLength = await projectOutputDataCache.get(
+                const summaryLength = await projectComputedDataCache.get(
                     'genkit-summarization-test',
                     'summaryLength'
                 );
-                const compressionRatio = await projectOutputDataCache.get(
+                const compressionRatio = await projectComputedDataCache.get(
                     'genkit-summarization-test',
                     'compressionRatio'
                 );
@@ -861,11 +861,11 @@ describe('AIInferenceService Tests', () => {
                     edges
                 );
 
-                const summary = await projectOutputDataCache.get(
+                const summary = await projectComputedDataCache.get(
                     'genkit-summarization-custom-test',
                     'summary'
                 );
-                const compressionRatio = await projectOutputDataCache.get(
+                const compressionRatio = await projectComputedDataCache.get(
                     'genkit-summarization-custom-test',
                     'compressionRatio'
                 );
@@ -910,7 +910,7 @@ describe('AIInferenceService Tests', () => {
                     edges
                 );
 
-                const summary = await projectOutputDataCache.get(
+                const summary = await projectComputedDataCache.get(
                     'genkit-summarization-bullets-test',
                     'summary'
                 );

@@ -8,7 +8,7 @@
 import { beforeEach, describe, expect, test } from 'vitest';
 import { executeFlowGraph } from '$lib/compositor/Interpreter';
 import type { Node, Edge } from '@xyflow/svelte';
-import { projectOutputDataCache } from '$lib/stores/ProjectState';
+import { projectComputedDataCache } from '$lib/stores/ProjectState';
 import { auth } from '../firebase';
 import { signInAnonymously } from 'firebase/auth';
 
@@ -19,7 +19,7 @@ describe('AI Inference Nodes Unit Tests', () => {
     beforeEach(async () => {
         nodes = [];
         edges = [];
-        await projectOutputDataCache.clear();
+        await projectComputedDataCache.clear();
 
         // Sign in anonymously for Firebase auth
         await signInAnonymously(auth);
@@ -56,7 +56,7 @@ describe('AI Inference Nodes Unit Tests', () => {
             expect(result.success).toBe(true);
 
             // Check that we got predictions output
-            const outputData = await projectOutputDataCache.get(
+            const outputData = await projectComputedDataCache.get(
                 'ai-fill-mask-test',
                 'predictions'
             );

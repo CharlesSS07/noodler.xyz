@@ -1,6 +1,6 @@
-import type { NodeBluePrintControllerFactoryInterface } from '$lib/compositor/NodeBluePrint.js';
+import type { NodeBluePrintControllerFactoryInterface } from '$lib/compositor/nodes/NodeBluePrint.js';
 import { FirestoreNodeBluePrintControllerFactoryInterface } from '$lib/compositor/nodes/firestore/FirestoreNodeBluePrint.js';
-import { JIMPImageSocketParamsBuilder } from '$lib/compositor/SocketParamBuilders.js';
+import { FileSocketParamsBuilder } from '$lib/compositor/SocketParamBuilders.js';
 import { STANDARD_DATATYPES } from '$lib/compositor/DataTypes.js';
 
 const nodeBluePrintController: NodeBluePrintControllerFactoryInterface =
@@ -31,7 +31,7 @@ export async function fileLoadingNodes() {
         label: '.xlsx',
         documentation: 'Excel File',
         type: STANDARD_DATATYPES.FILE,
-        params: new JIMPImageSocketParamsBuilder().build(),
+        params: new FileSocketParamsBuilder().build(),
     });
 
     loadExcel.newOutputSocket('json', {
@@ -57,14 +57,13 @@ export async function fileLoadingNodes() {
         'extraction',
         'content',
         'portable',
-        'not-implemented',
     ];
 
     loadPDF.newInputSocket('pdf_file', {
         label: '.pdf',
         documentation: 'PDF File',
         type: STANDARD_DATATYPES.FILE,
-        params: new JIMPImageSocketParamsBuilder().build(),
+        params: new FileSocketParamsBuilder(['.pdf']).build(),
     });
 
     loadPDF.newOutputSocket('text', {
@@ -79,9 +78,36 @@ export async function fileLoadingNodes() {
         type: STANDARD_DATATYPES.OBJECT,
     });
 
-    loadPDF.code = `const pdf = require('pdf-parse');
-const data = await pdf(inputs.pdf_file);
-outputs.set("text", data.text);
-outputs.set("metadata", data.metadata);
+    loadPDF.newOutputSocket('pdf', {
+        label: '.pdf',
+        documentation: 'Identical to input PDF file',
+        type: STANDARD_DATATYPES.FILE,
+    });
+
+    loadPDF.code = `
+outputs.set('pdf', inputs.pdf_file);
+const pdfData = new Uint8Array(await inputs.pdf_file.arrayBuffer());
+const pdf = await utils.unpdf.getDocumentProxy(pdfData);
+
+// Extract text from the PDF
+const { totalPages, text } = await utils.unpdf.extractText(pdf, { mergePages: true });
+
+// Get PDF metadata
+const metadata = await pdf.getMetadata();
+const info = metadata?.info || {};
+
+const pdfMetadata = {
+    title: info.Title || '',
+    author: info.Author || '',
+    subject: info.Subject || '',
+    creator: info.Creator || '',
+    producer: info.Producer || '',
+    creationDate: info.CreationDate || '',
+    modDate: info.ModDate || '',
+    numPages: totalPages
+};
+
+outputs.set("text", text);
+outputs.set("metadata", pdfMetadata);
 `;
 }

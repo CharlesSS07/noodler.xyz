@@ -14,7 +14,7 @@
         errorMessage = $bindable('')
     }: Props = $props();
 
-    import {projectOutputDataCache} from "$lib/stores/ProjectState";
+    import {projectComputedDataCache} from "$lib/stores/ProjectState";
     import {untrack} from "svelte";
 
     let copySuccess = $state(false);
@@ -40,7 +40,7 @@
     //
     // });
 
-    const unsubscribeSocket = projectOutputDataCache.useNodeErrorStore(id).subscribe(
+    const unsubscribeSocket = projectComputedDataCache.useNodeErrorStore(id).subscribe(
         (socketData) => {
             untrack(() => {
                 // console.log(socketData)

@@ -17,7 +17,7 @@
 import { beforeEach, describe, expect, test } from 'vitest';
 import { executeFlowGraph } from '$lib/compositor/Interpreter';
 import type { Node, Edge } from '@xyflow/svelte';
-import { projectOutputDataCache } from '$lib/stores/ProjectState';
+import { projectComputedDataCache } from '$lib/stores/ProjectState';
 
 describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => {
     let mockNodes: Node[];
@@ -26,7 +26,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
     beforeEach(async () => {
         mockNodes = [];
         mockEdges = [];
-        await projectOutputDataCache.clear();
+        await projectComputedDataCache.clear();
     });
 
     // ========================================
@@ -49,7 +49,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
             mockEdges = [];
 
             await executeFlowGraph('add-test', mockNodes, mockEdges);
-            const result = await projectOutputDataCache.get(
+            const result = await projectComputedDataCache.get(
                 'add-test',
                 'result'
             );
@@ -71,7 +71,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
             mockEdges = [];
 
             await executeFlowGraph('subtract-test', mockNodes, mockEdges);
-            const result = await projectOutputDataCache.get(
+            const result = await projectComputedDataCache.get(
                 'subtract-test',
                 'result'
             );
@@ -93,7 +93,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
             mockEdges = [];
 
             await executeFlowGraph('multiply-test', mockNodes, mockEdges);
-            const result = await projectOutputDataCache.get(
+            const result = await projectComputedDataCache.get(
                 'multiply-test',
                 'result'
             );
@@ -115,7 +115,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
             mockEdges = [];
 
             await executeFlowGraph('divide-test', mockNodes, mockEdges);
-            const result = await projectOutputDataCache.get(
+            const result = await projectComputedDataCache.get(
                 'divide-test',
                 'result'
             );
@@ -143,7 +143,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
             mockEdges = [];
 
             await executeFlowGraph('raw-text-test', mockNodes, mockEdges);
-            const result = await projectOutputDataCache.get(
+            const result = await projectComputedDataCache.get(
                 'raw-text-test',
                 'outputText'
             );
@@ -165,7 +165,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
             mockEdges = [];
 
             await executeFlowGraph('md-text-test', mockNodes, mockEdges);
-            const result = await projectOutputDataCache.get(
+            const result = await projectComputedDataCache.get(
                 'md-text-test',
                 'text'
             );
@@ -190,7 +190,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
             mockEdges = [];
 
             await executeFlowGraph('template-test', mockNodes, mockEdges);
-            const result = await projectOutputDataCache.get(
+            const result = await projectComputedDataCache.get(
                 'template-test',
                 'text'
             );
@@ -217,7 +217,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
             mockEdges = [];
 
             await executeFlowGraph('join-text-test', mockNodes, mockEdges);
-            const result = await projectOutputDataCache.get(
+            const result = await projectComputedDataCache.get(
                 'join-text-test',
                 'text'
             );
@@ -242,7 +242,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
             mockEdges = [];
 
             await executeFlowGraph('split-text-test', mockNodes, mockEdges);
-            const result = await projectOutputDataCache.get(
+            const result = await projectComputedDataCache.get(
                 'split-text-test',
                 'splitText'
             );
@@ -270,7 +270,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
             mockEdges = [];
 
             await executeFlowGraph('new-image', mockNodes, mockEdges);
-            const result = await projectOutputDataCache.get(
+            const result = await projectComputedDataCache.get(
                 'new-image',
                 'image'
             );
@@ -311,7 +311,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
             ];
 
             await executeFlowGraph('greyscale', mockNodes, mockEdges);
-            const result = await projectOutputDataCache.get('greyscale', 'img');
+            const result = await projectComputedDataCache.get('greyscale', 'img');
             expect(result).toBeDefined();
             expect(result.bitmap?.width).toBe(100);
             expect(result.bitmap?.height).toBe(100);
@@ -349,7 +349,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
             ];
 
             await executeFlowGraph('hsv-transform', mockNodes, mockEdges);
-            const result = await projectOutputDataCache.get(
+            const result = await projectComputedDataCache.get(
                 'hsv-transform',
                 'img'
             );
@@ -373,7 +373,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
             mockEdges = [];
 
             await executeFlowGraph('new-image-test', mockNodes, mockEdges);
-            const result = await projectOutputDataCache.get(
+            const result = await projectComputedDataCache.get(
                 'new-image-test',
                 'image'
             );
@@ -414,7 +414,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
             ];
 
             await executeFlowGraph('resize', mockNodes, mockEdges);
-            const result = await projectOutputDataCache.get('resize', 'image');
+            const result = await projectComputedDataCache.get('resize', 'image');
             expect(result).toBeDefined();
             expect(result.bitmap?.width).toBe(200);
             expect(result.bitmap?.height).toBe(150);
@@ -444,7 +444,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
             mockEdges = [];
 
             await executeFlowGraph('json-editor-test', mockNodes, mockEdges);
-            const result = await projectOutputDataCache.get(
+            const result = await projectComputedDataCache.get(
                 'json-editor-test',
                 'jsonObject'
             );
@@ -466,7 +466,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
             mockEdges = [];
 
             await executeFlowGraph('json-to-string-test', mockNodes, mockEdges);
-            const result = await projectOutputDataCache.get(
+            const result = await projectComputedDataCache.get(
                 'json-to-string-test',
                 'jsonString'
             );
@@ -523,7 +523,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
                 mockNodes,
                 mockEdges
             );
-            const result = await projectOutputDataCache.get(
+            const result = await projectComputedDataCache.get(
                 'html-elementify-test',
                 'html'
             );
@@ -547,7 +547,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
             mockEdges = [];
 
             await executeFlowGraph('fetch-url-test', mockNodes, mockEdges);
-            const result = await projectOutputDataCache.get(
+            const result = await projectComputedDataCache.get(
                 'fetch-url-test',
                 'text'
             );
@@ -661,15 +661,15 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
 
             await executeFlowGraph('subtract-step', mockNodes, mockEdges);
 
-            const addResult = await projectOutputDataCache.get(
+            const addResult = await projectComputedDataCache.get(
                 'add-step',
                 'result'
             );
-            const multiplyResult = await projectOutputDataCache.get(
+            const multiplyResult = await projectComputedDataCache.get(
                 'multiply-step',
                 'result'
             );
-            const finalResult = await projectOutputDataCache.get(
+            const finalResult = await projectComputedDataCache.get(
                 'subtract-step',
                 'result'
             );
@@ -710,7 +710,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
             ];
 
             await executeFlowGraph('split-text', mockNodes, mockEdges);
-            const splitResult = await projectOutputDataCache.get(
+            const splitResult = await projectComputedDataCache.get(
                 'split-text',
                 'splitText'
             );
@@ -766,15 +766,15 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
 
             await executeFlowGraph('make-greyscale', mockNodes, mockEdges);
 
-            const originalImage = await projectOutputDataCache.get(
+            const originalImage = await projectComputedDataCache.get(
                 'create-image',
                 'image'
             );
-            const transformedImage = await projectOutputDataCache.get(
+            const transformedImage = await projectComputedDataCache.get(
                 'hsv-transform',
                 'img'
             );
-            const greyscaleImage = await projectOutputDataCache.get(
+            const greyscaleImage = await projectComputedDataCache.get(
                 'make-greyscale',
                 'img'
             );
@@ -809,7 +809,7 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
             await executeFlowGraph('big-multiply', mockNodes, mockEdges);
             const endTime = Date.now();
 
-            const result = await projectOutputDataCache.get(
+            const result = await projectComputedDataCache.get(
                 'big-multiply',
                 'result'
             );
@@ -877,9 +877,9 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
             await executeFlowGraph('final-multiply', mockNodes, mockEdges);
             const endTime = Date.now();
 
-            const result1 = await projectOutputDataCache.get('add-1', 'result');
-            const result2 = await projectOutputDataCache.get('add-2', 'result');
-            const finalResult = await projectOutputDataCache.get(
+            const result1 = await projectComputedDataCache.get('add-1', 'result');
+            const result2 = await projectComputedDataCache.get('add-2', 'result');
+            const finalResult = await projectComputedDataCache.get(
                 'final-multiply',
                 'result'
             );

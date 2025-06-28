@@ -37,6 +37,7 @@
     import CompleteTextLLM from "$lib/components/nodes/huggingface/CompleteTextLLM.svelte";
     import TextEditorMarkdownNode from "$lib/components/nodes/text/TextEditorMarkdownNode.svelte";
     import TextEditorRawNode from "$lib/components/nodes/text/TextEditorRawNode.svelte";
+    import MemoryUsageChart from "../../components/MemoryUsageChart.svelte";
 
     let nodes = $state.raw<Node[]>([]);
 
@@ -590,6 +591,8 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
                 on:close={() => showNodeSearch = false}
                 position={{x: '50vw', y: '20vw'}}
         />
+
+<!--        <MemoryUsageChart></MemoryUsageChart>-->
 
     </div>
 

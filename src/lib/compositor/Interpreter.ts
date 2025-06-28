@@ -1,8 +1,8 @@
 import { type Node, type Edge } from '@xyflow/svelte';
 import { FirestoreNodeBluePrintControllerFactoryInterface } from './nodes/firestore/FirestoreNodeBluePrint';
-import type { NodeBluePrint } from './NodeBluePrint';
+import type { NodeBluePrint } from './nodes/NodeBluePrint';
 import { ComputedDataCache } from './ComputedDataCache';
-import { projectOutputDataCache } from '$lib/stores/ProjectState';
+import { projectComputedDataCache } from '$lib/stores/ProjectState';
 import { getBigData, type BigDataRef } from './BigData';
 
 export class OutputSocketAsyncReturner {
@@ -111,6 +111,8 @@ export async function executeFlowGraph(
 
         executingNodes.add(nodeId);
 
+        projectComputedDataCache.nodeExecutionStarted(nodeId);
+
         try {
             const node = nodes.find((n) => n.id === nodeId);
             if (!node || !node.data?.nid) {
@@ -130,7 +132,7 @@ export async function executeFlowGraph(
             const outputSocketIds = new Set(nodeBlueprint.outputSocketKeys());
             // set up return data & error handling
             const outputReturner = new OutputSocketAsyncReturner(
-                projectOutputDataCache,
+                projectComputedDataCache,
                 nodeId,
                 outputSocketIds
             );
@@ -141,7 +143,7 @@ export async function executeFlowGraph(
                     nodeId,
                     nodes,
                     edges,
-                    projectOutputDataCache
+                    projectComputedDataCache
                 );
 
                 if (nodeBlueprint.input_spec_strict) {
@@ -230,6 +232,8 @@ export async function executeFlowGraph(
             console.error(error);
             throw error;
         }
+
+        projectComputedDataCache.nodeExecutionFinished(nodeId);
     };
 
     // Start execution with sink nodes
@@ -324,9 +328,10 @@ async function getNodeInputData(
 
     // Temporary. This replaces every BigDataRef with the value in the database
     for (const key in inputData) {
-        // @ts-ignore
         if (
+            // @ts-ignore
             inputData[key].hasOwnProperty('_type') &&
+            // @ts-ignore
             inputData[key]._type == 'bigdata_ref'
         ) {
             inputData[key] = await getBigData(inputData[key] as BigDataRef);

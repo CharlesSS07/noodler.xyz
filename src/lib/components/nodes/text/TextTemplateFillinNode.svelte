@@ -23,7 +23,6 @@
     import {fetchSocketDataTypeByName, STANDARD_DATATYPES} from '$lib/compositor/DataTypes';
     import {Tooltip} from "flowbite-svelte";
     import NodeWrapper from "$lib/components/nodeComponents/NodeWrapper.svelte";
-    import {projectActions} from "$lib/stores/ProjectState.js";
 
     let {id, data, selected}: NodeProps<TemplateFillinNodeType> = $props();
 

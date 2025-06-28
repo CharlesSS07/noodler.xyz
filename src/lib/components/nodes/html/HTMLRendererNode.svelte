@@ -14,7 +14,7 @@
 <script lang="ts">
     import {Handle, Position, type NodeProps, useNodeConnections} from '@xyflow/svelte';
 
-    import {projectOutputDataCache} from "$lib/stores/ProjectState";
+    import {projectComputedDataCache} from "$lib/stores/ProjectState";
     import {fetchSocketDataTypeByName, STANDARD_DATATYPES} from "$lib/compositor/DataTypes";
     import NodeWrapper from "$lib/components/nodeComponents/NodeWrapper.svelte";
     import {Tooltip} from "flowbite-svelte";
@@ -33,7 +33,7 @@
             const source = inputConnections.current[0].source;
             const sourceHandle = inputConnections.current[0].sourceHandle;
             if (sourceHandle) {
-                const unsubscribeSocket = projectOutputDataCache.useSocketStore(
+                const unsubscribeSocket = projectComputedDataCache.useSocketStore(
                     source,
                     sourceHandle
                 ).subscribe((socketData) => {

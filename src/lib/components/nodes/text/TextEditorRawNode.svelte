@@ -14,7 +14,7 @@
 <script lang="ts">
     import {Handle, Position, type NodeProps, useNodeConnections} from '@xyflow/svelte';
 
-    import {projectActions, projectOutputDataCache} from "$lib/stores/ProjectState";
+    import {projectActions, projectComputedDataCache} from "$lib/stores/ProjectState";
     import {untrack} from "svelte";
     import {fetchSocketDataTypeByName, STANDARD_DATATYPES} from "$lib/compositor/DataTypes";
     import NodeWrapper from "$lib/components/nodeComponents/NodeWrapper.svelte";
@@ -33,7 +33,7 @@
             const source = inputConnections.current[0].source;
             const sourceHandle = inputConnections.current[0].sourceHandle;
             if (sourceHandle) {
-                const unsubscribeSocket = projectOutputDataCache.useSocketStore(
+                const unsubscribeSocket = projectComputedDataCache.useSocketStore(
                     source,
                     sourceHandle
                 ).subscribe((socketData) => {
@@ -124,7 +124,7 @@
                     position={Position.Left}
                     id="inputText"
                     class="socket-handle"
-                    style="top: 50%;{datatype?.style || ''}"
+                    style="top: 20px;{datatype?.style || ''}"
             />
             <Tooltip placement="top">
                 <b>Type ({datatype?.name}):</b> {datatype?.description}
@@ -142,7 +142,7 @@
                     type="source"
                     position={Position.Right}
                     id='outputText'
-                    style="top: 50%;{datatype?.style || ''}"
+                    style="top: 20px;{datatype?.style || ''}"
                     class="socket-handle"
             />
             <Tooltip placement="top">

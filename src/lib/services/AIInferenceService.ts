@@ -30,20 +30,7 @@ import type {
     TextFormattingResponse,
 } from './AIInferenceTypes';
 
-export let aiServiceInstance: AIInferenceService | undefined;
-
-auth.onAuthStateChanged((user) => {
-    if (user) {
-        aiServiceInstance = new AIInferenceService({ user });
-    }
-});
-
 export class AIInferenceService {
-    private user: User;
-
-    constructor(config: AIInferenceServiceConfig) {
-        this.user = config.user;
-    }
 
     // Utility methods for JIMP conversion
     private async jimpToBase64(image: JimpInstance): Promise<string> {
@@ -277,3 +264,5 @@ export class AIInferenceService {
         return response;
     }
 }
+
+export const aiServiceInstance: AIInferenceService = new AIInferenceService();

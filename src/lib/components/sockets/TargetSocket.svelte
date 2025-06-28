@@ -1,18 +1,16 @@
 <script lang="ts">
 
-    import type {InputSocketParams} from "$lib/compositor/SocketModels.js";
-
     interface Props {
         id: string;
-        label: string;
-        type: string;
+        label?: string;
+        datatype: string;
         documentation: string;
     }
 
     let {
         id,
-        label = 'Untitled Socket',
-        type = 'text',
+        label,
+        datatype = 'unknown',
         documentation = 'Missing Documentation!'
     }: Props = $props();
 
@@ -24,28 +22,30 @@
 </script>
 <div class="socket-container">
 
-    <div class="flex flex-col">
-        <span class="socket-label">{label}</span>
-        {#if type}
-        <span class="socket-type">
-            Type: {type}
-        </span>
-        {/if}
-    </div>
+    {#if label}
+        <div class="flex flex-col">
+            <span class="socket-label">{label}</span>
+            {#if datatype}
+                <span class="socket-type">
+                    Type: {datatype}
+                </span>
+            {/if}
+        </div>
+    {/if}
 
-    {#await fetchSocketDataTypeByName(type)}
-        Loading Target Socket {label} of type {type}
-    {:then datatype}
+    {#await fetchSocketDataTypeByName(datatype)}
+        Loading Target Socket {label} of type {datatype}
+    {:then datatypeInfo}
         <Handle
                 type="target"
                 position={Position.Left}
                 id={id}
                 class="socket-handle"
-                style={datatype?.style || ''}
+                style={datatypeInfo?.style || ''}
         />
         <Tooltip placement="top">
             <b>{label}</b>--{documentation}<br>
-            <b>Type ({datatype?.name}):</b> {datatype?.description}
+            <b>Type ({datatypeInfo?.name}):</b> {datatypeInfo?.description}
         </Tooltip>
     {:catch error}
         Error; could not load input socket: {JSON.stringify(error, null, 2)}
