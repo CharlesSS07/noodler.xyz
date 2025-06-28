@@ -34,7 +34,7 @@ export class OutputSocketAsyncReturner {
     }
 
     async errorMessage(error: string) {
-        this.dataCache.cache(this.node_id, '__error__', error);
+        await this.dataCache.cache(this.node_id, '__error__', error);
     }
 }
 
@@ -111,8 +111,6 @@ export async function executeFlowGraph(
 
         executingNodes.add(nodeId);
 
-        projectComputedDataCache.nodeExecutionStarted(nodeId);
-
         try {
             const node = nodes.find((n) => n.id === nodeId);
             if (!node || !node.data?.nid) {
@@ -140,13 +138,13 @@ export async function executeFlowGraph(
             try {
                 // Get input data for the node
                 const inputData = await getNodeInputData(
-                    nodeId,
-                    nodes,
+                    node,
                     edges,
                     projectComputedDataCache
                 );
 
                 if (nodeBlueprint.input_spec_strict) {
+                    console.debug("Executing node in strict mode.")
                     // Check that input data and node blueprint spec inputs align
                     const inputDataSocketKeys = new Set(Object.keys(inputData));
                     const inputSocketKeysSpec = new Set(
@@ -179,6 +177,7 @@ export async function executeFlowGraph(
                 console.log(inputData);
 
                 // Execute the node
+                projectComputedDataCache.nodeExecutionStarted(nodeId);
                 await nodeBlueprint
                     .call(inputData, outputReturner)
                     .then(() => {
@@ -188,6 +187,8 @@ export async function executeFlowGraph(
                     .catch((err) => {
                         console.error(`${nodeId} ❌`);
                         throw err;
+                    }).finally(() => {
+                        projectComputedDataCache.nodeExecutionFinished(nodeId);
                     });
 
                 // Mark as executed
@@ -210,16 +211,16 @@ export async function executeFlowGraph(
                     // do not throw; this is the error of another node.
                 }
             } catch (error) {
-                console.error('Error in pre or post node execution:');
+                console.error('Error in node execution:');
                 console.error(error);
                 if (error instanceof Error) {
-                    outputReturner.errorMessage(
+                    await outputReturner.errorMessage(
                         `While executing ${nodeBlueprint.nid} id=${nodeId}:\n${error.message}`
                     );
                 } else {
-                    outputReturner.errorMessage(
+                    await outputReturner.errorMessage(
                         `While executing ${nodeBlueprint.nid} id=${nodeId}:` +
-                            error
+                        error
                     ); // !!! convert to string first!
                     // error objects are some stupid fucking shit that can't be uploaded to firebase rtdb
                     // wasted my whole fucking day figuring out Error objects cannot be serialized by JSON.stringify
@@ -232,8 +233,6 @@ export async function executeFlowGraph(
             console.error(error);
             throw error;
         }
-
-        projectComputedDataCache.nodeExecutionFinished(nodeId);
     };
 
     // Start execution with sink nodes
@@ -274,8 +273,7 @@ function buildDependencyGraph(
 }
 
 async function getNodeInputData(
-    nodeId: string,
-    nodes: Node[],
+    node: Node,
     edges: Edge[],
     dataCache: ComputedDataCache
 ): Promise<Record<string, unknown>> {
@@ -284,17 +282,11 @@ async function getNodeInputData(
      */
     const inputData: Record<string, unknown> = {};
 
-    // Find the node
-    const node = nodes.find((n) => n.id === nodeId);
-    if (!node) {
-        throw new Error(`Node ${nodeId} not found`);
-    }
-
     // Find all edges that target this node
-    const incomingEdges = edges.filter((edge) => edge.target === nodeId);
+    const incomingEdges = edges.filter((edge) => edge.target === node.id);
     const connectedInputs = new Set(
         incomingEdges.map((edge) => edge.targetHandle)
-    ); //.filter(Boolean));
+    );
 
     // Get data from connected edges
     for (const edge of incomingEdges) {
@@ -310,6 +302,7 @@ async function getNodeInputData(
                 // this allows for opening up a socket / have it be assigned in different ways if it's not a primitive!
                 inputData[edge.targetHandle] = data;
             } catch (error) {
+                throw error;
                 // Input not available yet - this shouldn't happen if dependencies are tracked correctly
             }
         }
@@ -319,16 +312,18 @@ async function getNodeInputData(
     if (node.data?.input) {
         for (const [inputKey, inputValue] of Object.entries(node.data.input)) {
             if (!connectedInputs.has(inputKey)) {
+                console.log(`Received input: ${inputKey}, ${inputValue}`);
                 inputData[inputKey] = inputValue;
             }
         }
     } else {
-        console.error(`Node ${nodeId} does not have an input data store.`);
+        console.error(`Node ${node.id} does not have an input data store.`);
     }
 
     // Temporary. This replaces every BigDataRef with the value in the database
     for (const key in inputData) {
         if (
+            inputData[key] &&
             // @ts-ignore
             inputData[key].hasOwnProperty('_type') &&
             // @ts-ignore

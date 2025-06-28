@@ -1,7 +1,5 @@
 <script lang="ts">
 
-    import {Handle, Position} from "@xyflow/svelte";
-
     interface Props {
         inputSockets?: {
             label: string,
@@ -23,10 +21,10 @@
 
     import '$lib/css/nodes.css';
     import {STANDARD_DATATYPES} from "$lib/compositor/DataTypes";
-    import {getInputComponentForDataType} from "$lib/components/sockets/socket-inputs/SocketInputMapping";
+    import {getInputComponentForDataType} from "$lib/components/nodeComponents/sockets/socket-inputs/SocketInputMapping";
     import type {InputSocketParams} from "$lib/compositor/SocketModels";
-    import TargetSocket from "$lib/components/sockets/TargetSocket.svelte";
-    import SourceSocket from "$lib/components/sockets/SourceSocket.svelte";
+    import TargetSocket from "$lib/components/nodeComponents/sockets/TargetSocketLabelled.svelte";
+    import SourceSocket from "$lib/components/nodeComponents/sockets/SourceSocketLabelled.svelte";
 
 </script>
 
@@ -36,7 +34,7 @@
     <div class="flex flex-col">
         {#each outputSockets as outputSocket}
             <div class="socket-content output-content">
-                <SourceSocket id={outputSocket.id} label={outputSocket.label} type={outputSocket.type}
+                <SourceSocket id={outputSocket.id} label={outputSocket.label} datatype={outputSocket.type}
                               documentation={outputSocket.documentation}></SourceSocket>
 
             </div>
@@ -47,7 +45,7 @@
         {#each inputSockets as inputSocket}
             <div class="socket-content input-content">
 
-                <TargetSocket id={inputSocket.id} label={inputSocket.label} type={inputSocket.type}
+                <TargetSocket id={inputSocket.id} label={inputSocket.label} datatype={inputSocket.type}
                               documentation={inputSocket.documentation}></TargetSocket>
                 {#if !inputSocket.isConnected && inputSocket.type !== STANDARD_DATATYPES.UNKNOWN && inputSocket.type !== STANDARD_DATATYPES.UNREGISTER}
                     {@const inputMapping = getInputComponentForDataType(inputSocket.type)}

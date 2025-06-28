@@ -1,6 +1,6 @@
 <script lang="ts">
     import type { NumberSocketParams } from '$lib/compositor/SocketParamBuilders';
-    import BlenderSlider from "../../../../components/BlenderSlider.svelte";
+    import BlenderSlider from "../../../../../components/BlenderSlider.svelte";
 
     let {
         value = $bindable(),

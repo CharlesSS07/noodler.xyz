@@ -6,7 +6,7 @@
 
     interface Props {
         id: string;
-        errorMessage: string;
+        errorMessage?: string;
     }
 
     let {
@@ -36,23 +36,24 @@
         return `https://chat.openai.com/?q=${prompt}`;
     }
 
-    // $effect(() => {
-    //
-    // });
-
-    const unsubscribeSocket = projectComputedDataCache.useNodeErrorStore(id).subscribe(
-        (socketData) => {
-            untrack(() => {
-                // console.log(socketData)
-                if (socketData !== undefined && socketData !== null) {
-                    // console.log('displaying error', "error:"+socketData as string, JSON.stringify(socketData, null, 2), typeof socketData, socketData instanceof Error);
-                    // use '' to forcefully convert Error to string
+    // Use a reactive store directly in runes
+    const errorStore = projectComputedDataCache.useNodeErrorStore(id);
+    
+    $effect(() => {
+        console.log('subscribed')
+        const unsubscribe = errorStore.subscribe(
+            (socketData) => {
+                console.log('error subscription triggered for node', id, socketData);
+                if (socketData !== undefined && socketData !== null && socketData !== '') {
                     errorMessage = ''+socketData as string;
+                } else {
+                    errorMessage = '';
                 }
-            });
-        }
-    );
-    // return unsubscribeSocket;
+            }
+        );
+        
+        return unsubscribe;
+    });
 </script>
 
 {#if errorMessage}

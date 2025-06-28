@@ -1,12 +1,10 @@
 import {writable, derived, type Writable, type Readable, readable} from 'svelte/store';
 import {type NodeConnection, useNodeConnections, useNodesData, useSvelteFlow} from '@xyflow/svelte';
-import { projectComputedDataCache } from '$lib/stores/ProjectState';
+import {projectActions, projectComputedDataCache} from '$lib/stores/ProjectState';
 import type {Unsubscribe} from "firebase/firestore";
 import { docStore } from 'sveltefire';
 import { firestore } from '../../../firebase';
 import type { FirestoreNodeBluePrintModel } from '$lib/compositor/nodes/firestore/FirestoreNodeBluePrint';
-
-const { updateNodeData } = useSvelteFlow();
 
 /**
  * Reactive stores and utilities for node components
@@ -117,18 +115,19 @@ export class NodeInstanceStore {
             .useNodeExecutionStatusStore(this.nodeId)
             .subscribe(
             (executionStatus) => {
-                if (executionStatus !== undefined && executionStatus !== null && typeof executionStatus === "string") {
-                    const executionStatusString: string = executionStatus as string;
-                    const executedAtPrefix = 'Executed at ';
-                    if (executionStatusString.startsWith(executedAtPrefix)) {
-                        const executionTimeMs = Date.now() - parseInt(executionStatusString.substring(executedAtPrefix.length));
-                        this.executionTime.set(executionTimeMs);
-                    } else if (executionStatusString === 'idle') {
-                        this.executionTime.set(0);
-                    }
-                } else {
-                    console.warn(`Received invalid execution status`, executionStatus);
-                }
+                console.log(executionStatus);
+                // if (executionStatus !== undefined && executionStatus !== null && typeof executionStatus === "string") {
+                //     const executionStatusString: string = executionStatus as string;
+                //     const executedAtPrefix = 'Executed at ';
+                //     if (executionStatusString.startsWith(executedAtPrefix)) {
+                //         const executionTimeMs = Date.now() - parseInt(executionStatusString.substring(executedAtPrefix.length));
+                //         this.executionTime.set(executionTimeMs);
+                //     } else if (executionStatusString === 'idle') {
+                //         this.executionTime.set(0);
+                //     }
+                // } else {
+                //     console.warn(`Received invalid execution status`, executionStatus);
+                // }
             }
         );
         this.unsubscribers.push(unsubscribeExecution);
@@ -139,7 +138,9 @@ export class NodeInstanceStore {
      */
     updateData(data: Record<string, unknown>): void {
         // projectActions.
-        updateNodeData(this.nodeId, data);
+        // const { updateNodeData } = useSvelteFlow();
+        // updateNodeData(this.nodeId, data);
+        projectActions.updateNodeData(this.nodeId, data);
     }
 
     /**

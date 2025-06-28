@@ -12,145 +12,99 @@
 </script>
 
 <script lang="ts">
-    import {Handle, Position, type NodeProps, useNodeConnections} from '@xyflow/svelte';
-
-    import {projectActions, projectComputedDataCache} from "$lib/stores/ProjectState";
-    import {untrack} from "svelte";
-    import {fetchSocketDataTypeByName, STANDARD_DATATYPES} from "$lib/compositor/DataTypes";
+    import {type NodeProps} from '@xyflow/svelte';
+    import {createNodeStore} from '$lib/components/nodes/NodeInstanceStore';
+    import {STANDARD_DATATYPES} from "$lib/compositor/DataTypes";
     import NodeWrapper from "$lib/components/nodeComponents/NodeWrapper.svelte";
-    import {Tooltip} from "flowbite-svelte";
+    import SourceSocket from "$lib/components/nodeComponents/sockets/SourceSocket.svelte";
+    import TargetSocket from "$lib/components/nodeComponents/sockets/TargetSocket.svelte";
+    import {get} from "svelte/store";
+    import NodeErrorDisplay from "$lib/components/nodeComponents/NodeErrorDisplay.svelte";
 
-    let {id, data, selected}: NodeProps<PlainTextNodeType> = $props();
+    let {id, selected}: NodeProps<PlainTextNodeType> = $props();
 
-    const inputConnections = useNodeConnections({id, handleType: 'target'});
-    let hasInputConnection = $derived(inputConnections.current.length > 0);
+    const nodeStore = createNodeStore(id);
+    const inputSocketData = nodeStore.inputSocketStore('inputText');
+    const hasInputConnected = $derived(get(nodeStore.hasInputConnection));
+    const executionTime = $derived(get(nodeStore.executionTime));
 
-    // Update display value when connection source becomes avaliable
-    let displayValue = $state('');
-    $effect(() => {
-        if (hasInputConnection) {
-            // only one way to have an input connection to this node, so 0 index is a-ok
-            const source = inputConnections.current[0].source;
-            const sourceHandle = inputConnections.current[0].sourceHandle;
-            if (sourceHandle) {
-                const unsubscribeSocket = projectComputedDataCache.useSocketStore(
-                    source,
-                    sourceHandle
-                ).subscribe((socketData) => {
-                    console.log('output socket data updated:', socketData, id)
-                    if (typeof socketData === 'string')
-                        displayValue = socketData as string;
-                    else
-                        displayValue = '<<OBJECT>>\n' + JSON.stringify(socketData, null, 2);
-                    autoResize(textarea);
-                });
-                return unsubscribeSocket;
+    function getDisplayValue(socketData) {
+        if (socketData) {
+            if (typeof socketData === 'string') {
+                return socketData;
             }
+            return "<JSON>: "+JSON.stringify(socketData);
         }
-    });
+        return "EMPTY!";
+    }
 
-    let inputText = $state(data.input.inputText || '');
+    let displayValue = $derived(getDisplayValue($inputSocketData));
+
+    let inputText = $derived.by(() => nodeStore.nodeData.current?.data?.input?.inputText || '');
     let textarea: HTMLTextAreaElement;
 
-    // Initialize without triggering update
     $effect(() => {
-        projectActions.updateNodeData(untrack(() => id), {input: {inputText: inputText}});
+        if (textarea) autoResize(textarea);
+    });
+    $effect(() => {
+        if (textarea && displayValue) autoResize(textarea);
     });
 
-    $effect(() => {
-        if (data.input.inputText && textarea) {
-            inputText = data.input.inputText;
-            autoResize(textarea);
-        }
-    })
 
-    // Auto-resize effect
-    $effect(() => {
-        if (textarea) {
-            autoResize(textarea);
-        }
-    });
 
-    // Resize when displayValue changes
-    $effect(() => {
-        if (textarea && displayValue) {
-            autoResize(textarea);
-        }
-    });
+    function handleInput(value: string) {
+        console.log(textarea, value)
+        if (textarea) autoResize(textarea);
+        nodeStore.updateData({input: {inputText: value}});
+    }
 
     function autoResize(textarea: HTMLTextAreaElement) {
         textarea.style.width = 'auto';
-        // textarea.style.width = Math.min(textarea.style.width, 400) + 'px';
         textarea.style.height = 'auto';
         textarea.style.height = textarea.scrollHeight + 'px';
     }
 
 </script>
 
-<NodeWrapper label="Raw Text" isSelected={selected}>
+<NodeWrapper label="Raw Text" isSelected={selected} executionTime={executionTime}>
     <div class="relative">
         <!-- Main textarea -->
+        <SourceSocket
+                id="outputText"
+                label="Output Text"
+                datatype={STANDARD_DATATYPES.TEXT}
+                documentation="Text output from the raw text editor"
+        />
+
+        <TargetSocket
+            id="inputText"
+            label="Input Text"
+            datatype={STANDARD_DATATYPES.TEXT}
+            documentation="Text input for the raw text editor"
+        />
+
         <div class="border-2 border-gray-300 rounded-lg bg-white overflow-hidden">
-            <!--{id}-->
-            {#if hasInputConnection}
-            <textarea
-                    bind:this={textarea}
-                    value={displayValue}
-                    class="w-fit p-3 border-0 outline-none font-mono text-sm resize-none overflow-hidden"
-                    placeholder='No data supplied by link.'
-                    disabled
-                    onchange={(e) => autoResize(e.target)}
-            ></textarea>
+            {#if hasInputConnected}
+                <textarea
+                        bind:this={textarea}
+                        value={displayValue}
+                        class="w-fit p-3 border-0 outline-none font-mono text-sm resize-none overflow-hidden"
+                        placeholder='No data supplied by link.'
+                        disabled
+                        onchange={(e) => autoResize(e.target)}></textarea>
             {:else }
-            <textarea
-                    bind:this={textarea}
-                    value={inputText}
-                    class="w-fit p-3 border-0 outline-none font-mono text-sm resize-none overflow-hidden"
-                    placeholder='Enter plain text...'
-                    oninput={(e) => {
-                        const value = e.target.value;
-                        inputText = value;
-                        autoResize(e.target);
-                    }}
-            ></textarea>
+                <textarea
+                        bind:this={textarea}
+                        value={inputText}
+                        class="w-fit p-3 border-0 outline-none font-mono text-sm resize-none overflow-hidden"
+                        placeholder='Enter plain text...'
+                        oninput={(e) => handleInput(e.target.value)}></textarea>
             {/if}
         </div>
 
-        {#await fetchSocketDataTypeByName(STANDARD_DATATYPES.TEXT)}
-            Loading Target Socket
-        {:then datatype}
-            <Handle
-                    type="target"
-                    position={Position.Left}
-                    id="inputText"
-                    class="socket-handle"
-                    style="top: 20px;{datatype?.style || ''}"
-            />
-            <Tooltip placement="top">
-                <b>Type ({datatype?.name}):</b> {datatype?.description}
-            </Tooltip>
-        {:catch error}
-            Error; could not load input socket: {JSON.stringify(error, null, 2)}
-        {/await}
+        <NodeErrorDisplay {id}></NodeErrorDisplay>
 
-        <!-- Output handle -->
 
-        {#await fetchSocketDataTypeByName(STANDARD_DATATYPES.TEXT)}
-            Loading Target Socket
-        {:then datatype}
-            <Handle
-                    type="source"
-                    position={Position.Right}
-                    id='outputText'
-                    style="top: 20px;{datatype?.style || ''}"
-                    class="socket-handle"
-            />
-            <Tooltip placement="top">
-                <b>Type ({datatype?.name}):</b> {datatype?.description}
-            </Tooltip>
-        {:catch error}
-            Error; could not load input socket: {JSON.stringify(error, null, 2)}
-        {/await}
     </div>
 </NodeWrapper>
 

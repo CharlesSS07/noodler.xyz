@@ -24,7 +24,7 @@ function parseSocketInstanceKey(key: string): SocketInstance {
     return { node_key, socket_id };
 }
 
-interface ExecutionStatus {
+export interface ExecutionStatus {
     startedAt: Date;
     finishedAt: Date;
 }
@@ -38,14 +38,13 @@ export class ComputedDataCache {
     // Store for tracking which sockets have data
     private socketKeysStore: Writable<Set<string>> = writable(new Set());
 
-    private executingNodes: Set<string> = new Set();
-
     constructor() {
         // Keep the stores in sync with the internal data
         this.updateStores();
     }
 
     private updateStores(): void {
+        console.log('updateStores called, current data:', Array.from(this.data.entries()));
         this.dataStore.set(new Map(this.data));
         this.socketKeysStore.set(new Set(this.data.keys()));
     }
@@ -80,8 +79,9 @@ export class ComputedDataCache {
      */
     useNodeErrorStore(node_key: string): Readable<unknown | null> {
         const key = socketInstanceKey(node_key, RESERVED_SOCKETS.error);
-
+        console.log('useNodeErrorStore', key);
         return derived(this.dataStore, ($data) => {
+            console.log('error', key, $data.get(key));
             return $data.has(key) ? $data.get(key) : null;
         });
     }
@@ -99,6 +99,7 @@ export class ComputedDataCache {
         const exec_status = this.data.get(key) as ExecutionStatus;
         if (exec_status) {
             this.data.set(key, {startedAt: exec_status.startedAt, finishedAt: new Date()});
+            this.updateStores();
         } else {
             throw new Error("Node was never executed so cannot have finished executing.");
         }
@@ -149,6 +150,7 @@ export class ComputedDataCache {
         data: unknown
     ): Promise<void> {
         const key = socketInstanceKey(node_key, socket_id);
+        console.log('cache called:', key, data);
 
         // if (this.data.has(key)) {
         //     throw new Error(`Socket ${key} already cached. This would overwrite the socket data. The whole node should have been dumped first.`);
