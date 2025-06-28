@@ -38,6 +38,8 @@
     import TextEditorMarkdownNode from "$lib/components/nodes/text/TextEditorMarkdownNode.svelte";
     import TextEditorRawNode from "$lib/components/nodes/text/TextEditorRawNode.svelte";
     import MemoryUsageChart from "../../components/MemoryUsageChart.svelte";
+    import MemoryGraph from "../../components/MemoryGraph.svelte";
+    import MemoryMonitorNode from "$lib/components/nodeComponents/MemoryMonitorNode.svelte";
 
     let nodes = $state.raw<Node[]>([]);
 
@@ -67,6 +69,13 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
             },
             position: {x: 0, y: 0}
         }, 'default-intro-node');
+
+        addNode({
+            type: 'memoryMonitor',
+            data: {},
+            deletable: false,
+            position: {x: -600, y: 0}
+        }, 'default-memory-monitor');
     }
 
     function onProjectLoaded() {
@@ -175,6 +184,7 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
         textEditorMd: TextEditorMarkdownNode,
         textEditorRaw: TextEditorRawNode,
         huggingfaceLLM: CompleteTextLLM,
+        memoryMonitor: MemoryMonitorNode,
     };
 
     let colorMode: ColorMode = $state('light');

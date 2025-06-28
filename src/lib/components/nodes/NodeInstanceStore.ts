@@ -15,7 +15,6 @@ export class NodeInstanceStore {
 
     // Core reactive stores
     public inputConnections: Readable<{readonly current: NodeConnection[]}>;
-    public hasInputConnection: Readable<boolean>;
     public nodeData;
     public readonly nid: string;
     public hasError: Writable<boolean>;
@@ -32,9 +31,6 @@ export class NodeInstanceStore {
 
         // Initialize connection management
         this.inputConnections = readable(useNodeConnections({ id: this.nodeId, handleType: 'target' }));
-        this.hasInputConnection = derived(this.inputConnections, (connections) =>
-            connections.current.length > 0
-        );
 
         this.nodeData = useNodesData(this.nodeId);
         if (!this.nodeData.current)
@@ -149,10 +145,10 @@ export class NodeInstanceStore {
      */
     inputSocketStore(socketId: string): Readable<any> {
         return derived(
-            [this.inputConnections, this.hasInputConnection],
-            ([connections, hasConnection], set) => {
-                if (!hasConnection || connections.current.length === 0) {
-                    set(null);
+            this.inputConnections,
+            (connections, set) => {
+                if (connections.current.length === 0) {
+                    set(this.nodeData.current?.data.input[socketId]);
                     return;
                 }
 

@@ -25,7 +25,7 @@
 
     const nodeStore = createNodeStore(id);
     const inputSocketData = nodeStore.inputSocketStore('inputText');
-    const hasInputConnected = $derived(get(nodeStore.hasInputConnection));
+    const hasInputConnected = $derived(get(nodeStore.inputConnections).current.length>0);
     const executionTime = $derived(get(nodeStore.executionTime));
 
     function getDisplayValue(socketData) {
