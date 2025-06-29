@@ -158,7 +158,7 @@ describe('ComputedDataCache', () => {
             expect(startStatus).toHaveProperty('finishedAt');
             expect(startStatus.startedAt).toBeInstanceOf(Date);
             expect(startStatus.startedAt.getTime()).toBeGreaterThanOrEqual(startTime.getTime());
-            expect(startStatus.finishedAt).toBeUndefined();
+            expect(startStatus.stoppedAt).toBeUndefined();
 
             // Finish execution
             const finishTime = new Date();
@@ -167,8 +167,8 @@ describe('ComputedDataCache', () => {
             const finishStatus = get(executionStore) as ExecutionStatus;
             expect(finishStatus).toHaveProperty('startedAt');
             expect(finishStatus).toHaveProperty('finishedAt');
-            expect(finishStatus.finishedAt).toBeInstanceOf(Date);
-            expect(finishStatus.finishedAt!.getTime()).toBeGreaterThanOrEqual(finishTime.getTime());
+            expect(finishStatus.stoppedAt).toBeInstanceOf(Date);
+            expect(finishStatus.stoppedAt!.getTime()).toBeGreaterThanOrEqual(finishTime.getTime());
             expect(finishStatus.startedAt).toBe(startStatus.startedAt); // Should preserve start time
 
             unsubscribe();
@@ -189,7 +189,7 @@ describe('ComputedDataCache', () => {
             
             const startCall = mockSubscriber.mock.calls[1][0] as ExecutionStatus;
             expect(startCall).toHaveProperty('startedAt');
-            expect(startCall.finishedAt).toBeUndefined();
+            expect(startCall.stoppedAt).toBeUndefined();
 
             // Finish execution should trigger update
             cache.nodeExecutionFinished('test-node');
@@ -198,7 +198,7 @@ describe('ComputedDataCache', () => {
             const finishCall = mockSubscriber.mock.calls[2][0] as ExecutionStatus;
             expect(finishCall).toHaveProperty('startedAt');
             expect(finishCall).toHaveProperty('finishedAt');
-            expect(finishCall.finishedAt).toBeInstanceOf(Date);
+            expect(finishCall.stoppedAt).toBeInstanceOf(Date);
 
             unsubscribe();
         });
@@ -219,7 +219,7 @@ describe('ComputedDataCache', () => {
             cache.nodeExecutionFinished('test-node');
             const firstFinish = get(executionStore) as ExecutionStatus;
             
-            expect(firstFinish.finishedAt).toBeInstanceOf(Date);
+            expect(firstFinish.stoppedAt).toBeInstanceOf(Date);
             
             // Wait a bit to ensure time difference
             await new Promise(resolve => setTimeout(resolve, 10));
@@ -230,12 +230,12 @@ describe('ComputedDataCache', () => {
             
             // Should have a new start time
             expect(secondStart.startedAt.getTime()).toBeGreaterThan(firstStart.startedAt.getTime());
-            expect(secondStart.finishedAt).toBeUndefined();
+            expect(secondStart.stoppedAt).toBeUndefined();
             
             cache.nodeExecutionFinished('test-node');
             const secondFinish = get(executionStore) as ExecutionStatus;
             
-            expect(secondFinish.finishedAt).toBeInstanceOf(Date);
+            expect(secondFinish.stoppedAt).toBeInstanceOf(Date);
             expect(secondFinish.startedAt).toBe(secondStart.startedAt);
         });
 
@@ -252,8 +252,8 @@ describe('ComputedDataCache', () => {
             
             expect(status1.startedAt).toBeInstanceOf(Date);
             expect(status2.startedAt).toBeInstanceOf(Date);
-            expect(status1.finishedAt).toBeUndefined();
-            expect(status2.finishedAt).toBeUndefined();
+            expect(status1.stoppedAt).toBeUndefined();
+            expect(status2.stoppedAt).toBeUndefined();
             
             // Finish only node-1
             cache.nodeExecutionFinished('node-1');
@@ -261,8 +261,8 @@ describe('ComputedDataCache', () => {
             const updatedStatus1 = get(executionStore1) as ExecutionStatus;
             const updatedStatus2 = get(executionStore2) as ExecutionStatus;
             
-            expect(updatedStatus1.finishedAt).toBeInstanceOf(Date);
-            expect(updatedStatus2.finishedAt).toBeUndefined(); // Should still be running
+            expect(updatedStatus1.stoppedAt).toBeInstanceOf(Date);
+            expect(updatedStatus2.stoppedAt).toBeUndefined(); // Should still be running
         });
 
         it('should clear execution status when node caches are dumped', async () => {
@@ -273,7 +273,7 @@ describe('ComputedDataCache', () => {
             cache.nodeExecutionFinished('test-node');
             
             const beforeDump = get(executionStore) as ExecutionStatus;
-            expect(beforeDump.finishedAt).toBeInstanceOf(Date);
+            expect(beforeDump.stoppedAt).toBeInstanceOf(Date);
             
             // Dump node caches
             await cache.dumpNodeCaches('test-node');
@@ -326,13 +326,13 @@ describe('ComputedDataCache', () => {
             // Execution status should still show as running
             const statusDuringError = get(executionStore) as ExecutionStatus;
             expect(statusDuringError.startedAt).toBeInstanceOf(Date);
-            expect(statusDuringError.finishedAt).toBeUndefined();
+            expect(statusDuringError.stoppedAt).toBeUndefined();
             
             // Finish execution (even with error)
             cache.nodeExecutionFinished('test-node');
             
             const finalStatus = get(executionStore) as ExecutionStatus;
-            expect(finalStatus.finishedAt).toBeInstanceOf(Date);
+            expect(finalStatus.stoppedAt).toBeInstanceOf(Date);
             expect(get(errorStore)).toBe('Runtime error occurred'); // Error should persist
         });
 

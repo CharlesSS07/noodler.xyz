@@ -5,17 +5,12 @@
     import {Copy, Check, MessageCircleQuestion} from 'lucide-svelte';
 
     interface Props {
-        id: string;
-        errorMessage?: string;
+        errorMessage: string;
     }
 
     let {
-        id,
-        errorMessage = $bindable('')
+        errorMessage
     }: Props = $props();
-
-    import {projectComputedDataCache} from "$lib/stores/ProjectState";
-    import {untrack} from "svelte";
 
     let copySuccess = $state(false);
 
@@ -36,24 +31,6 @@
         return `https://chat.openai.com/?q=${prompt}`;
     }
 
-    // Use a reactive store directly in runes
-    const errorStore = projectComputedDataCache.useNodeErrorStore(id);
-    
-    $effect(() => {
-        console.log('subscribed')
-        const unsubscribe = errorStore.subscribe(
-            (socketData) => {
-                console.log('error subscription triggered for node', id, socketData);
-                if (socketData !== undefined && socketData !== null && socketData !== '') {
-                    errorMessage = ''+socketData as string;
-                } else {
-                    errorMessage = '';
-                }
-            }
-        );
-        
-        return unsubscribe;
-    });
 </script>
 
 {#if errorMessage}

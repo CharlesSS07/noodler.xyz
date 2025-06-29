@@ -1,6 +1,28 @@
 <script lang="ts">
 import { onMount, onDestroy } from 'svelte';
 import { writable, derived } from 'svelte/store';
+import * as echarts from 'echarts/core';
+import {
+    LineChart,
+} from 'echarts/charts';
+import {
+    TitleComponent,
+    TooltipComponent,
+    GridComponent,
+    DataZoomComponent,
+    LegendComponent
+} from 'echarts/components';
+import { CanvasRenderer } from 'echarts/renderers';
+
+echarts.use([
+    LineChart,
+    TitleComponent,
+    TooltipComponent,
+    GridComponent,
+    DataZoomComponent,
+    LegendComponent,
+    CanvasRenderer
+]);
 
 interface MemoryData {
     timestamp: number;
@@ -12,7 +34,7 @@ interface MemoryData {
 
 class MemoryMonitor {
     private data: MemoryData[] = [];
-    private maxDataPoints = 3600; // 1 hour of data at 1 second intervals
+    private maxDataPoints = 3600;
     private intervalId: number | null = null;
 
     public dataStore = writable<MemoryData[]>([]);
@@ -23,10 +45,10 @@ class MemoryMonitor {
     }
 
     private getMemoryInfo(): MemoryData | null {
-        // Check if performance.memory is available (Chrome/Edge)
+        const timestamp = Date.now();
+
         if ('performance' in window && 'memory' in performance) {
             const memory = (performance as any).memory;
-            const timestamp = Date.now();
 
             return {
                 timestamp,
@@ -36,22 +58,7 @@ class MemoryMonitor {
                 usedPercent: (memory.usedJSHeapSize / memory.jsHeapSizeLimit) * 100
             };
         }
-
-        // Fallback for browsers without performance.memory
-        // Generate simulated data for demonstration
-        const timestamp = Date.now();
-        const baseUsage = 20 * 1024 * 1024; // 20MB base
-        const randomVariation = Math.random() * 10 * 1024 * 1024; // Up to 10MB variation
-        const usedJSHeapSize = baseUsage + randomVariation;
-        const jsHeapSizeLimit = 100 * 1024 * 1024; // 100MB limit
-
-        return {
-            timestamp,
-            usedJSHeapSize,
-            totalJSHeapSize: usedJSHeapSize * 1.2,
-            jsHeapSizeLimit,
-            usedPercent: (usedJSHeapSize / jsHeapSizeLimit) * 100
-        };
+        return null;
     }
 
     public startMonitoring() {
@@ -63,14 +70,13 @@ class MemoryMonitor {
             if (memoryInfo) {
                 this.data.push(memoryInfo);
 
-                // Keep only the last maxDataPoints
                 if (this.data.length > this.maxDataPoints) {
                     this.data = this.data.slice(-this.maxDataPoints);
                 }
 
                 this.dataStore.set([...this.data]);
             }
-        }, 1000);
+        }, 2000);
     }
 
     public stopMonitoring() {
@@ -79,12 +85,6 @@ class MemoryMonitor {
             this.intervalId = null;
             this.isMonitoring.set(false);
         }
-    }
-
-    public getDataInRange(startTime: number, endTime: number): MemoryData[] {
-        return this.data.filter(item =>
-            item.timestamp >= startTime && item.timestamp <= endTime
-        );
     }
 
     public destroy() {
@@ -96,235 +96,237 @@ export const memoryMonitor = new MemoryMonitor();
 export const memoryData = memoryMonitor.dataStore;
 export const isMonitoring = memoryMonitor.isMonitoring;
 
-// Derived store for the last 5 minutes of data
 export const recentMemoryData = derived(memoryData, ($memoryData) => {
     const fiveMinutesAgo = Date.now() - (5 * 60 * 1000);
     return $memoryData.filter(item => item.timestamp >= fiveMinutesAgo);
 });
-let canvas: HTMLCanvasElement;
-let ctx: CanvasRenderingContext2D;
-let animationFrame: number;
 
-// Chart settings
-let viewStartTime = 0;
-let viewEndTime = 0;
-let isDragging = false;
-let lastMouseX = 0;
-let zoomLevel = 1;
-
-// Display options
+let chartContainer: HTMLDivElement;
+let chart: echarts.ECharts;
 let showFullHistory = false;
+let userHasInteracted = false;
+let currentDataZoomStart = 80;
+let currentDataZoomEnd = 100;
 
 $: currentData = showFullHistory ? $memoryData : $recentMemoryData;
+$: {
+    if (chart && currentData.length > 0) {
+        updateChart();
+    }
+}
 
 onMount(() => {
-    ctx = canvas.getContext('2d')!;
-    updateViewTime();
-    startAnimation();
-
-    // Set initial view to last 5 minutes
-    const now = Date.now();
-    viewEndTime = now;
-    viewStartTime = now - (5 * 60 * 1000);
+    initializeChart();
 });
 
 onDestroy(() => {
-    if (animationFrame) {
-        cancelAnimationFrame(animationFrame);
+    if (chart) {
+        chart.dispose();
     }
 });
 
-function updateViewTime() {
-    if (!showFullHistory) {
-        const now = Date.now();
-        viewEndTime = now;
-        viewStartTime = now - (5 * 60 * 1000);
-    }
-}
-
-function startAnimation() {
-    function animate() {
-        if (!showFullHistory) {
-            updateViewTime();
+function initializeChart() {
+    chart = echarts.init(chartContainer, 'dark');
+    
+    // Listen for dataZoom events to track user interactions
+    chart.on('datazoom', (params: any) => {
+        if (showFullHistory) {
+            userHasInteracted = true;
+            if (params.start !== undefined) currentDataZoomStart = params.start;
+            if (params.end !== undefined) currentDataZoomEnd = params.end;
         }
-        drawChart();
-        animationFrame = requestAnimationFrame(animate);
-    }
-    animate();
+    });
+    
+    updateChart();
+    
+    window.addEventListener('resize', () => {
+        chart.resize();
+    });
 }
 
-function drawChart() {
-    if (!ctx || !canvas) return;
+function updateChart() {
+    if (!chart || currentData.length === 0) return;
 
-    const rect = canvas.getBoundingClientRect();
-    canvas.width = rect.width * devicePixelRatio;
-    canvas.height = rect.height * devicePixelRatio;
-    ctx.scale(devicePixelRatio, devicePixelRatio);
+    const timeData = currentData.map(d => new Date(d.timestamp));
+    const usedData = currentData.map(d => d.usedJSHeapSize);
+    const totalData = currentData.map(d => d.totalJSHeapSize);
+    const limitData = currentData.map(d => d.jsHeapSizeLimit);
 
-    const width = rect.width;
-    const height = rect.height;
-
-    // Clear canvas
-    ctx.fillStyle = '#1a1a1a';
-    ctx.fillRect(0, 0, width, height);
-
-    if (currentData.length === 0) {
-        // Show "No data" message
-        ctx.fillStyle = '#888';
-        ctx.font = '16px Inter, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('Collecting memory data...', width / 2, height / 2);
-        return;
-    }
-
-    // Filter data for current view
-    const visibleData = currentData.filter(item =>
-        item.timestamp >= viewStartTime && item.timestamp <= viewEndTime
-    );
-
-    if (visibleData.length === 0) return;
-
-    // Calculate scales
-    const timeRange = viewEndTime - viewStartTime;
-    const maxMemory = Math.max(...visibleData.map(d => d.jsHeapSizeLimit));
-
-    const padding = 60;
-    const chartWidth = width - padding * 2;
-    const chartHeight = height - padding * 2;
-
-    // Draw grid
-    drawGrid(padding, chartWidth, chartHeight, maxMemory, timeRange);
-
-    // Draw memory lines
-    drawMemoryLines(visibleData, padding, chartWidth, chartHeight, maxMemory, timeRange);
-
-    // Draw legend
-    drawLegend(padding, width);
-
-    // Draw current values
-    drawCurrentValues(visibleData, padding, height);
-}
-
-function drawGrid(padding: number, chartWidth: number, chartHeight: number, maxMemory: number, timeRange: number) {
-    ctx.strokeStyle = '#333';
-    ctx.lineWidth = 1;
-
-    // Horizontal grid lines (memory)
-    const memorySteps = 5;
-    for (let i = 0; i <= memorySteps; i++) {
-        const y = padding + (chartHeight * i / memorySteps);
-        ctx.beginPath();
-        ctx.moveTo(padding, y);
-        ctx.lineTo(padding + chartWidth, y);
-        ctx.stroke();
-
-        // Memory labels
-        const memoryValue = maxMemory * (1 - i / memorySteps);
-        ctx.fillStyle = '#888';
-        ctx.font = '12px Inter, sans-serif';
-        ctx.textAlign = 'right';
-        ctx.fillText(formatBytes(memoryValue), padding - 10, y + 4);
-    }
-
-    // Vertical grid lines (time)
-    const timeSteps = 6;
-    for (let i = 0; i <= timeSteps; i++) {
-        const x = padding + (chartWidth * i / timeSteps);
-        ctx.beginPath();
-        ctx.moveTo(x, padding);
-        ctx.lineTo(x, padding + chartHeight);
-        ctx.stroke();
-
-        // Time labels
-        const timeValue = viewStartTime + (timeRange * i / timeSteps);
-        const timeStr = formatTime(timeValue);
-        ctx.fillStyle = '#888';
-        ctx.font = '12px Inter, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(timeStr, x, padding + chartHeight + 20);
-    }
-}
-
-function drawMemoryLines(data: MemoryData[], padding: number, chartWidth: number, chartHeight: number, maxMemory: number, timeRange: number) {
-    if (data.length < 2) return;
-
-    const lines = [
-        { key: 'usedJSHeapSize', color: '#3B82F6', label: 'Used Heap' },
-        { key: 'totalJSHeapSize', color: '#10B981', label: 'Total Heap' },
-        { key: 'jsHeapSizeLimit', color: '#F59E0B', label: 'Heap Limit' }
-    ];
-
-    lines.forEach(line => {
-        ctx.strokeStyle = line.color;
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-
-        data.forEach((point, index) => {
-            const x = padding + ((point.timestamp - viewStartTime) / timeRange) * chartWidth;
-            const y = padding + chartHeight - ((point[line.key as keyof MemoryData] as number / maxMemory) * chartHeight);
-
-            if (index === 0) {
-                ctx.moveTo(x, y);
-            } else {
-                ctx.lineTo(x, y);
+    const option = {
+        backgroundColor: 'transparent',
+        title: {
+            text: 'JavaScript Memory Usage',
+            textStyle: {
+                color: '#fff',
+                fontSize: 16
+            },
+            top: 10,
+            left: 20
+        },
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+                type: 'cross'
+            },
+            formatter: (params: any) => {
+                const time = new Date(params[0].axisValue).toLocaleTimeString();
+                let content = `<div style="margin-bottom: 5px;">${time}</div>`;
+                params.forEach((param: any) => {
+                    const value = formatBytes(param.value);
+                    content += `<div style="color:${param.color};">
+                        <span style="display:inline-block;margin-right:5px;border-radius:10px;width:9px;height:9px;background-color:${param.color}"></span>
+                        ${param.seriesName}: ${value}
+                    </div>`;
+                });
+                return content;
             }
-        });
+        },
+        legend: {
+            data: ['Used JS Heap', 'Total JS Heap', 'JS Heap Limit'],
+            top: 40,
+            textStyle: {
+                color: '#fff'
+            }
+        },
+        grid: {
+            left: '80px',
+            right: '50px',
+            bottom: '100px',
+            top: '80px',
+            containLabel: false
+        },
+        xAxis: {
+            type: 'time',
+            boundaryGap: false,
+            axisLine: {
+                lineStyle: {
+                    color: '#444'
+                }
+            },
+            axisLabel: {
+                color: '#888',
+                formatter: (value: number) => {
+                    return new Date(value).toLocaleTimeString([], { 
+                        hour: '2-digit', 
+                        minute: '2-digit', 
+                        second: '2-digit' 
+                    });
+                }
+            },
+            splitLine: {
+                show: true,
+                lineStyle: {
+                    color: '#333'
+                }
+            }
+        },
+        yAxis: {
+            type: 'value',
+            axisLine: {
+                lineStyle: {
+                    color: '#444'
+                }
+            },
+            axisLabel: {
+                color: '#888',
+                formatter: (value: number) => formatBytes(value)
+            },
+            splitLine: {
+                lineStyle: {
+                    color: '#333'
+                }
+            }
+        },
+        dataZoom: showFullHistory ? [
+            {
+                type: 'inside',
+                start: userHasInteracted ? currentDataZoomStart : 80,
+                end: userHasInteracted ? currentDataZoomEnd : 100
+            },
+            {
+                start: userHasInteracted ? currentDataZoomStart : 80,
+                end: userHasInteracted ? currentDataZoomEnd : 100,
+                height: 30,
+                bottom: 20,
+                textStyle: {
+                    color: '#888'
+                },
+                borderColor: '#555',
+                fillerColor: 'rgba(59, 130, 246, 0.2)',
+                handleStyle: {
+                    color: '#3B82F6'
+                }
+            }
+        ] : undefined,
+        series: [
+            {
+                name: 'Used JS Heap',
+                type: 'line',
+                data: timeData.map((time, index) => [time, usedData[index]]),
+                smooth: true,
+                symbol: 'none',
+                lineStyle: {
+                    width: 2
+                },
+                areaStyle: {
+                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                        {
+                            offset: 0,
+                            color: 'rgba(59, 130, 246, 0.8)'
+                        },
+                        {
+                            offset: 1,
+                            color: 'rgba(59, 130, 246, 0.1)'
+                        }
+                    ])
+                },
+                itemStyle: {
+                    color: '#3B82F6'
+                }
+            },
+            {
+                name: 'Total JS Heap',
+                type: 'line',
+                data: timeData.map((time, index) => [time, totalData[index]]),
+                smooth: true,
+                symbol: 'none',
+                lineStyle: {
+                    width: 2
+                },
+                areaStyle: {
+                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                        {
+                            offset: 0,
+                            color: 'rgba(16, 185, 129, 0.6)'
+                        },
+                        {
+                            offset: 1,
+                            color: 'rgba(16, 185, 129, 0.05)'
+                        }
+                    ])
+                },
+                itemStyle: {
+                    color: '#10B981'
+                }
+            },
+            {
+                name: 'JS Heap Limit',
+                type: 'line',
+                data: timeData.map((time, index) => [time, limitData[index]]),
+                smooth: true,
+                symbol: 'none',
+                lineStyle: {
+                    width: 2,
+                    type: 'dashed'
+                },
+                itemStyle: {
+                    color: '#F59E0B'
+                }
+            }
+        ]
+    };
 
-        ctx.stroke();
-    });
-}
-
-function drawLegend(padding: number, width: number) {
-    const legendItems = [
-        { color: '#3B82F6', label: 'Used JS Heap' },
-        { color: '#10B981', label: 'Total JS Heap' },
-        { color: '#F59E0B', label: 'JS Heap Limit' }
-    ];
-
-    const startX = width - 200;
-    let startY = padding;
-
-    legendItems.forEach((item, index) => {
-        const y = startY + index * 20;
-
-        // Color box
-        ctx.fillStyle = item.color;
-        ctx.fillRect(startX, y - 6, 12, 12);
-
-        // Label
-        ctx.fillStyle = '#fff';
-        ctx.font = '12px Inter, sans-serif';
-        ctx.textAlign = 'left';
-        ctx.fillText(item.label, startX + 18, y + 3);
-    });
-}
-
-function drawCurrentValues(data: MemoryData[], padding: number, height: number) {
-    if (data.length === 0) return;
-
-    const latest = data[data.length - 1];
-    const values = [
-        { label: 'Used:', value: formatBytes(latest.usedJSHeapSize), color: '#3B82F6' },
-        { label: 'Total:', value: formatBytes(latest.totalJSHeapSize), color: '#10B981' },
-        { label: 'Limit:', value: formatBytes(latest.jsHeapSizeLimit), color: '#F59E0B' },
-        { label: 'Usage:', value: latest.usedPercent.toFixed(1) + '%', color: '#888' }
-    ];
-
-    const startX = padding;
-    const startY = height - 30;
-
-    values.forEach((item, index) => {
-        const x = startX + index * 120;
-
-        ctx.fillStyle = '#888';
-        ctx.font = '12px Inter, sans-serif';
-        ctx.textAlign = 'left';
-        ctx.fillText(item.label, x, startY);
-
-        ctx.fillStyle = item.color;
-        ctx.font = '14px Inter, sans-serif';
-        ctx.fillText(item.value, x + 40, startY);
-    });
+    chart.setOption(option, true);
 }
 
 function formatBytes(bytes: number): string {
@@ -335,135 +337,95 @@ function formatBytes(bytes: number): string {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
 }
 
-function formatTime(timestamp: number): string {
-    const date = new Date(timestamp);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-}
-
-// Mouse interaction handlers
-function handleMouseDown(event: MouseEvent) {
-    isDragging = true;
-    lastMouseX = event.clientX;
-}
-
-function handleMouseMove(event: MouseEvent) {
-    if (!isDragging || !showFullHistory) return;
-
-    const deltaX = event.clientX - lastMouseX;
-    const timeRange = viewEndTime - viewStartTime;
-    const timeDelta = (deltaX / canvas.clientWidth) * timeRange;
-
-    viewStartTime -= timeDelta;
-    viewEndTime -= timeDelta;
-
-    // Constrain to available data
-    const minTime = $memoryData.length > 0 ? $memoryData[0].timestamp : 0;
-    const maxTime = Date.now();
-
-    if (viewStartTime < minTime) {
-        const shift = minTime - viewStartTime;
-        viewStartTime += shift;
-        viewEndTime += shift;
-    }
-
-    if (viewEndTime > maxTime) {
-        const shift = viewEndTime - maxTime;
-        viewStartTime -= shift;
-        viewEndTime -= shift;
-    }
-
-    lastMouseX = event.clientX;
-}
-
-function handleMouseUp() {
-    isDragging = false;
-}
-
-function handleWheel(event: WheelEvent) {
-    if (!showFullHistory) return;
-
-    event.preventDefault();
-    const zoomFactor = event.deltaY > 0 ? 1.1 : 0.9;
-    const timeRange = viewEndTime - viewStartTime;
-    const newTimeRange = timeRange * zoomFactor;
-    const center = (viewStartTime + viewEndTime) / 2;
-
-    viewStartTime = center - newTimeRange / 2;
-    viewEndTime = center + newTimeRange / 2;
-
-    // Constrain zoom
-    const minRange = 30 * 1000; // 30 seconds minimum
-    const maxRange = 60 * 60 * 1000; // 1 hour maximum
-
-    if (newTimeRange < minRange) {
-        viewStartTime = center - minRange / 2;
-        viewEndTime = center + minRange / 2;
-    } else if (newTimeRange > maxRange) {
-        viewStartTime = center - maxRange / 2;
-        viewEndTime = center + maxRange / 2;
-    }
-}
-
 function toggleHistoryView() {
     showFullHistory = !showFullHistory;
-    if (showFullHistory && $memoryData.length > 0) {
-        viewStartTime = $memoryData[0].timestamp;
-        viewEndTime = Date.now();
-    }
+    userHasInteracted = false;
+    currentDataZoomStart = 80;
+    currentDataZoomEnd = 100;
+    updateChart();
 }
 
 function resetView() {
-    const now = Date.now();
-    viewEndTime = now;
-    viewStartTime = now - (5 * 60 * 1000);
     showFullHistory = false;
+    userHasInteracted = false;
+    currentDataZoomStart = 80;
+    currentDataZoomEnd = 100;
+    updateChart();
 }
 </script>
 
 <div class="memory-graph">
-<div class="controls">
-<button
-    class="toggle-btn"
-class:active={showFullHistory}
-on:click={toggleHistoryView}
-    >
-    {showFullHistory ? 'Live View (5min)' : 'Full History'}
-    </button>
+    <div class="controls">
+        <button
+            class="toggle-btn"
+            class:active={showFullHistory}
+            on:click={toggleHistoryView}
+            on:mousedown|stopPropagation
+            on:pointerdown|stopPropagation
+        >
+            {showFullHistory ? 'Live View (5min)' : 'Full History'}
+        </button>
 
-    <button class="reset-btn" on:click={resetView}>
-    Reset View
-</button>
+        <button 
+            class="reset-btn" 
+            on:click={resetView}
+            on:mousedown|stopPropagation
+            on:pointerdown|stopPropagation
+        >
+            Reset View
+        </button>
 
-<div class="status">
-<div class="status-dot" class:active={$isMonitoring}></div>
-    <span>{$isMonitoring ? 'Monitoring' : 'Stopped'}</span>
+        <div class="status">
+            <div class="status-dot" class:active={$isMonitoring}></div>
+            <span>{$isMonitoring ? 'Monitoring' : 'Stopped'}</span>
+        </div>
     </div>
-    </div>
 
-    <canvas
-bind:this={canvas}
-class="chart-canvas"
-on:mousedown={handleMouseDown}
-on:mousemove={handleMouseMove}
-on:mouseup={handleMouseUp}
-on:mouseleave={handleMouseUp}
-on:wheel={handleWheel}
-    ></canvas>
+    <div 
+        bind:this={chartContainer} 
+        class="chart-container"
+        on:mousedown|stopPropagation
+        on:pointerdown|stopPropagation
+    ></div>
 
-{#if showFullHistory}
-<div class="help-text">
-    Scroll to zoom • Drag to pan • Click "Live View" to return to real-time monitoring
-</div>
-{/if}
+    {#if showFullHistory}
+        <div class="help-text">
+            Mouse wheel to zoom • Drag to pan • Use slider to navigate • Click "Live View" to return to real-time monitoring
+        </div>
+    {:else if currentData.length > 0}
+        <div 
+            class="current-stats"
+            on:mousedown|stopPropagation
+            on:pointerdown|stopPropagation
+        >
+            {#if currentData.length > 0}
+                {@const latest = currentData[currentData.length - 1]}
+                <div class="stat">
+                    <span class="label">Used:</span>
+                    <span class="value used">{formatBytes(latest.usedJSHeapSize)}</span>
+                </div>
+                <div class="stat">
+                    <span class="label">Total:</span>
+                    <span class="value total">{formatBytes(latest.totalJSHeapSize)}</span>
+                </div>
+                <div class="stat">
+                    <span class="label">Limit:</span>
+                    <span class="value limit">{formatBytes(latest.jsHeapSizeLimit)}</span>
+                </div>
+                <div class="stat">
+                    <span class="label">Usage:</span>
+                    <span class="value usage">{latest.usedPercent.toFixed(1)}%</span>
+                </div>
+            {/if}
+        </div>
+    {/if}
 </div>
 
 <style>
 .memory-graph {
     background: #1a1a1a;
     border-radius: 12px;
-    padding: 20px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    margin: 20px 0;
 }
 
 .controls {
@@ -516,16 +478,12 @@ on:wheel={handleWheel}
     box-shadow: 0 0 4px rgba(16, 185, 129, 0.5);
 }
 
-.chart-canvas {
+.chart-container {
     width: 100%;
     height: 400px;
     border-radius: 8px;
-    cursor: grab;
     background: #242424;
-}
-
-.chart-canvas:active {
-    cursor: grabbing;
+    overflow: hidden;
 }
 
 .help-text {
@@ -535,18 +493,73 @@ on:wheel={handleWheel}
     margin-top: 10px;
 }
 
+.current-stats {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin-top: 15px;
+    padding: 12px;
+    background: #242424;
+    border-radius: 8px;
+    gap: 10px;
+}
+
+.stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.stat .label {
+    color: #888;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.stat .value {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.value.used {
+    color: #3B82F6;
+}
+
+.value.total {
+    color: #10B981;
+}
+
+.value.limit {
+    color: #F59E0B;
+}
+
+.value.usage {
+    color: #888;
+}
+
 @media (max-width: 768px) {
-.memory-graph {
+    .memory-graph {
         padding: 15px;
     }
 
-.controls {
+    .controls {
         flex-direction: column;
         align-items: stretch;
     }
 
-.chart-canvas {
+    .chart-container {
         height: 300px;
     }
+
+    .current-stats {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .stat {
+        flex: 1;
+        min-width: 80px;
+    }
 }
-    </style>
+</style>

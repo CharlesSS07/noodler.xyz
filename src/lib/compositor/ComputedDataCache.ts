@@ -1,5 +1,4 @@
 import { writable, derived, type Writable, type Readable } from 'svelte/store';
-
 // Types for better TypeScript support
 type NodeKey = string;
 type SocketId = string;
@@ -10,7 +9,6 @@ interface SocketInstance {
 }
 
 const RESERVED_SOCKETS = {
-    error: '__error__',
     executionStatus: '__executionStatus__',
 }
 
@@ -26,7 +24,8 @@ function parseSocketInstanceKey(key: string): SocketInstance {
 
 export interface ExecutionStatus {
     startedAt: Date;
-    finishedAt: Date;
+    stoppedAt: Date;
+    logs: [context: {}, message: string][];
 }
 
 export class ComputedDataCache {
@@ -44,7 +43,6 @@ export class ComputedDataCache {
     }
 
     private updateStores(): void {
-        console.log('updateStores called, current data:', Array.from(this.data.entries()));
         this.dataStore.set(new Map(this.data));
         this.socketKeysStore.set(new Set(this.data.keys()));
     }
@@ -74,23 +72,24 @@ export class ComputedDataCache {
         });
     }
 
-    /**
-     * Get a reactive store for a specific nodes error output
-     */
-    useNodeErrorStore(node_key: string): Readable<unknown | null> {
-        const key = socketInstanceKey(node_key, RESERVED_SOCKETS.error);
-        console.log('useNodeErrorStore', key);
-        return derived(this.dataStore, ($data) => {
-            console.log('error', key, $data.get(key));
-            return $data.has(key) ? $data.get(key) : null;
-        });
-    }
-
     nodeExecutionStarted(node_key: string): void {
         const key = socketInstanceKey(node_key, RESERVED_SOCKETS.executionStatus);
 
-        this.data.set(key, {startedAt: new Date(), finishedAt: undefined});
+        this.data.set(key, {startedAt: new Date(), stoppedAt: undefined, logs: []});
         this.updateStores();
+    }
+
+    nodeExecutionLog(node_key: string, context: {}, message: string): void {
+        const key = socketInstanceKey(node_key, RESERVED_SOCKETS.executionStatus);
+
+        const exec_status = this.data.get(key) as ExecutionStatus;
+        if (exec_status) {
+            exec_status.logs.push([context, message]);
+            this.data.set(key, exec_status);
+            this.updateStores();
+        } else {
+            throw new Error("Node was never executed so cannot have finished executing.");
+        }
     }
 
     nodeExecutionFinished(node_key: string): void {
@@ -98,7 +97,8 @@ export class ComputedDataCache {
 
         const exec_status = this.data.get(key) as ExecutionStatus;
         if (exec_status) {
-            this.data.set(key, {startedAt: exec_status.startedAt, finishedAt: new Date()});
+            exec_status.stoppedAt = new Date();
+            this.data.set(key, exec_status);
             this.updateStores();
         } else {
             throw new Error("Node was never executed so cannot have finished executing.");
@@ -108,11 +108,11 @@ export class ComputedDataCache {
     /**
      * Get a reactive store for a specific nodes error output
      */
-    useNodeExecutionStatusStore(node_key: string): Readable<unknown | null> {
+    useNodeExecutionStatusStore(node_key: string): Readable<ExecutionStatus | undefined> {
         const key = socketInstanceKey(node_key, RESERVED_SOCKETS.executionStatus);
 
         return derived(this.dataStore, ($data) => {
-            return $data.has(key) ? $data.get(key) : 'idle';
+            return $data.has(key) ? $data.get(key) as ExecutionStatus : undefined;
         });
     }
 
@@ -150,7 +150,6 @@ export class ComputedDataCache {
         data: unknown
     ): Promise<void> {
         const key = socketInstanceKey(node_key, socket_id);
-        console.log('cache called:', key, data);
 
         // if (this.data.has(key)) {
         //     throw new Error(`Socket ${key} already cached. This would overwrite the socket data. The whole node should have been dumped first.`);

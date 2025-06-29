@@ -32,10 +32,6 @@ export class OutputSocketAsyncReturner {
             );
         }
     }
-
-    async errorMessage(error: string) {
-        await this.dataCache.cache(this.node_id, '__error__', error);
-    }
 }
 
 export async function executeFlowGraph(
@@ -55,7 +51,6 @@ export async function executeFlowGraph(
 
     // 1. Build dependency graph
     const dependencyGraph = buildDependencyGraph(start_node_id, nodes, edges);
-    console.log('dependencyGraph', dependencyGraph);
     const relevantNodes = Array.from(dependencyGraph.keys());
 
     const nodeLookup = new Map<string, number>(
@@ -83,7 +78,6 @@ export async function executeFlowGraph(
     for (let i = 0; i < relevantNids.length; i++) {
         relevantNodeBluePrintsLookup.set(relevantNids[i], blueprints[i]);
     }
-    console.log(nodes, edges, relevantNids, relevantNodeBluePrintsLookup);
 
     // Find sink nodes (nodes with no dependencies)
     const sinkNodes = relevantNodes.filter((nodeId) => {
@@ -91,7 +85,6 @@ export async function executeFlowGraph(
         return dependencies.length === 0;
     });
 
-    console.log('sinkNodes', sinkNodes);
 
     // Track which nodes have been executed
     const executedNodes = new Set<string>();
@@ -144,7 +137,6 @@ export async function executeFlowGraph(
                 );
 
                 if (nodeBlueprint.input_spec_strict) {
-                    console.debug("Executing node in strict mode.")
                     // Check that input data and node blueprint spec inputs align
                     const inputDataSocketKeys = new Set(Object.keys(inputData));
                     const inputSocketKeysSpec = new Set(
@@ -174,7 +166,7 @@ export async function executeFlowGraph(
                 }
 
                 console.log(`${nodeId} ▶️ (${nodeBlueprint.nid}) with args:`);
-                console.log(inputData);
+                console.dir(inputData);
 
                 // Execute the node
                 projectComputedDataCache.nodeExecutionStarted(nodeId);
@@ -182,10 +174,10 @@ export async function executeFlowGraph(
                     .call(inputData, outputReturner)
                     .then(() => {
                         console.log(`${nodeId} ✅`, outputReturner);
-                        outputReturner.errorMessage(''); // clear error
                     })
                     .catch((err) => {
                         console.error(`${nodeId} ❌`);
+                        projectComputedDataCache.nodeExecutionLog(nodeId, {error:true}, err.message || String(err));
                         throw err;
                     }).finally(() => {
                         projectComputedDataCache.nodeExecutionFinished(nodeId);
@@ -207,18 +199,22 @@ export async function executeFlowGraph(
                     // Execute ready nodes concurrently
                     await Promise.all(readyNodes.map(executeNode));
                 } catch (error) {
-                    console.error(error);
+                    // console.error(error);
                     // do not throw; this is the error of another node.
                 }
             } catch (error) {
                 console.error('Error in node execution:');
                 console.error(error);
                 if (error instanceof Error) {
-                    await outputReturner.errorMessage(
+                    projectComputedDataCache.nodeExecutionLog(
+                        nodeId,
+                        {error:true},
                         `While executing ${nodeBlueprint.nid} id=${nodeId}:\n${error.message}`
                     );
                 } else {
-                    await outputReturner.errorMessage(
+                    projectComputedDataCache.nodeExecutionLog(
+                        nodeId,
+                        {error:true},
                         `While executing ${nodeBlueprint.nid} id=${nodeId}:` +
                         error
                     ); // !!! convert to string first!

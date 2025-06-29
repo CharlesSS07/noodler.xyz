@@ -2,22 +2,52 @@
     import {Tooltip} from 'flowbite-svelte';
     import {Info} from 'lucide-svelte';
     import {Card} from 'flowbite-svelte';
+    import type {ExecutionStatus} from "$lib/compositor/ComputedDataCache";
+    import {untrack} from "svelte";
 
     interface NodeWrapperProps {
         label: string;
         documentation?: string;
-        executionTime?: number;
-        errorEncountered?: boolean;
+        executionStatus?: ExecutionStatus;
         isSelected?: boolean;
     }
 
     let {
         label,
         documentation,
-        executionTime = 0,
-        errorEncountered = false,
+        executionStatus,
         isSelected = false
     }: NodeWrapperProps = $props();
+
+    let executionIndicator: number | string = $state('idle');
+
+    let drawIndicatorLoop: NodeJS.Timeout | null = null;
+
+    $effect(() => {
+
+        untrack(() => {
+            if (drawIndicatorLoop) {
+                clearInterval(drawIndicatorLoop);
+                drawIndicatorLoop = null;
+            }
+        });
+
+        if (executionStatus) {
+            untrack(() => {
+                if (executionStatus.startedAt && executionStatus.stoppedAt) {
+                    executionIndicator = executionStatus.stoppedAt.getTime() - executionStatus.startedAt.getTime();
+                } else if (executionStatus.startedAt) {
+                    drawIndicatorLoop = setInterval(() => {
+                        executionIndicator = Date.now() - executionStatus.startedAt.getTime();
+                    });
+                } else {
+                    executionIndicator = 'idle';
+                }
+            });
+        } else {
+            executionIndicator = 'idle';
+        }
+    })
 </script>
 
 <div
@@ -43,13 +73,17 @@
             </div>
 
             <!-- Execution info -->
-            {#if executionTime > 0}
+            {#if typeof executionIndicator === "number"}
                 <div class="execution-info">
-                    <span class="execution-time" class:errorEncountered={'error'} >{executionTime}ms</span>
+                    <span class="execution-time" class:errorEncountered={'error'} >{executionIndicator}ms</span>
                 </div>
-            {:else}
+            {:else if typeof executionIndicator === "string"}
                 <div class="execution-info">
-                    <span class="execution-time" class:errorEncountered={'error'} >idle</span>
+                    <span class="execution-time" class:errorEncountered={'error'} >{executionIndicator}</span>
+                </div>
+            {:else }
+                <div class="execution-info">
+                    <span class="execution-time" class:errorEncountered={'error'} >{executionIndicator}</span>
                 </div>
             {/if}
         </div>

@@ -12,24 +12,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `yarn check:watch` - Run Svelte type checking in watch mode
 - `yarn format` - Format code with Prettier
 
+### Debugging
+- use advanced console commands; not just console.log, or console.error, but console.table(data) to display objects as tables...
+- more examples: console.group(groupName) ... console.groupEnd(groupName) for better visual seperation between sets of log statements, and console.time, timeLog, timeEnd..., also console.assert, and console.count(label).
+
 ### Firebase
 - `yarn emulators` - Start Firebase emulators (auth:9099, database:9000, firestore:8080, storage:9199)
 - `yarn deploy` - Build and deploy to Firebase
 
-### HuggingFace Cloud Functions
-- `cd functions && ./deploy.sh` - Deploy HuggingFace inference API endpoints
-- Available endpoints: textGeneration, textClassification, tokenClassification, questionAnswering, fillMask, summarization, translation, sentenceSimilarity, conversational, featureExtraction, imageClassification, objectDetection, automaticSpeechRecognition, tableQuestionAnswering
-- See `HUGGINGFACE_API_DOCS.md` for complete API documentation and examples
-
-### SvelteFlow
-- Examples and documentation for svelteflow are in examplesAndDocs/svelteflow.dev/
+### Cloud Functions
+- `./functions/deploy.sh` - Deploy HuggingFace inference API endpoints
 
 ### Svelte Language
 - Alwaus use runes. When using runes, make sure you don't introduce any infinite loops.
 - Use untrack to break reactivit within an $effect.
 
 ### Testing
-- Tests use Vitest framework (configured in package.json)
+- Tests use Vitest framework (configured in package.json) in main project, and mocha in functions.
 - Test files follow pattern: `*.test.ts`
 
 ### TypeScript

@@ -1,28 +1,46 @@
-import {writable, derived, type Writable, type Readable, readable} from 'svelte/store';
+import {writable, derived, type Writable, type Readable, readable, get} from 'svelte/store';
 import {type NodeConnection, useNodeConnections, useNodesData, useSvelteFlow} from '@xyflow/svelte';
 import {projectActions, projectComputedDataCache} from '$lib/stores/ProjectState';
 import type {Unsubscribe} from "firebase/firestore";
 import { docStore } from 'sveltefire';
 import { firestore } from '../../../firebase';
 import type { FirestoreNodeBluePrintModel } from '$lib/compositor/nodes/firestore/FirestoreNodeBluePrint';
+import {type Node} from "@xyflow/svelte";
+import type {ExecutionStatus} from "$lib/compositor/ComputedDataCache";
+
+export abstract class InputSocketState {
+    private readonly node: NodeInstanceStore;
+    constructor(node: NodeInstanceStore) {
+        this.node = node;
+    }
+    abstract get value(): unknown;
+    abstract get isConnected(): boolean;
+    get isEditable(): boolean {
+        return !this.isConnected;
+    }
+    getNode() {
+        return this.node;
+    }
+    abstract update(newValue: unknown): void;
+}
 
 /**
  * Reactive stores and utilities for node components
  * Centralizes common patterns used across all node implementations
  */
 export class NodeInstanceStore {
-    private nodeId: string;
+    readonly nodeId: string;
 
     // Core reactive stores
     public inputConnections: Readable<{readonly current: NodeConnection[]}>;
-    public nodeData;
+    public nodeData: Readable<{current: Pick<Node, "id" | "data" | "type"> | null}>;
     public readonly nid: string;
     public hasError: Writable<boolean>;
     public errorMessage: Writable<string>;
 
     // Node blueprint store
     public nodeBluePrint;
-    public executionTime: Writable<number>;
+    public executionStatus: Readable<ExecutionStatus | undefined>;
 
     private unsubscribers: Unsubscribe[] = [];
 
@@ -32,27 +50,27 @@ export class NodeInstanceStore {
         // Initialize connection management
         this.inputConnections = readable(useNodeConnections({ id: this.nodeId, handleType: 'target' }));
 
-        this.nodeData = useNodesData(this.nodeId);
-        if (!this.nodeData.current)
-            throw new Error(`No node data found for ${this.nodeId}`);
+        this.nodeData = readable(useNodesData(this.nodeId));
 
+        // get nid
+        const nodeDataSnapshot = get(this.nodeData);
+        if (!nodeDataSnapshot.current)
+            throw new Error(`No node data found for ${this.nodeId}`);
         // nid is a required attribute of data
-        if (!this.nodeData.current.data.nid)
+        if (!nodeDataSnapshot.current.data.nid)
             throw new Error(`No nid found for ${this.nodeId}`);
-        this.nid = this.nodeData.current.data.nid as string;
+        this.nid = nodeDataSnapshot.current.data.nid as string;
 
         // Error handling stores
         this.hasError = writable(false);
         this.errorMessage = writable('');
-        this.executionTime = writable(0);
+        this.executionStatus = projectComputedDataCache.useNodeExecutionStatusStore(this.nodeId);
 
         // Initialize blueprint if nid is provided
         this.nodeBluePrint = docStore<FirestoreNodeBluePrintModel>(firestore, `nodes/${this.nid}`);
 
         // Subscribe to error socket and execution status
         this.setupInputSockets();
-        this.setupErrorHandling();
-        this.setupExecutionTimeTracking();
     }
 
     /**
@@ -62,71 +80,35 @@ export class NodeInstanceStore {
         if (!this.nodeBluePrint)
             throw new Error(`No nodeBluePrint found for ${this.nodeId}`);
 
-        this.nodeBluePrint.subscribe((blueprint) => {
+        const unsubscribe = this.nodeBluePrint.subscribe((blueprint) => {
 
-            if (!this.nodeData.current)
-                throw new Error(`No node data found for ${this.nodeId}`);
+            const unsubscribe = this.nodeData.subscribe(($nodeData) => {
 
-            const nodeData = this.nodeData.current.data as Record<string, unknown>;
-            const input = (nodeData.input || {}) as Record<string, unknown>;
+                if (!$nodeData.current)
+                    throw new Error(`No node data found for ${this.nodeId}`);
 
-            if (blueprint?.input_sockets) {
-                blueprint.input_socket_order.forEach((socketId) => {
-                    if (!input[socketId]) {
-                        input[socketId] = blueprint.input_sockets[socketId].params.default_value;
-                    }
-                });
-            }
+                const nodeData = $nodeData.current.data as Record<string, unknown>;
+                const input = (nodeData.input || {}) as Record<string, unknown>;
 
-            this.updateData(
-                { input:input }
-            );
+                if (blueprint?.input_sockets) {
+                    blueprint.input_socket_order.forEach((socketId) => {
+                        if (!input[socketId]) {
+                            input[socketId] = blueprint.input_sockets[socketId].params.default_value;
+                        }
+                    });
+                }
+
+                this.updateData(
+                    { input:input }
+                );
+
+            });
+
+            return unsubscribe; // destroy callback for updating upon call to change blueprint.
         });
-    }
 
-    /**
-     * Sets up error handling subscription for the node
-     */
-    private setupErrorHandling(): void {
-        const unsubscribeError = projectComputedDataCache
-            .useNodeErrorStore(this.nodeId)
-            .subscribe((socketData) => {
-            if (socketData) {
-                this.hasError.set(true);
-                this.errorMessage.set(String(socketData));
-                this.updateData({ errorMessage: String(socketData) });
-            } else {
-                this.hasError.set(false);
-                this.errorMessage.set('');
-            }
-        });
-        this.unsubscribers.push(unsubscribeError);
-    }
-
-    /**
-     * Sets up execution time tracking subscription
-     */
-    private setupExecutionTimeTracking(): void {
-        const unsubscribeExecution = projectComputedDataCache
-            .useNodeExecutionStatusStore(this.nodeId)
-            .subscribe(
-            (executionStatus) => {
-                console.log(executionStatus);
-                // if (executionStatus !== undefined && executionStatus !== null && typeof executionStatus === "string") {
-                //     const executionStatusString: string = executionStatus as string;
-                //     const executedAtPrefix = 'Executed at ';
-                //     if (executionStatusString.startsWith(executedAtPrefix)) {
-                //         const executionTimeMs = Date.now() - parseInt(executionStatusString.substring(executedAtPrefix.length));
-                //         this.executionTime.set(executionTimeMs);
-                //     } else if (executionStatusString === 'idle') {
-                //         this.executionTime.set(0);
-                //     }
-                // } else {
-                //     console.warn(`Received invalid execution status`, executionStatus);
-                // }
-            }
-        );
-        this.unsubscribers.push(unsubscribeExecution);
+        if (unsubscribe)
+            this.unsubscribers.push(unsubscribe);
     }
 
     /**
@@ -139,37 +121,81 @@ export class NodeInstanceStore {
         projectActions.updateNodeData(this.nodeId, data);
     }
 
+    updateDataInputSocket(socketId: string, value: unknown): void {
+        const nodeData = get(this.nodeData);
+        if (nodeData.current) {
+            (nodeData.current.data.input as Record<string, unknown>)[socketId] = value;
+            projectActions.updateNodeData(
+                this.nodeId,
+                {
+                    input: nodeData.current.data.input
+                }
+            );
+        }
+    }
+
     /**
      * Creates a reactive subscription to a connected input socket
      * Returns a readable store with the socket data
      */
-    inputSocketStore(socketId: string): Readable<any> {
+    inputSocketStore(socketId: string): Readable<InputSocketState> {
         return derived(
             this.inputConnections,
             (connections, set) => {
-                if (connections.current.length === 0) {
-                    set(this.nodeData.current?.data.input[socketId]);
-                    return;
-                }
 
                 const connection = connections.current.find( connection => {
-                    return connection.targetHandle == socketId && connection.target === this.nodeId
+                    return connection.targetHandle == socketId // && connection.target === this.nodeId
                 });
 
-                if (!connection) {
-                    set(null);
-                    return;
+                if (!connection) { // reactively get data from the node.data.input[socketId]
+
+                    const unsubscribe = this.nodeData.subscribe(($nodeData) => {
+
+                        const socketState = new (class extends InputSocketState {
+                            get isConnected(): boolean {
+                                return false;
+                            }
+
+                            update(newValue: unknown): void {
+                                this.getNode().updateDataInputSocket(socketId, newValue);
+                            }
+
+                            get value(): unknown {
+                                return ($nodeData.current?.data.input as Record<string, unknown>)[socketId];
+                            }
+
+                        })(this);
+
+                        set(socketState);
+                    });
+                    return unsubscribe;
                 }
 
                 const source = connection.source;
                 const sourceHandle = connection.sourceHandle;
 
-                if (sourceHandle) {
+                if (sourceHandle) { // reactively get data from the linked socket
                     const unsubscribe = projectComputedDataCache.useSocketStore(
                         source,
                         sourceHandle
                     ).subscribe((socketData) => {
-                        set(socketData);
+
+                        const socketState = new (class extends InputSocketState {
+                            get isConnected(): boolean {
+                                return true;
+                            }
+
+                            update(newValue: unknown): void {
+                                throw new Error(`You cannot modify a connected socket's value: tried to update ${socketId} on ${this.getNode().nodeId}`);
+                            }
+
+                            get value(): unknown {
+                                return socketData;
+                            }
+
+                        })(this);
+
+                        set(socketState);
                     });
                     return unsubscribe;
                 }

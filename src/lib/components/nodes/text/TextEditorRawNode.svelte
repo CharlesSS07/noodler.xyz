@@ -18,44 +18,26 @@
     import NodeWrapper from "$lib/components/nodeComponents/NodeWrapper.svelte";
     import SourceSocket from "$lib/components/nodeComponents/sockets/SourceSocket.svelte";
     import TargetSocket from "$lib/components/nodeComponents/sockets/TargetSocket.svelte";
-    import {get} from "svelte/store";
     import NodeErrorDisplay from "$lib/components/nodeComponents/NodeErrorDisplay.svelte";
 
     let {id, selected}: NodeProps<PlainTextNodeType> = $props();
 
     const nodeStore = createNodeStore(id);
-    const inputSocketData = nodeStore.inputSocketStore('inputText');
-    const hasInputConnected = $derived(get(nodeStore.inputConnections).current.length>0);
-    const executionTime = $derived(get(nodeStore.executionTime));
+    const inputTextSocket = nodeStore.inputSocketStore('inputText');
+    let executionStatus = nodeStore.executionStatus;
 
-    function getDisplayValue(socketData) {
-        if (socketData) {
-            if (typeof socketData === 'string') {
-                return socketData;
-            }
-            return "<JSON>: "+JSON.stringify(socketData);
-        }
-        return "EMPTY!";
-    }
-
-    let displayValue = $derived(getDisplayValue($inputSocketData));
-
-    let inputText = $derived.by(() => nodeStore.nodeData.current?.data?.input?.inputText || '');
     let textarea: HTMLTextAreaElement;
 
     $effect(() => {
+        $inputTextSocket.value;
         if (textarea) autoResize(textarea);
     });
-    $effect(() => {
-        if (textarea && displayValue) autoResize(textarea);
-    });
-
-
 
     function handleInput(value: string) {
-        console.log(textarea, value)
+        console.log(value)
+        // nodeStore.updateData({input: {inputText: value}});
+        $inputTextSocket.update(value);
         if (textarea) autoResize(textarea);
-        nodeStore.updateData({input: {inputText: value}});
     }
 
     function autoResize(textarea: HTMLTextAreaElement) {
@@ -66,7 +48,7 @@
 
 </script>
 
-<NodeWrapper label="Raw Text" isSelected={selected} executionTime={executionTime}>
+<NodeWrapper label="Raw Text" isSelected={selected} executionStatus={$executionStatus}>
     <div class="relative">
         <!-- Main textarea -->
         <SourceSocket
@@ -84,10 +66,10 @@
         />
 
         <div class="border-2 border-gray-300 rounded-lg bg-white overflow-hidden">
-            {#if hasInputConnected}
+            {#if $inputTextSocket.isConnected}
                 <textarea
                         bind:this={textarea}
-                        value={displayValue}
+                        value={$inputTextSocket.value}
                         class="w-fit p-3 border-0 outline-none font-mono text-sm resize-none overflow-hidden"
                         placeholder='No data supplied by link.'
                         disabled
@@ -95,15 +77,16 @@
             {:else }
                 <textarea
                         bind:this={textarea}
-                        value={inputText}
+                        value={$inputTextSocket.value}
                         class="w-fit p-3 border-0 outline-none font-mono text-sm resize-none overflow-hidden"
                         placeholder='Enter plain text...'
                         oninput={(e) => handleInput(e.target.value)}></textarea>
             {/if}
         </div>
 
-        <NodeErrorDisplay {id}></NodeErrorDisplay>
-
+        {#if $executionStatus}
+            <NodeErrorDisplay errorMessage={$executionStatus.logs.map((log) => log[1]).join('<br>')}></NodeErrorDisplay>
+        {/if}
 
     </div>
 </NodeWrapper>
