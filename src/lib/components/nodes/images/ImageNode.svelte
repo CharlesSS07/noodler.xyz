@@ -87,15 +87,12 @@
 
     // recieve errors to display
     $effect(() => {
-        console.log(id);
         const unsubscribeSocket = projectComputedDataCache.useSocketStore(
             id,
             '__error__'
         ).subscribe((socketData) => {
             untrack(() => {
-                console.log(socketData)
                 if (socketData) {
-                    // console.log('displaying error', "error:"+socketData as string, JSON.stringify(socketData, null, 2), typeof socketData, socketData instanceof Error);
                     updateNodeData(id, {errorMessage: ''+socketData as string});
                 }
             });

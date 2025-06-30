@@ -309,7 +309,7 @@ export class NodeBluePrintInFirestore extends NodeBluePrint {
         this.update();
     }
 
-    get inputSocketKeys(): Array<SocketID> {
+    get inputSocketOrder(): Array<SocketID> {
         return this.current.input_socket_order;
     }
 
@@ -339,7 +339,7 @@ export class NodeBluePrintInFirestore extends NodeBluePrint {
     }
 
     // Synchronous version using cached model
-    outputSocketKeys(): Array<SocketID> {
+    get outputSocketOrder(): Array<SocketID> {
         return this.current.output_socket_order;
     }
 

@@ -1,78 +1,34 @@
-<script module lang="ts">
-    import type {Node} from '@xyflow/svelte';
-
-    // Official NID for this node: md_text_editor
-    export type MarkdownTextNodeType = Node<
-        {
-            input: { text: string };
-            nid?: string; // Should be set to 'md_text_editor' when using official blueprint
-        },
-        'node-markdown-text-editor'
-    >;
-</script>
-
 <script lang="ts">
-    import {Handle, Position, type NodeProps, useNodeConnections} from '@xyflow/svelte';
-
-    import {projectActions, projectComputedDataCache} from "$lib/stores/ProjectState";
-    import {untrack} from "svelte";
-    import {fetchSocketDataTypeByName, STANDARD_DATATYPES} from "$lib/compositor/DataTypes";
+    import {type NodeProps} from '@xyflow/svelte';
+    import {createNodeStore, type NodeStoreType} from '$lib/components/nodes/NodeInstanceStore';
+    import {STANDARD_DATATYPES} from "$lib/compositor/DataTypes";
     import NodeWrapper from "$lib/components/nodeComponents/NodeWrapper.svelte";
-    import {Tooltip, Button} from "flowbite-svelte";
+    import SourceSocket from "$lib/components/nodeComponents/sockets/SourceSocket.svelte";
+    import TargetSocket from "$lib/components/nodeComponents/sockets/TargetSocket.svelte";
+    import NodeErrorDisplay from "$lib/components/nodeComponents/NodeErrorDisplay.svelte";
+    import {Button} from "flowbite-svelte";
     import {Copy, Check} from 'lucide-svelte';
     import {marked} from 'marked';
 
-    let {id, data, selected}: NodeProps<MarkdownTextNodeType> = $props();
+    let {id, selected}: NodeProps<NodeStoreType> = $props();
 
-    const inputConnections = useNodeConnections({id, handleType: 'target'});
-    let hasInputConnection = $derived(inputConnections.current.length > 0);
+    const nodeStore = createNodeStore(id);
+    const textSocket = nodeStore.inputSocketStore('text');
+    let executionStatus = nodeStore.executionStatus;
 
-    // Update display value when connection source becomes available
-    let displayValue = $state('');
-    $effect(() => {
-        if (hasInputConnection) {
-            // only one way to have an input connection to this node, so 0 index is a-ok
-            const source = inputConnections.current[0].source;
-            const sourceHandle = inputConnections.current[0].sourceHandle;
-            if (sourceHandle) {
-                const unsubscribeSocket = projectComputedDataCache.useSocketStore(
-                    source,
-                    sourceHandle
-                ).subscribe((socketData) => {
-                    console.log('output socket data updated:', socketData, id)
-                    if (typeof socketData === 'string')
-                        displayValue = socketData as string;
-                    else
-                        displayValue = '<<OBJECT>>\n' + JSON.stringify(socketData, null, 2);
-                });
-                return unsubscribeSocket;
-            }
-        }
-    });
-
-    let inputText = $state(data.input.text || '');
     let textarea: HTMLTextAreaElement;
     let isEditing = $state(false);
     let copySuccess = $state(false);
 
-    // Initialize without triggering update
     $effect(() => {
-        projectActions.updateNodeData(untrack(() => id), {input: {text: inputText}});
+        $textSocket.value;
+        if (textarea) autoResize(textarea);
     });
 
-    $effect(() => {
-        if (data.input.text && textarea) {
-            inputText = data.input.text;
-            autoResize(textarea);
-        }
-    })
-
-    // Auto-resize effect for textarea
-    $effect(() => {
-        if (textarea) {
-            autoResize(textarea);
-        }
-    });
+    function handleInput(value: string) {
+        $textSocket.update(value);
+        if (textarea) autoResize(textarea);
+    }
 
     function autoResize(textarea: HTMLTextAreaElement) {
         textarea.style.width = 'auto';
@@ -81,7 +37,7 @@
     }
 
     function startEditing() {
-        if (!hasInputConnection) {
+        if (!$textSocket.isConnected) {
             isEditing = true;
         }
     }
@@ -92,19 +48,8 @@
 
     async function copyToClipboard(): Promise<void> {
         try {
-            await navigator.clipboard.writeText(displayValue);
-            copySuccess = true;
-            setTimeout(() => {
-                copySuccess = false;
-            }, 2000);
-        } catch (err) {
-            console.error('Failed to copy:', err);
-        }
-    }
-
-    async function copyInputToClipboard(): Promise<void> {
-        try {
-            await navigator.clipboard.writeText(inputText);
+            const value = typeof $textSocket.value === 'string' ? $textSocket.value : JSON.stringify($textSocket.value, null, 2);
+            await navigator.clipboard.writeText(value);
             copySuccess = true;
             setTimeout(() => {
                 copySuccess = false;
@@ -116,18 +61,33 @@
 
 </script>
 
-<NodeWrapper label="Markdown Text" isSelected={selected}>
+<NodeWrapper label="Markdown Text" isSelected={selected} executionStatus={$executionStatus}>
     <div class="relative">
+        <!-- Sockets -->
+        <SourceSocket
+            id="text"
+            label="Output Text"
+            datatype={STANDARD_DATATYPES.TEXT}
+            documentation="Markdown text output"
+        />
+
+        <TargetSocket
+            id="text"
+            label="Input Text"
+            datatype={STANDARD_DATATYPES.TEXT}
+            documentation="Markdown text input"
+        />
+
         <!-- Main content area -->
         <div class="border-2 border-gray-300 rounded-lg bg-white overflow-hidden">
-            {#if hasInputConnection}
+            {#if $textSocket.isConnected}
                 <!-- Connected input - show markdown rendered display value -->
                 <div class="relative group">
                     <div class="w-fit p-3 prose max-w-none text-sm">
-                        {@html marked.parse(displayValue || 'No data supplied by link.')}
+                        {@html marked.parse(typeof $textSocket.value === 'string' ? $textSocket.value : 'No data supplied by link.')}
                     </div>
                     <!-- Copy button - only visible when connected and has content -->
-                    {#if displayValue}
+                    {#if $textSocket.value}
                         <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                             <Button
                                 size="xs"
@@ -149,17 +109,13 @@
             {:else if isEditing}
                 <!-- Editing mode - show textarea -->
                 <textarea
-                        bind:this={textarea}
-                        value={inputText}
-                        class="w-fit p-3 border-0 outline-none font-mono text-sm resize-none overflow-hidden"
-                        placeholder='Enter markdown text...'
-                        oninput={(e) => {
-                            const value = e.target.value;
-                            inputText = value;
-                            autoResize(e.target);
-                        }}
-                        onblur={stopEditing}
-                        onfocusout={stopEditing}
+                    bind:this={textarea}
+                    value={$textSocket.value}
+                    class="w-fit p-3 border-0 outline-none font-mono text-sm resize-none overflow-hidden"
+                    placeholder='Enter markdown text...'
+                    oninput={(e) => handleInput(e.target.value)}
+                    onblur={stopEditing}
+                    onfocusout={stopEditing}
                 ></textarea>
             {:else}
                 <!-- Display mode - show rendered markdown -->
@@ -169,10 +125,10 @@
                         onclick={startEditing}
                         onkeypress={startEditing}
                     >
-                        {@html marked.parse(inputText || 'Click to enter markdown...')}
+                        {@html marked.parse(typeof $textSocket.value === 'string' ? $textSocket.value : 'Click to enter markdown...')}
                     </div>
                     <!-- Copy button - only visible when there's content -->
-                    {#if inputText}
+                    {#if $textSocket.value}
                         <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                             <Button
                                 size="xs"
@@ -180,7 +136,7 @@
                                 outline
                                 onclick={(e) => {
                                     e.stopPropagation();
-                                    copyInputToClipboard();
+                                    copyToClipboard();
                                 }}
                                 title="Copy content to clipboard"
                                 class="shadow-sm"
@@ -197,41 +153,9 @@
             {/if}
         </div>
 
-        <!-- Input handle -->
-        {#await fetchSocketDataTypeByName(STANDARD_DATATYPES.TEXT)}
-            Loading Target Socket
-        {:then datatype}
-            <Handle
-                    type="target"
-                    position={Position.Left}
-                    id="text"
-                    class="socket-handle"
-                    style="top: 20px;{datatype?.style || ''}"
-            />
-            <Tooltip placement="top">
-                <b>Type ({datatype?.name}):</b> {datatype?.description}
-            </Tooltip>
-        {:catch error}
-            Error; could not load input socket: {JSON.stringify(error, null, 2)}
-        {/await}
-
-        <!-- Output handle -->
-        {#await fetchSocketDataTypeByName(STANDARD_DATATYPES.TEXT)}
-            Loading Source Socket
-        {:then datatype}
-            <Handle
-                    type="source"
-                    position={Position.Right}
-                    id='text'
-                    style="top: 20px;{datatype?.style || ''}"
-                    class="socket-handle"
-            />
-            <Tooltip placement="top">
-                <b>Type ({datatype?.name}):</b> {datatype?.description}
-            </Tooltip>
-        {:catch error}
-            Error; could not load output socket: {JSON.stringify(error, null, 2)}
-        {/await}
+        {#if $executionStatus}
+            <NodeErrorDisplay errorMessage={$executionStatus.logs.map((log) => log[1]).join('<br>')}></NodeErrorDisplay>
+        {/if}
 
     </div>
 </NodeWrapper>

@@ -372,7 +372,7 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
         const centerY = (-viewport.y + (typeof window !== 'undefined' ? window.innerHeight : 600) / 2) / viewport.zoom;
 
         const newNode: Node = {
-            id: `${nodeConfig.id}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            id: `${nodeConfig.type}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
             type: nodeConfig.type,
             position: {
                 x: centerX + 100, // Random position

@@ -70,7 +70,7 @@ export abstract class NodeBluePrint {
         socket_key: SocketID,
         socket: InputSocketModel<InputSocketParams>
     ): void;
-    abstract get inputSocketKeys(): Array<SocketID>;
+    abstract get inputSocketOrder(): Array<SocketID>;
     abstract get inputSockets(): Array<InputSocketModel<InputSocketParams>>;
     // abstract migrateInputSocket(socket_key: SocketID, new_socket_key: SocketID): Promise<void>;
     // abstract retireInputSocket(socket_key: SocketID): Promise<void>;
@@ -80,7 +80,7 @@ export abstract class NodeBluePrint {
         socket_key: SocketID,
         socket: OutputSocketModel
     ): void;
-    abstract outputSocketKeys(): Array<SocketID>;
+    abstract get outputSocketOrder(): Array<SocketID>;
     abstract get outputSockets(): Array<OutputSocketModel>;
     // abstract migrateOutputSocket(socket_key: SocketID, new_socket_key: SocketID): Promise<void>;
     // abstract retireOutputSocket(socket_key: SocketID): Promise<void>;

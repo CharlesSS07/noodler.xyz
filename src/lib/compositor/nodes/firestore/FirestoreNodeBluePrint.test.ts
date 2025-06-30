@@ -166,7 +166,7 @@ describe('FirestoreNodeBluePrint Test Suite', () => {
 
             await testNode.newInputSocket('test_input', inputSocket);
 
-            expect(testNode.inputSocketKeys).toContain('test_input');
+            expect(testNode.inputSocketOrder).toContain('test_input');
             expect(testNode.inputSockets).toHaveLength(1);
             expect(testNode.inputSockets[0].label).toBe('Test Input');
             expect(testNode.inputSockets[0].type).toBe('string');
@@ -193,7 +193,7 @@ describe('FirestoreNodeBluePrint Test Suite', () => {
             await testNode.newInputSocket('input1', socket1);
             await testNode.newInputSocket('input2', socket2);
 
-            expect(testNode.inputSocketKeys).toEqual([
+            expect(testNode.inputSocketOrder).toEqual([
                 'test_input',
                 'input1',
                 'input2',
@@ -212,7 +212,7 @@ describe('FirestoreNodeBluePrint Test Suite', () => {
 
             testNode.newOutputSocket('test_output', outputSocket);
 
-            expect(testNode.outputSocketKeys()).toContain('test_output');
+            expect(testNode.outputSocketOrder()).toContain('test_output');
             expect(testNode.outputSockets).toHaveLength(1);
             expect(testNode.outputSockets[0].label).toBe('Test Output');
             expect(testNode.outputSockets[0].type).toBe('string');
@@ -234,7 +234,7 @@ describe('FirestoreNodeBluePrint Test Suite', () => {
             testNode.newOutputSocket('output1', socket1);
             testNode.newOutputSocket('output2', socket2);
 
-            expect(testNode.outputSocketKeys()).toEqual([
+            expect(testNode.outputSocketOrder()).toEqual([
                 'test_output',
                 'output1',
                 'output2',
@@ -462,7 +462,7 @@ describe('FirestoreNodeBluePrint Test Suite', () => {
                 await Promise.all(updatePromises);
 
                 // Verify final state
-                expect(node.inputSocketKeys).toHaveLength(20);
+                expect(node.inputSocketOrder).toHaveLength(20);
                 expect(node.title).toMatch(/^Stress Test/);
             },
             TEST_CONFIG.timeout
@@ -574,7 +574,7 @@ describe('FirestoreNodeBluePrint Test Suite', () => {
                     expect(node.title).toMatch(
                         new RegExp(`Multi Update ${index}-`)
                     );
-                    expect(node.outputSocketKeys().length).toBeGreaterThan(0);
+                    expect(node.outputSocketOrder().length).toBeGreaterThan(0);
                 });
 
                 // Clean up subscriptions

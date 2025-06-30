@@ -120,7 +120,7 @@ export async function executeFlowGraph(
             }
 
             // Create output returner
-            const outputSocketIds = new Set(nodeBlueprint.outputSocketKeys());
+            const outputSocketIds = new Set(nodeBlueprint.outputSocketOrder);
             // set up return data & error handling
             const outputReturner = new OutputSocketAsyncReturner(
                 projectComputedDataCache,
@@ -140,7 +140,7 @@ export async function executeFlowGraph(
                     // Check that input data and node blueprint spec inputs align
                     const inputDataSocketKeys = new Set(Object.keys(inputData));
                     const inputSocketKeysSpec = new Set(
-                        nodeBlueprint.inputSocketKeys
+                        nodeBlueprint.inputSocketOrder
                     );
 
                     // Check for extra socket keys (inputDataSocketKeys - inputSocketKeysSpec)

@@ -26,8 +26,6 @@
 
     let {id, data, selected}: NodeProps<TemplateFillinNodeType> = $props();
 
-    console.log(id)
-
     // initialize data if defaults not given
     if (data.input === undefined) {
         data.input = {template: ""};

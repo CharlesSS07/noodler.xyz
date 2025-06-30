@@ -1,26 +1,13 @@
-<script module lang="ts">
-    import type {Node} from '@xyflow/svelte';
-
-    // Official NID for this node: node_official_raw_text_editor
-    export type PlainTextNodeType = Node<
-        {
-            input: { inputText: string };
-            nid?: string; // Should be set to 'node_official_raw_text_editor' when using official blueprint
-        },
-        'node-raw-text-editor'
-    >;
-</script>
-
 <script lang="ts">
     import {type NodeProps} from '@xyflow/svelte';
-    import {createNodeStore} from '$lib/components/nodes/NodeInstanceStore';
+    import {createNodeStore, type NodeStoreType} from '$lib/components/nodes/NodeInstanceStore';
     import {STANDARD_DATATYPES} from "$lib/compositor/DataTypes";
     import NodeWrapper from "$lib/components/nodeComponents/NodeWrapper.svelte";
     import SourceSocket from "$lib/components/nodeComponents/sockets/SourceSocket.svelte";
     import TargetSocket from "$lib/components/nodeComponents/sockets/TargetSocket.svelte";
     import NodeErrorDisplay from "$lib/components/nodeComponents/NodeErrorDisplay.svelte";
 
-    let {id, selected}: NodeProps<PlainTextNodeType> = $props();
+    let {id, selected}: NodeProps<NodeStoreType> = $props();
 
     const nodeStore = createNodeStore(id);
     const inputTextSocket = nodeStore.inputSocketStore('inputText');
