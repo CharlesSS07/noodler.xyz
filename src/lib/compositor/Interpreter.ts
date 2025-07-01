@@ -85,7 +85,6 @@ export async function executeFlowGraph(
         return dependencies.length === 0;
     });
 
-
     // Track which nodes have been executed
     const executedNodes = new Set<string>();
     const executingNodes = new Set<string>();
@@ -177,9 +176,14 @@ export async function executeFlowGraph(
                     })
                     .catch((err) => {
                         console.error(`${nodeId} ❌`);
-                        projectComputedDataCache.nodeExecutionLog(nodeId, {error:true}, err.message || String(err));
+                        projectComputedDataCache.nodeExecutionLog(
+                            nodeId,
+                            { error: true },
+                            err.message || String(err)
+                        );
                         throw err;
-                    }).finally(() => {
+                    })
+                    .finally(() => {
                         projectComputedDataCache.nodeExecutionFinished(nodeId);
                     });
 
@@ -208,15 +212,15 @@ export async function executeFlowGraph(
                 if (error instanceof Error) {
                     projectComputedDataCache.nodeExecutionLog(
                         nodeId,
-                        {error:true},
+                        { error: true },
                         `While executing ${nodeBlueprint.nid} id=${nodeId}:\n${error.message}`
                     );
                 } else {
                     projectComputedDataCache.nodeExecutionLog(
                         nodeId,
-                        {error:true},
+                        { error: true },
                         `While executing ${nodeBlueprint.nid} id=${nodeId}:` +
-                        error
+                            error
                     ); // !!! convert to string first!
                     // error objects are some stupid fucking shit that can't be uploaded to firebase rtdb
                     // wasted my whole fucking day figuring out Error objects cannot be serialized by JSON.stringify

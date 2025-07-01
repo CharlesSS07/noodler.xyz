@@ -200,7 +200,10 @@ describe('Image Processing Integration Tests', () => {
             ];
 
             await executeFlowGraph('greyscale', mockNodes, mockEdges);
-            const result = await projectComputedDataCache.get('greyscale', 'img');
+            const result = await projectComputedDataCache.get(
+                'greyscale',
+                'img'
+            );
 
             expect(result).toBeDefined();
             expect(result.bitmap?.width).toBe(30);
@@ -239,7 +242,10 @@ describe('Image Processing Integration Tests', () => {
             ];
 
             await executeFlowGraph('resize', mockNodes, mockEdges);
-            const result = await projectComputedDataCache.get('resize', 'image');
+            const result = await projectComputedDataCache.get(
+                'resize',
+                'image'
+            );
 
             expect(result).toBeDefined();
             expect(result.bitmap?.width).toBe(75);
@@ -787,7 +793,10 @@ describe('Image Processing Integration Tests', () => {
             expect(source.bitmap?.height).toBe(60);
 
             // Verify Chain 1 results
-            const hsv1 = await projectComputedDataCache.get('hsv-chain1', 'img');
+            const hsv1 = await projectComputedDataCache.get(
+                'hsv-chain1',
+                'img'
+            );
             const grey1 = await projectComputedDataCache.get(
                 'grey-chain1',
                 'img'
@@ -800,7 +809,10 @@ describe('Image Processing Integration Tests', () => {
                 'resize-chain2',
                 'image'
             );
-            const hsv2 = await projectComputedDataCache.get('hsv-chain2', 'img');
+            const hsv2 = await projectComputedDataCache.get(
+                'hsv-chain2',
+                'img'
+            );
             expect(resize2.bitmap?.width).toBe(40);
             expect(resize2.bitmap?.height).toBe(80);
             expect(hsv2.bitmap?.width).toBe(40);

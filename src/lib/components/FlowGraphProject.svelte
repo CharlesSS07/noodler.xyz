@@ -1,7 +1,5 @@
 <script lang="ts">
 
-    import project from "../../routes/app/demos/aiImgEditing/project";
-
     let {project_key = 'project_key_not_assigned', onProjectReadyCallback} = $props<{
         project_key?: string;
         onProjectReadyCallback?: (context: any) => Promise<void>
@@ -20,12 +18,6 @@
     } from '@xyflow/svelte';
     import '@xyflow/svelte/dist/style.css';
 
-    import NoteNode from '$lib/components/nodes/NoteNode.svelte';
-    import StemNode from '$lib/components/StemNode.svelte';
-    import TextTemplateFillinNode from "$lib/components/nodes/text/TextTemplateFillinNode.svelte";
-    import ImageNode from "$lib/components/nodes/images/ImageNode.svelte";
-    import HTMLRendererNode from "$lib/components/nodes/html/HTMLRendererNode.svelte";
-
     import Logo from "../../components/Logo.svelte";
     import NodeSearch from "./NodeSearch.svelte";
     import BugReportButton from "../../components/BugReportButton.svelte";
@@ -34,10 +26,16 @@
     import {executeFlowGraph} from "$lib/compositor/Interpreter";
 
     // Import the existing nodes
-    import CompleteTextLLM from "$lib/components/nodes/huggingface/CompleteTextLLM.svelte";
+
+    import NoteNode from '$lib/components/nodes/NoteNode.svelte';
+    import StemNode from '$lib/components/StemNode.svelte';
+    import TextTemplateFillinNode from "$lib/components/nodes/text/TextTemplateFillinNode.svelte";
+    import ImageNode from "$lib/components/nodes/images/ImageNode.svelte";
+    import HTMLRendererNode from "$lib/components/nodes/html/HTMLRendererNode.svelte";
+
     import TextEditorMarkdownNode from "$lib/components/nodes/text/TextEditorMarkdownNode.svelte";
     import TextEditorRawNode from "$lib/components/nodes/text/TextEditorRawNode.svelte";
-    import MemoryMonitorNode from "$lib/components/nodeComponents/MemoryMonitorNode.svelte";
+    import MemoryMonitorNode from "$lib/components/nodes/MemoryMonitorNode.svelte";
 
     let nodes = $state.raw<Node[]>([]);
 
@@ -181,7 +179,6 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
         textTemplate: TextTemplateFillinNode,
         textEditorMd: TextEditorMarkdownNode,
         textEditorRaw: TextEditorRawNode,
-        huggingfaceLLM: CompleteTextLLM,
         memoryMonitor: MemoryMonitorNode,
     };
 

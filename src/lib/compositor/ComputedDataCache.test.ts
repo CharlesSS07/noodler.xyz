@@ -23,14 +23,20 @@ describe('ComputedDataCache', () => {
 
             // Cache an error message directly
             await cache.cache('test-node', '__error__', 'Test error message');
-            
+
             // Should trigger reactivity and update the error store
             expect(mockSubscriber).toHaveBeenCalledWith('Test error message');
             expect(get(errorStore)).toBe('Test error message');
 
             // Update the error message
-            await cache.cache('test-node', '__error__', 'Updated error message');
-            expect(mockSubscriber).toHaveBeenCalledWith('Updated error message');
+            await cache.cache(
+                'test-node',
+                '__error__',
+                'Updated error message'
+            );
+            expect(mockSubscriber).toHaveBeenCalledWith(
+                'Updated error message'
+            );
             expect(get(errorStore)).toBe('Updated error message');
 
             // Clear the error
@@ -43,8 +49,12 @@ describe('ComputedDataCache', () => {
 
         it('should handle error messages via OutputSocketAsyncReturner.errorMessage', async () => {
             const outputKeys = new Set(['output1', 'output2']);
-            const returner = new OutputSocketAsyncReturner(cache, 'test-node', outputKeys);
-            
+            const returner = new OutputSocketAsyncReturner(
+                cache,
+                'test-node',
+                outputKeys
+            );
+
             const errorStore = cache.useNodeErrorStore('test-node');
             const mockSubscriber = vi.fn();
 
@@ -57,7 +67,9 @@ describe('ComputedDataCache', () => {
             await returner.errorMessage('Connection timeout error');
 
             // Should update error store reactively
-            expect(mockSubscriber).toHaveBeenCalledWith('Connection timeout error');
+            expect(mockSubscriber).toHaveBeenCalledWith(
+                'Connection timeout error'
+            );
             expect(get(errorStore)).toBe('Connection timeout error');
 
             // Set another error
@@ -70,9 +82,17 @@ describe('ComputedDataCache', () => {
 
         it('should handle multiple nodes with separate error stores', async () => {
             const outputKeys = new Set(['output1']);
-            const returner1 = new OutputSocketAsyncReturner(cache, 'node-1', outputKeys);
-            const returner2 = new OutputSocketAsyncReturner(cache, 'node-2', outputKeys);
-            
+            const returner1 = new OutputSocketAsyncReturner(
+                cache,
+                'node-1',
+                outputKeys
+            );
+            const returner2 = new OutputSocketAsyncReturner(
+                cache,
+                'node-2',
+                outputKeys
+            );
+
             const errorStore1 = cache.useNodeErrorStore('node-1');
             const errorStore2 = cache.useNodeErrorStore('node-2');
 
@@ -92,8 +112,12 @@ describe('ComputedDataCache', () => {
 
         it('should handle error store reactivity when node caches are dumped', async () => {
             const outputKeys = new Set(['output1']);
-            const returner = new OutputSocketAsyncReturner(cache, 'test-node', outputKeys);
-            
+            const returner = new OutputSocketAsyncReturner(
+                cache,
+                'test-node',
+                outputKeys
+            );
+
             const errorStore = cache.useNodeErrorStore('test-node');
             const mockSubscriber = vi.fn();
 
@@ -117,13 +141,17 @@ describe('ComputedDataCache', () => {
 
         it('should handle different error data types', async () => {
             const errorStore = cache.useNodeErrorStore('test-node');
-            
+
             // String error
             await cache.cache('test-node', '__error__', 'String error');
             expect(get(errorStore)).toBe('String error');
 
             // Object error
-            const errorObj = { code: 404, message: 'Not found', details: { path: '/api/test' } };
+            const errorObj = {
+                code: 404,
+                message: 'Not found',
+                details: { path: '/api/test' },
+            };
             await cache.cache('test-node', '__error__', errorObj);
             expect(get(errorStore)).toEqual(errorObj);
 
@@ -140,7 +168,8 @@ describe('ComputedDataCache', () => {
 
     describe('Execution Status Functions', () => {
         it('should track execution status through start and finish lifecycle', async () => {
-            const executionStore = cache.useNodeExecutionStatusStore('test-node');
+            const executionStore =
+                cache.useNodeExecutionStatusStore('test-node');
             const mockSubscriber = vi.fn();
 
             const unsubscribe = executionStore.subscribe(mockSubscriber);
@@ -157,7 +186,9 @@ describe('ComputedDataCache', () => {
             expect(startStatus).toHaveProperty('startedAt');
             expect(startStatus).toHaveProperty('finishedAt');
             expect(startStatus.startedAt).toBeInstanceOf(Date);
-            expect(startStatus.startedAt.getTime()).toBeGreaterThanOrEqual(startTime.getTime());
+            expect(startStatus.startedAt.getTime()).toBeGreaterThanOrEqual(
+                startTime.getTime()
+            );
             expect(startStatus.stoppedAt).toBeUndefined();
 
             // Finish execution
@@ -168,14 +199,17 @@ describe('ComputedDataCache', () => {
             expect(finishStatus).toHaveProperty('startedAt');
             expect(finishStatus).toHaveProperty('finishedAt');
             expect(finishStatus.stoppedAt).toBeInstanceOf(Date);
-            expect(finishStatus.stoppedAt!.getTime()).toBeGreaterThanOrEqual(finishTime.getTime());
+            expect(finishStatus.stoppedAt!.getTime()).toBeGreaterThanOrEqual(
+                finishTime.getTime()
+            );
             expect(finishStatus.startedAt).toBe(startStatus.startedAt); // Should preserve start time
 
             unsubscribe();
         });
 
         it('should reactively update execution status store', async () => {
-            const executionStore = cache.useNodeExecutionStatusStore('test-node');
+            const executionStore =
+                cache.useNodeExecutionStatusStore('test-node');
             const mockSubscriber = vi.fn();
 
             const unsubscribe = executionStore.subscribe(mockSubscriber);
@@ -186,16 +220,18 @@ describe('ComputedDataCache', () => {
             // Start execution should trigger update
             cache.nodeExecutionStarted('test-node');
             expect(mockSubscriber).toHaveBeenCalledTimes(2);
-            
-            const startCall = mockSubscriber.mock.calls[1][0] as ExecutionStatus;
+
+            const startCall = mockSubscriber.mock
+                .calls[1][0] as ExecutionStatus;
             expect(startCall).toHaveProperty('startedAt');
             expect(startCall.stoppedAt).toBeUndefined();
 
             // Finish execution should trigger update
             cache.nodeExecutionFinished('test-node');
             expect(mockSubscriber).toHaveBeenCalledTimes(3);
-            
-            const finishCall = mockSubscriber.mock.calls[2][0] as ExecutionStatus;
+
+            const finishCall = mockSubscriber.mock
+                .calls[2][0] as ExecutionStatus;
             expect(finishCall).toHaveProperty('startedAt');
             expect(finishCall).toHaveProperty('finishedAt');
             expect(finishCall.stoppedAt).toBeInstanceOf(Date);
@@ -206,35 +242,40 @@ describe('ComputedDataCache', () => {
         it('should throw error when finishing execution that was never started', () => {
             expect(() => {
                 cache.nodeExecutionFinished('never-started-node');
-            }).toThrow('Node was never executed so cannot have finished executing.');
+            }).toThrow(
+                'Node was never executed so cannot have finished executing.'
+            );
         });
 
         it('should handle multiple execution cycles for the same node', async () => {
-            const executionStore = cache.useNodeExecutionStatusStore('test-node');
-            
+            const executionStore =
+                cache.useNodeExecutionStatusStore('test-node');
+
             // First execution cycle
             cache.nodeExecutionStarted('test-node');
             const firstStart = get(executionStore) as ExecutionStatus;
-            
+
             cache.nodeExecutionFinished('test-node');
             const firstFinish = get(executionStore) as ExecutionStatus;
-            
+
             expect(firstFinish.stoppedAt).toBeInstanceOf(Date);
-            
+
             // Wait a bit to ensure time difference
-            await new Promise(resolve => setTimeout(resolve, 10));
-            
+            await new Promise((resolve) => setTimeout(resolve, 10));
+
             // Second execution cycle
             cache.nodeExecutionStarted('test-node');
             const secondStart = get(executionStore) as ExecutionStatus;
-            
+
             // Should have a new start time
-            expect(secondStart.startedAt.getTime()).toBeGreaterThan(firstStart.startedAt.getTime());
+            expect(secondStart.startedAt.getTime()).toBeGreaterThan(
+                firstStart.startedAt.getTime()
+            );
             expect(secondStart.stoppedAt).toBeUndefined();
-            
+
             cache.nodeExecutionFinished('test-node');
             const secondFinish = get(executionStore) as ExecutionStatus;
-            
+
             expect(secondFinish.stoppedAt).toBeInstanceOf(Date);
             expect(secondFinish.startedAt).toBe(secondStart.startedAt);
         });
@@ -242,64 +283,66 @@ describe('ComputedDataCache', () => {
         it('should handle execution status for multiple nodes independently', async () => {
             const executionStore1 = cache.useNodeExecutionStatusStore('node-1');
             const executionStore2 = cache.useNodeExecutionStatusStore('node-2');
-            
+
             // Start execution for both nodes
             cache.nodeExecutionStarted('node-1');
             cache.nodeExecutionStarted('node-2');
-            
+
             const status1 = get(executionStore1) as ExecutionStatus;
             const status2 = get(executionStore2) as ExecutionStatus;
-            
+
             expect(status1.startedAt).toBeInstanceOf(Date);
             expect(status2.startedAt).toBeInstanceOf(Date);
             expect(status1.stoppedAt).toBeUndefined();
             expect(status2.stoppedAt).toBeUndefined();
-            
+
             // Finish only node-1
             cache.nodeExecutionFinished('node-1');
-            
+
             const updatedStatus1 = get(executionStore1) as ExecutionStatus;
             const updatedStatus2 = get(executionStore2) as ExecutionStatus;
-            
+
             expect(updatedStatus1.stoppedAt).toBeInstanceOf(Date);
             expect(updatedStatus2.stoppedAt).toBeUndefined(); // Should still be running
         });
 
         it('should clear execution status when node caches are dumped', async () => {
-            const executionStore = cache.useNodeExecutionStatusStore('test-node');
-            
+            const executionStore =
+                cache.useNodeExecutionStatusStore('test-node');
+
             // Start and finish execution
             cache.nodeExecutionStarted('test-node');
             cache.nodeExecutionFinished('test-node');
-            
+
             const beforeDump = get(executionStore) as ExecutionStatus;
             expect(beforeDump.stoppedAt).toBeInstanceOf(Date);
-            
+
             // Dump node caches
             await cache.dumpNodeCaches('test-node');
-            
+
             // Should return to 'idle'
             expect(get(executionStore)).toBe('idle');
         });
 
         it('should preserve execution status when other node data is modified', async () => {
-            const executionStore = cache.useNodeExecutionStatusStore('test-node');
-            
+            const executionStore =
+                cache.useNodeExecutionStatusStore('test-node');
+
             // Start execution
             cache.nodeExecutionStarted('test-node');
             const startStatus = get(executionStore) as ExecutionStatus;
-            
+
             // Add some regular socket data
             await cache.cache('test-node', 'output1', 'some data');
             await cache.cache('test-node', 'output2', 'more data');
-            
+
             // Execution status should be unchanged
             const afterCacheStatus = get(executionStore) as ExecutionStatus;
             expect(afterCacheStatus).toEqual(startStatus);
-            
+
             // Remove regular socket data
             await cache.remove('test-node', 'output1');
-            
+
             // Execution status should still be unchanged
             const afterRemoveStatus = get(executionStore) as ExecutionStatus;
             expect(afterRemoveStatus).toEqual(startStatus);
@@ -309,28 +352,33 @@ describe('ComputedDataCache', () => {
     describe('Integration: Error Handling + Execution Status', () => {
         it('should handle errors during execution lifecycle', async () => {
             const outputKeys = new Set(['output1']);
-            const returner = new OutputSocketAsyncReturner(cache, 'test-node', outputKeys);
-            
+            const returner = new OutputSocketAsyncReturner(
+                cache,
+                'test-node',
+                outputKeys
+            );
+
             const errorStore = cache.useNodeErrorStore('test-node');
-            const executionStore = cache.useNodeExecutionStatusStore('test-node');
-            
+            const executionStore =
+                cache.useNodeExecutionStatusStore('test-node');
+
             // Start execution
             cache.nodeExecutionStarted('test-node');
             expect(get(executionStore)).toHaveProperty('startedAt');
             expect(get(errorStore)).toBeNull();
-            
+
             // Set error during execution
             await returner.errorMessage('Runtime error occurred');
             expect(get(errorStore)).toBe('Runtime error occurred');
-            
+
             // Execution status should still show as running
             const statusDuringError = get(executionStore) as ExecutionStatus;
             expect(statusDuringError.startedAt).toBeInstanceOf(Date);
             expect(statusDuringError.stoppedAt).toBeUndefined();
-            
+
             // Finish execution (even with error)
             cache.nodeExecutionFinished('test-node');
-            
+
             const finalStatus = get(executionStore) as ExecutionStatus;
             expect(finalStatus.stoppedAt).toBeInstanceOf(Date);
             expect(get(errorStore)).toBe('Runtime error occurred'); // Error should persist
@@ -338,22 +386,27 @@ describe('ComputedDataCache', () => {
 
         it('should clear both error and execution status when node is dumped', async () => {
             const outputKeys = new Set(['output1']);
-            const returner = new OutputSocketAsyncReturner(cache, 'test-node', outputKeys);
-            
+            const returner = new OutputSocketAsyncReturner(
+                cache,
+                'test-node',
+                outputKeys
+            );
+
             const errorStore = cache.useNodeErrorStore('test-node');
-            const executionStore = cache.useNodeExecutionStatusStore('test-node');
-            
+            const executionStore =
+                cache.useNodeExecutionStatusStore('test-node');
+
             // Set up execution with error
             cache.nodeExecutionStarted('test-node');
             await returner.errorMessage('Error during execution');
             cache.nodeExecutionFinished('test-node');
-            
+
             expect(get(errorStore)).toBe('Error during execution');
             expect(get(executionStore)).toHaveProperty('finishedAt');
-            
+
             // Dump node caches
             await cache.dumpNodeCaches('test-node');
-            
+
             // Both should be cleared
             expect(get(errorStore)).toBeNull();
             expect(get(executionStore)).toBe('idle');

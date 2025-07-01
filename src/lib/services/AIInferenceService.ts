@@ -31,7 +31,6 @@ import type {
 } from './AIInferenceTypes';
 
 export class AIInferenceService {
-
     // Utility methods for JIMP conversion
     private async jimpToBase64(image: JimpInstance): Promise<string> {
         const buffer = await image.getBuffer(JimpMime.png);

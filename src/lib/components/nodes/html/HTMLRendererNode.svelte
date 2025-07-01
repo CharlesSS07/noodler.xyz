@@ -1,61 +1,33 @@
-<script module lang="ts">
-    import type {Node} from '@xyflow/svelte';
-
-    // Official NID for this node: html_renderer
-    export type HtmlRendererNodeType = Node<
-        {
-            input: { html: string };
-            nid?: string; // Should be set to 'html_renderer' when using official blueprint
-        },
-        'node-html-renderer'
-    >;
-</script>
-
 <script lang="ts">
-    import {Handle, Position, type NodeProps, useNodeConnections} from '@xyflow/svelte';
-
-    import {projectComputedDataCache} from "$lib/stores/ProjectState";
-    import {fetchSocketDataTypeByName, STANDARD_DATATYPES} from "$lib/compositor/DataTypes";
+    import {type NodeProps} from '@xyflow/svelte';
+    import {createNodeStore, type NodeStoreType} from '$lib/components/nodes/NodeInstanceStore';
+    import {STANDARD_DATATYPES} from "$lib/compositor/DataTypes";
     import NodeWrapper from "$lib/components/nodeComponents/NodeWrapper.svelte";
-    import {Tooltip} from "flowbite-svelte";
+    import TargetSocket from "$lib/components/nodeComponents/sockets/TargetSocket.svelte";
+    import NodeErrorDisplay from "$lib/components/nodeComponents/NodeErrorDisplay.svelte";
 
-    let {id, data, selected}: NodeProps<HtmlRendererNodeType> = $props();
+    let {id, selected}: NodeProps<NodeStoreType> = $props();
 
-    const inputConnections = useNodeConnections({id, handleType: 'target'});
-    let hasInputConnection = $derived(inputConnections.current.length > 0);
+    const nodeStore = createNodeStore(id);
+    const htmlInputSocket = nodeStore.inputSocketStore('html');
+    let executionStatus = nodeStore.executionStatus;
 
     // Update display value when connection source becomes available
     let displayValue = $state('');
     let hasValidData = $state(false);
     $effect(() => {
-        if (hasInputConnection) {
-            // only one way to have an input connection to this node, so 0 index is a-ok
-            const source = inputConnections.current[0].source;
-            const sourceHandle = inputConnections.current[0].sourceHandle;
-            if (sourceHandle) {
-                const unsubscribeSocket = projectComputedDataCache.useSocketStore(
-                    source,
-                    sourceHandle
-                ).subscribe((socketData) => {
-                    console.log('output socket data updated:', socketData, id)
-                    
-                    // Check if we have valid data (not null, undefined, or empty)
-                    if (socketData === null || socketData === undefined || socketData === '') {
-                        hasValidData = false;
-                        displayValue = '';
-                    } else if (typeof socketData === 'string') {
-                        displayValue = socketData as string;
-                        hasValidData = true;
-                    } else {
-                        displayValue = '<<OBJECT>>\n' + JSON.stringify(socketData, null, 2);
-                        hasValidData = true;
-                    }
-                });
-                return unsubscribeSocket;
-            }
-        } else {
+        const htmlData = $htmlInputSocket.value;
+        
+        // Check if we have valid data (not null, undefined, or empty)
+        if (htmlData === null || htmlData === undefined || htmlData === '') {
             hasValidData = false;
             displayValue = '';
+        } else if (typeof htmlData === 'string') {
+            displayValue = htmlData as string;
+            hasValidData = true;
+        } else {
+            displayValue = '<<OBJECT>>\n' + JSON.stringify(htmlData, null, 2);
+            hasValidData = true;
         }
     });
 
@@ -120,7 +92,7 @@
 
     // Initialize iframe when mounted
     function handleIframeLoad() {
-        if (hasInputConnection && hasValidData) {
+        if ($htmlInputSocket.isConnected && hasValidData) {
             updateIframeContent(displayValue);
         } else {
             updateIframeContent('<div style="text-align: center; color: #999; padding: 20px;">Waiting for data...</div>');
@@ -129,20 +101,28 @@
 
     // Update iframe when display value changes (only for connected inputs with valid data)
     $effect(() => {
-        if (iframeRef && hasInputConnection && hasValidData) {
+        if (iframeRef && $htmlInputSocket.isConnected && hasValidData) {
             updateIframeContent(displayValue);
-        } else if (iframeRef && hasInputConnection && !hasValidData) {
+        } else if (iframeRef && $htmlInputSocket.isConnected && !hasValidData) {
             updateIframeContent('<div style="text-align: center; color: #999; padding: 20px;">Waiting for data...</div>');
         }
     });
 
 </script>
 
-<NodeWrapper label="HTML Renderer" isSelected={selected}>
+<NodeWrapper label="HTML Renderer" isSelected={selected} executionStatus={$executionStatus}>
     <div class="relative">
+        <!-- Sockets -->
+        <TargetSocket
+            id="html"
+            label="HTML Input"
+            datatype={STANDARD_DATATYPES.TEXT}
+            documentation="HTML content to render in iframe"
+        />
+
         <!-- Main content area -->
         <div class="border-2 border-gray-300 rounded-lg bg-white overflow-hidden w-80 h-48">
-            {#if hasInputConnection}
+            {#if $htmlInputSocket.isConnected}
                 <!-- Connected input - show iframe with display value -->
                 <iframe
                     bind:this={iframeRef}
@@ -163,25 +143,9 @@
             {/if}
         </div>
 
-        <!-- Input handle -->
-        {#await fetchSocketDataTypeByName(STANDARD_DATATYPES.TEXT)}
-            Loading Target Socket
-        {:then datatype}
-            <Handle
-                    type="target"
-                    position={Position.Left}
-                    id="html"
-                    class="socket-handle"
-                    style="top: 50%;{datatype?.style || ''}"
-            />
-            <Tooltip placement="top">
-                <b>Type ({datatype?.name}):</b> {datatype?.description}
-            </Tooltip>
-        {:catch error}
-            Error; could not load input socket: {JSON.stringify(error, null, 2)}
-        {/await}
-
-
+        {#if $executionStatus}
+            <NodeErrorDisplay errorMessage={$executionStatus.logs.map((log) => log[1]).join('<br>')}></NodeErrorDisplay>
+        {/if}
     </div>
 </NodeWrapper>
 

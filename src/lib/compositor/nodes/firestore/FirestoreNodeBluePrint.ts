@@ -18,7 +18,7 @@ import type {
     SocketID,
 } from '../../SocketModels';
 import { OutputSocketAsyncReturner } from '../../Interpreter';
-import {utils} from "../NodeUtilsEnvironment";
+import { utils } from '../NodeUtilsEnvironment';
 
 export interface FirestoreNodeBluePrintModel {
     title: string;

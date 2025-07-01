@@ -6,25 +6,32 @@ import {
     readable,
     get,
     type Subscriber,
-    type Unsubscriber
+    type Unsubscriber,
 } from 'svelte/store';
-import {type NodeConnection, useNodeConnections} from '@xyflow/svelte';
-import {projectActions, projectComputedDataCache, projectNodes, projectState} from '$lib/stores/ProjectState';
-import type {Unsubscribe} from "firebase/firestore";
+import { type NodeConnection, useNodeConnections } from '@xyflow/svelte';
 import {
-    FirestoreNodeBluePrintControllerFactoryInterface,
-} from '$lib/compositor/nodes/firestore/FirestoreNodeBluePrint';
-import {type Node} from "@xyflow/svelte";
-import type {ExecutionStatus} from "$lib/compositor/ComputedDataCache";
-import {NodeBluePrint, type NodeBluePrintControllerFactoryInterface} from "$lib/compositor/nodes/NodeBluePrint";
+    projectActions,
+    projectComputedDataCache,
+    projectNodes,
+    projectState,
+} from '$lib/stores/ProjectState';
+import type { Unsubscribe } from 'firebase/firestore';
+import { FirestoreNodeBluePrintControllerFactoryInterface } from '$lib/compositor/nodes/firestore/FirestoreNodeBluePrint';
+import { type Node } from '@xyflow/svelte';
+import type { ExecutionStatus } from '$lib/compositor/ComputedDataCache';
+import {
+    NodeBluePrint,
+    type NodeBluePrintControllerFactoryInterface,
+} from '$lib/compositor/nodes/NodeBluePrint';
 
 /**
  * sveltefire, which I have been using to access data in firestore reactivley in svelte has it's custom
  * reactivity, so this is an adapter which allows me to use sveltefire like it's really reactive.
  */
-type DocStoreSubscriptionType<T> = {subscribe: (cb: (value: T | null) => void) => void | (() => void);}
+type DocStoreSubscriptionType<T> = {
+    subscribe: (cb: (value: T | null) => void) => void | (() => void);
+};
 class ReadableDocStoreWrapper<T> implements Readable<T> {
-
     docStore: DocStoreSubscriptionType<T>;
 
     constructor(docStore: DocStoreSubscriptionType<T>) {
@@ -33,15 +40,12 @@ class ReadableDocStoreWrapper<T> implements Readable<T> {
 
     subscribe(run: Subscriber<T>, invalidate?: () => void): Unsubscriber {
         function wrapper(value: T | null) {
-            if (value)
-                run(value);
+            if (value) run(value);
         }
         const ret = this.docStore.subscribe(wrapper);
-        if (ret)
-            return ret;
+        if (ret) return ret;
         return () => {};
     }
-
 }
 
 export abstract class InputSocketState {
@@ -60,7 +64,8 @@ export abstract class InputSocketState {
     abstract update(newValue: unknown): void;
 }
 
-const blueprintFactory: NodeBluePrintControllerFactoryInterface = new FirestoreNodeBluePrintControllerFactoryInterface();
+const blueprintFactory: NodeBluePrintControllerFactoryInterface =
+    new FirestoreNodeBluePrintControllerFactoryInterface();
 
 /**
  * Reactive stores and utilities for node components
@@ -70,7 +75,7 @@ export class NodeInstanceStore {
     readonly nodeId: string;
 
     // Core reactive stores
-    public inputConnections: Readable<{readonly current:NodeConnection[]}>;
+    public inputConnections: Readable<{ readonly current: NodeConnection[] }>;
     public nodeStore: Readable<Node | undefined>;
     public nodeInputDataStore: Readable<Record<string, unknown>>;
     public nid: Readable<string | undefined>;
@@ -86,64 +91,69 @@ export class NodeInstanceStore {
 
         // Create a periodic check for edge changes (fallback approach)
         // this bs is the result of sveltflow breaking reactivity FOR ABSOLUTELY NO FUCKING REASON
-        const inputConnections = useNodeConnections({id: this.nodeId, handleType:'target'});
-        let lastConnectionsHash: string | null = null;
-        this.inputConnections = readable(JSON.parse(JSON.stringify(inputConnections)), (set) => {
-
-            const interval = setInterval(() => {
-                const connectionsHash = JSON.stringify(inputConnections);
-                if (connectionsHash !== lastConnectionsHash) {
-                    lastConnectionsHash = connectionsHash;
-                    set(JSON.parse(connectionsHash));
-                }
-            }, 100);
-
-            return () => clearInterval(interval);
+        const inputConnections = useNodeConnections({
+            id: this.nodeId,
+            handleType: 'target',
         });
+        let lastConnectionsHash: string | null = null;
+        this.inputConnections = readable(
+            JSON.parse(JSON.stringify(inputConnections)),
+            (set) => {
+                const interval = setInterval(() => {
+                    const connectionsHash = JSON.stringify(inputConnections);
+                    if (connectionsHash !== lastConnectionsHash) {
+                        lastConnectionsHash = connectionsHash;
+                        set(JSON.parse(connectionsHash));
+                    }
+                }, 100);
+
+                return () => clearInterval(interval);
+            }
+        );
 
         // set up node data store with hash-based comparison to prevent reactive loops
         let lastNodeHash: string | null = null;
-        this.nodeStore = derived(
-            projectNodes,
-            ($nodes, set) => {
-                const node = $nodes.find((node) => node.id===this.nodeId);
-                const nodeHash = node ? JSON.stringify(node) : null;
+        this.nodeStore = derived(projectNodes, ($nodes, set) => {
+            const node = $nodes.find((node) => node.id === this.nodeId);
+            const nodeHash = node ? JSON.stringify(node) : null;
 
-                // Only update if the hash has actually changed
-                if (nodeHash !== lastNodeHash) {
-                    lastNodeHash = nodeHash;
-                    set(node);
-                }
+            // Only update if the hash has actually changed
+            if (nodeHash !== lastNodeHash) {
+                lastNodeHash = nodeHash;
+                set(node);
             }
-        );
+        });
 
         let lastInputDataHash: string | null = null;
-        this.nodeInputDataStore = derived(
-            this.nodeStore,
-            ($nodeStore, set) => {
-                const inputData = ($nodeStore?.data.input || {}) as Record<string, unknown>;
-                const inputDataHash = JSON.stringify(inputData);
-                
-                // Only update if the hash has actually changed
-                if (inputDataHash !== lastInputDataHash) {
-                    lastInputDataHash = inputDataHash;
-                    set(inputData);
-                }
+        this.nodeInputDataStore = derived(this.nodeStore, ($nodeStore, set) => {
+            const inputData = ($nodeStore?.data.input || {}) as Record<
+                string,
+                unknown
+            >;
+            const inputDataHash = JSON.stringify(inputData);
+
+            // Only update if the hash has actually changed
+            if (inputDataHash !== lastInputDataHash) {
+                lastInputDataHash = inputDataHash;
+                set(inputData);
             }
-        );
+        });
 
         this.nid = derived(
             this.nodeStore,
-            ($nodeStore) => $nodeStore?.data.nid as string || undefined
+            ($nodeStore) => ($nodeStore?.data.nid as string) || undefined
         );
 
         // Error handling stores
-        this.executionStatus = projectComputedDataCache.useNodeExecutionStatusStore(this.nodeId);
+        this.executionStatus =
+            projectComputedDataCache.useNodeExecutionStatusStore(this.nodeId);
 
         // Initialize blueprint if nid is provided
         this.nodeBluePrint = derived(this.nid, ($nid, set) => {
             if ($nid) {
-                blueprintFactory.getNodeBluePrintFromNID($nid).then((nbp) => set(nbp));
+                blueprintFactory
+                    .getNodeBluePrintFromNID($nid)
+                    .then((nbp) => set(nbp));
                 return;
             }
             set(undefined);
@@ -161,43 +171,49 @@ export class NodeInstanceStore {
             throw new Error(`No nodeBluePrint found for ${this.nodeId}`);
 
         const unsubscribe = this.nodeBluePrint.subscribe((blueprint) => {
+            if (!blueprint) return;
 
-            if (!blueprint)
-                return;
+            const unsubscribe = this.nodeInputDataStore.subscribe(
+                ($nodeInputDataStore) => {
+                    if (!$nodeInputDataStore)
+                        throw new Error(
+                            `No node data found for ${this.nodeId}`
+                        );
 
-            const unsubscribe = this.nodeInputDataStore.subscribe(($nodeInputDataStore) => {
+                    const newInput: Record<string, unknown> = {};
+                    let updated = false;
 
-                if (!$nodeInputDataStore)
-                    throw new Error(`No node data found for ${this.nodeId}`);
+                    if (blueprint.inputSockets) {
+                        blueprint.inputSocketOrder.forEach((socketId) => {
+                            if (
+                                !Object.keys($nodeInputDataStore).includes(
+                                    socketId
+                                )
+                            ) {
+                                const socketIdx =
+                                    blueprint.inputSocketOrder.indexOf(
+                                        socketId
+                                    );
+                                if (socketIdx === -1) return;
+                                newInput[socketId] =
+                                    blueprint.inputSockets[
+                                        socketIdx
+                                    ].params.default_value;
+                                updated = true;
+                            }
+                        });
+                    }
 
-                const newInput: Record<string, unknown> = {};
-                let updated = false;
-
-                if (blueprint.inputSockets) {
-                    blueprint.inputSocketOrder.forEach((socketId) => {
-                        if (!Object.keys($nodeInputDataStore).includes(socketId)) {
-                            const socketIdx = blueprint.inputSocketOrder.indexOf(socketId);
-                            if (socketIdx === -1)
-                                return;
-                            newInput[socketId] = blueprint.inputSockets[socketIdx].params.default_value;
-                            updated = true;
-                        }
-                    });
+                    if (updated) {
+                        this.updateData({ input: newInput });
+                    }
                 }
-
-                if (updated) {
-                    this.updateData(
-                        {input: newInput}
-                    );
-                }
-
-            });
+            );
 
             return unsubscribe; // destroy callback for updating upon call to change blueprint.
         });
 
-        if (unsubscribe)
-            this.unsubscribers.push(unsubscribe);
+        if (unsubscribe) this.unsubscribers.push(unsubscribe);
     }
 
     /**
@@ -214,70 +230,75 @@ export class NodeInstanceStore {
         const nodeInputDataStore = get(this.nodeInputDataStore);
         if (nodeInputDataStore) {
             nodeInputDataStore[socketId] = value;
-            projectActions.updateNodeData(
-                this.nodeId,
-                {
-                    input: nodeInputDataStore
-                }
-            );
+            projectActions.updateNodeData(this.nodeId, {
+                input: nodeInputDataStore,
+            });
         }
     }
 
-    private subscribeToInputSocketState(connections: NodeConnection[], socketId: string, set: (value: InputSocketState) => void): Unsubscribe {
-        const connection = connections.find( connection => {
-            return connection.targetHandle == socketId // && connection.target === this.nodeId
+    private subscribeToInputSocketState(
+        connections: NodeConnection[],
+        socketId: string,
+        set: (value: InputSocketState) => void
+    ): Unsubscribe {
+        const connection = connections.find((connection) => {
+            return connection.targetHandle == socketId; // && connection.target === this.nodeId
         });
 
-        if (!connection) { // reactively get data from the node.data.input[socketId]
+        if (!connection) {
+            // reactively get data from the node.data.input[socketId]
 
-            const unsubscribe = this.nodeInputDataStore.subscribe(($nodeInputDataStore) => {
+            const unsubscribe = this.nodeInputDataStore.subscribe(
+                ($nodeInputDataStore) => {
+                    const socketState = new (class extends InputSocketState {
+                        get isConnected(): boolean {
+                            return false;
+                        }
 
-                const socketState = new (class extends InputSocketState {
-                    get isConnected(): boolean {
-                        return false;
-                    }
+                        update(newValue: unknown): void {
+                            this.getNode().updateDataInputSocket(
+                                socketId,
+                                newValue
+                            );
+                        }
 
-                    update(newValue: unknown): void {
-                        this.getNode().updateDataInputSocket(socketId, newValue);
-                    }
+                        get value(): unknown {
+                            return $nodeInputDataStore[socketId] || null;
+                        }
+                    })(this);
 
-                    get value(): unknown {
-                        return $nodeInputDataStore[socketId] || null;
-                    }
-
-                })(this);
-
-                set(socketState);
-            });
+                    set(socketState);
+                }
+            );
             return unsubscribe;
         }
 
         const source = connection.source;
         const sourceHandle = connection.sourceHandle;
 
-        if (sourceHandle) { // reactively get data from the linked socket
-            const unsubscribe = projectComputedDataCache.useSocketStore(
-                source,
-                sourceHandle
-            ).subscribe((socketData) => {
+        if (sourceHandle) {
+            // reactively get data from the linked socket
+            const unsubscribe = projectComputedDataCache
+                .useSocketStore(source, sourceHandle)
+                .subscribe((socketData) => {
+                    const socketState = new (class extends InputSocketState {
+                        get isConnected(): boolean {
+                            return true;
+                        }
 
-                const socketState = new (class extends InputSocketState {
-                    get isConnected(): boolean {
-                        return true;
-                    }
+                        update(newValue: unknown): void {
+                            throw new Error(
+                                `You cannot modify a connected socket's value: tried to update ${socketId} on ${this.getNode().nodeId}`
+                            );
+                        }
 
-                    update(newValue: unknown): void {
-                        throw new Error(`You cannot modify a connected socket's value: tried to update ${socketId} on ${this.getNode().nodeId}`);
-                    }
+                        get value(): unknown {
+                            return socketData;
+                        }
+                    })(this);
 
-                    get value(): unknown {
-                        return socketData;
-                    }
-
-                })(this);
-
-                set(socketState);
-            });
+                    set(socketState);
+                });
             return unsubscribe;
         }
 
@@ -289,19 +310,19 @@ export class NodeInstanceStore {
      * Returns a readable store with the socket data
      */
     inputSocketStore(socketId: string): Readable<InputSocketState> {
-        return derived(
-            this.inputConnections,
-            (connections, set) => {
-                return this.subscribeToInputSocketState(connections.current, socketId, set);
-            }
-        );
+        return derived(this.inputConnections, (connections, set) => {
+            return this.subscribeToInputSocketState(
+                connections.current,
+                socketId,
+                set
+            );
+        });
     }
 
     allInputSocketsStore(): Readable<Map<string, InputSocketState>> {
         return derived(
             [this.inputConnections, this.nodeBluePrint],
             ([$connections, $nodeBluePrint], set) => {
-
                 const socketStates: Map<string, InputSocketState> = new Map();
                 const unsubscribers: Unsubscribe[] = [];
 
@@ -313,15 +334,20 @@ export class NodeInstanceStore {
                     function returnSocketState(socket: InputSocketState) {
                         socketStates.set(socketId, socket);
                     }
-                    unsubscribers.push(this.subscribeToInputSocketState($connections.current, socketId, returnSocketState));
+                    unsubscribers.push(
+                        this.subscribeToInputSocketState(
+                            $connections.current,
+                            socketId,
+                            returnSocketState
+                        )
+                    );
                 });
 
                 set(socketStates);
 
                 return () => {
                     unsubscribers.forEach((unsubscribe) => unsubscribe());
-                }
-
+                };
             }
         );
     }
@@ -332,7 +358,7 @@ export class NodeInstanceStore {
     cleanup(): void {
         // This would contain cleanup logic for subscriptions
         // Implementation depends on how subscriptions are managed
-        this.unsubscribers.forEach(unsubscribe => unsubscribe());
+        this.unsubscribers.forEach((unsubscribe) => unsubscribe());
     }
 
     destroy(): void {
@@ -351,9 +377,9 @@ export function createNodeStore(nodeId: string): NodeInstanceStore {
 /**
  * Utility type for node data with standardized input
  */
-export interface NodeState extends Record<string, unknown>{
+export interface NodeState extends Record<string, unknown> {
     nid: string;
-    input: Record<string, unknown>,
+    input: Record<string, unknown>;
     errorMessage: string;
 }
 

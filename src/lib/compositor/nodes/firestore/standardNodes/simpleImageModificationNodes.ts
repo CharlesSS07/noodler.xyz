@@ -111,6 +111,7 @@ outputs.set('img', img);
     });
 
     hsv.code =
+        'console.log(inputs.img);\n' +
         'const img = inputs.img.clone();\n' +
         'const hue = inputs.hue;\n' +
         'const saturation = inputs.saturation;\n' +

@@ -356,13 +356,17 @@ export class FileSocketParamsBuilder extends GenericSocketParamsBuilder<
         }
 
         if (typeof value !== 'string' && !(value instanceof File)) {
-            throw new Error('Value must be a File object, BigData reference string, or null');
+            throw new Error(
+                'Value must be a File object, BigData reference string, or null'
+            );
         }
 
         if (value instanceof File && this.params.acceptedFileTypes.length > 0) {
             const fileExt = '.' + value.name.split('.').pop()?.toLowerCase();
             if (!this.params.acceptedFileTypes.includes(fileExt)) {
-                throw new Error(`File type ${fileExt} not accepted. Expected: ${this.params.acceptedFileTypes.join(', ')}`);
+                throw new Error(
+                    `File type ${fileExt} not accepted. Expected: ${this.params.acceptedFileTypes.join(', ')}`
+                );
             }
         }
     }

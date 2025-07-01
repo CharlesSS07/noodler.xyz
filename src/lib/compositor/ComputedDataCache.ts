@@ -10,7 +10,7 @@ interface SocketInstance {
 
 const RESERVED_SOCKETS = {
     executionStatus: '__executionStatus__',
-}
+};
 
 // Helper functions (you'll need to implement these based on your existing code)
 function socketInstanceKey(node_key: string, socket_id: string): string {
@@ -73,14 +73,24 @@ export class ComputedDataCache {
     }
 
     nodeExecutionStarted(node_key: string): void {
-        const key = socketInstanceKey(node_key, RESERVED_SOCKETS.executionStatus);
+        const key = socketInstanceKey(
+            node_key,
+            RESERVED_SOCKETS.executionStatus
+        );
 
-        this.data.set(key, {startedAt: new Date(), stoppedAt: undefined, logs: []});
+        this.data.set(key, {
+            startedAt: new Date(),
+            stoppedAt: undefined,
+            logs: [],
+        });
         this.updateStores();
     }
 
     nodeExecutionLog(node_key: string, context: {}, message: string): void {
-        const key = socketInstanceKey(node_key, RESERVED_SOCKETS.executionStatus);
+        const key = socketInstanceKey(
+            node_key,
+            RESERVED_SOCKETS.executionStatus
+        );
 
         const exec_status = this.data.get(key) as ExecutionStatus;
         if (exec_status) {
@@ -88,12 +98,17 @@ export class ComputedDataCache {
             this.data.set(key, exec_status);
             this.updateStores();
         } else {
-            throw new Error("Node was never executed so cannot have finished executing.");
+            throw new Error(
+                'Node was never executed so cannot have finished executing.'
+            );
         }
     }
 
     nodeExecutionFinished(node_key: string): void {
-        const key = socketInstanceKey(node_key, RESERVED_SOCKETS.executionStatus);
+        const key = socketInstanceKey(
+            node_key,
+            RESERVED_SOCKETS.executionStatus
+        );
 
         const exec_status = this.data.get(key) as ExecutionStatus;
         if (exec_status) {
@@ -101,18 +116,27 @@ export class ComputedDataCache {
             this.data.set(key, exec_status);
             this.updateStores();
         } else {
-            throw new Error("Node was never executed so cannot have finished executing.");
+            throw new Error(
+                'Node was never executed so cannot have finished executing.'
+            );
         }
     }
 
     /**
      * Get a reactive store for a specific nodes error output
      */
-    useNodeExecutionStatusStore(node_key: string): Readable<ExecutionStatus | undefined> {
-        const key = socketInstanceKey(node_key, RESERVED_SOCKETS.executionStatus);
+    useNodeExecutionStatusStore(
+        node_key: string
+    ): Readable<ExecutionStatus | undefined> {
+        const key = socketInstanceKey(
+            node_key,
+            RESERVED_SOCKETS.executionStatus
+        );
 
         return derived(this.dataStore, ($data) => {
-            return $data.has(key) ? $data.get(key) as ExecutionStatus : undefined;
+            return $data.has(key)
+                ? ($data.get(key) as ExecutionStatus)
+                : undefined;
         });
     }
 

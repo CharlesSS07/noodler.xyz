@@ -309,11 +309,17 @@ describe('Interpreter Flow Graph Tests', () => {
         await executeFlowGraph('multiply-combined', mockNodes, mockEdges);
 
         // First addition: 3 + 4 = 7
-        const add1Result = await projectComputedDataCache.get('add-1', 'result');
+        const add1Result = await projectComputedDataCache.get(
+            'add-1',
+            'result'
+        );
         expect(add1Result).toBe(7);
 
         // Second addition: 10 + 20 = 30
-        const add2Result = await projectComputedDataCache.get('add-2', 'result');
+        const add2Result = await projectComputedDataCache.get(
+            'add-2',
+            'result'
+        );
         expect(add2Result).toBe(30);
 
         // Final multiplication: 7 * 30 = 210
@@ -341,7 +347,10 @@ describe('Interpreter Flow Graph Tests', () => {
 
         await executeFlowGraph('standalone', mockNodes, mockEdges);
 
-        const result = await projectComputedDataCache.get('standalone', 'result');
+        const result = await projectComputedDataCache.get(
+            'standalone',
+            'result'
+        );
         expect(result).toBe(2);
     });
 

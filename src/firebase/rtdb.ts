@@ -1,6 +1,13 @@
-import { onValue, ref, set, update, remove, type DatabaseReference } from 'firebase/database';
+import {
+    onValue,
+    ref,
+    set,
+    update,
+    remove,
+    type DatabaseReference,
+} from 'firebase/database';
 import { readable } from 'svelte/store';
-import {rtdb} from "./index";
+import { rtdb } from './index';
 
 type RTDBStore<T> = {
     subscribe: (run: (value: T | null) => void) => () => void;

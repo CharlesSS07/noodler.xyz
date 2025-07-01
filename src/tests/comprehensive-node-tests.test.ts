@@ -311,7 +311,10 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
             ];
 
             await executeFlowGraph('greyscale', mockNodes, mockEdges);
-            const result = await projectComputedDataCache.get('greyscale', 'img');
+            const result = await projectComputedDataCache.get(
+                'greyscale',
+                'img'
+            );
             expect(result).toBeDefined();
             expect(result.bitmap?.width).toBe(100);
             expect(result.bitmap?.height).toBe(100);
@@ -414,7 +417,10 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
             ];
 
             await executeFlowGraph('resize', mockNodes, mockEdges);
-            const result = await projectComputedDataCache.get('resize', 'image');
+            const result = await projectComputedDataCache.get(
+                'resize',
+                'image'
+            );
             expect(result).toBeDefined();
             expect(result.bitmap?.width).toBe(200);
             expect(result.bitmap?.height).toBe(150);
@@ -877,8 +883,14 @@ describe('Comprehensive Node Tests - All FirestoreStandardNodeSet Nodes', () => 
             await executeFlowGraph('final-multiply', mockNodes, mockEdges);
             const endTime = Date.now();
 
-            const result1 = await projectComputedDataCache.get('add-1', 'result');
-            const result2 = await projectComputedDataCache.get('add-2', 'result');
+            const result1 = await projectComputedDataCache.get(
+                'add-1',
+                'result'
+            );
+            const result2 = await projectComputedDataCache.get(
+                'add-2',
+                'result'
+            );
             const finalResult = await projectComputedDataCache.get(
                 'final-multiply',
                 'result'
