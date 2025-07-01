@@ -2,11 +2,18 @@
    NODE CONTAINER STYLES
    ========================================================================== */
 
+.svelte-flow__node {
+    height: fit-content !important;
+    max-height: fit-content !important;
+}
+
 /* Base node container - defines size constraints and prevents text selection */
 .node-container {
-    min-width: 100px !important;
-    max-width: 400px !important;
     width: auto !important;
+
+    min-width: 100px !important;
+    min-height: 100px !important;
+
     transition: all 0.2s ease;
     user-select: none;
 }
@@ -156,6 +163,7 @@
 .node-body {
     padding: 0;
     width: 100%;
+    height: fit-content;
 }
 
 /* Node content - vertical layout for socket sections */
@@ -163,6 +171,7 @@
     display: flex;
     flex-direction: column;
     width: 100%;
+    height: 100%;
 }
 
 /* Socket section - container for groups of sockets with padding */

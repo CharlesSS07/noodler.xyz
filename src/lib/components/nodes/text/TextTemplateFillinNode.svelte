@@ -1,51 +1,63 @@
-<script module lang="ts">
-    import {type Node} from '@xyflow/svelte';
-
-    // Official NID for this node: template
-    export type TemplateFillinNodeType = Node<
-        {
-            input: {
-                template: string; // The user-defined template string
-            },
-            nid?: string; // Should be set to 'template' when using official blueprint
-        },
-        'node-template-fillin'
-    >;
-</script>
-
 <script lang="ts">
     import {
-        Handle,
-        Position,
         type NodeProps,
         NodeResizeControl
     } from '@xyflow/svelte';
-    import {fetchSocketDataTypeByName, STANDARD_DATATYPES} from '$lib/compositor/DataTypes';
-    import {Tooltip} from "flowbite-svelte";
+    import {createNodeStore, type NodeStoreType} from '$lib/components/nodes/NodeInstanceStore';
+    import {STANDARD_DATATYPES} from '$lib/compositor/DataTypes';
     import NodeWrapper from "$lib/components/nodeComponents/NodeWrapper.svelte";
+    import NodeErrorDisplay from "$lib/components/nodeComponents/NodeErrorDisplay.svelte";
+    import SourceSocketLabelled from "$lib/components/nodeComponents/sockets/SourceSocketLabelled.svelte";
+    import TargetSocketLabelled from "$lib/components/nodeComponents/sockets/TargetSocketLabelled.svelte";
 
-    let {id, data, selected}: NodeProps<TemplateFillinNodeType> = $props();
+    let {id, selected}: NodeProps<NodeStoreType> = $props();
 
-    // initialize data if defaults not given
-    if (data.input === undefined) {
-        data.input = {template: ""};
-    }
-    if (data.input.template === undefined) {
-        data.input.template = "";
-    }
+    const nodeStore = createNodeStore(id);
+    let executionStatus = nodeStore.executionStatus;
 
     // State for template handling
     let isEditing: boolean = $state(false);
     let textareaRef: HTMLTextAreaElement;
+    
+    // Get template value directly from node input data
+    const nodeInputData = nodeStore.nodeInputDataStore;
+    let templateValue = $derived(($nodeInputData.template || '') as string);
 
     // Extract unique variables from template
-    let templateVariables = $derived(() => {
-        const matches = data.input.template.match(/@(\w+)/g);
+    let templateVariables = $derived.by(() => {
+        const matches = templateValue.match(/@(\w+)/g);
         if (!matches) return [];
 
         // Get unique variable names (remove @ prefix and dedupe)
         const uniqueVars = [...new Set(matches.map((match) => match.slice(1)))];
         return uniqueVars;
+    });
+
+    // Ensure input data has keys for all template variables
+    $effect(() => {
+        const variables = templateVariables;
+        if (variables.length > 0) {
+            const currentInput = $nodeInputData;
+            const newInput = { ...currentInput };
+            let hasChanges = false;
+
+            // Add missing variable keys to input data
+            variables.forEach(variable => {
+                if (!(variable in newInput)) {
+                    newInput[variable] = '';
+                    hasChanges = true;
+                }
+            });
+
+            if (hasChanges) {
+                nodeStore.updateData({ input: newInput });
+            }
+        }
+    });
+
+    $effect(() => {
+        templateValue;
+        if (textareaRef) autoResize(textareaRef);
     });
 
     // Handle click to edit
@@ -56,7 +68,7 @@
                 if (textareaRef) {
                     textareaRef.focus();
                     textareaRef.setSelectionRange(textareaRef.value.length, textareaRef.value.length);
-                    autoResize(textareaRef); // Ensure correct size on focus
+                    autoResize(textareaRef);
                 }
             }, 0);
         }
@@ -80,34 +92,28 @@
         isEditing = false;
     }
 
-    // Handle textarea input
-    function handleInput(event: Event) {
-        const target = event.target as HTMLTextAreaElement;
-        data.input.template = target.value;
-        // projectActions.updateNodeData(id, {input: data.input});
+    // Handle textarea input - update template and create sockets for new variables
+    function handleInput(value: string) {
+        nodeStore.updateDataInputSocket('template', value);
+        if (textareaRef) autoResize(textareaRef);
     }
 
     // Auto-resize textarea based on scrollHeight, with a minimum height
     function autoResize(textarea: HTMLTextAreaElement) {
-        textarea.style.height = 'auto'; // Reset height
-        // Set a minimum height based on a few rows for better UX
-        // text-sm has line-height: 1.25rem = 20px (assuming 1rem = 16px)
-        const minHeightBasedOnRows = 3 * 20; // 3 rows * 20px/row
+        textarea.style.height = 'auto';
+        const minHeightBasedOnRows = 3 * 20;
         textarea.style.height = Math.max(minHeightBasedOnRows, textarea.scrollHeight) + 'px';
     }
 
-    // Resize textarea when editing starts
-    $effect(() => {
-        if (isEditing && textareaRef) {
-            autoResize(textareaRef);
-        }
-    });
+    // Get all variable socket stores for checking connections
+    const allSocketsStore = nodeStore.allInputSocketsStore();
 
     // Highlight variables in display text
     function highlightVariables(text: string): string {
         return text.replace(/@(\w+)/g, (match, varName) => {
-            // const hasValue = getTemplateVariable(varName);
-            const hasValue = false;
+            // Check if this variable has a connected socket
+            const socketMap = $allSocketsStore;
+            const hasValue = socketMap && socketMap.has(varName) && socketMap.get(varName)?.isConnected;
             const className = hasValue ? 'variable-filled' : 'variable-empty';
             return `<span class="${className}">${match}</span>`;
         });
@@ -118,45 +124,26 @@
         label="Template"
         documentation="Fill in your text with variables from links. Useful for prompt design."
         isSelected={selected}
+        executionStatus={$executionStatus}
 >
     <div class="flex flex-col border-2 border-gray-300 rounded-lg bg-white relative">
 
-        <NodeResizeControl
-                minWidth={100}
-                minHeight={50}
-                style="background: transparent; border: none;"
-        >
-            <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    stroke-width="2"
-                    stroke="rgb(128, 128, 128)"
-                    fill="none"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    style="position: absolute; right: 5px; bottom: 5px;"
-            >
-                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                <polyline points="16 20 20 20 20 16"/>
-                <line x1="14" y1="14" x2="20" y2="20"/>
-                <polyline points="8 4 4 4 4 8"/>
-                <line x1="4" y1="4" x2="10" y2="10"/>
-            </svg>
-        </NodeResizeControl>
+        <!-- Output socket -->
+        <SourceSocketLabelled
+            id="text"
+            label="Filled in Template Text"
+            datatype={STANDARD_DATATYPES.TEXT}
+            documentation="Filled template output"
+        />
 
         <div class="p-3">
             {#if isEditing}
                 <textarea
                         bind:this={textareaRef}
-                        value={data.input.template}
-                        on:blur={handleBlur}
-                        on:keydown={handleKeydown}
-                        on:input={(e) => {
-                            handleInput(e);
-                            autoResize(e.target as HTMLTextAreaElement);
-                        }}
+                        value={templateValue}
+                        onblur={handleBlur}
+                        onkeydown={handleKeydown}
+                        oninput={(e) => handleInput(e.target.value)}
                         class="w-full border-0 outline-none resize-y font-mono text-sm"
                         placeholder="Enter template with @variable placeholders..."
                         rows="3"
@@ -165,19 +152,19 @@
             {:else}
                 <div
                         class="min-h-[60px] overflow-auto cursor-pointer hover:bg-gray-50 transition-colors"
-                        on:click={handleClick}
+                        onclick={handleClick}
                         role="button"
                         tabindex="0"
-                        on:keydown={(e) => {
+                        onkeydown={(e) => {
                             if (e.key === 'Enter' || e.key === ' ') {
                                 e.preventDefault();
                                 handleClick();
                             }
                         }}
                 >
-                    {#if data.input.template.trim()}
+                    {#if templateValue && templateValue.trim()}
                         <div class="template-display font-mono text-sm whitespace-pre-wrap">
-                            {@html highlightVariables(data.input.template)}
+                            {@html highlightVariables(templateValue)}
                         </div>
                     {:else}
                         <div class="text-gray-400 text-center flex flex-col items-center justify-center h-full">
@@ -196,47 +183,28 @@
             {/if}
         </div>
 
-        {#each templateVariables() as variable, index}
-            <!--            <TargetSocket id={index.toString()} label={variable} type={STANDARD_DATATYPES.TEXT}-->
-            <!--                          documentation={'Fills in @'+variable}></TargetSocket>-->
-            {#await fetchSocketDataTypeByName(STANDARD_DATATYPES.TEXT)}
-                Loading Target Socket
-            {:then datatype}
-                <Handle
-                        type="target"
-                        position={Position.Left}
-                        id="{variable}"
-                        class="socket-handle"
-                        style="top: {30 * index}px;{datatype?.style || ''}"
+
+
+        <!-- Dynamic variable sockets -->
+        <div class="flex flex-col">
+            {#each templateVariables as variable, index}
+                <TargetSocketLabelled
+                        id={variable}
+                        label={variable}
+                        datatype={STANDARD_DATATYPES.TEXT}
+                        documentation="Fills in @{variable}"
                 />
-                <Tooltip placement="top">
-                    <b>{variable}</b>
-                </Tooltip>
-            {:catch error}
-                Error; could not load input socket: {JSON.stringify(error, null, 2)}
-            {/await}
-        {/each}
+            {/each}
+        </div>
 
-        <!--        <SourceSocket id="text" label="Text" type={STANDARD_DATATYPES.TEXT} documentation=''></SourceSocket>-->
-
-        {#await fetchSocketDataTypeByName(STANDARD_DATATYPES.TEXT)}
-            Loading Target Socket
-        {:then datatype}
-            <Handle
-                    type="source"
-                    position={Position.Right}
-                    id='text'
-                    style="top: 50%;{datatype?.style || ''}"
-                    class="socket-handle"
-            />
-            <Tooltip placement="top">
-                <b>Type ({datatype?.name}):</b> {datatype?.description}
-            </Tooltip>
-        {:catch error}
-            Error; could not load input socket: {JSON.stringify(error, null, 2)}
-        {/await}
+        {#if $executionStatus}
+            <NodeErrorDisplay errorMessage={$executionStatus.logs.map((log) => log[1]).join('<br>')}></NodeErrorDisplay>
+        {/if}
 
     </div>
+
+
+
 </NodeWrapper>
 
 <style>

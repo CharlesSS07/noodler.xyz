@@ -23,8 +23,8 @@
     import {STANDARD_DATATYPES} from "$lib/compositor/DataTypes";
     import {getInputComponentForDataType} from "$lib/components/nodeComponents/sockets/socket-inputs/SocketInputMapping";
     import type {InputSocketParams} from "$lib/compositor/SocketModels";
-    import TargetSocket from "$lib/components/nodeComponents/sockets/TargetSocketLabelled.svelte";
-    import SourceSocket from "$lib/components/nodeComponents/sockets/SourceSocketLabelled.svelte";
+    import TargetSocketLabelled from "$lib/components/nodeComponents/sockets/TargetSocketLabelled.svelte";
+    import SourceSocketLabelled from "$lib/components/nodeComponents/sockets/SourceSocketLabelled.svelte";
 
 </script>
 
@@ -34,8 +34,11 @@
     <div class="flex flex-col">
         {#each outputSockets as outputSocket}
             <div class="socket-content output-content">
-                <SourceSocket id={outputSocket.id} label={outputSocket.label} datatype={outputSocket.type}
-                              documentation={outputSocket.documentation}></SourceSocket>
+                <SourceSocketLabelled
+                        id={outputSocket.id}
+                        label={outputSocket.label}
+                        datatype={outputSocket.type}
+                        documentation={outputSocket.documentation}></SourceSocketLabelled>
 
             </div>
         {/each}
@@ -45,8 +48,11 @@
         {#each inputSockets as inputSocket}
             <div class="socket-content input-content">
 
-                <TargetSocket id={inputSocket.id} label={inputSocket.label} datatype={inputSocket.type}
-                              documentation={inputSocket.documentation}></TargetSocket>
+                <TargetSocketLabelled
+                        id={inputSocket.id}
+                        label={inputSocket.label}
+                        datatype={inputSocket.type}
+                        documentation={inputSocket.documentation}></TargetSocketLabelled>
                 {#if !inputSocket.isConnected && inputSocket.type !== STANDARD_DATATYPES.UNKNOWN && inputSocket.type !== STANDARD_DATATYPES.UNREGISTER}
                     {@const inputMapping = getInputComponentForDataType(inputSocket.type)}
                     {#if inputMapping && inputValues[inputSocket.id] !== undefined}
