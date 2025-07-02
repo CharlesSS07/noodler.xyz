@@ -1,15 +1,5 @@
-import { firestore } from '../../firebase';
-import {
-    collection,
-    query,
-    where,
-    orderBy,
-    limit,
-    getDocs,
-    type QuerySnapshot,
-    type DocumentData,
-} from 'firebase/firestore';
-import type { NodeBluePrintModel } from '$lib/compositor/nodes/NodeBluePrint.js';
+import { functions } from '../../firebase';
+import { httpsCallable } from 'firebase/functions';
 
 export interface NodeSearchResult {
     id: string;
@@ -18,49 +8,52 @@ export interface NodeSearchResult {
     author_uid: string;
     trust_level: string;
     category?: string;
-    tags?: string[];
     input_socket_count: number;
     output_socket_count: number;
+    similarity?: number;
+}
+
+interface SearchResponse {
+    results: Array<{
+        nid: string;
+        title: string;
+        description: string;
+        similarity?: number;
+    }>;
+    totalFound: number;
 }
 
 export class NodeSearchService {
-    private nodesCollection = collection(firestore, 'nodes');
+    private searchNodeBluePrints = httpsCallable<
+        {
+            query: string;
+            limit?: number;
+            trustLevelFilter?: string;
+            tagFilter?: string[];
+        },
+        SearchResponse
+    >(functions, 'searchNodeBluePrints');
 
     /**
-     * Search nodes by text matching in title and documentation
+     * Search nodes by text matching using vector search
      */
     async searchByText(
         searchTerm: string,
         maxResults: number = 20
     ): Promise<NodeSearchResult[]> {
-        const searchTermLower = searchTerm.toLowerCase().trim();
+        const searchTermTrimmed = searchTerm.trim();
 
-        if (!searchTermLower) {
+        if (!searchTermTrimmed) {
             return this.getPopularNodes(maxResults);
         }
 
-        // Firestore doesn't support full-text search, so we'll do a prefix search on title
-        // and then filter by documentation on the client side
-        const titleQuery = query(
-            this.nodesCollection,
-            where('title', '>=', searchTerm),
-            where('title', '<=', searchTerm + '\uf8ff'),
-            orderBy('title'),
-            limit(maxResults * 2) // Get more to filter on client side
-        );
-
         try {
-            const snapshot = await getDocs(titleQuery);
-            let results = this.processSearchResults(snapshot);
+            const result = await this.searchNodeBluePrints({
+                query: searchTermTrimmed,
+                limit: maxResults,
+            });
 
-            // Client-side filtering for documentation and better matching
-            results = results.filter(
-                (node) =>
-                    node.title.toLowerCase().includes(searchTermLower) ||
-                    node.documentation.toLowerCase().includes(searchTermLower)
-            );
-
-            return results.slice(0, maxResults);
+            return this.processSearchResults(result.data.results);
         } catch (error) {
             console.error('Error searching nodes:', error);
             return [];
@@ -74,20 +67,15 @@ export class NodeSearchService {
         trustLevel?: string,
         maxResults: number = 20
     ): Promise<NodeSearchResult[]> {
-        let nodeQuery = query(this.nodesCollection, limit(maxResults));
-
-        if (trustLevel) {
-            nodeQuery = query(
-                this.nodesCollection,
-                where('trust_level', '==', trustLevel),
-                orderBy('title'),
-                limit(maxResults)
-            );
-        }
-
         try {
-            const snapshot = await getDocs(nodeQuery);
-            return this.processSearchResults(snapshot);
+            // Use a general search query with trust level filter
+            const result = await this.searchNodeBluePrints({
+                query: trustLevel ? `trust level ${trustLevel}` : 'nodes',
+                limit: maxResults,
+                trustLevelFilter: trustLevel,
+            });
+
+            return this.processSearchResults(result.data.results);
         } catch (error) {
             console.error('Error searching nodes by category:', error);
             return [];
@@ -100,16 +88,24 @@ export class NodeSearchService {
     async getPopularNodes(
         maxResults: number = 10
     ): Promise<NodeSearchResult[]> {
-        const officialQuery = query(
-            this.nodesCollection,
-            where('trust_level', 'in', ['Official', 'Trusted']),
-            orderBy('title'),
-            limit(maxResults)
-        );
-
         try {
-            const snapshot = await getDocs(officialQuery);
-            return this.processSearchResults(snapshot);
+            const result = await this.searchNodeBluePrints({
+                query: 'popular recommended nodes',
+                limit: maxResults,
+                trustLevelFilter: 'Official',
+            });
+
+            // If no official nodes, try trusted
+            if (result.data.results.length === 0) {
+                const trustedResult = await this.searchNodeBluePrints({
+                    query: 'popular recommended nodes',
+                    limit: maxResults,
+                    trustLevelFilter: 'Trusted',
+                });
+                return this.processSearchResults(trustedResult.data.results);
+            }
+
+            return this.processSearchResults(result.data.results);
         } catch (error) {
             console.error('Error getting popular nodes:', error);
             return [];
@@ -124,24 +120,14 @@ export class NodeSearchService {
         isInput: boolean = true,
         maxResults: number = 15
     ): Promise<NodeSearchResult[]> {
-        // This is a complex query that would need denormalized data in Firestore
-        // For now, we'll get all nodes and filter client-side
-        // In production, you'd want to store socket types in separate fields for efficient querying
-
         try {
-            const snapshot = await getDocs(
-                query(this.nodesCollection, limit(50))
-            );
-            const allResults = this.processSearchResults(snapshot);
+            const socketDirection = isInput ? 'input' : 'output';
+            const result = await this.searchNodeBluePrints({
+                query: `${socketDirection} socket ${socketType}`,
+                limit: maxResults,
+            });
 
-            // Client-side filtering by socket type (this could be optimized with better data structure)
-            return allResults
-                .filter((node) => {
-                    // This is a simplified check - in a real implementation, you'd have
-                    // denormalized socket type data for efficient Firestore queries
-                    return true; // Placeholder for socket type matching
-                })
-                .slice(0, maxResults);
+            return this.processSearchResults(result.data.results);
         } catch (error) {
             console.error('Error searching nodes by socket type:', error);
             return [];
@@ -155,109 +141,91 @@ export class NodeSearchService {
         projectDescription?: string,
         maxResults: number = 8
     ): Promise<NodeSearchResult[]> {
-        // This would ideally use AI/ML for better suggestions
-        // For now, return a mix of popular and recent nodes
-        return this.getPopularNodes(maxResults);
+        try {
+            const query = projectDescription 
+                ? `suggested nodes for ${projectDescription}`
+                : 'suggested recommended nodes';
+            
+            const result = await this.searchNodeBluePrints({
+                query,
+                limit: maxResults,
+            });
+
+            return this.processSearchResults(result.data.results);
+        } catch (error) {
+            console.error('Error getting suggested nodes:', error);
+            // Fallback to popular nodes
+            return this.getPopularNodes(maxResults);
+        }
     }
 
     /**
-     * Process Firestore query results into NodeSearchResult objects
+     * Search nodes by tags
+     */
+    async searchByTags(
+        tags: string[],
+        maxResults: number = 15
+    ): Promise<NodeSearchResult[]> {
+        try {
+            const result = await this.searchNodeBluePrints({
+                query: `nodes with tags ${tags.join(' ')}`,
+                limit: maxResults,
+                tagFilter: tags,
+            });
+
+            return this.processSearchResults(result.data.results);
+        } catch (error) {
+            console.error('Error searching nodes by tags:', error);
+            return [];
+        }
+    }
+
+    /**
+     * Process function response into NodeSearchResult objects
      */
     private processSearchResults(
-        snapshot: QuerySnapshot<DocumentData>
+        results: Array<{
+            nid: string;
+            title: string;
+            description: string;
+            similarity?: number;
+        }>
     ): NodeSearchResult[] {
-        return snapshot.docs.map((doc) => {
-            const data = doc.data() as NodeBluePrintModel;
-            return {
-                id: doc.id,
-                title: data.title || 'Untitled Node',
-                documentation: data.documentation || '',
-                author_uid: data.author_uid || '',
-                trust_level: data.trust_level || 'New',
-                input_socket_count: data.input_socket_order?.length || 0,
-                output_socket_count: data.output_socket_order?.length || 0,
-                category: this.inferCategory(data),
-                tags: this.extractTags(data),
-            };
-        });
+        return results.map((result) => ({
+            id: result.nid,
+            title: result.title || 'Untitled Node',
+            documentation: result.description || '',
+            author_uid: '', // Not available in search results
+            trust_level: 'Unknown', // Would need separate query to get this
+            input_socket_count: 0, // Would need separate query to get this
+            output_socket_count: 0, // Would need separate query to get this
+            category: this.inferCategoryFromTitle(result.title),
+            similarity: result.similarity,
+        }));
     }
 
     /**
-     * Infer category from node data
+     * Infer category from node title (simple heuristic)
      */
-    private inferCategory(node: NodeBluePrintModel): string {
-        const title = node.title?.toLowerCase() || '';
-        const doc = node.documentation?.toLowerCase() || '';
-
-        if (title.includes('image') || doc.includes('image'))
-            return 'Image Processing';
-        if (title.includes('text') || doc.includes('text'))
-            return 'Text Processing';
-        if (
-            title.includes('llm') ||
-            title.includes('ai') ||
-            doc.includes('llm')
-        )
-            return 'AI/ML';
-        if (title.includes('data') || doc.includes('data'))
-            return 'Data Processing';
-        if (title.includes('file') || doc.includes('file'))
-            return 'File Operations';
-        if (title.includes('html') || doc.includes('html')) return 'Web/HTML';
-
-        return 'General';
-    }
-
-    /**
-     * Extract tags from node data for better search
-     */
-    private extractTags(node: NodeBluePrintModel): string[] {
-        const tags: string[] = [];
-        const title = node.title?.toLowerCase() || '';
-        const doc = node.documentation?.toLowerCase() || '';
-
-        // Extract common keywords as tags
-        const keywords = [
-            'image',
-            'text',
-            'ai',
-            'llm',
-            'data',
-            'file',
-            'html',
-            'json',
-            'upload',
-            'download',
-            'process',
-            'transform',
-            'generate',
-        ];
-
-        keywords.forEach((keyword) => {
-            if (title.includes(keyword) || doc.includes(keyword)) {
-                tags.push(keyword);
-            }
-        });
-
-        return tags;
-    }
-
-    /**
-     * Initialize standard nodes if the collection is empty
-     * This can be called during app initialization
-     */
-    async initializeStandardNodes(): Promise<void> {
-        try {
-            // Check if we have any nodes
-            const snapshot = await getDocs(
-                query(this.nodesCollection, limit(1))
-            );
-
-            if (snapshot.empty) {
-                // In a real app, you might want to automatically populate some basic nodes here
-            }
-        } catch (error) {
-            console.error('Error checking for existing nodes:', error);
+    private inferCategoryFromTitle(title: string): string {
+        const titleLower = title.toLowerCase();
+        
+        if (titleLower.includes('text') || titleLower.includes('string')) {
+            return 'text';
         }
+        if (titleLower.includes('image') || titleLower.includes('photo')) {
+            return 'image';
+        }
+        if (titleLower.includes('data') || titleLower.includes('json')) {
+            return 'data';
+        }
+        if (titleLower.includes('ai') || titleLower.includes('ml')) {
+            return 'ai';
+        }
+        if (titleLower.includes('web') || titleLower.includes('http')) {
+            return 'web';
+        }
+        
+        return 'general';
     }
 }

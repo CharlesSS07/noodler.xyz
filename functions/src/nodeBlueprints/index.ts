@@ -1,0 +1,56 @@
+import {onCall} from "firebase-functions/v2/https";
+import {
+  embedNodeBluePrint as embedNodeBluePrintCore,
+  embedAllUnembeddedNodeBluePrints as embedAllUnembeddedNodeBluePrintsCore,
+  searchNodeBluePrints as searchNodeBluePrintsCore,
+} from "./search";
+
+// Export the callable functions with authentication checks
+export const embedNodeBluePrint = onCall(
+  async (request) => {
+    // Check authentication
+    if (!request.auth?.uid) {
+      throw new Error("Authentication required");
+    }
+
+    const {nid} = request.data;
+    if (!nid) {
+      throw new Error("NodeBluePrint ID (nid) is required");
+    }
+
+    await embedNodeBluePrintCore(nid);
+    return {success: true, nid};
+  }
+);
+
+export const embedAllUnembeddedNodeBluePrints = onCall(
+  async (request) => {
+    // Check authentication
+    if (!request.auth?.uid) {
+      throw new Error("Authentication required");
+    }
+
+    return await embedAllUnembeddedNodeBluePrintsCore();
+  }
+);
+
+export const searchNodeBluePrints = onCall(
+  async (request) => {
+    // Check authentication
+    if (!request.auth?.uid) {
+      throw new Error("Authentication required");
+    }
+
+    const {query, limit, trustLevelFilter, tagFilter} = request.data;
+    if (!query) {
+      throw new Error("Search query is required");
+    }
+
+    return await searchNodeBluePrintsCore({
+      query,
+      limit,
+      trustLevelFilter,
+      tagFilter,
+    });
+  }
+);

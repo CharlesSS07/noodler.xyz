@@ -17,3 +17,11 @@ export {
   authenticatedHealthCheck,
   verifiedEmailHealthCheck,
 } from "./healthchecks";
+
+// NodeBlueprint Functions
+export {
+  embedNodeBluePrint,
+  embedAllUnembeddedNodeBluePrints,
+  searchNodeBluePrints,
+} from "./nodeBlueprints";
+

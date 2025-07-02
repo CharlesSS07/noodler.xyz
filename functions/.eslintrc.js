@@ -21,8 +21,8 @@ module.exports = {
     "/compositor/**/*", // Ignore built files.
     "/generated/**/*", // Ignore generated files.
     "/lib/**/*", // Ignore compiled output.
-    "scripts/examples/huggingfaceInferenceAPI.ts", // Ignore example file.
     "src/test/**/*", // Ignore test files.
+    "**/*.test.ts",
   ],
   plugins: [
     "@typescript-eslint",
