@@ -7,7 +7,7 @@ import type {
 import { OutputSocketAsyncReturner } from '../Interpreter';
 import { writable, type Writable } from 'svelte/store';
 
-export interface NodeBluePrintControllerFactoryInterface {
+export interface NodeBlueprintControllerFactoryInterface {
     initNewNodeBluePrint(
         author_uid: string,
         hint?: string | undefined

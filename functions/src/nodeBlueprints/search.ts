@@ -49,6 +49,7 @@ interface NodeBluePrintData {
   created_at: unknown;
   last_updated_at: unknown;
   searchable: boolean;
+  embeddingValid?: boolean;
 }
 
 interface SearchResult {
@@ -182,6 +183,7 @@ export async function embedNodeBluePrint(nid: string): Promise<void> {
       ...nodeBluePrintData,
       [vectorDbIndexConfig.vectorField]: FieldValue.vector(embedding),
       [vectorDbIndexConfig.contentField]: text,
+      embeddingValid: true,
       nid,
     });
 
@@ -209,6 +211,7 @@ export async function removeNodeBluePrintEmbeddingFromIndex(
       .update({
         [vectorDbIndexConfig.vectorField]:
         admin.firestore.FieldValue.delete(),
+        embeddingValid: false,
       });
     return;
   } catch (error) {
@@ -299,17 +302,17 @@ export async function embedAllUnembeddedNodeBluePrints(): Promise<{
   errorDetails: Array<{nid: string, error: string}>;
 }> {
   try {
-    // Get all searchable NodeBluePrints that don't have embeddings yet
+    // Get all searchable NodeBluePrints that don't have valid embeddings
     const snapshot = await firestore
       .collection(vectorDbIndexConfig.collection)
       .where("searchable", "==", true)
-      .where(vectorDbIndexConfig.vectorField, "==", null)
+      .where("embeddingValid", "!=", true)
       .get();
 
     const results = [];
     const errors = [];
 
-    // Process each node
+    // Process each node (already filtered to only invalid embeddings)
     for (const doc of snapshot.docs) {
       try {
         const nid = doc.id;
@@ -365,6 +368,9 @@ export async function searchNodeBluePrints(
 
     // Add filters if provided
     const whereConditions: {[key: string]: unknown} = {};
+    // Always filter for valid embeddings
+    whereConditions["embeddingValid"] = true;
+
     if (trustLevelFilter) {
       whereConditions["trust_level"] = trustLevelFilter;
     }

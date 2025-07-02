@@ -5,6 +5,7 @@
 .svelte-flow__node {
     height: fit-content !important;
     max-height: fit-content !important;
+    max-width: 700px;
 }
 
 /* Base node container - defines size constraints and prevents text selection */

@@ -112,7 +112,6 @@
                 <!-- Display connected image -->
                 <div class="min-h-[150px] max-h-[400px] flex items-center justify-center bg-gray-50">
                     {#if displayImageUrl && displayImageUrl!=='' && displayImageUrl!=='empty_jimp_image'}
-                        {displayImageUrl}
                         <img
                             src={displayImageUrl}
                             alt="Connected image"

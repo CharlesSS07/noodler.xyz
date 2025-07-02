@@ -127,8 +127,6 @@
 <svelte:window on:keydown={handleKeydown} />
 
 {#if isOpen}
-    <!-- Debug: Modal should be visible -->
-    {console.log('NodeSearch isOpen:', isOpen, 'position:', position)}
     <!-- Overlay -->
     <div 
         class="fixed inset-0 bg-black bg-opacity-50 z-40"

@@ -51,6 +51,7 @@ const mockNodeBluePrintData = {
   created_at: new Date().toISOString(),
   last_updated_at: new Date().toISOString(),
   searchable: true,
+  embeddingValid: false,
 };
 
 describe("NodeBlueprint Search Functions", function() {
@@ -399,7 +400,7 @@ describe("NodeBlueprint Search Functions", function() {
           nid: "test-unembedded-1",
           title: "Node Without Embedding",
           searchable: true,
-          embedding: null, // No embedding yet
+          embeddingValid: false, // No valid embedding yet
         });
       await firestore
         .collection("nodes")
@@ -409,7 +410,7 @@ describe("NodeBlueprint Search Functions", function() {
           nid: "test-unembedded-2",
           title: "Another Node Without Embedding",
           searchable: true,
-          embedding: null, // No embedding yet
+          embeddingValid: false, // No valid embedding yet
         });
       await firestore
         .collection("nodes")
@@ -420,6 +421,7 @@ describe("NodeBlueprint Search Functions", function() {
           title: "Node With Embedding",
           searchable: true,
           embedding: [0.1, 0.2, 0.3], // Already has embedding
+          embeddingValid: true, // Has valid embedding
         });
 
       const result = await embedAllUnembeddedNodeBluePrints();
@@ -445,7 +447,7 @@ describe("NodeBlueprint Search Functions", function() {
           nid: "test-searchable",
           title: "Searchable Node",
           searchable: true,
-          embedding: null,
+          embeddingValid: false,
         });
       await firestore
         .collection("nodes")
@@ -455,7 +457,7 @@ describe("NodeBlueprint Search Functions", function() {
           nid: "test-not-searchable",
           title: "Non-Searchable Node",
           searchable: false,
-          embedding: null,
+          embeddingValid: false,
         });
 
       const result = await embedAllUnembeddedNodeBluePrints();

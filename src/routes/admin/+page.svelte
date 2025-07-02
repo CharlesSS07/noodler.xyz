@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { generateStandardNodeSuite } from '$lib/compositor/nodes/firestore/FirestoreStandardNodeSet.js';
+	import { generateStandardNodeSuite, embedAllNodes } from '$lib/compositor/nodes/firestore/FirestoreStandardNodeSet.js';
 	import '../../app.css'; // Assuming this provides some base styles
 	import { auth } from '../../firebase';
 	import { SignedIn, SignedOut } from 'sveltefire'; // Import SignedOut for a better user experience
@@ -7,6 +7,9 @@
 	let activeTab = 'dashboard';
 	let isGenerating = false;
 	let generationComplete = false;
+	let isEmbedding = false;
+	let embeddingComplete = false;
+	let embeddingResult: { processed: number; errors: number; errorDetails: any[] } | null = null;
 
 	async function handleGenerateNodes() {
 		isGenerating = true;
@@ -19,6 +22,22 @@
 			console.error('Error generating node suite:', error);
 		} finally {
 			isGenerating = false;
+		}
+	}
+
+	async function handleEmbedNodes() {
+		isEmbedding = true;
+		embeddingComplete = false;
+		embeddingResult = null;
+		
+		try {
+			const result = await embedAllNodes();
+			embeddingResult = result;
+			embeddingComplete = true;
+		} catch (error) {
+			console.error('Error embedding nodes:', error);
+		} finally {
+			isEmbedding = false;
 		}
 	}
 </script>
@@ -79,6 +98,37 @@
 							<p class="action-description">
 								Creates the default set of node blueprints in Firestore
 							</p>
+
+							<button 
+								on:click={handleEmbedNodes} 
+								class="action-button"
+								class:generating={isEmbedding}
+								class:complete={embeddingComplete}
+								disabled={isEmbedding}
+							>
+								{#if isEmbedding}
+									Embedding...
+								{:else if embeddingComplete}
+									✓ Embedding Complete
+								{:else}
+									Embed All Unembedded Nodes
+								{/if}
+							</button>
+							<p class="action-description">
+								Generates vector embeddings for all nodes without embeddings using the functions API
+							</p>
+							{#if embeddingResult}
+								<div class="embedding-result">
+									<p><strong>Processed:</strong> {embeddingResult.processed} nodes</p>
+									<p><strong>Errors:</strong> {embeddingResult.errors}</p>
+									{#if embeddingResult.errorDetails.length > 0}
+										<details>
+											<summary>Error Details</summary>
+											<pre>{JSON.stringify(embeddingResult.errorDetails, null, 2)}</pre>
+										</details>
+									{/if}
+								</div>
+							{/if}
 						</div>
 					</div>
 				{:else if activeTab === 'node-manager'}
@@ -230,7 +280,32 @@
 	.action-description {
 		color: #666;
 		font-size: 0.9rem;
-		margin: 0;
+		margin: 0 0 1rem 0;
+	}
+
+	.embedding-result {
+		background: #f8f9fa;
+		border: 1px solid #dee2e6;
+		border-radius: 4px;
+		padding: 1rem;
+		margin-top: 1rem;
+		font-size: 0.9rem;
+	}
+
+	.embedding-result p {
+		margin: 0.5rem 0;
+	}
+
+	.embedding-result details {
+		margin-top: 1rem;
+	}
+
+	.embedding-result pre {
+		background: #e9ecef;
+		padding: 0.5rem;
+		border-radius: 4px;
+		overflow-x: auto;
+		font-size: 0.8rem;
 	}
 
 	.sign-out-button {
