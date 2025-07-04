@@ -4,6 +4,7 @@ import {
   embedAllUnembeddedNodeBluePrints as embedAllUnembeddedNodeBluePrintsCore,
   searchNodeBluePrints as searchNodeBluePrintsCore,
 } from "./search";
+import {generateStandardNodeSuite as generateStandardNodeSuiteCore} from "./libs/FirestoreStandardNodeSet";
 
 // Export the callable functions with authentication checks
 export const embedNodeBluePrint = onCall(
@@ -52,5 +53,18 @@ export const searchNodeBluePrints = onCall(
       trustLevelFilter,
       tagFilter,
     });
+  }
+);
+
+export const generateStandardNodeSuite = onCall(
+  async (request) => {
+    // Check authentication
+    if (!request.auth?.uid) {
+      throw new Error("Authentication required");
+    }
+
+    await generateStandardNodeSuiteCore();
+    await embedAllUnembeddedNodeBluePrintsCore();
+    return {success: true, message: "Standard node suite generated & embedded successfully"};
   }
 );

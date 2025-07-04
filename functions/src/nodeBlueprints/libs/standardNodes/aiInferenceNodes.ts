@@ -1,5 +1,5 @@
-import type { NodeBluePrintControllerFactoryInterface } from '$lib/compositor/nodes/NodeBluePrint.js';
-import { FirestoreNodeBluePrintControllerFactoryInterface } from '$lib/compositor/nodes/firestore/FirestoreNodeBluePrint.js';
+import type { NodeBluePrintControllerFactoryInterface } from '$lib/compositor/libs/NodeBluePrint.js';
+import { FirestoreNodeBluePrintControllerFactoryInterface } from '$lib/compositor/libs/firestore/FirestoreNodeBluePrint.js';
 import {
     NumberSocketParamsBuilder,
     StringSocketParamsBuilder,
@@ -18,10 +18,10 @@ export async function aiInferenceNodes() {
     textToImage.title = 'Text to Image';
     textToImage.documentation = 'Generates an image from text using AI models.';
     textToImage.tags = [
-        'ai', // for nodes that use ai
-        'image', // for nodes that handle images in any way
-        'remote', // for nodes that do operations using the cloud, not fully locally
-        'text', // for nodes that handle text
+        'ai', // for libs that use ai
+        'image', // for libs that handle images in any way
+        'remote', // for libs that do operations using the cloud, not fully locally
+        'text', // for libs that handle text
     ];
 
     textToImage.newInputSocket('prompt', {

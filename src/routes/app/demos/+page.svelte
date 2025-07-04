@@ -30,7 +30,7 @@
         {
             id: 'promptdesign',
             title: 'Prompt Design Studio',
-            description: 'Advanced visual prompt engineering with template composition, variable replacement, and LLM text transformation nodes.',
+            description: 'Advanced visual prompt engineering with template composition, variable replacement, and LLM text transformation libs.',
             icon: MessageSquare,
             path: '/app/demos/promptdesign',
             status: 'active',

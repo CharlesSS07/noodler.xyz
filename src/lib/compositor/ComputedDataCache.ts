@@ -123,7 +123,7 @@ export class ComputedDataCache {
     }
 
     /**
-     * Get a reactive store for a specific nodes error output
+     * Get a reactive store for a specific libs error output
      */
     useNodeExecutionStatusStore(
         node_key: string

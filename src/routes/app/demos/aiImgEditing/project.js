@@ -3,7 +3,7 @@ export default {
         {
             data: {
                 markdown:
-                    '# Welcome to noodler.xyz!\nA project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)\n\n* Pan around by clicking and dragging on the canvas.\n* Scroll to zoom.\n* Add a node by clicking on one of the buttons above. Wire nodes together to create flow functionality.\n\n## TODO:\n1. Node search tool --> KNN over embeddings of node code, name, and descriptions. Also just plain old text comparison.\n2. More standard nodes\n3. Oauth integrations to cut costs\n4. NodeAI for developing new nodes\n5. FlowAI for developing flows',
+                    '# Welcome to noodler.xyz!\nA project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)\n\n* Pan around by clicking and dragging on the canvas.\n* Scroll to zoom.\n* Add a node by clicking on one of the buttons above. Wire libs together to create flow functionality.\n\n## TODO:\n1. Node search tool --> KNN over embeddings of node code, name, and descriptions. Also just plain old text comparison.\n2. More standard libs\n3. Oauth integrations to cut costs\n4. NodeAI for developing new libs\n5. FlowAI for developing flows',
             },
             id: 'default-intro-node',
             measured: {

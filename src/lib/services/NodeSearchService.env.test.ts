@@ -117,7 +117,7 @@ describe('NodeSearchService Environment Tests', () => {
             });
         }, timeout);
 
-        it('should get popular nodes', async () => {
+        it('should get popular libs', async () => {
             const results = await nodeSearchService.getPopularNodes(5);
             
             expect(results).toBeDefined();

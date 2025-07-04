@@ -9,6 +9,7 @@ import {
   FieldValue,
 } from "firebase-admin/firestore";
 import * as admin from "firebase-admin";
+import {NodeBluePrintInFirestore} from "./libs/FirestoreNodeBluePrint";
 
 // Configure Genkit instance
 const ai = genkit({
@@ -20,10 +21,15 @@ const firestore = admin.firestore();
 
 // Configuration for the vector index
 const vectorDbIndexConfig = {
-  collection: "nodes",
+  collection: "node_embeddings", // Separate collection for embeddings
   contentField: "text",
   vectorField: "embedding",
   embedder: textEmbedding004,
+};
+
+// Configuration for the NodeBluePrint collection
+const nodesBluePrintConfig = {
+  collection: "nodes",
 };
 
 // Define the Firestore retriever for vector search
@@ -37,20 +43,6 @@ const retriever = defineFirestoreRetriever(ai, {
   distanceMeasure: "COSINE",
 });
 
-interface NodeBluePrintData {
-  nid: string;
-  title: string;
-  documentation: string;
-  tags: string[];
-  trust_level: string;
-  input_sockets?: unknown[];
-  output_sockets?: unknown[];
-  author_uid: string;
-  created_at: unknown;
-  last_updated_at: unknown;
-  searchable: boolean;
-  embeddingValid?: boolean;
-}
 
 interface SearchResult {
   nid: string;
@@ -66,62 +58,89 @@ interface SearchResult {
  */
 export async function nodeBluePrintToText(nid: string): Promise<string> {
   try {
-    const doc = await firestore
-      .collection(vectorDbIndexConfig.collection)
-      .doc(nid).get();
+    // Try to use the proper NodeBluePrint class first
+    const nodeBluePrint = new NodeBluePrintInFirestore(nid);
 
-    if (!doc.exists) {
-      throw new Error(`NodeBluePrint with nid ${nid} not found`);
+    try {
+      // Wait for the node to be initialized from Firestore
+      await nodeBluePrint.waitForInitialization();
+
+      // Use the built-in toString method from NodeBluePrint
+      const text = nodeBluePrint.toString();
+
+      // Clean up the subscription to prevent memory leaks
+      nodeBluePrint.destroy();
+
+      return text;
+    } catch (classError) {
+      // If the class approach fails (e.g., due to missing owner field),
+      // fall back to direct Firestore reading
+      console.warn(
+        `NodeBluePrint class approach failed for ${nid}, falling back:`,
+        classError.message
+      );
+
+      // Clean up the failed instance
+      nodeBluePrint.destroy();
+
+      // Fall back to direct Firestore reading for compatibility
+      const doc = await firestore
+        .collection(nodesBluePrintConfig.collection)
+        .doc(nid).get();
+
+      if (!doc.exists) {
+        throw new Error(`NodeBluePrint with nid ${nid} not found`);
+      }
+
+      const data = doc.data();
+
+      // Use the NodeBluePrint toString logic directly
+      const parts: string[] = [];
+
+      // Add title
+      if (data.title) {
+        parts.push(`Title: ${data.title}`);
+      }
+
+      // Add documentation/description
+      if (data.documentation) {
+        parts.push(`Description: ${data.documentation}`);
+      }
+
+      // Add tags
+      if (data.tags && data.tags.length > 0) {
+        parts.push(`Tags: ${data.tags.join(", ")}`);
+      }
+
+      // Add trust level
+      if (data.trust_level) {
+        parts.push(`Trust Level: ${data.trust_level}`);
+      }
+
+      // Add input specifications
+      if (data.input_sockets && data.input_sockets.length > 0) {
+        const inputSpecs = data.input_sockets.map((socket) => {
+          const key = socket.key || socket.id;
+          const type = socket.type || socket.dataType || "unknown";
+          const desc = socket.description || socket.label || "";
+          return `${key}: ${type} - ${desc}`;
+        }).join("; ");
+        parts.push(`Input Sockets: ${inputSpecs}`);
+      }
+
+      // Add output specifications
+      if (data.output_sockets && data.output_sockets.length > 0) {
+        const outputSpecs = data.output_sockets.map((socket) => {
+          const key = socket.key || socket.id;
+          const type = socket.type || socket.dataType || "unknown";
+          const desc = socket.description || socket.label || "";
+          return `${key}: ${type} - ${desc}`;
+        }).join("; ");
+        parts.push(`Output Sockets: ${outputSpecs}`);
+      }
+
+      return parts.join("\n\n");
     }
-
-    const data = doc.data() as NodeBluePrintData;
-
-    // Create comprehensive text description for embeddings
-    const parts: string[] = [];
-
-    // Add title
-    if (data.title) {
-      parts.push(`Title: ${data.title}`);
-    }
-
-    // Add documentation/description
-    if (data.documentation) {
-      parts.push(`Description: ${data.documentation}`);
-    }
-
-    // Add tags
-    if (data.tags && data.tags.length > 0) {
-      parts.push(`Tags: ${data.tags.join(", ")}`);
-    }
-
-    // Add trust level
-    if (data.trust_level) {
-      parts.push(`Trust Level: ${data.trust_level}`);
-    }
-
-    // Add input specifications
-    if (data.input_sockets && data.input_sockets.length > 0) {
-      const inputSpecs = data.input_sockets.map((socket: unknown) => {
-        const s = socket as Record<string, unknown>;
-        return `${s.key || s.id}: ${s.type ||
-          s.dataType || "unknown"} - ${s.description ||
-          s.label || ""}`;
-      }).join("; ");
-      parts.push(`Input Sockets: ${inputSpecs}`);
-    }
-
-    // Add output specifications
-    if (data.output_sockets && data.output_sockets.length > 0) {
-      const outputSpecs = data.output_sockets.map((socket: unknown) => {
-        const s = socket as Record<string, unknown>;
-        return `${s.key || s.id}: ${s.type ||
-          s.dataType || "unknown"} - ${s.description ||
-          s.label || ""}`;
-      }).join("; ");
-      parts.push(`Output Sockets: ${outputSpecs}`);
-    }
-
-    return parts.join("\n\n");
   } catch (error) {
     console.error(`Error converting NodeBluePrint ${nid} to text:`, error);
     throw error;
@@ -162,8 +181,11 @@ export async function embedNodeBluePrint(nid: string): Promise<void> {
   }
 
   try {
-    // Get the text representation
-    const text = await nodeBluePrintToText(nid);
+    // Get the text representation using NodeBluePrint.toString()
+    const nodeBluePrint = new NodeBluePrintInFirestore(nid);
+    await nodeBluePrint.waitForInitialization();
+    const text = nodeBluePrint.toString();
+    nodeBluePrint.destroy();
 
     // Generate embedding
     const embedding = (await ai.embed({
@@ -171,20 +193,14 @@ export async function embedNodeBluePrint(nid: string): Promise<void> {
       content: text,
     }))[0].embedding;
 
-    // Get the original NodeBluePrint data for metadata
-    const nodeBluePrintDoc = await firestore
-      .collection(vectorDbIndexConfig.collection)
-      .doc(nid)
-      .get();
-    const nodeBluePrintData = nodeBluePrintDoc.data() as NodeBluePrintData;
-
-    // Store in vector collection
+    // Store in embeddings collection (no need to read from nodes collection)
     await firestore.collection(vectorDbIndexConfig.collection).doc(nid).set({
-      ...nodeBluePrintData,
+      nid,
       [vectorDbIndexConfig.vectorField]: FieldValue.vector(embedding),
       [vectorDbIndexConfig.contentField]: text,
       embeddingValid: true,
-      nid,
+      created_at: new Date(),
+      last_updated_at: new Date(),
     });
 
     return;
@@ -208,11 +224,7 @@ export async function removeNodeBluePrintEmbeddingFromIndex(
 
   try {
     await firestore.collection(vectorDbIndexConfig.collection).doc(nid)
-      .update({
-        [vectorDbIndexConfig.vectorField]:
-        admin.firestore.FieldValue.delete(),
-        embeddingValid: false,
-      });
+      .delete();
     return;
   } catch (error) {
     console.error(
@@ -258,9 +270,9 @@ export async function reEmbedAllNodeBluePrints(): Promise<{
   errorDetails: Array<{nid: string, error: string}>;
 }> {
   try {
-    // Get all searchable NodeBluePrints from the vector collection
+    // Get all searchable NodeBluePrints from the nodes collection
     const snapshot = await firestore
-      .collection(vectorDbIndexConfig.collection)
+      .collection(nodesBluePrintConfig.collection)
       .where("searchable", "==", true)
       .get();
 
@@ -302,25 +314,36 @@ export async function embedAllUnembeddedNodeBluePrints(): Promise<{
   errorDetails: Array<{nid: string, error: string}>;
 }> {
   try {
-    // Get all searchable NodeBluePrints that don't have valid embeddings
-    const snapshot = await firestore
-      .collection(vectorDbIndexConfig.collection)
+    // Get all searchable NodeBluePrints from the nodes collection
+    const nodesSnapshot = await firestore
+      .collection(nodesBluePrintConfig.collection)
       .where("searchable", "==", true)
-      .where("embeddingValid", "!=", true)
       .get();
 
     const results = [];
     const errors = [];
 
-    // Process each node (already filtered to only invalid embeddings)
-    for (const doc of snapshot.docs) {
+    // Check each searchable node to see if it has a valid embedding
+    for (const nodeDoc of nodesSnapshot.docs) {
       try {
-        const nid = doc.id;
-        await reEmbedNodeBluePrint(nid);
-        results.push(nid);
+        const nid = nodeDoc.id;
+
+        // Check if embedding exists and is valid
+        const embeddingDoc = await firestore
+          .collection(vectorDbIndexConfig.collection)
+          .doc(nid)
+          .get();
+
+        const hasValidEmbedding = embeddingDoc.exists &&
+          embeddingDoc.data()?.embeddingValid === true;
+
+        if (!hasValidEmbedding) {
+          await reEmbedNodeBluePrint(nid);
+          results.push(nid);
+        }
       } catch (error) {
-        console.error(`Error processing NodeBluePrint ${doc.id}:`, error);
-        errors.push({nid: doc.id, error: error.toString()});
+        console.error(`Error processing NodeBluePrint ${nodeDoc.id}:`, error);
+        errors.push({nid: nodeDoc.id, error: error.toString()});
       }
     }
 

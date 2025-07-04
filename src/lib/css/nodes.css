@@ -389,7 +389,7 @@
    ANIMATIONS
    ========================================================================== */
 
-/* Pulse animation - subtle scaling effect for executing nodes */
+/* Pulse animation - subtle scaling effect for executing libs */
 @keyframes pulse {
     0%, 100% {
         transform: scale(1);

@@ -3,11 +3,9 @@ import type {
     InputSocketParams,
     OutputSocketModel,
     SocketID,
-} from '../SocketModels.js';
-import { OutputSocketAsyncReturner } from '../Interpreter';
-import { writable, type Writable } from 'svelte/store';
+} from './SocketModels.js';
 
-export interface NodeBlueprintControllerFactoryInterface {
+export interface NodeBluePrintControllerFactoryInterface {
     initNewNodeBluePrint(
         author_uid: string,
         hint?: string | undefined
@@ -28,34 +26,40 @@ export interface NodeBlueprintControllerFactoryInterface {
      * @param author_uid
      */
     forkNode(nid: string, author_uid: string): Promise<NodeBluePrint>;
-
-    getNodeBluePrintFromNID(nid: string): Promise<NodeBluePrint>;
 }
 
 /**
  * The NodeBluePrint is used in three areas:
  *
- * 1. displaying nodes in FlowGraph
- * 2. executing nodes
+ * 1. displaying libs in FlowGraph
+ * 2. executing libs
  * 3. node design studio
  */
 
 export abstract class NodeBluePrint {
-    /**
-     * Does whatever it is to call the executable part of this node. Takes inputs, and sets the outputs.
-     * @param inputs
-     * @param outputs
-     */
-    abstract call(
-        inputs: Record<string, unknown>,
-        outputs: OutputSocketAsyncReturner
-    ): Promise<void>;
 
-    abstract get author_uid(): string;
+    abstract get owner(): string;
+    abstract set owner(uid: string);
+    abstract get editors(): string[];
+    abstract addEditor(uid: string): void;
+    abstract removeEditor(uid: string): void;
+    abstract get viewers(): string[];
+    abstract addViewer(uid: string): void;
+    abstract removeViewer(uid: string): void;
 
     abstract get created_at(): Date;
+
+    /**
+     * When the node blueprint was last changed.
+     */
     abstract get last_updated_at(): Date;
+
+    /**
+     * Set last_updated_at to the current time.
+     * @protected
+     */
     protected abstract update(): void;
+
     abstract get is_frozen(): boolean;
     abstract freeze(): void;
 
@@ -76,6 +80,9 @@ export abstract class NodeBluePrint {
     // abstract retireInputSocket(socket_key: SocketID): Promise<void>;
     // abstract unretireInputSocket(socket_key: SocketID): Promise<void>;
 
+    abstract get input_spec_strict(): boolean;
+    abstract set input_spec_strict(spec_strict: boolean);
+
     abstract newOutputSocket(
         socket_key: SocketID,
         socket: OutputSocketModel
@@ -92,9 +99,6 @@ export abstract class NodeBluePrint {
     abstract set title(title: string);
     abstract get title(): string;
 
-    abstract get input_spec_strict(): boolean;
-    abstract set input_spec_strict(spec_strict: boolean);
-
     abstract set code(title: string);
     abstract get code(): string;
 
@@ -105,33 +109,63 @@ export abstract class NodeBluePrint {
     abstract set official_note(note: string);
 
     abstract get searchable(): boolean;
+    abstract set searchable(value: boolean);
     abstract notSearchable(): void;
     abstract isSearchable(): void;
 
     abstract get tags(): string[];
     abstract set tags(tags: string[]);
-}
 
-// Wrapper function to create a reactive store
-export function createNodeBluePrintStore(
-    nodeBluePrint: NodeBluePrint
-): Writable<NodeBluePrint> {
-    return writable(nodeBluePrint);
-}
+    /**
+     * Converts the NodeBluePrint to a text description for embedding
+     * @return {string} Text description of the NodeBluePrint
+     */
+    toString(): string {
+        const parts: string[] = [];
 
-// Helper function to trigger store updates after mutations
-export function updateNodeBluePrintStore(
-    store: Writable<NodeBluePrint>,
-    updateFn: (node: NodeBluePrint) => void | Promise<void>
-) {
-    store.update((node) => {
-        const result = updateFn(node);
-
-        // Handle async updates
-        if (result instanceof Promise) {
-            result.then(() => store.set(node));
+        // Add title
+        if (this.title) {
+            parts.push(`Title: ${this.title}`);
         }
 
-        return node;
-    });
+        // Add documentation/description
+        if (this.documentation) {
+            parts.push(`Description: ${this.documentation}`);
+        }
+
+        // Add tags
+        if (this.tags && this.tags.length > 0) {
+            parts.push(`Tags: ${this.tags.join(", ")}`);
+        }
+
+        // Add trust level
+        if (this.trust_level) {
+            parts.push(`Trust Level: ${this.trust_level}`);
+        }
+
+        // Add input specifications
+        if (this.inputSockets && this.inputSockets.length > 0) {
+            const inputSpecs = this.inputSockets.map(
+                socket => {
+                    return `${socket.label}(${socket.type}): ${socket.documentation}`;
+                }
+            ).join("; ");
+            parts.push(`Input Sockets: ${inputSpecs}`);
+        }
+
+        // Add output specifications
+        if (this.outputSockets && this.outputSockets.length > 0) {
+            const outputSpecs = this.outputSockets.map(
+                socket => {
+                    return `${socket.label}(${socket.type}): ${socket.documentation}`;
+                }
+            ).join("; ");
+            parts.push(`Output Sockets: ${outputSpecs}`);
+        }
+
+        // todo use llmFlow to summarize what code does, and add the summary to the description
+
+        return parts.join("\n\n");
+    }
+
 }

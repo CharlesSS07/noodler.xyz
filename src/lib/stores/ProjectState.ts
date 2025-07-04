@@ -315,8 +315,8 @@ class ProjectFirebaseSync {
                 Object.keys(nodesToSave).length === 0 &&
                 currentState!.nodes.length === 0
             ) {
-                // For extra safety, don't include nodes field in the save if it's empty
-                // This prevents overwriting existing nodes with empty data
+                // For extra safety, don't include libs field in the save if it's empty
+                // This prevents overwriting existing libs with empty data
             }
             if (
                 Object.keys(edgesToSave).length === 0 &&
@@ -332,7 +332,7 @@ class ProjectFirebaseSync {
                 last_updated_at: new Date().toISOString(),
             };
 
-            // Always include nodes/edges in save data
+            // Always include libs/edges in save data
             // The earlier safeguards prevent saving during initial load
             saveData.nodes = nodesToSave;
             saveData.edges = edgesToSave;

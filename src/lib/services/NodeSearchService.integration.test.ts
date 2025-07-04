@@ -28,7 +28,7 @@ describe('NodeSearchService Integration Tests', () => {
     let nodeSearchService: NodeSearchService;
     let testUser: any;
 
-    // Test data for creating test nodes
+    // Test data for creating test libs
     const testNodes = [
         {
             nid: 'test-text-processor-int',
@@ -153,12 +153,12 @@ describe('NodeSearchService Integration Tests', () => {
     async function setupTestData() {
         console.log('📝 Setting up test data...');
         
-        // Create test nodes in Firestore
+        // Create test libs in Firestore
         for (const node of testNodes) {
             await setDoc(doc(firestore, 'nodes', node.nid), node);
         }
 
-        // Embed the test nodes if we're using emulator (production might already have embeddings)
+        // Embed the test libs if we're using emulator (production might already have embeddings)
         if (useEmulator) {
             const embedFunction = httpsCallable(functions, 'embedNodeBluePrint');
             
@@ -179,7 +179,7 @@ describe('NodeSearchService Integration Tests', () => {
     async function cleanupTestData() {
         console.log('🧹 Cleaning up test data...');
         
-        // Delete test nodes
+        // Delete test libs
         for (const node of testNodes) {
             try {
                 await deleteDoc(doc(firestore, 'nodes', node.nid));
@@ -190,7 +190,7 @@ describe('NodeSearchService Integration Tests', () => {
     }
 
     describe('searchByText', () => {
-        it('should find nodes by text content', async () => {
+        it('should find libs by text content', async () => {
             const results = await nodeSearchService.searchByText('text processing');
             
             expect(results).toBeDefined();
@@ -209,7 +209,7 @@ describe('NodeSearchService Integration Tests', () => {
             }
         }, 30000);
 
-        it('should find math-related nodes', async () => {
+        it('should find math-related libs', async () => {
             const results = await nodeSearchService.searchByText('mathematics calculator arithmetic');
             
             expect(results).toBeDefined();
@@ -227,7 +227,7 @@ describe('NodeSearchService Integration Tests', () => {
             
             expect(results).toBeDefined();
             expect(Array.isArray(results)).toBe(true);
-            // Should return popular/official nodes
+            // Should return popular/official libs
         }, 30000);
 
         it('should handle non-existent search terms', async () => {
@@ -235,31 +235,31 @@ describe('NodeSearchService Integration Tests', () => {
             
             expect(results).toBeDefined();
             expect(Array.isArray(results)).toBe(true);
-            // Results might be empty or return similar nodes
+            // Results might be empty or return similar libs
         }, 30000);
     });
 
     describe('searchByCategory', () => {
-        it('should find Official trust level nodes', async () => {
+        it('should find Official trust level libs', async () => {
             const results = await nodeSearchService.searchByCategory('Official');
             
             expect(results).toBeDefined();
             expect(Array.isArray(results)).toBe(true);
             
-            // Filter results to only test nodes for verification
+            // Filter results to only test libs for verification
             const testResults = results.filter(r => r.id.includes('-int'));
             testResults.forEach(node => {
                 expect(node.trust_level).toBe('Official');
             });
         }, 30000);
 
-        it('should find Trusted trust level nodes', async () => {
+        it('should find Trusted trust level libs', async () => {
             const results = await nodeSearchService.searchByCategory('Trusted');
             
             expect(results).toBeDefined();
             expect(Array.isArray(results)).toBe(true);
             
-            // Filter results to only test nodes for verification
+            // Filter results to only test libs for verification
             const testResults = results.filter(r => r.id.includes('-int'));
             testResults.forEach(node => {
                 expect(node.trust_level).toBe('Trusted');
@@ -268,18 +268,18 @@ describe('NodeSearchService Integration Tests', () => {
     });
 
     describe('searchBySocketType', () => {
-        it('should find nodes with string input sockets', async () => {
+        it('should find libs with string input sockets', async () => {
             const results = await nodeSearchService.searchBySocketType('string', true);
             
             expect(results).toBeDefined();
             expect(Array.isArray(results)).toBe(true);
             
-            // Should find nodes that accept string inputs
+            // Should find libs that accept string inputs
             const stringInputNodes = results.filter(r => r.id.includes('-int'));
             expect(stringInputNodes.length).toBeGreaterThan(0);
         }, 30000);
 
-        it('should find nodes with number output sockets', async () => {
+        it('should find libs with number output sockets', async () => {
             const results = await nodeSearchService.searchBySocketType('number', false);
             
             expect(results).toBeDefined();
@@ -323,12 +323,12 @@ describe('NodeSearchService Integration Tests', () => {
             
             expect(results).toBeDefined();
             expect(Array.isArray(results)).toBe(true);
-            // Should return some suggested nodes
+            // Should return some suggested libs
         }, 30000);
     });
 
     describe('searchByTags', () => {
-        it('should find nodes by math tags', async () => {
+        it('should find libs by math tags', async () => {
             const results = await nodeSearchService.searchByTags(['math', 'arithmetic']);
             
             expect(results).toBeDefined();
@@ -341,7 +341,7 @@ describe('NodeSearchService Integration Tests', () => {
             }
         }, 30000);
 
-        it('should find nodes by image tags', async () => {
+        it('should find libs by image tags', async () => {
             const results = await nodeSearchService.searchByTags(['image', 'photo']);
             
             expect(results).toBeDefined();
@@ -369,13 +369,13 @@ describe('NodeSearchService Integration Tests', () => {
     });
 
     describe('getPopularNodes', () => {
-        it('should return popular nodes', async () => {
+        it('should return popular libs', async () => {
             const results = await nodeSearchService.getPopularNodes();
             
             expect(results).toBeDefined();
             expect(Array.isArray(results)).toBe(true);
             
-            // Should return some nodes (might include test nodes or existing nodes)
+            // Should return some libs (might include test libs or existing libs)
             if (results.length > 0) {
                 expect(results[0]).toHaveProperty('id');
                 expect(results[0]).toHaveProperty('title');

@@ -27,9 +27,9 @@ type JSNodeType @table {
 }
 
 enum TrustLevel {
-	OFFICIAL # Officially supported and maintained nodes
+	OFFICIAL # Officially supported and maintained libs
 	TRUSTED # Nodes from trusted sources, thoroughly reviewed
-	UNOFFICIAL_COMMUNITY # Community-created nodes, variable quality
+	UNOFFICIAL_COMMUNITY # Community-created libs, variable quality
 	UNTRUSTED # Nodes from unverified sources, use with caution
 	MARKED_AS_MALICIOUS # Nodes flagged as potentially malicious
 	MALICIOUS # Nodes known to be malicious, avoid using

@@ -1,6 +1,6 @@
 /**
  * Unit tests for AI Inference Nodes
- * Tests AI inference nodes by calling them through the Firestore node blueprint system
+ * Tests AI inference libs by calling them through the Firestore node blueprint system
  *
  * These tests use the real AI inference service without mocking
  */

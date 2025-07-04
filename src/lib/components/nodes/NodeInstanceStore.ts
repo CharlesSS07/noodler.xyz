@@ -1,52 +1,20 @@
 import {
-    writable,
     derived,
-    type Writable,
     type Readable,
     readable,
     get,
-    type Subscriber,
-    type Unsubscriber,
 } from 'svelte/store';
 import { type NodeConnection, useNodeConnections } from '@xyflow/svelte';
 import {
     projectActions,
     projectComputedDataCache,
     projectNodes,
-    projectState,
 } from '$lib/stores/ProjectState';
 import type { Unsubscribe } from 'firebase/firestore';
-import { FirestoreNodeBluePrintControllerFactoryInterface } from '$lib/compositor/nodes/firestore/FirestoreNodeBluePrint';
 import { type Node } from '@xyflow/svelte';
 import type { ExecutionStatus } from '$lib/compositor/ComputedDataCache';
-import {
-    NodeBluePrint,
-    type NodeBluePrintControllerFactoryInterface,
-} from '$lib/compositor/nodes/NodeBluePrint';
-
-/**
- * sveltefire, which I have been using to access data in firestore reactivley in svelte has it's custom
- * reactivity, so this is an adapter which allows me to use sveltefire like it's really reactive.
- */
-type DocStoreSubscriptionType<T> = {
-    subscribe: (cb: (value: T | null) => void) => void | (() => void);
-};
-class ReadableDocStoreWrapper<T> implements Readable<T> {
-    docStore: DocStoreSubscriptionType<T>;
-
-    constructor(docStore: DocStoreSubscriptionType<T>) {
-        this.docStore = docStore;
-    }
-
-    subscribe(run: Subscriber<T>, invalidate?: () => void): Unsubscriber {
-        function wrapper(value: T | null) {
-            if (value) run(value);
-        }
-        const ret = this.docStore.subscribe(wrapper);
-        if (ret) return ret;
-        return () => {};
-    }
-}
+import type {FirestoreNodeBluePrintModel} from "../../../../functions/src/nodeBlueprints/libs/FirestoreNodeBluePrint";
+import {createNodeBluePrintStore} from "$lib/compositor/NodeBluePrint";
 
 export abstract class InputSocketState {
     private readonly node: NodeInstanceStore;
@@ -64,9 +32,6 @@ export abstract class InputSocketState {
     abstract update(newValue: unknown): void;
 }
 
-const blueprintFactory: NodeBluePrintControllerFactoryInterface =
-    new FirestoreNodeBluePrintControllerFactoryInterface();
-
 /**
  * Reactive stores and utilities for node components
  * Centralizes common patterns used across all node implementations
@@ -81,7 +46,7 @@ export class NodeInstanceStore {
     public nid: Readable<string | undefined>;
 
     // Node blueprint store
-    public nodeBluePrint: Readable<NodeBluePrint | undefined>;
+    public nodeBluePrint: Readable<FirestoreNodeBluePrintModel | undefined>;
     public executionStatus: Readable<ExecutionStatus | undefined>;
 
     private unsubscribers: Unsubscribe[] = [];
@@ -151,10 +116,9 @@ export class NodeInstanceStore {
         // Initialize blueprint if nid is provided
         this.nodeBluePrint = derived(this.nid, ($nid, set) => {
             if ($nid) {
-                blueprintFactory
-                    .getNodeBluePrintFromNID($nid)
-                    .then((nbp) => set(nbp));
-                return;
+                return createNodeBluePrintStore($nid).subscribe((blueprint) => {
+                    set(blueprint);
+                });
             }
             set(undefined);
         });
@@ -183,20 +147,20 @@ export class NodeInstanceStore {
                     const newInput: Record<string, unknown> = {};
                     let updated = false;
 
-                    if (blueprint.inputSockets) {
-                        blueprint.inputSocketOrder.forEach((socketId) => {
+                    if (blueprint.input_sockets) {
+                        blueprint.input_socket_order.forEach((socketId) => {
                             if (
                                 !Object.keys($nodeInputDataStore).includes(
                                     socketId
                                 )
                             ) {
                                 const socketIdx =
-                                    blueprint.inputSocketOrder.indexOf(
+                                    blueprint.input_socket_order.indexOf(
                                         socketId
                                     );
                                 if (socketIdx === -1) return;
                                 newInput[socketId] =
-                                    blueprint.inputSockets[
+                                    blueprint.input_sockets[
                                         socketIdx
                                     ].params.default_value;
                                 updated = true;
@@ -330,7 +294,7 @@ export class NodeInstanceStore {
                     return;
                 }
 
-                $nodeBluePrint.inputSocketOrder.map((socketId: string) => {
+                $nodeBluePrint.input_socket_order.map((socketId: string) => {
                     function returnSocketState(socket: InputSocketState) {
                         socketStates.set(socketId, socket);
                     }

@@ -1,5 +1,5 @@
 /**
- * Comprehensive test suite for all nodes in FirestoreStandardNodeSet.ts
+ * Comprehensive test suite for all libs in FirestoreStandardNodeSet.ts
  * Tests every node type available in the standard node library
  *
  * This file systematically tests each node category:

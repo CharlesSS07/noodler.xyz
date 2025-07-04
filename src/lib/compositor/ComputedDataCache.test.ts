@@ -80,7 +80,7 @@ describe('ComputedDataCache', () => {
             unsubscribe();
         });
 
-        it('should handle multiple nodes with separate error stores', async () => {
+        it('should handle multiple libs with separate error stores', async () => {
             const outputKeys = new Set(['output1']);
             const returner1 = new OutputSocketAsyncReturner(
                 cache,
@@ -96,7 +96,7 @@ describe('ComputedDataCache', () => {
             const errorStore1 = cache.useNodeErrorStore('node-1');
             const errorStore2 = cache.useNodeErrorStore('node-2');
 
-            // Set errors for different nodes
+            // Set errors for different libs
             await returner1.errorMessage('Error from node 1');
             await returner2.errorMessage('Error from node 2');
 
@@ -280,11 +280,11 @@ describe('ComputedDataCache', () => {
             expect(secondFinish.startedAt).toBe(secondStart.startedAt);
         });
 
-        it('should handle execution status for multiple nodes independently', async () => {
+        it('should handle execution status for multiple libs independently', async () => {
             const executionStore1 = cache.useNodeExecutionStatusStore('node-1');
             const executionStore2 = cache.useNodeExecutionStatusStore('node-2');
 
-            // Start execution for both nodes
+            // Start execution for both libs
             cache.nodeExecutionStarted('node-1');
             cache.nodeExecutionStarted('node-2');
 

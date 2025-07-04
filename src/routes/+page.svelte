@@ -207,7 +207,7 @@
                 {#each [
                     {icon: '💬', title: 'Prompt Engineering', desc: 'Professional prompt structuring with visual templates'},
                     {icon: '☁️', title: 'Cloud-First AI', desc: 'Access powerful models without local hardware'},
-                    {icon: '🎨', title: 'Visual Logic Designer', desc: 'Drag, drop, and connect nodes without code'},
+                    {icon: '🎨', title: 'Visual Logic Designer', desc: 'Drag, drop, and connect libs without code'},
                     {icon: '🔨', title: 'API Orchestrator', desc: 'Connect multiple services and automate workflows'},
                     {icon: '🛡️', title: 'Secure Execution', desc: 'Browser-sandboxed, cloud-isolated processing'},
                     {icon: '🧠', title: 'AI Integration', desc: 'Seamlessly integrate LLMs and AI services'},

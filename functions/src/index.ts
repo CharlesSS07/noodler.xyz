@@ -23,5 +23,6 @@ export {
   embedNodeBluePrint,
   embedAllUnembeddedNodeBluePrints,
   searchNodeBluePrints,
+  generateStandardNodeSuite,
 } from "./nodeBlueprints";
 

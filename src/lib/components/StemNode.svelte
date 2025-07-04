@@ -15,15 +15,15 @@
 
     let inputSocketStates = $derived.by<Map<string, InputSocketState>>(() => {
         if ($nodeBluePrint) {
-            return new Map($nodeBluePrint.inputSocketOrder.map((socketId: string) => [socketId, $allInputSocketStates.get(socketId)]));
+            return new Map($nodeBluePrint.input_socket_order.map((socketId: string) => [socketId, $allInputSocketStates.get(socketId)]));
         }
         return new Map();
     });
 
     let inputSockets = $derived.by(() => {
         if ($nodeBluePrint) {
-            return $nodeBluePrint.inputSocketOrder.map((socketId: string, idx: number) => {
-                const socketBluePrint = $nodeBluePrint.inputSockets[idx];
+            return $nodeBluePrint.input_socket_order.map((socketId: string, idx: number) => {
+                const socketBluePrint = $nodeBluePrint.input_sockets[idx];
                 const socket = inputSocketStates.get(socketId);
                 return {
                     label: socketBluePrint.label,
@@ -40,8 +40,8 @@
 
     let outputSockets = $derived.by(() => {
         if ($nodeBluePrint) {
-            return $nodeBluePrint.outputSocketOrder.map((socketId: string, idx: number) => {
-                const socketBluePrint = $nodeBluePrint.outputSockets[idx];
+            return $nodeBluePrint.output_socket_order.map((socketId: string, idx: number) => {
+                const socketBluePrint = $nodeBluePrint.output_sockets[idx];
                 return {
                     label: socketBluePrint.label,
                     id: socketId,

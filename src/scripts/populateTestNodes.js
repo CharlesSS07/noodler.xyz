@@ -1,4 +1,4 @@
-// Script to populate test nodes in Firestore emulator for testing NodeSearch
+// Script to populate test libs in Firestore emulator for testing NodeSearch
 import { initializeApp } from 'firebase/app';
 import {
     connectFirestoreEmulator,
@@ -99,7 +99,7 @@ const testNodes = [
 ];
 
 async function populateNodes() {
-    console.log('Populating test nodes in Firestore emulator...');
+    console.log('Populating test libs in Firestore emulator...');
 
     try {
         const nodesCollection = collection(firestore, 'nodes');
@@ -109,9 +109,9 @@ async function populateNodes() {
             console.log(`Added node: ${node.title} with ID: ${docRef.id}`);
         }
 
-        console.log('Successfully populated all test nodes!');
+        console.log('Successfully populated all test libs!');
     } catch (error) {
-        console.error('Error populating nodes:', error);
+        console.error('Error populating libs:', error);
     }
 }
 

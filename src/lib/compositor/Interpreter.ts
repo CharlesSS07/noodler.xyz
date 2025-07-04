@@ -1,9 +1,54 @@
-import { type Node, type Edge } from '@xyflow/svelte';
-import { FirestoreNodeBluePrintControllerFactoryInterface } from './nodes/firestore/FirestoreNodeBluePrint';
-import type { NodeBluePrint } from './nodes/NodeBluePrint';
-import { ComputedDataCache } from './ComputedDataCache';
-import { projectComputedDataCache } from '$lib/stores/ProjectState';
-import { getBigData, type BigDataRef } from './BigData';
+import {type Node, type Edge} from '@xyflow/svelte';
+import {ComputedDataCache} from './ComputedDataCache';
+import {projectComputedDataCache} from '$lib/stores/ProjectState';
+import {getBigData, type BigDataRef} from './BigData';
+import {createNodeBluePrintStore} from "$lib/compositor/NodeBluePrint";
+import {get} from "svelte/store";
+import {utils} from "$lib/compositor/NodeEnvironment";
+
+async function callNodeBlueprint(
+    nid: string,
+    code: string,
+    inputs: Record<string, unknown>,
+    outputs: OutputSocketAsyncReturner
+): Promise<void> {
+    try {
+
+        if (!code || code.trim() === '') {
+            throw new Error(`No code defined for node: ${nid}`);
+        }
+
+        console.log(`[DEBUG] Executing code for ${nid}:`, code);
+
+        const executionContext = {
+            inputs,
+            outputs,
+            utils: utils,
+            console: console,
+        };
+
+        const asyncFunction = new Function(
+            'inputs',
+            'outputs',
+            'utils',
+            'console',
+            `return (async function() {
+    ${code}
+})();`
+        );
+
+// Execute the code with the context
+        await asyncFunction(
+            executionContext.inputs,
+            executionContext.outputs,
+            executionContext.utils,
+            executionContext.console
+        );
+    } catch (error) {
+        console.error(`Error executing node ${nid}:`, error);
+        throw new Error(`Error during execution of ${nid}: ${error}`);
+    }
+}
 
 export class OutputSocketAsyncReturner {
     /**
@@ -40,16 +85,16 @@ export async function executeFlowGraph(
     edges: Edge[]
 ): Promise<void> {
     /**
-     * 1. Build a dependency graph of nodes that start_node_id depends on (ignore all others)
-     * 2. Begin executing the source nodes, i.e. the nodes that everything depends on
+     * 1. Build a dependency graph of libs that start_node_id depends on (ignore all others)
+     * 2. Begin executing the source libs, i.e. the libs that everything depends on
      * 3. When a socket yields it's output, this should be final
      * 4. When all the sockets for a node are ready, execute that node.
      * 5. Store sockets in the global instance of OutputSocketDataCache in projectState
-     * 6. When a socket is yielded, check the state and any nodes that are ready should begin async execution
+     * 6. When a socket is yielded, check the state and any libs that are ready should begin async execution
      * 7. Nodes are executed by calling the execute function. I will fill it in later.
      */
 
-    // 1. Build dependency graph
+        // 1. Build dependency graph
     const dependencyGraph = buildDependencyGraph(start_node_id, nodes, edges);
     const relevantNodes = Array.from(dependencyGraph.keys());
 
@@ -65,27 +110,19 @@ export async function executeFlowGraph(
         }
     });
 
-    const factory = new FirestoreNodeBluePrintControllerFactoryInterface();
-
     // Load all node blueprints in parallel
-    const relevantNodeBluePrintsLookup = new Map<string, NodeBluePrint>();
-    const blueprintPromises = relevantNids.map((nid) =>
-        factory.getNodeBluePrintFromNID(nid)
-    );
-    const blueprints = await Promise.all(blueprintPromises);
+    const relevantNodeBluePrintsLookup = new Map(relevantNids.map(
+        (nid) =>
+            [nid, createNodeBluePrintStore(nid)]
+    ));
 
-    // Build the lookup map
-    for (let i = 0; i < relevantNids.length; i++) {
-        relevantNodeBluePrintsLookup.set(relevantNids[i], blueprints[i]);
-    }
-
-    // Find sink nodes (nodes with no dependencies)
+    // Find sink libs (libs with no dependencies)
     const sinkNodes = relevantNodes.filter((nodeId) => {
         const dependencies = dependencyGraph.get(nodeId) || [];
         return dependencies.length === 0;
     });
 
-    // Track which nodes have been executed
+    // Track which libs have been executed
     const executedNodes = new Set<string>();
     const executingNodes = new Set<string>();
 
@@ -105,21 +142,26 @@ export async function executeFlowGraph(
 
         try {
             const node = nodes.find((n) => n.id === nodeId);
-            if (!node || !node.data?.nid) {
+            const nid = node?.data?.nid as string;
+            if (!node || !nid) {
                 throw new Error(`Node ${nodeId} not found or missing nid`);
             }
 
             const nodeBlueprint = relevantNodeBluePrintsLookup.get(
-                node.data.nid as string
+                nid as string
             );
             if (!nodeBlueprint) {
+                throw new Error("Node blueprint not found");
+            }
+            const $nodeBlueprint = get(nodeBlueprint);
+            if (!$nodeBlueprint) {
                 throw new Error(
-                    `NodeBlueprint not found for nid: ${node.data.nid}`
+                    `NodeBlueprint not yet loaded or not found for nid: ${nid}`
                 );
             }
 
             // Create output returner
-            const outputSocketIds = new Set(nodeBlueprint.outputSocketOrder);
+            const outputSocketIds = new Set($nodeBlueprint.output_socket_order);
             // set up return data & error handling
             const outputReturner = new OutputSocketAsyncReturner(
                 projectComputedDataCache,
@@ -135,11 +177,11 @@ export async function executeFlowGraph(
                     projectComputedDataCache
                 );
 
-                if (nodeBlueprint.input_spec_strict) {
+                if ($nodeBlueprint.input_spec_strict) {
                     // Check that input data and node blueprint spec inputs align
                     const inputDataSocketKeys = new Set(Object.keys(inputData));
                     const inputSocketKeysSpec = new Set(
-                        nodeBlueprint.inputSocketOrder
+                        $nodeBlueprint.input_socket_order
                     );
 
                     // Check for extra socket keys (inputDataSocketKeys - inputSocketKeysSpec)
@@ -164,13 +206,17 @@ export async function executeFlowGraph(
                     // TODO: input socket data type checking
                 }
 
-                console.log(`${nodeId} ▶️ (${nodeBlueprint.nid}) with args:`);
+                console.log(`${nodeId} ▶️ (${nid}) with args:`);
                 console.dir(inputData);
 
                 // Execute the node
                 projectComputedDataCache.nodeExecutionStarted(nodeId);
-                await nodeBlueprint
-                    .call(inputData, outputReturner)
+                await callNodeBlueprint(
+                    nid,
+                    $nodeBlueprint.user_defined_code,
+                    inputData,
+                    outputReturner
+                )
                     .then(() => {
                         console.log(`${nodeId} ✅`, outputReturner);
                     })
@@ -178,7 +224,7 @@ export async function executeFlowGraph(
                         console.error(`${nodeId} ❌`);
                         projectComputedDataCache.nodeExecutionLog(
                             nodeId,
-                            { error: true },
+                            {error: true},
                             err.message || String(err)
                         );
                         throw err;
@@ -191,7 +237,7 @@ export async function executeFlowGraph(
                 executedNodes.add(nodeId);
                 executingNodes.delete(nodeId);
 
-                // Check if any other nodes are now ready for execution
+                // Check if any other libs are now ready for execution
                 const readyNodes = relevantNodes.filter(
                     (id) =>
                         !executedNodes.has(id) &&
@@ -200,7 +246,7 @@ export async function executeFlowGraph(
                 );
 
                 try {
-                    // Execute ready nodes concurrently
+                    // Execute ready libs concurrently
                     await Promise.all(readyNodes.map(executeNode));
                 } catch (error) {
                     // console.error(error);
@@ -212,15 +258,15 @@ export async function executeFlowGraph(
                 if (error instanceof Error) {
                     projectComputedDataCache.nodeExecutionLog(
                         nodeId,
-                        { error: true },
-                        `While executing ${nodeBlueprint.nid} id=${nodeId}:\n${error.message}`
+                        {error: true},
+                        `While executing ${nid} id=${nodeId}:\n${error.message}`
                     );
                 } else {
                     projectComputedDataCache.nodeExecutionLog(
                         nodeId,
-                        { error: true },
-                        `While executing ${nodeBlueprint.nid} id=${nodeId}:` +
-                            error
+                        {error: true},
+                        `While executing ${nid} id=${nodeId}:` +
+                        error
                     ); // !!! convert to string first!
                     // error objects are some stupid fucking shit that can't be uploaded to firebase rtdb
                     // wasted my whole fucking day figuring out Error objects cannot be serialized by JSON.stringify
@@ -235,7 +281,7 @@ export async function executeFlowGraph(
         }
     };
 
-    // Start execution with sink nodes
+    // Start execution with sink libs
     await Promise.all(sinkNodes.map(executeNode));
     return Promise.resolve();
 }
@@ -246,8 +292,8 @@ function buildDependencyGraph(
     edges: Edge[]
 ): Map<string, string[]> {
     /**
-     * Build a dependency graph showing which nodes each node depends on
-     * Only includes nodes that are in the dependency chain of the target node
+     * Build a dependency graph showing which libs each node depends on
+     * Only includes libs that are in the dependency chain of the target node
      */
     const dependencyGraph = new Map<string, string[]>();
     const visited = new Set<string>();

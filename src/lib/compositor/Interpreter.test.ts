@@ -14,7 +14,7 @@
  * ✅ 8 tests passing (including complex multi-node calculations)
  * 📝 1 test marked as TODO (division by zero - requires node code fix)
  *
- * The Firestore nodes DO exist and the test environment CAN access Firebase emulators properly.
+ * The Firestore libs DO exist and the test environment CAN access Firebase emulators properly.
  */
 
 // Test environment automatically connects to emulators via NODE_ENV=test check in firebase/index.ts
@@ -23,7 +23,7 @@ import { beforeEach, describe, expect, test } from 'vitest';
 import { executeFlowGraph } from './Interpreter';
 import type { Node, Edge } from '@xyflow/svelte';
 import { projectComputedDataCache } from '$lib/stores/ProjectState';
-import { FirestoreNodeBluePrintControllerFactoryInterface } from './nodes/firestore/FirestoreNodeBluePrint';
+import { FirestoreNodeBluePrintControllerFactoryInterface } from './libs/firestore/FirestoreNodeBluePrint';
 
 describe('Interpreter Flow Graph Tests', () => {
     let mockNodes: Node[];
@@ -38,9 +38,9 @@ describe('Interpreter Flow Graph Tests', () => {
     });
 
     test('Simple addition: 9 + 6 = 15', async () => {
-        // This test should now work since we confirmed the nodes exist
+        // This test should now work since we confirmed the libs exist
 
-        // Create nodes for the calculation: 9 + 6
+        // Create libs for the calculation: 9 + 6
         mockNodes = [
             {
                 id: 'const-9',
@@ -65,7 +65,7 @@ describe('Interpreter Flow Graph Tests', () => {
     });
 
     test('Chained addition: 9 + (5 + 6) = 20', async () => {
-        // Create nodes for the calculation: 9 + (5 + 6)
+        // Create libs for the calculation: 9 + (5 + 6)
         mockNodes = [
             {
                 id: 'add-inner',
@@ -359,7 +359,7 @@ describe('Interpreter Flow Graph Tests', () => {
         const { getAuth, signInAnonymously } = await import('firebase/auth');
         const { app } = await import('../../firebase');
         const { FirestoreNodeBluePrintControllerFactoryInterface } =
-            await import('./nodes/firestore/FirestoreNodeBluePrint');
+            await import('./libs/firestore/FirestoreNodeBluePrint');
 
         // Test Firebase connection
         const auth = getAuth(app);
@@ -389,7 +389,7 @@ describe('Interpreter Flow Graph Tests', () => {
         }
     });
 
-    // Working tests that don't require Firestore nodes
+    // Working tests that don't require Firestore libs
     test('Should clear output data cache properly', async () => {
         // Test that the cache clearing functionality works
         await projectComputedDataCache.cache(

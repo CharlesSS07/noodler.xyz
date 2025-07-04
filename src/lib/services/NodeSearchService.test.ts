@@ -60,7 +60,7 @@ describe('NodeSearchService', () => {
             });
         });
 
-        it('should return popular nodes when search term is empty', async () => {
+        it('should return popular libs when search term is empty', async () => {
             const mockResults = {
                 data: {
                     results: [
@@ -80,7 +80,7 @@ describe('NodeSearchService', () => {
 
             // Should call getPopularNodes instead
             expect(mockSearchFunction).toHaveBeenCalledWith({
-                query: 'popular recommended nodes',
+                query: 'popular recommended libs',
                 limit: 20, // Uses maxResults parameter from searchByText
                 trustLevelFilter: 'Official'
             });
@@ -209,7 +209,7 @@ describe('NodeSearchService', () => {
             expect(result[0].id).toBe('suggestion-node-1');
         });
 
-        it('should fallback to popular nodes on error', async () => {
+        it('should fallback to popular libs on error', async () => {
             // First call fails, second succeeds
             mockSearchFunction
                 .mockRejectedValueOnce(new Error('API Error'))

@@ -35,7 +35,7 @@ export class NodeSearchService {
     >(functions, 'searchNodeBluePrints');
 
     /**
-     * Search nodes by text matching using vector search
+     * Search libs by text matching using vector search
      */
     async searchByText(
         searchTerm: string,
@@ -55,13 +55,13 @@ export class NodeSearchService {
 
             return this.processSearchResults(result.data.results);
         } catch (error) {
-            console.error('Error searching nodes:', error);
+            console.error('Error searching libs:', error);
             return [];
         }
     }
 
     /**
-     * Search nodes by category/trust level
+     * Search libs by category/trust level
      */
     async searchByCategory(
         trustLevel?: string,
@@ -77,28 +77,28 @@ export class NodeSearchService {
 
             return this.processSearchResults(result.data.results);
         } catch (error) {
-            console.error('Error searching nodes by category:', error);
+            console.error('Error searching libs by category:', error);
             return [];
         }
     }
 
     /**
-     * Get popular/recommended nodes (Official and Trusted)
+     * Get popular/recommended libs (Official and Trusted)
      */
     async getPopularNodes(
         maxResults: number = 10
     ): Promise<NodeSearchResult[]> {
         try {
             const result = await this.searchNodeBluePrints({
-                query: 'popular recommended nodes',
+                query: 'popular recommended libs',
                 limit: maxResults,
                 trustLevelFilter: 'Official',
             });
 
-            // If no official nodes, try trusted
+            // If no official libs, try trusted
             if (result.data.results.length === 0) {
                 const trustedResult = await this.searchNodeBluePrints({
-                    query: 'popular recommended nodes',
+                    query: 'popular recommended libs',
                     limit: maxResults,
                     trustLevelFilter: 'Trusted',
                 });
@@ -107,13 +107,13 @@ export class NodeSearchService {
 
             return this.processSearchResults(result.data.results);
         } catch (error) {
-            console.error('Error getting popular nodes:', error);
+            console.error('Error getting popular libs:', error);
             return [];
         }
     }
 
     /**
-     * Search nodes by socket compatibility
+     * Search libs by socket compatibility
      */
     async searchBySocketType(
         socketType: string,
@@ -129,13 +129,13 @@ export class NodeSearchService {
 
             return this.processSearchResults(result.data.results);
         } catch (error) {
-            console.error('Error searching nodes by socket type:', error);
+            console.error('Error searching libs by socket type:', error);
             return [];
         }
     }
 
     /**
-     * Get suggested nodes based on current project context
+     * Get suggested libs based on current project context
      */
     async getSuggestedNodes(
         projectDescription?: string,
@@ -144,7 +144,7 @@ export class NodeSearchService {
         try {
             const query = projectDescription 
                 ? `suggested nodes for ${projectDescription}`
-                : 'suggested recommended nodes';
+                : 'suggested recommended libs';
             
             const result = await this.searchNodeBluePrints({
                 query,
@@ -153,14 +153,14 @@ export class NodeSearchService {
 
             return this.processSearchResults(result.data.results);
         } catch (error) {
-            console.error('Error getting suggested nodes:', error);
-            // Fallback to popular nodes
+            console.error('Error getting suggested libs:', error);
+            // Fallback to popular libs
             return this.getPopularNodes(maxResults);
         }
     }
 
     /**
-     * Search nodes by tags
+     * Search libs by tags
      */
     async searchByTags(
         tags: string[],
@@ -175,7 +175,7 @@ export class NodeSearchService {
 
             return this.processSearchResults(result.data.results);
         } catch (error) {
-            console.error('Error searching nodes by tags:', error);
+            console.error('Error searching libs by tags:', error);
             return [];
         }
     }

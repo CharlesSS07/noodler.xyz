@@ -16,7 +16,7 @@ interface SocketModel {
      * Ideas
      *
      * Instead of a disabled flag, we have the port-to socket id which explains how to migrate
-     * nodes that are already connected by swapping connections over to replacement socket
+     * libs that are already connected by swapping connections over to replacement socket
      */
 }
 

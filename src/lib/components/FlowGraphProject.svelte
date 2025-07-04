@@ -25,7 +25,7 @@
     import {projectState, projectActions, projectSync} from "$lib/stores/ProjectState";
     import {executeFlowGraph} from "$lib/compositor/Interpreter";
 
-    // Import the existing nodes
+    // Import the existing libs
 
     import NoteNode from '$lib/components/nodes/NoteNode.svelte';
     import StemNode from '$lib/components/StemNode.svelte';
@@ -106,7 +106,7 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
         };
     });
 
-    // Sync local nodes/edges with ProjectState
+    // Sync local libs/edges with ProjectState
     $effect(() => {
         if (isInitialized) {
             projectActions.setNodes(nodes);
@@ -126,7 +126,7 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
                 // Only update from ProjectState if there are no pending local changes
                 // This prevents overwriting local changes that are queued for auto-save
                 if (!state.isDirty) {
-                    // Update local nodes if they differ (ensure arrays)
+                    // Update local libs if they differ (ensure arrays)
                     const stateNodes = Array.isArray(state.nodes) ? state.nodes : [];
                     if (JSON.stringify(nodes) !== JSON.stringify(stateNodes)) {
                         nodes = [...stateNodes];
@@ -290,7 +290,7 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
 
         const newNode: Node = {
             id: `node_${Date.now()}_${Math.random().toString(36).substring(2, 2 + 9)}`,
-            type: 'node', // Use StemNode for blueprint-based nodes
+            type: 'node', // Use StemNode for blueprint-based libs
             position: {
                 x: centerX - 100, // Offset slightly from center
                 y: centerY - 25
@@ -382,7 +382,7 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
         showNodeDropdown = false;
     }
 
-    // Group nodes by category for dropdown
+    // Group libs by category for dropdown
     const nodesByCategory = $derived(() => {
         const grouped: Record<string, typeof availableNodes> = {};
         availableNodes.forEach(node => {
@@ -422,7 +422,7 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
     }
 
     function resetProject(): void {
-        if (confirm('Are you sure you want to reset the project? This will delete all nodes and edges permanently.')) {
+        if (confirm('Are you sure you want to reset the project? This will delete all libs and edges permanently.')) {
             projectActions.resetProject();
             nodes = [];
             edges = [];

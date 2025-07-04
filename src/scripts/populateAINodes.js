@@ -1,4 +1,4 @@
-// Script to populate AI inference nodes in Firestore emulator for testing
+// Script to populate AI inference libs in Firestore emulator for testing
 import { initializeApp } from 'firebase/app';
 import {
     connectFirestoreEmulator,
@@ -159,7 +159,7 @@ const aiNodes = [
 ];
 
 async function populateAINodes() {
-    console.log('Populating AI inference nodes in Firestore emulator...');
+    console.log('Populating AI inference libs in Firestore emulator...');
 
     try {
         for (const node of aiNodes) {
@@ -168,9 +168,9 @@ async function populateAINodes() {
             console.log(`Added AI node: ${node.title} with NID: ${node.nid}`);
         }
 
-        console.log('Successfully populated all AI inference nodes!');
+        console.log('Successfully populated all AI inference libs!');
     } catch (error) {
-        console.error('Error populating AI nodes:', error);
+        console.error('Error populating AI libs:', error);
     }
 }
 

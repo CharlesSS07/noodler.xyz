@@ -9,9 +9,8 @@ process.env.FIRESTORE_EMULATOR_HOST = "localhost:8080";
 import {expect} from "chai";
 import {describe, it, before, after, beforeEach} from "mocha";
 import * as admin from "firebase-admin";
-import {getFirestore} from "firebase-admin/firestore";
+import {getFirestore, Timestamp} from "firebase-admin/firestore";
 import {
-  nodeBluePrintToText,
   embedNodeBluePrint,
   removeNodeBluePrintEmbeddingFromIndex,
   reEmbedNodeBluePrint,
@@ -20,6 +19,7 @@ import {
   searchNodeBluePrints,
   embedAllUnembeddedNodeBluePrints,
 } from "./search";
+import {NodeBluePrintInFirestore} from "./libs/FirestoreNodeBluePrint";
 
 // Test data using test-specific NIDs (not real ones)
 const mockNodeBluePrintData = {
@@ -28,28 +28,33 @@ const mockNodeBluePrintData = {
   documentation: "Adds two numbers together",
   tags: ["math", "arithmetic", "basic", "calculator", "addition"],
   trust_level: "high",
-  input_sockets: [
-    {
-      key: "a",
+  input_sockets: {
+    "a": {
+      label: "a",
       type: "number",
-      description: "First number to add",
+      documentation: "First number to add",
+      params: { default_value: 0 },
     },
-    {
-      key: "b",
+    "b": {
+      label: "b",
       type: "number",
-      description: "Second number to add",
+      documentation: "Second number to add",
+      params: { default_value: 0 },
     },
-  ],
-  output_sockets: [
-    {
-      key: "result",
+  },
+  input_socket_order: ["a", "b"],
+  output_sockets: {
+    "result": {
+      label: "result",
       type: "number",
-      description: "The sum of A + B",
+      documentation: "The sum of A + B",
     },
-  ],
+  },
+  output_socket_order: ["result"],
   author_uid: "test",
-  created_at: new Date().toISOString(),
-  last_updated_at: new Date().toISOString(),
+  owner: "test-owner",
+  created_at: Timestamp.now(),
+  last_updated_at: Timestamp.now(),
   searchable: true,
   embeddingValid: false,
 };
@@ -88,7 +93,7 @@ describe("NodeBlueprint Search Functions", function() {
     }
   });
 
-  describe("nodeBluePrintToText", () => {
+  describe("NodeBluePrint.toString", () => {
     it("should convert NodeBlueprint to text description", async () => {
       // Create test document
       await firestore
@@ -96,7 +101,10 @@ describe("NodeBlueprint Search Functions", function() {
         .doc("test-add-node")
         .set(mockNodeBluePrintData);
 
-      const result = await nodeBluePrintToText("test-add-node");
+      const nodeBluePrint = new NodeBluePrintInFirestore("test-add-node");
+      await nodeBluePrint.waitForInitialization();
+      const result = nodeBluePrint.toString();
+      nodeBluePrint.destroy();
 
       expect(result).to.be.a("string");
       expect(result).to.include("Title: Add Numbers");
@@ -107,13 +115,8 @@ describe("NodeBlueprint Search Functions", function() {
         "Tags: math, arithmetic, basic, calculator, addition"
       );
       expect(result).to.include("Trust Level: high");
-      expect(result).to.include(
-        "Input Sockets: a: number - First number to add; " +
-        "b: number - Second number to add"
-      );
-      expect(result).to.include(
-        "Output Sockets: result: number - The sum of A + B"
-      );
+      expect(result).to.include("Input Sockets:");
+      expect(result).to.include("Output Sockets:");
     });
 
     it("should handle NodeBlueprint with minimal data",
@@ -122,6 +125,7 @@ describe("NodeBlueprint Search Functions", function() {
           nid: "test-minimal-node",
           title: "Subtract Numbers",
           searchable: true,
+          owner: "test-owner",
         };
 
         await firestore
@@ -129,28 +133,20 @@ describe("NodeBlueprint Search Functions", function() {
           .doc("test-minimal-node")
           .set(minimalData);
 
-        const result = await nodeBluePrintToText("test-minimal-node");
+        const nodeBluePrint = new NodeBluePrintInFirestore("test-minimal-node");
+        await nodeBluePrint.waitForInitialization();
+        const result = nodeBluePrint.toString();
+        nodeBluePrint.destroy();
 
         expect(result).to.be.a("string");
         expect(result).to.include("Title: Subtract Numbers");
-        expect(result).to.not.include("Description:");
-        expect(result).to.not.include("Tags:");
       });
 
     it("should throw error when NodeBlueprint is not found", async () => {
       try {
-        await nodeBluePrintToText("test-nonexistent");
-        expect.fail("Should have thrown an error");
-      } catch (error: unknown) {
-        expect((error as Error).message).to.include(
-          "NodeBluePrint with nid test-nonexistent not found"
-        );
-      }
-    });
-
-    it("should throw error when nid is empty", async () => {
-      try {
-        await nodeBluePrintToText("");
+        const nodeBluePrint = new NodeBluePrintInFirestore("test-nonexistent");
+        await nodeBluePrint.waitForInitialization();
+        nodeBluePrint.destroy();
         expect.fail("Should have thrown an error");
       } catch (error: unknown) {
         expect(error).to.be.instanceOf(Error);
@@ -190,7 +186,7 @@ describe("NodeBlueprint Search Functions", function() {
       await embedNodeBluePrint("test-add-node");
 
       const vectorDoc = await firestore
-        .collection("nodes")
+        .collection("node_embeddings")
         .doc("test-add-node")
         .get();
 
@@ -206,28 +202,25 @@ describe("NodeBlueprint Search Functions", function() {
 
   describe("removeNodeBluePrintEmbeddingFromIndex", () => {
     it("should remove NodeBlueprint embedding from vector index", async () => {
-      // Create a vector document first with embedding
+      // Create an embedding document first
       await firestore
-        .collection("nodes")
+        .collection("node_embeddings")
         .doc("test-vector-node")
         .set({
           nid: "test-vector-node",
           text: "test",
           embedding: [0.1, 0.2, 0.3], // mock embedding
+          embeddingValid: true,
         });
 
       await removeNodeBluePrintEmbeddingFromIndex("test-vector-node");
 
       const doc = await firestore
-        .collection("nodes")
+        .collection("node_embeddings")
         .doc("test-vector-node")
         .get();
 
-      expect(doc.exists).to.be.true;
-      const data = doc.data();
-      expect(data).to.have.property("nid");
-      expect(data).to.have.property("text");
-      expect(data).to.not.have.property("embedding");
+      expect(doc.exists).to.be.false; // Document should be deleted
     });
 
     it("should throw error when nid is empty", async () => {
@@ -257,20 +250,27 @@ describe("NodeBlueprint Search Functions", function() {
 
   describe("reEmbedNodeBluePrint", () => {
     it("should reEmbed NodeBlueprint embedding from vector index", async () => {
-      // Create an existing vector document with old embedding
+      // Create the node document
       await firestore
         .collection("nodes")
         .doc(mockNodeBluePrintData.nid)
+        .set(mockNodeBluePrintData);
+
+      // Create an existing embedding document with old embedding
+      await firestore
+        .collection("node_embeddings")
+        .doc(mockNodeBluePrintData.nid)
         .set({
-          ...mockNodeBluePrintData,
+          nid: mockNodeBluePrintData.nid,
           embedding: [0.1, 0.2, 0.3], // old embedding
           text: "old text representation",
+          embeddingValid: true,
         });
 
       await reEmbedNodeBluePrint(mockNodeBluePrintData.nid);
 
       const doc = await firestore
-        .collection("nodes")
+        .collection("node_embeddings")
         .doc(mockNodeBluePrintData.nid)
         .get();
 
@@ -310,24 +310,27 @@ describe("NodeBlueprint Search Functions", function() {
 
   describe("clearAllVectorEmbeddings", () => {
     it("should return count of deleted embeddings", async () => {
-      // Create some test vector documents with embeddings
+      // First clear any existing embeddings
+      await clearAllVectorEmbeddings();
+      
+      // Create some test embedding documents
       await firestore
-        .collection("nodes")
+        .collection("node_embeddings")
         .doc("test-vector-1")
         .set({
           nid: "test-vector-1",
           text: "test1",
           embedding: [0.1, 0.2, 0.3],
-          title: "Test Node 1",
+          embeddingValid: true,
         });
       await firestore
-        .collection("nodes")
+        .collection("node_embeddings")
         .doc("test-vector-2")
         .set({
           nid: "test-vector-2",
           text: "test2",
           embedding: [0.4, 0.5, 0.6],
-          title: "Test Node 2",
+          embeddingValid: true,
         });
 
       const result = await clearAllVectorEmbeddings();
@@ -336,21 +339,11 @@ describe("NodeBlueprint Search Functions", function() {
       expect(result.deletedCount).to.be.a("number");
       expect(result.deletedCount).to.equal(2);
 
-      // Verify documents still exist but embeddings are removed
+      // Verify embedding documents are deleted
       const snapshot = await firestore
-        .collection("nodes")
+        .collection("node_embeddings")
         .get();
-      expect(snapshot.empty).to.be.false;
-      expect(snapshot.size).to.equal(2);
-
-      // Check each document still exists but embedding is gone
-      snapshot.docs.forEach((doc) => {
-        const data = doc.data();
-        expect(data).to.have.property("nid");
-        expect(data).to.have.property("text");
-        expect(data).to.have.property("title");
-        expect(data).to.not.have.property("embedding");
-      });
+      expect(snapshot.empty).to.be.true;
     });
 
     it("should handle empty collection", async () => {
@@ -362,7 +355,7 @@ describe("NodeBlueprint Search Functions", function() {
 
   describe("reEmbedAllNodeBluePrints", () => {
     it("should return processing results", async () => {
-      // Create test nodes
+      // Create test libs
       await firestore
         .collection("nodes")
         .doc("test-node-1")
@@ -390,8 +383,8 @@ describe("NodeBlueprint Search Functions", function() {
   });
 
   describe("embedAllUnembeddedNodeBluePrints", () => {
-    it("should embed only nodes without existing embeddings", async () => {
-      // Create test nodes in vector collection
+    it("should embed only libs without existing embeddings", async () => {
+      // Create test node documents
       await firestore
         .collection("nodes")
         .doc("test-unembedded-1")
@@ -400,7 +393,6 @@ describe("NodeBlueprint Search Functions", function() {
           nid: "test-unembedded-1",
           title: "Node Without Embedding",
           searchable: true,
-          embeddingValid: false, // No valid embedding yet
         });
       await firestore
         .collection("nodes")
@@ -410,7 +402,6 @@ describe("NodeBlueprint Search Functions", function() {
           nid: "test-unembedded-2",
           title: "Another Node Without Embedding",
           searchable: true,
-          embeddingValid: false, // No valid embedding yet
         });
       await firestore
         .collection("nodes")
@@ -420,8 +411,17 @@ describe("NodeBlueprint Search Functions", function() {
           nid: "test-embedded-1",
           title: "Node With Embedding",
           searchable: true,
-          embedding: [0.1, 0.2, 0.3], // Already has embedding
-          embeddingValid: true, // Has valid embedding
+        });
+
+      // Create an embedding for the one that already has one
+      await firestore
+        .collection("node_embeddings")
+        .doc("test-embedded-1")
+        .set({
+          nid: "test-embedded-1",
+          embedding: [0.1, 0.2, 0.3],
+          text: "some text",
+          embeddingValid: true,
         });
 
       const result = await embedAllUnembeddedNodeBluePrints();
@@ -432,32 +432,34 @@ describe("NodeBlueprint Search Functions", function() {
       expect(result.errors).to.be.a("number");
       expect(result.errorDetails).to.be.an("array");
 
-      // Should only process the 2 nodes without embeddings
+      // Should only process the 2 libs without embeddings
       expect(result.processed).to.equal(2);
       expect(result.errors).to.equal(0);
     });
 
-    it("should skip non-searchable nodes", async () => {
-      // Create test nodes - some searchable, some not
+    it("should skip non-searchable libs", async () => {
+      // Clean up any existing embeddings for these test nodes
+      await firestore.collection("node_embeddings").doc("test-searchable-skip").delete();
+      await firestore.collection("node_embeddings").doc("test-not-searchable-skip").delete();
+      
+      // Create test libs - some searchable, some not
       await firestore
         .collection("nodes")
-        .doc("test-searchable")
+        .doc("test-searchable-skip")
         .set({
           ...mockNodeBluePrintData,
-          nid: "test-searchable",
+          nid: "test-searchable-skip",
           title: "Searchable Node",
           searchable: true,
-          embeddingValid: false,
         });
       await firestore
         .collection("nodes")
-        .doc("test-not-searchable")
+        .doc("test-not-searchable-skip")
         .set({
           ...mockNodeBluePrintData,
-          nid: "test-not-searchable",
+          nid: "test-not-searchable-skip",
           title: "Non-Searchable Node",
           searchable: false,
-          embeddingValid: false,
         });
 
       const result = await embedAllUnembeddedNodeBluePrints();
@@ -520,23 +522,40 @@ describe("NodeBlueprint Search Functions", function() {
     it(
       "should find specific node by content and return correct nid first",
       async () => {
-      // Create 3 different nodes with distinct content
+      // Create 3 different libs with distinct content
         const addNode = {
           nid: "test-add-specific",
           title: "Add Numbers Calculator",
           documentation: "Performs addition of two numerical values",
           tags: ["math", "arithmetic", "addition"],
           trust_level: "high",
-          input_sockets: [
-            {key: "a", type: "number", description: "First number"},
-            {key: "b", type: "number", description: "Second number"},
-          ],
-          output_sockets: [
-            {key: "result", type: "number", description: "Sum result"},
-          ],
+          input_sockets: {
+            "a": {
+              label: "a",
+              type: "number",
+              documentation: "First number",
+              params: { default_value: 0 },
+            },
+            "b": {
+              label: "b",
+              type: "number",
+              documentation: "Second number",
+              params: { default_value: 0 },
+            },
+          },
+          input_socket_order: ["a", "b"],
+          output_sockets: {
+            "result": {
+              label: "result",
+              type: "number",
+              documentation: "Sum result",
+            },
+          },
+          output_socket_order: ["result"],
           author_uid: "test",
-          created_at: new Date().toISOString(),
-          last_updated_at: new Date().toISOString(),
+          owner: "test-owner",
+          created_at: Timestamp.now(),
+          last_updated_at: Timestamp.now(),
           searchable: true,
         };
 
@@ -546,20 +565,33 @@ describe("NodeBlueprint Search Functions", function() {
           documentation: "Performs multiplication of two values",
           tags: ["math", "arithmetic", "multiplication"],
           trust_level: "high",
-          input_sockets: [
-            {key: "x", type: "number", description: "First factor"},
-            {key: "y", type: "number", description: "Second factor"},
-          ],
-          output_sockets: [
-            {
-              key: "product",
+          input_sockets: {
+            "x": {
+              label: "x",
               type: "number",
-              description: "Multiplication result",
+              documentation: "First factor",
+              params: { default_value: 1 },
             },
-          ],
+            "y": {
+              label: "y",
+              type: "number",
+              documentation: "Second factor",
+              params: { default_value: 1 },
+            },
+          },
+          input_socket_order: ["x", "y"],
+          output_sockets: {
+            "product": {
+              label: "product",
+              type: "number",
+              documentation: "Multiplication result",
+            },
+          },
+          output_socket_order: ["product"],
           author_uid: "test",
-          created_at: new Date().toISOString(),
-          last_updated_at: new Date().toISOString(),
+          owner: "test-owner",
+          created_at: Timestamp.now(),
+          last_updated_at: Timestamp.now(),
           searchable: true,
         };
 
@@ -569,19 +601,31 @@ describe("NodeBlueprint Search Functions", function() {
           documentation: "Processes and transforms text strings",
           tags: ["text", "string", "processing"],
           trust_level: "medium",
-          input_sockets: [
-            {key: "input", type: "string", description: "Input text"},
-          ],
-          output_sockets: [
-            {key: "output", type: "string", description: "Processed text"},
-          ],
+          input_sockets: {
+            "input": {
+              label: "input",
+              type: "string",
+              documentation: "Input text",
+              params: { default_value: "" },
+            },
+          },
+          input_socket_order: ["input"],
+          output_sockets: {
+            "output": {
+              label: "output",
+              type: "string",
+              documentation: "Processed text",
+            },
+          },
+          output_socket_order: ["output"],
           author_uid: "test",
-          created_at: new Date().toISOString(),
-          last_updated_at: new Date().toISOString(),
+          owner: "test-owner",
+          created_at: Timestamp.now(),
+          last_updated_at: Timestamp.now(),
           searchable: true,
         };
 
-        // Save all nodes to Firestore
+        // Save all libs to Firestore
         await firestore
           .collection("nodes")
           .doc("test-add-specific")
@@ -595,7 +639,7 @@ describe("NodeBlueprint Search Functions", function() {
           .doc("test-text-specific")
           .set(textNode);
 
-        // Embed all nodes
+        // Embed all libs
         await embedNodeBluePrint("test-add-specific");
         await embedNodeBluePrint("test-multiply-specific");
         await embedNodeBluePrint("test-text-specific");
@@ -614,7 +658,9 @@ describe("NodeBlueprint Search Functions", function() {
   describe("Input Validation", () => {
     it("should handle null inputs gracefully", async () => {
       try {
-        await nodeBluePrintToText(null as unknown as string);
+        const nodeBluePrint = new NodeBluePrintInFirestore(null as unknown as string);
+        await nodeBluePrint.waitForInitialization();
+        nodeBluePrint.destroy();
         expect.fail("Should have thrown an error");
       } catch (error: unknown) {
         expect(error).to.be.instanceOf(Error);

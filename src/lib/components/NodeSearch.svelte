@@ -50,7 +50,7 @@
         try {
             searchResults = await nodeSearchService.getPopularNodes(15);
         } catch (error) {
-            console.error('Error loading popular nodes:', error);
+            console.error('Error loading popular libs:', error);
             searchResults = [];
         } finally {
             isLoading = false;

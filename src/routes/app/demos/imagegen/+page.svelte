@@ -17,7 +17,7 @@
     import TextTemplateFillinNode from "$lib/components/nodes/text/TextTemplateFillinNode.svelte";
     import TextEditorNode from "$lib/components/nodes/text/TextEditorMarkdownNode.svelte";
 
-    // Import our custom demo nodes
+    // Import our custom demo libs
     import ForegroundSplitter from "$lib/components/dummynodes/ForegroundSplitter.svelte";
     import BackgroundGenerator from "$lib/components/dummynodes/BackgroundGenerator.svelte";
     import SmartCompositor from "$lib/components/dummynodes/SmartCompositor.svelte";
@@ -34,7 +34,7 @@
     import { Position } from "@xyflow/svelte";
     import StemNode from "$lib/components/StemNode.svelte";
 
-    // Demo workflow nodes
+    // Demo workflow libs
     let nodes = $state.raw<Node[]>([
         {
             id: 'welcome-note',
@@ -290,7 +290,7 @@ Each step uses state-of-the-art AI models for professional-quality results.
     }
 
     function resetWorkflow() {
-        // Reset all nodes to initial state
+        // Reset all libs to initial state
         nodes = [...nodes]; // Trigger reactivity
         alert('Workflow reset to initial state.');
     }
@@ -346,9 +346,9 @@ Each step uses state-of-the-art AI models for professional-quality results.
         }
     }
 
-    // Auto-layout nodes on initial load and connect edges after delay
+    // Auto-layout libs on initial load and connect edges after delay
     onMount(() => {
-        // Wait for TextTemplate nodes to generate their dynamic sockets
+        // Wait for TextTemplate libs to generate their dynamic sockets
         setTimeout(() => {
             edges = targetEdges; // Add all the edges after template sockets are ready
         }, 1000);
