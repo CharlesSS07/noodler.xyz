@@ -33,6 +33,9 @@ export default {
         files: {
             routes: 'src/routes',
         },
+        alias: {
+            $shared: 'functions/src/shared',
+        },
     },
     onwarn: (warning, handler) => {
         // Ignore warnings from examplesAndDocs folder

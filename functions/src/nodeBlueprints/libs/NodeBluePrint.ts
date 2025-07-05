@@ -1,31 +1,38 @@
-import type {
-    InputSocketModel,
-    InputSocketParams,
-    OutputSocketModel,
-    SocketID,
-} from './SocketModels.js';
+import {
+  InputSocketModel,
+  InputSocketParams,
+  OutputSocketModel,
+  SocketID,
+} from "$shared/SocketModels";
 
+/**
+ * Methods for creating NodeBluePrints
+ */
 export interface NodeBluePrintControllerFactoryInterface {
     initNewNodeBluePrint(
-        author_uid: string,
+        authorUid: string,
         hint?: string | undefined
     ): Promise<NodeBluePrint>;
 
     /**
      * This creates an official, verified operator.
-     * @param uniqueFunctionName
+     * @param {string} uniqueFunctionName - The unique function name
+     * @return {Promise<NodeBluePrint>} The created node blueprint
      */
     initOfficialNodeBluePrint(
         uniqueFunctionName: string
     ): Promise<NodeBluePrint>;
 
     /**
-     * This is not just copying all the logic and sockets, but specifies and gives credit to the node
-     * which is being spun-off by referencing that node in the predecessor_nid. Kinda like forking a
-     * git repo. This should probably be done in a cloud function but this should work.
-     * @param author_uid
+     * This is not just copying all the logic and sockets, but specifies
+     * and gives credit to the node which is being spun-off by referencing
+     * that node in the predecessor_nid. Kinda like forking a git repo.
+     * This should probably be done in a cloud function but this should work.
+     * @param {string} nid - The node ID to fork
+     * @param {string} authorUid - The author UID
+     * @return {Promise<NodeBluePrint>} The forked node blueprint
      */
-    forkNode(nid: string, author_uid: string): Promise<NodeBluePrint>;
+    forkNode(nid: string, authorUid: string): Promise<NodeBluePrint>;
 }
 
 /**
@@ -35,9 +42,10 @@ export interface NodeBluePrintControllerFactoryInterface {
  * 2. executing libs
  * 3. node design studio
  */
-
+/**
+ * Abstract base class for node blueprints.
+ */
 export abstract class NodeBluePrint {
-
     abstract get owner(): string;
     abstract set owner(uid: string);
     abstract get editors(): string[];
@@ -71,12 +79,17 @@ export abstract class NodeBluePrint {
     abstract get predecessor_nid(): string | undefined;
 
     abstract newInputSocket(
-        socket_key: SocketID,
+        socketKey: SocketID,
         socket: InputSocketModel<InputSocketParams>
     ): void;
     abstract get inputSocketOrder(): Array<SocketID>;
-    abstract get inputSockets(): Array<InputSocketModel<InputSocketParams>>;
-    // abstract migrateInputSocket(socket_key: SocketID, new_socket_key: SocketID): Promise<void>;
+    abstract get inputSockets():
+        Array<InputSocketModel<InputSocketParams>>;
+    // abstract migrateInputSocket(
+    //      socket_key: SocketID,
+    //      new_socket_key:
+    //      SocketID
+    // ): Promise<void>;
     // abstract retireInputSocket(socket_key: SocketID): Promise<void>;
     // abstract unretireInputSocket(socket_key: SocketID): Promise<void>;
 
@@ -84,12 +97,15 @@ export abstract class NodeBluePrint {
     abstract set input_spec_strict(spec_strict: boolean);
 
     abstract newOutputSocket(
-        socket_key: SocketID,
+        socketKey: SocketID,
         socket: OutputSocketModel
     ): void;
     abstract get outputSocketOrder(): Array<SocketID>;
     abstract get outputSockets(): Array<OutputSocketModel>;
-    // abstract migrateOutputSocket(socket_key: SocketID, new_socket_key: SocketID): Promise<void>;
+    // abstract migrateOutputSocket(
+    //      socket_key: SocketID,
+    //      new_socket_key: SocketID
+    // ): Promise<void>;
     // abstract retireOutputSocket(socket_key: SocketID): Promise<void>;
     // abstract unretireOutputSocket(socket_key: SocketID): Promise<void>;
 
@@ -121,51 +137,53 @@ export abstract class NodeBluePrint {
      * @return {string} Text description of the NodeBluePrint
      */
     toString(): string {
-        const parts: string[] = [];
+      const parts: string[] = [];
 
-        // Add title
-        if (this.title) {
-            parts.push(`Title: ${this.title}`);
-        }
+      // Add title
+      if (this.title) {
+        parts.push(`Title: ${this.title}`);
+      }
 
-        // Add documentation/description
-        if (this.documentation) {
-            parts.push(`Description: ${this.documentation}`);
-        }
+      // Add documentation/description
+      if (this.documentation) {
+        parts.push(`Description: ${this.documentation}`);
+      }
 
-        // Add tags
-        if (this.tags && this.tags.length > 0) {
-            parts.push(`Tags: ${this.tags.join(", ")}`);
-        }
+      // Add tags
+      if (this.tags && this.tags.length > 0) {
+        parts.push(`Tags: ${this.tags.join(", ")}`);
+      }
 
-        // Add trust level
-        if (this.trust_level) {
-            parts.push(`Trust Level: ${this.trust_level}`);
-        }
+      // Add trust level
+      if (this.trust_level) {
+        parts.push(`Trust Level: ${this.trust_level}`);
+      }
 
-        // Add input specifications
-        if (this.inputSockets && this.inputSockets.length > 0) {
-            const inputSpecs = this.inputSockets.map(
-                socket => {
-                    return `${socket.label}(${socket.type}): ${socket.documentation}`;
-                }
-            ).join("; ");
-            parts.push(`Input Sockets: ${inputSpecs}`);
-        }
+      // Add input specifications
+      if (this.inputSockets && this.inputSockets.length > 0) {
+        const inputSpecs = this.inputSockets.map(
+          (socket) => {
+            return `${socket.label}(${socket.type}): ${
+              socket.documentation}`;
+          }
+        ).join("; ");
+        parts.push(`Input Sockets: ${inputSpecs}`);
+      }
 
-        // Add output specifications
-        if (this.outputSockets && this.outputSockets.length > 0) {
-            const outputSpecs = this.outputSockets.map(
-                socket => {
-                    return `${socket.label}(${socket.type}): ${socket.documentation}`;
-                }
-            ).join("; ");
-            parts.push(`Output Sockets: ${outputSpecs}`);
-        }
+      // Add output specifications
+      if (this.outputSockets && this.outputSockets.length > 0) {
+        const outputSpecs = this.outputSockets.map(
+          (socket) => {
+            return `${socket.label}(${socket.type}): ${
+              socket.documentation}`;
+          }
+        ).join("; ");
+        parts.push(`Output Sockets: ${outputSpecs}`);
+      }
 
-        // todo use llmFlow to summarize what code does, and add the summary to the description
+      // todo use llmFlow to summarize what code does,
+      //  and add the summary to the description
 
-        return parts.join("\n\n");
+      return parts.join("\n\n");
     }
-
 }

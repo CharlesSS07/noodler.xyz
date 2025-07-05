@@ -12,7 +12,11 @@
     "target": "es2017",
     "skipLibCheck": true,
     "lib": ["es2017"],
-    "types": ["node", "mocha", "chai"]
+    "types": ["node", "mocha", "chai"],
+    "baseUrl": ".",
+    "paths": {
+      "$shared/*": ["src/shared/*"]
+    }
   },
   "compileOnSave": true,
   "include": [
@@ -20,6 +24,5 @@
   ],
   "exclude": [
     "node_modules",
-    "scripts/examples/huggingfaceInferenceAPI.ts"
   ]
 }

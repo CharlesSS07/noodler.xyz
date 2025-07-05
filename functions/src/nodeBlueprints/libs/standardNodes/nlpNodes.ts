@@ -1,81 +1,81 @@
-import type { NodeBluePrintControllerFactoryInterface } from '$lib/compositor/libs/NodeBluePrint.js';
-import { FirestoreNodeBluePrintControllerFactoryInterface } from '$lib/compositor/libs/firestore/FirestoreNodeBluePrint.js';
+import type {
+  NodeBluePrintControllerFactoryInterface} from "../NodeBluePrint.js";
 import {
-    NumberSocketParamsBuilder,
-    StringSocketParamsBuilder,
-} from '$lib/compositor/SocketParamBuilders.js';
-import { STANDARD_DATATYPES } from '$lib/compositor/DataTypes.js';
+  FirestoreNodeBluePrintControllerFactoryInterface,
+} from "../FirestoreNodeBluePrint.js";
+import {
+  StringSocketParamsBuilder,
+  NumberSocketParamsBuilder,
+} from "../SocketParamBuilders.js";
+import {STANDARD_DATATYPES} from "$shared/DataTypes";
 
 const factory: NodeBluePrintControllerFactoryInterface =
     new FirestoreNodeBluePrintControllerFactoryInterface();
 
+/**
+ * Creates and configures nlpNodes nodes.
+ * @return {Promise<void>} Promise that resolves when nodes are created
+ */
 export async function nlpNodes() {
-    // GENKIT SUMMARIZATION NODE
-    const genkitSummarization = await factory.initOfficialNodeBluePrint(
-        'genkit_summarization'
-    );
-    genkitSummarization.title = 'GenKit Summarization';
-    genkitSummarization.documentation =
-        'Advanced text summarization using Google GenKit with Gemini AI.';
-    genkitSummarization.tags = [
-        'ai',
-        'text',
-        'remote',
-        'summarization',
-        'genkit',
-        'gemini',
-    ];
+  // GENKIT SUMMARIZATION NODE
+  const genkitSummarization = await factory.initOfficialNodeBluePrint(
+    "genkit_summarization"
+  );
+  genkitSummarization.title = "GenKit Summarization";
+  genkitSummarization.documentation =
+        "Advanced text summarization using Google GenKit with Gemini AI.";
+  genkitSummarization.tags = [
+    "ai",
+    "text",
+    "remote",
+    "summarization",
+    "genkit",
+    "gemini",
+  ];
 
-    genkitSummarization.newInputSocket('content', {
-        label: 'Content to Summarize',
-        documentation: 'Text content to be summarized.',
-        type: STANDARD_DATATYPES.STRING,
-        params: new StringSocketParamsBuilder('').asParagraph().build(),
-    });
+  genkitSummarization.newInputSocket("content", {
+    label: "Content to Summarize",
+    documentation: "Text content to be summarized.",
+    type: STANDARD_DATATYPES.STRING,
+    params: new StringSocketParamsBuilder("").asParagraph().build()});
 
-    genkitSummarization.newInputSocket('maxLength', {
-        label: 'Max Length',
-        documentation: 'Maximum length of the summary in words.',
-        type: STANDARD_DATATYPES.NUMBER,
-        params: new NumberSocketParamsBuilder(150)
-            .setMin(10)
-            .setMax(500)
-            .build(),
-    });
+  genkitSummarization.newInputSocket("maxLength", {
+    label: "Max Length",
+    documentation: "Maximum length of the summary in words.",
+    type: STANDARD_DATATYPES.NUMBER,
+    params: new NumberSocketParamsBuilder(150)
+      .setMin(10)
+      .setMax(500)
+      .build()});
 
-    genkitSummarization.newInputSocket('style', {
-        label: 'Summary Style',
-        documentation:
-            'Style of summarization: brief, detailed, or bullet-points.',
-        type: STANDARD_DATATYPES.STRING,
-        params: new StringSocketParamsBuilder('brief').build(),
-    });
+  genkitSummarization.newInputSocket("style", {
+    label: "Summary Style",
+    documentation:
+      "Style of summarization: brief, detailed, or bullet-points.",
+    type: STANDARD_DATATYPES.STRING,
+    params: new StringSocketParamsBuilder("brief").build()});
 
-    genkitSummarization.newOutputSocket('summary', {
-        label: 'Summary',
-        documentation: 'The generated summary text.',
-        type: STANDARD_DATATYPES.STRING,
-    });
+  genkitSummarization.newOutputSocket("summary", {
+    label: "Summary",
+    documentation: "The generated summary text.",
+    type: STANDARD_DATATYPES.STRING});
 
-    genkitSummarization.newOutputSocket('originalLength', {
-        label: 'Original Length',
-        documentation: 'Character count of the original content.',
-        type: STANDARD_DATATYPES.NUMBER,
-    });
+  genkitSummarization.newOutputSocket("originalLength", {
+    label: "Original Length",
+    documentation: "Character count of the original content.",
+    type: STANDARD_DATATYPES.NUMBER});
 
-    genkitSummarization.newOutputSocket('summaryLength', {
-        label: 'Summary Length',
-        documentation: 'Character count of the generated summary.',
-        type: STANDARD_DATATYPES.NUMBER,
-    });
+  genkitSummarization.newOutputSocket("summaryLength", {
+    label: "Summary Length",
+    documentation: "Character count of the generated summary.",
+    type: STANDARD_DATATYPES.NUMBER});
 
-    genkitSummarization.newOutputSocket('compressionRatio', {
-        label: 'Compression Ratio',
-        documentation: 'Ratio of summary length to original length (0-1).',
-        type: STANDARD_DATATYPES.NUMBER,
-    });
+  genkitSummarization.newOutputSocket("compressionRatio", {
+    label: "Compression Ratio",
+    documentation: "Ratio of summary length to original length (0-1).",
+    type: STANDARD_DATATYPES.NUMBER});
 
-    genkitSummarization.code = `
+  genkitSummarization.code = `
         
         // Validate inputs
         if (!inputs.content || typeof inputs.content !== 'string') {
@@ -95,63 +95,59 @@ export async function nlpNodes() {
         outputs.set('compressionRatio', result.compressionRatio);
     `;
 
-    // TEXT FORMATTER LLM NODE
-    const textFormatterLLM =
-        await factory.initOfficialNodeBluePrint('text_formatter_llm');
-    textFormatterLLM.title = 'Text Formatter LLM';
-    textFormatterLLM.documentation =
-        'Format and restructure text content using LLM-powered formatting rules and styles.';
-    textFormatterLLM.tags = [
-        'ai',
-        'text',
-        'remote',
-        'formatting',
-        'llm',
-        'style',
-    ];
+  // TEXT FORMATTER LLM NODE
+  const textFormatterLLM =
+        await factory.initOfficialNodeBluePrint("text_formatter_llm");
+  textFormatterLLM.title = "Text Formatter LLM";
+  textFormatterLLM.documentation =
+        "Format and restructure text content using LLM-powered " +
+          "formatting rules and styles.";
+  textFormatterLLM.tags = [
+    "ai",
+    "text",
+    "remote",
+    "formatting",
+    "llm",
+    "style",
+  ];
 
-    textFormatterLLM.newInputSocket('content', {
-        label: 'Content to Format',
-        documentation: 'Text content to be formatted.',
-        type: STANDARD_DATATYPES.STRING,
-        params: new StringSocketParamsBuilder('').asParagraph().build(),
-    });
+  textFormatterLLM.newInputSocket("content", {
+    label: "Content to Format",
+    documentation: "Text content to be formatted.",
+    type: STANDARD_DATATYPES.STRING,
+    params: new StringSocketParamsBuilder("").asParagraph().build()});
 
-    textFormatterLLM.newInputSocket('formatStyle', {
-        label: 'Format Style',
-        documentation:
-            'Formatting style: markdown, html, plain, bullet-points, numbered-list, or custom.',
-        type: STANDARD_DATATYPES.STRING,
-        params: new StringSocketParamsBuilder('markdown').build(),
-    });
+  textFormatterLLM.newInputSocket("formatStyle", {
+    label: "Format Style",
+    documentation:
+      "Formatting style: markdown, html, plain, bullet-points, numbered-list," +
+      "or custom.",
+    type: STANDARD_DATATYPES.STRING,
+    params: new StringSocketParamsBuilder("markdown").build()});
 
-    textFormatterLLM.newInputSocket('customInstructions', {
-        label: 'Custom Instructions',
-        documentation:
-            'Custom formatting instructions when format style is set to "custom".',
-        type: STANDARD_DATATYPES.STRING,
-        params: new StringSocketParamsBuilder('').asParagraph().build(),
-    });
+  textFormatterLLM.newInputSocket("customInstructions", {
+    label: "Custom Instructions",
+    documentation:
+      "Custom formatting instructions when format style is set to \"custom\".",
+    type: STANDARD_DATATYPES.STRING,
+    params: new StringSocketParamsBuilder("").asParagraph().build()});
 
-    textFormatterLLM.newOutputSocket('formattedText', {
-        label: 'Formatted Text',
-        documentation: 'The formatted text output.',
-        type: STANDARD_DATATYPES.STRING,
-    });
+  textFormatterLLM.newOutputSocket("formattedText", {
+    label: "Formatted Text",
+    documentation: "The formatted text output.",
+    type: STANDARD_DATATYPES.STRING});
 
-    textFormatterLLM.newOutputSocket('originalLength', {
-        label: 'Original Length',
-        documentation: 'Character count of the original content.',
-        type: STANDARD_DATATYPES.NUMBER,
-    });
+  textFormatterLLM.newOutputSocket("originalLength", {
+    label: "Original Length",
+    documentation: "Character count of the original content.",
+    type: STANDARD_DATATYPES.NUMBER});
 
-    textFormatterLLM.newOutputSocket('formattedLength', {
-        label: 'Formatted Length',
-        documentation: 'Character count of the formatted text.',
-        type: STANDARD_DATATYPES.NUMBER,
-    });
+  textFormatterLLM.newOutputSocket("formattedLength", {
+    label: "Formatted Length",
+    documentation: "Character count of the formatted text.",
+    type: STANDARD_DATATYPES.NUMBER});
 
-    textFormatterLLM.code = `
+  textFormatterLLM.code = `
         
         // Validate inputs
         if (!inputs.content || typeof inputs.content !== 'string') {
@@ -169,7 +165,8 @@ export async function nlpNodes() {
         } else {
             formatRules = \`Format as \${formatStyle}\`;
             if (customInstructions) {
-                formatRules += \`. Additional instructions: \${customInstructions}\`;
+                formatRules +=
+                  \`. Additional instructions: \${customInstructions}\`;
             }
         }
         

@@ -1,3 +1,13 @@
+/**
+ * This test suite verifies the LLM Flow functionality, which provides a Firebase Functions-based interface for calling Google's Gemini AI models through GenKit. The tests validate text generation capabilities with various parameter configurations, ensuring proper input validation, response structure, and error handling. The suite covers basic text generation, custom parameter handling (maxTokens, temperature), input validation scenarios, response metrics calculation, and parameter boundary testing.
+ * 
+ * Test categories:
+ * • LLM Generation - Tests basic text generation with simple prompts, custom maxTokens and temperature settings, default parameter handling, and complex multi-line prompt processing
+ * • Input Validation - Validates rejection of empty prompts, missing prompt fields, invalid temperature values, and negative temperature values
+ * • Response Metrics - Verifies correct calculation of prompt and response lengths for various input sizes
+ * • Parameter Validation - Tests acceptance of valid temperature boundaries and positive maxTokens values
+ */
+
 import {expect} from "chai";
 import {llmFlow} from "./llmFlow";
 

@@ -1,10 +1,12 @@
 import {onCall} from "firebase-functions/v2/https";
 import {
   embedNodeBluePrint as embedNodeBluePrintCore,
-  embedAllUnembeddedNodeBluePrints as embedAllUnembeddedNodeBluePrintsCore,
+  embedAllUnembeddedNodeBluePrints as embedAllUnembeddedCore,
   searchNodeBluePrints as searchNodeBluePrintsCore,
 } from "./search";
-import {generateStandardNodeSuite as generateStandardNodeSuiteCore} from "./libs/FirestoreStandardNodeSet";
+import {
+  generateStandardNodeSuite as generateStandardNodeSuiteCore,
+} from "./libs/FirestoreStandardNodeSet";
 
 // Export the callable functions with authentication checks
 export const embedNodeBluePrint = onCall(
@@ -31,7 +33,7 @@ export const embedAllUnembeddedNodeBluePrints = onCall(
       throw new Error("Authentication required");
     }
 
-    return await embedAllUnembeddedNodeBluePrintsCore();
+    return await embedAllUnembeddedCore();
   }
 );
 
@@ -64,7 +66,10 @@ export const generateStandardNodeSuite = onCall(
     }
 
     await generateStandardNodeSuiteCore();
-    await embedAllUnembeddedNodeBluePrintsCore();
-    return {success: true, message: "Standard node suite generated & embedded successfully"};
+    await embedAllUnembeddedCore();
+    return {
+      success: true,
+      message: "Standard node suite generated & embedded successfully",
+    };
   }
 );

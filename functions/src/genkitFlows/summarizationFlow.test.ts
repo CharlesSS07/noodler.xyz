@@ -1,3 +1,12 @@
+/**
+ * This test suite validates the content summarization functionality built on Google's Gemini AI models through GenKit. The tests ensure that text content can be effectively condensed into shorter summaries with various formatting styles while maintaining essential information. The suite covers different summarization styles, input validation, compression metrics calculation, and parameter customization options.
+ * 
+ * Test categories:
+ * • Content Summarization - Tests brief, detailed, and bullet-points summarization styles with custom maxLength parameters and default parameter handling
+ * • Input Validation - Validates rejection of empty content and missing content fields
+ * • Compression Metrics - Verifies accurate calculation of compression ratios between original and summarized content
+ */
+
 import {expect} from "chai";
 import {contentSummarizationFlow} from "./summarizationFlow";
 
