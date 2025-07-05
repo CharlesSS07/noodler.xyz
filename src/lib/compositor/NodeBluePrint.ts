@@ -1,7 +1,19 @@
 import {readable, type Readable} from "svelte/store";
 import {firestore} from "../../firebase";
-import {collection, doc, onSnapshot} from "firebase/firestore";
+import {collection, doc, onSnapshot, getDoc} from "firebase/firestore";
 import type {FirestoreNodeBluePrintModel} from "../../../functions/src/shared/NodeBluePrintModel";
+
+export async function getNodeBluePrintModel(nid: string): Promise<FirestoreNodeBluePrintModel> {
+    return await getDoc(
+        doc(collection(firestore, "nodes"), nid)
+    ).then((snapshot) => {
+        if (snapshot.exists()) {
+            return snapshot.data() as FirestoreNodeBluePrintModel;
+        }
+        throw new Error(`Node blueprint not found: ${nid}`);
+    });
+}
+
 
 export function createNodeBluePrintStore(nid: string): Readable<FirestoreNodeBluePrintModel | undefined> {
 

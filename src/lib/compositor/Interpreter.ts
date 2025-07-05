@@ -2,7 +2,7 @@ import {type Node, type Edge} from '@xyflow/svelte';
 import {ComputedDataCache} from './ComputedDataCache';
 import {projectComputedDataCache} from '$lib/stores/ProjectState';
 import {getBigData, type BigDataRef} from './BigData';
-import {createNodeBluePrintStore} from "$lib/compositor/NodeBluePrint";
+import {createNodeBluePrintStore, getNodeBluePrintModel} from "$lib/compositor/NodeBluePrint";
 import {get} from "svelte/store";
 import {utils} from "$lib/compositor/NodeEnvironment";
 
@@ -113,7 +113,7 @@ export async function executeFlowGraph(
     // Load all node blueprints in parallel
     const relevantNodeBluePrintsLookup = new Map(relevantNids.map(
         (nid) =>
-            [nid, createNodeBluePrintStore(nid)]
+            [nid, getNodeBluePrintModel(nid)]
     ));
 
     // Find sink libs (libs with no dependencies)
@@ -153,7 +153,7 @@ export async function executeFlowGraph(
             if (!nodeBlueprint) {
                 throw new Error("Node blueprint not found");
             }
-            const $nodeBlueprint = get(nodeBlueprint);
+            const $nodeBlueprint = await nodeBlueprint;
             if (!$nodeBlueprint) {
                 throw new Error(
                     `NodeBlueprint not yet loaded or not found for nid: ${nid}`
