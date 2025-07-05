@@ -34,6 +34,7 @@ export default {
             routes: 'src/routes',
         },
         alias: {
+            $lib: 'src/lib',
             $shared: 'functions/src/shared',
         },
     },

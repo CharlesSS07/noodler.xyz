@@ -1,8 +1,8 @@
 /**
- * Unit tests for AI Inference Nodes
- * Tests AI inference libs by calling them through the Firestore node blueprint system
- *
- * These tests use the real AI inference service without mocking
+ * This test suite validates AI inference nodes by executing them through the complete Firestore node blueprint system and flow graph interpreter, testing real AI model integrations without mocking. The tests verify that AI-powered nodes can be properly instantiated, configured, and executed within the visual programming environment while maintaining proper authentication and error handling.
+ * 
+ * Test categories:
+ * • Text Processing AI Nodes - Tests AI Fill Mask Node with BERT model integration, text completion functionality, prediction ranking, and result structure validation
  */
 
 import { beforeEach, describe, expect, test } from 'vitest';

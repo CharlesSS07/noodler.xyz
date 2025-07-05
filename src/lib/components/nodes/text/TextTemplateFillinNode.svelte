@@ -4,7 +4,7 @@
         NodeResizeControl
     } from '@xyflow/svelte';
     import {createNodeStore, type NodeStoreType} from '$lib/components/nodes/NodeInstanceStore';
-    import {STANDARD_DATATYPES} from '$lib/compositor/DataTypes';
+    import {STANDARD_DATATYPES} from '$shared/DataTypes';
     import NodeWrapper from "$lib/components/nodeComponents/NodeWrapper.svelte";
     import NodeErrorDisplay from "$lib/components/nodeComponents/NodeErrorDisplay.svelte";
     import SourceSocketLabelled from "$lib/components/nodeComponents/sockets/SourceSocketLabelled.svelte";

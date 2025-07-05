@@ -1,14 +1,12 @@
 /**
- * Comprehensive Image Processing Integration Test
- *
- * This test file chains together multiple image processing operations:
- * 1. Fetch URL node - loads an image from the internet
- * 2. Image Loader node - converts the fetched data to JimpInstance
- * 3. HSV node - applies color transformations
- * 4. Other JIMP operations - applies various image modifications
- *
- * Each component is tested individually first, then integrated together
- * to create a complete image processing pipeline.
+ * This comprehensive integration test suite validates complete image processing workflows by chaining multiple image processing nodes together to create complex transformation pipelines. The tests verify that images can be fetched from external sources, loaded into the JIMP processing system, transformed through various operations, and maintain data integrity throughout the entire processing chain while ensuring proper error handling and performance optimization.
+ * 
+ * Test categories:
+ * • Individual Component Tests - Tests fetch_url node for internet image retrieval, image_loader for base64 to JIMP conversion, hsv node for color transformations, greyscale conversion, and resize operations with dimension validation
+ * • Integration Tests - Chained Operations - Tests simple processing chains (Create → HSV → Greyscale), complex multi-step workflows (Create → Resize → HSV → Greyscale), and full integration pipelines (Fetch URL → Image Loader → Processing Chain)
+ * • Multiple Processing Chains - Tests parallel processing with same source and different transformations, demonstrating concurrent image processing capabilities
+ * • Error Handling Tests - Tests graceful handling of invalid base64 image data, missing image inputs to processing nodes, and invalid HSV parameter values
+ * • Performance Tests - Tests large image processing chains with performance benchmarks and response time validation under realistic workloads
  */
 
 import { beforeEach, describe, expect, test } from 'vitest';

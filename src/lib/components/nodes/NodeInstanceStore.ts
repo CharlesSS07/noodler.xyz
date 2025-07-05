@@ -13,8 +13,8 @@ import {
 import type { Unsubscribe } from 'firebase/firestore';
 import { type Node } from '@xyflow/svelte';
 import type { ExecutionStatus } from '$lib/compositor/ComputedDataCache';
-import type {FirestoreNodeBluePrintModel} from "../../../../functions/src/nodeBlueprints/libs/FirestoreNodeBluePrint";
 import {createNodeBluePrintStore} from "$lib/compositor/NodeBluePrint";
+import type {FirestoreNodeBluePrintModel} from "$shared/NodeBluePrintModel";
 
 export abstract class InputSocketState {
     private readonly node: NodeInstanceStore;
@@ -134,7 +134,7 @@ export class NodeInstanceStore {
         if (!this.nodeBluePrint)
             throw new Error(`No nodeBluePrint found for ${this.nodeId}`);
 
-        const unsubscribe = this.nodeBluePrint.subscribe((blueprint) => {
+        const unsubscribe = this.nodeBluePrint.subscribe((blueprint: FirestoreNodeBluePrintModel | undefined) => {
             if (!blueprint) return;
 
             const unsubscribe = this.nodeInputDataStore.subscribe(
@@ -154,14 +154,9 @@ export class NodeInstanceStore {
                                     socketId
                                 )
                             ) {
-                                const socketIdx =
-                                    blueprint.input_socket_order.indexOf(
-                                        socketId
-                                    );
-                                if (socketIdx === -1) return;
                                 newInput[socketId] =
                                     blueprint.input_sockets[
-                                        socketIdx
+                                        socketId
                                     ].params.default_value;
                                 updated = true;
                             }

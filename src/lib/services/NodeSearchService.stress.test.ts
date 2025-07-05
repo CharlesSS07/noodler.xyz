@@ -5,8 +5,14 @@ import { getAuth, signInAnonymously } from 'firebase/auth';
 import { getFunctions, connectFunctionsEmulator } from 'firebase/functions';
 
 /**
- * Stress tests for NodeSearchService
- * Tests performance, concurrency, and edge cases
+ * This stress test suite validates the NodeSearchService under high-load conditions, testing performance boundaries, concurrent operations, edge cases, and system resilience. The tests simulate real-world usage patterns with multiple simultaneous users, large datasets, unusual input conditions, and error recovery scenarios to ensure the service maintains reliability and performance under stress.
+ * 
+ * Test categories:
+ * • Concurrency Tests - Tests 10 concurrent searches, mixed concurrent operations with different search types, and system stability under parallel load
+ * • Load Tests - Validates rapid sequential searches, burst request handling with 20+ simultaneous requests, and sustained performance monitoring
+ * • Edge Case Tests - Tests very long search queries, special characters in search terms, unicode and international character handling, large result limits, and zero/negative limit boundary conditions
+ * • Error Recovery Tests - Validates recovery from multiple failed searches, performance maintenance after errors, and system resilience during error conditions
+ * • Performance Benchmarks - Tests response time requirements for basic operations, category searches, popular node retrieval, socket searches, and suggestion generation with defined performance thresholds
  */
 
 const firebaseConfig = {

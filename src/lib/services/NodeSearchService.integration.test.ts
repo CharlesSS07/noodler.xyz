@@ -5,6 +5,20 @@ import { getAuth, signInAnonymously, signOut } from 'firebase/auth';
 import { getFirestore, doc, setDoc, deleteDoc, collection, getDocs } from 'firebase/firestore';
 import { getFunctions, connectFunctionsEmulator, httpsCallable } from 'firebase/functions';
 
+/**
+ * This integration test suite validates the NodeSearchService with real Firebase services and live data, testing complete search workflows from data setup through search operations to cleanup. The tests create realistic test node data, perform actual embedding operations, and verify end-to-end search functionality including vector similarity search, filtering operations, and result ranking with proper test data isolation and cleanup.
+ * 
+ * Test categories:
+ * • searchByText - Tests finding nodes by text content, math-related searches, empty search handling, and non-existent search term handling with real vector embeddings
+ * • searchByCategory - Validates official and trusted trust level filtering with live Firestore data and actual node classification
+ * • searchBySocketType - Tests finding nodes with specific input/output socket types using real node socket definitions and filtering
+ * • getSuggestedNodes - Verifies project-based suggestions for image processing, data processing, and general suggestions with live recommendation algorithms
+ * • searchByTags - Tests tag-based filtering for math, image, and single tag searches with real tag indexing and matching
+ * • getPopularNodes - Validates popular node retrieval with maxResults parameter handling and real popularity metrics
+ * • Error Handling - Tests graceful handling of network errors and invalid queries with real error scenarios
+ * • Performance Tests - Validates concurrent search operations, response time requirements, and system performance under load with real infrastructure
+ */
+
 // Test configuration
 const firebaseConfig = {
     apiKey: 'AIzaSyAs0yTwlWsB5XrmDx5PXV10gNfotvKIG5o',

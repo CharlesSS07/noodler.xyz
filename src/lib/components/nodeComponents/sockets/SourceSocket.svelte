@@ -1,6 +1,6 @@
 <script lang="ts">
 
-    import type {InputSocketParams} from "$lib/compositor/SocketModels.js";
+    import {fetchSocketDataTypeByName} from "$shared/DataTypes";
 
     interface Props {
         id: string;
@@ -17,8 +17,6 @@
     }: Props = $props();
 
     import {Handle, Position} from "@xyflow/svelte";
-
-    import {fetchSocketDataTypeByName} from "$lib/compositor/DataTypes";
     import {Tooltip} from "flowbite-svelte";
 
 </script>

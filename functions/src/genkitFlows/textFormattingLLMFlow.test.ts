@@ -1,3 +1,13 @@
+/**
+ * This test suite verifies the text formatting functionality powered by Google's Gemini AI through GenKit, which transforms and restructures text content according to specified formatting rules and output types. The tests validate the ability to convert text into various formats (plain, markdown, HTML, structured, JSON) while applying custom formatting rules and respecting content preservation settings.
+ * 
+ * Test categories:
+ * • Text Formatting - Tests formatting with different output types (plain, markdown, HTML, structured, JSON), content preservation settings, maxOutputLength constraints, and default parameter handling
+ * • Input Validation - Validates rejection of empty text, empty format rules, missing required fields, invalid output types, and invalid maxOutputLength values
+ * • Compression Metrics - Verifies accurate calculation of compression/expansion ratios and proper handling of different content transformations
+ * • Format Rules Processing - Tests application of specific formatting rules and complex multi-step formatting operations
+ */
+
 import {expect} from "chai";
 import {textFormatingLLMFlow} from "./textFormatingLLMFlow";
 

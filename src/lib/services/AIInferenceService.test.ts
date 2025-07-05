@@ -1,8 +1,11 @@
 /**
- * Unit tests for AIInferenceService
- * Tests AI inference service methods including GenKit summarization
- *
- * These tests call the real AI inference APIs through Firebase Functions
+ * This comprehensive test suite validates the AIInferenceService, which provides a client-side interface for calling AI inference APIs through Firebase Functions with GenKit integration. The service handles text summarization, LLM generation, and text formatting operations with proper authentication, parameter validation, and error handling. The tests cover real API interactions, response validation, and integration with node execution systems.
+ * 
+ * Test categories:
+ * • GenKit Summarization Tests - Tests summarization with default parameters, custom maxLength settings, different summarization styles (brief, detailed, bullet-points), empty/short/large content handling, and network error recovery
+ * • GenKit callLLM Tests - Validates LLM calls with default/custom parameters, complex prompts, temperature variations, maxTokens limits, empty prompt handling, and error scenarios
+ * • GenKit Text Formatting Tests - Tests text formatting with various output types (plain, markdown, HTML, structured, JSON), content preservation settings, output length constraints, complex formatting rules, and error handling
+ * • GenKitSummarizationNode Integration Tests - Verifies node execution integration with summarization functionality, custom parameters, different styles, error handling for invalid inputs, and authentication requirements
  */
 
 import { beforeEach, describe, expect, test } from 'vitest';

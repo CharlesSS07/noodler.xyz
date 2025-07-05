@@ -1,20 +1,14 @@
 /**
- * Unit tests for the Interpreter.ts execution engine
- * Tests basic math operations and dependency resolution
- *
- * ISSUES FIXED:
- * 1. Updated mock node data structure to match current implementation
- * 2. Fixed node blueprint IDs (add, subtract, etc.)
- * 3. Updated assertions to use projectOutputDataCache.get() instead of node.data.output
- * 4. Removed obsolete 'output' property from node data structure
- * 5. Fixed array index bug: changed `if (idx && ...)` to `if (idx !== undefined && ...)`
- * 6. Fixed Set method compatibility: replaced union/intersection/difference with compatible implementations
- *
- * CURRENT STATUS:
- * ✅ 8 tests passing (including complex multi-node calculations)
- * 📝 1 test marked as TODO (division by zero - requires node code fix)
- *
- * The Firestore libs DO exist and the test environment CAN access Firebase emulators properly.
+ * This comprehensive test suite validates the Interpreter execution engine, which orchestrates the execution of visual flow graphs by managing node dependencies, data flow, and computation order. The interpreter handles complex dependency resolution, caches computation results, and provides seamless integration between different node types while maintaining proper error handling and Firebase connectivity for node blueprint retrieval.
+ * 
+ * Test categories:
+ * • Interpreter Flow Graph Tests - Tests simple mathematical operations (addition, subtraction, multiplication, division), chained calculations with dependency resolution, complex multi-node computations, and empty dependency graph handling
+ * • Firebase Integration Tests - Tests Firebase emulator connectivity, node blueprint retrieval from Firestore, authentication verification, and database communication
+ * • Working Tests - Tests output data cache functionality, node/edge data structure handling, and basic system operations
+ * • Image Processing Pipeline Tests - Tests complete image processing workflows with node chaining (new image → HSV → greyscale), image viewer passthrough functionality, and image dimension validation throughout processing chains
+ * • Diagnostic Tests - Tests Firebase connection verification, node existence checking, and system debugging capabilities with comprehensive error reporting
+ * 
+ * Note: Tests include Firebase emulator integration, real node blueprint loading, and end-to-end workflow validation with proper cleanup and test isolation.
  */
 
 // Test environment automatically connects to emulators via NODE_ENV=test check in firebase/index.ts

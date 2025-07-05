@@ -1,5 +1,12 @@
 /**
- * Unit tests for BigDataCleanup utilities
+ * This test suite validates the BigDataCleanup utilities that provide automated maintenance and monitoring capabilities for the BigData storage system. The tests ensure proper cleanup of old data entries, accurate storage statistics reporting, complete data clearing functionality, and automatic cleanup scheduling with configurable intervals and error handling.
+ * 
+ * Test categories:
+ * • BigDataCleanup.cleanup() - Tests cleanup of old entries with counting, default 7-day age limits, custom age parameters, error handling, and browser environment detection
+ * • BigDataCleanup.getStats() - Validates storage statistics reporting, data type categorization, error handling, and non-browser environment compatibility  
+ * • BigDataCleanup.clearAll() - Tests complete data clearing, error handling during clear operations, and browser environment checks
+ * • startAutomaticCleanup() - Verifies automatic cleanup scheduling with default/custom intervals, cleanup failure handling, and browser environment detection
+ * • formatBytes() - Tests byte formatting utility with various sizes, edge cases, and proper decimal place rounding
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';

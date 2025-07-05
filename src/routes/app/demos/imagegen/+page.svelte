@@ -32,7 +32,7 @@
     import { Play, RefreshCw, Download, ArrowLeft, Layout } from "lucide-svelte";
     import ELK from 'elkjs/lib/elk.bundled.js';
     import { Position } from "@xyflow/svelte";
-    import StemNode from "$lib/components/StemNode.svelte";
+    import StemNode from "$lib/components/nodes/StemNode.svelte";
 
     // Demo workflow libs
     let nodes = $state.raw<Node[]>([

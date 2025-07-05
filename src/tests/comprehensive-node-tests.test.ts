@@ -1,17 +1,15 @@
 /**
- * Comprehensive test suite for all libs in FirestoreStandardNodeSet.ts
- * Tests every node type available in the standard node library
- *
- * This file systematically tests each node category:
- * - Basic Math Operations (add, subtract, multiply, divide)
- * - Text Processing (raw_text_editor, md_text_editor, template, join_text, split_text)
- * - Image Processing (image_viewer, greyscale, hsv, jimp_new_blank_image, jimp_resize_image, image_cropper)
- * - JSON Operations (json_editor, json_to_string)
- * - HTML Operations (html_viewer, html_elementify, fetch_url)
- * - File Operations (load_csv, load_tsv, image_loader)
- * - Date/Time Operations (datetime_parser, datetime_constructor)
- * - API Operations (promptdesignOld, text_to_image)
- * - Utility Operations (weather, colorize, super_resolution, object_background_seperation)
+ * This comprehensive test suite systematically validates every node type available in the FirestoreStandardNodeSet, ensuring complete functionality coverage across all supported node categories. The tests verify that each node type can be properly instantiated, executed, and produces expected outputs while maintaining compatibility with the visual flow graph system and proper error handling for edge cases and invalid inputs.
+ * 
+ * Test categories:
+ * • Basic Math Operations - Tests add, subtract, multiply, and divide nodes with various input combinations and result validation
+ * • Text Processing Operations - Tests raw_text_editor, md_text_editor, template, join_text, and split_text nodes with string manipulation and formatting
+ * • Image Processing Operations - Tests jimp_new_blank_image, greyscale, hsv, and jimp_resize_image nodes with image creation, transformation, and dimension validation
+ * • JSON Operations - Tests json_editor and json_to_string nodes with object parsing, stringification, and data structure handling
+ * • HTML Operations - Tests html_viewer, html_elementify, and fetch_url nodes with HTML processing, element creation, and web content retrieval
+ * • Error Handling and Edge Cases - Tests graceful handling of missing nodes, invalid JSON input, and malformed data with proper error reporting
+ * • Complex Multi-Node Workflows - Tests chained mathematical operations, text processing pipelines, image processing workflows, and data flow between multiple connected nodes
+ * • Performance and Stress Tests - Tests large number operations, concurrent execution, response time requirements, and system efficiency under load
  */
 
 import { beforeEach, describe, expect, test } from 'vitest';

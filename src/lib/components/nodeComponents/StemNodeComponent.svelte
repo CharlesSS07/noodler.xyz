@@ -1,5 +1,7 @@
 <script lang="ts">
 
+    import type {InputSocketParams} from "$shared/SocketModels";
+
     interface Props {
         inputSockets?: {
             label: string,
@@ -20,11 +22,10 @@
     }: Props = $props();
 
     import '$lib/css/nodes.css';
-    import {STANDARD_DATATYPES} from "$lib/compositor/DataTypes";
     import {getInputComponentForDataType} from "$lib/components/nodeComponents/sockets/socket-inputs/SocketInputMapping";
-    import type {InputSocketParams} from "$lib/compositor/SocketModels";
     import TargetSocketLabelled from "$lib/components/nodeComponents/sockets/TargetSocketLabelled.svelte";
     import SourceSocketLabelled from "$lib/components/nodeComponents/sockets/SourceSocketLabelled.svelte";
+    import {STANDARD_DATATYPES} from "$shared/DataTypes";
 
 </script>
 

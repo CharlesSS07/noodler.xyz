@@ -28,7 +28,7 @@
     // Import the existing libs
 
     import NoteNode from '$lib/components/nodes/NoteNode.svelte';
-    import StemNode from '$lib/components/StemNode.svelte';
+    import StemNode from '$lib/components/nodes/StemNode.svelte';
     import TextTemplateFillinNode from "$lib/components/nodes/text/TextTemplateFillinNode.svelte";
     import ImageNode from "$lib/components/nodes/images/ImageNode.svelte";
     import HTMLRendererNode from "$lib/components/nodes/html/HTMLRendererNode.svelte";

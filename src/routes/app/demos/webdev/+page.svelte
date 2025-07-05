@@ -6,7 +6,7 @@
 	import ELK from 'elkjs/lib/elk.bundled.js';
 
 	// Import custom libs
-	import StemNode from '$lib/components/StemNode.svelte';
+	import StemNode from '$lib/components/nodes/StemNode.svelte';
 	import HtmlTagNode from '$lib/components/dummynodes/HtmlTagNode.svelte';
 	import HtmlBoilerplateNode from '$lib/components/dummynodes/HtmlBoilerplateNode.svelte';
 	import WebNavbarNode from '$lib/components/dummynodes/WebNavbarNode.svelte';

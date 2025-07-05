@@ -1,3 +1,18 @@
+/**
+ * This comprehensive test suite validates the node blueprint search functionality within the Firebase Functions environment, testing both vector embeddings and traditional search operations for node discovery and retrieval. The tests verify the complete lifecycle of node blueprint management including embedding generation, search operations, cleanup functions, and error handling scenarios using Firebase Firestore emulators.
+ * 
+ * Test categories:
+ * • NodeBluePrint.toString - Tests conversion of node blueprints to text descriptions, handling of minimal data, and error cases for non-existent nodes
+ * • embedNodeBluePrint - Validates successful embedding creation, input validation for empty/undefined IDs, and proper storage in vector index
+ * • removeNodeBluePrintEmbeddingFromIndex - Tests removal of embeddings from vector index with proper error handling
+ * • reEmbedNodeBluePrint - Verifies re-embedding functionality with updated content and proper cleanup of old embeddings
+ * • clearAllVectorEmbeddings - Tests bulk deletion operations and counting of deleted embeddings
+ * • reEmbedAllNodeBluePrints - Validates batch re-embedding operations with processing statistics
+ * • embedAllUnembeddedNodeBluePrints - Tests selective embedding of only unembedded nodes with searchability filtering
+ * • searchNodeBluePrints - Validates vector search functionality with various query types and result ranking
+ * • Input Validation - Tests graceful handling of null, undefined, and invalid inputs across all functions
+ */
+
 // Load environment variables from .env file
 import * as dotenv from "dotenv";
 import * as path from "path";

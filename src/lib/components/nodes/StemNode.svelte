@@ -1,6 +1,6 @@
 <script lang="ts">
     import {type NodeProps} from "@xyflow/svelte";
-    import StemNodeComponent from "$lib/components/StemNodeComponent.svelte";
+    import StemNodeComponent from "$lib/components/nodeComponents/StemNodeComponent.svelte";
     import NodeErrorDisplay from "$lib/components/nodeComponents/NodeErrorDisplay.svelte";
     import NodeWrapper from "$lib/components/nodeComponents/NodeWrapper.svelte";
     import {createNodeStore, InputSocketState, type NodeStoreType} from "$lib/components/nodes/NodeInstanceStore";
@@ -23,7 +23,7 @@
     let inputSockets = $derived.by(() => {
         if ($nodeBluePrint) {
             return $nodeBluePrint.input_socket_order.map((socketId: string, idx: number) => {
-                const socketBluePrint = $nodeBluePrint.input_sockets[idx];
+                const socketBluePrint = $nodeBluePrint.input_sockets[socketId];
                 const socket = inputSocketStates.get(socketId);
                 return {
                     label: socketBluePrint.label,
@@ -41,7 +41,7 @@
     let outputSockets = $derived.by(() => {
         if ($nodeBluePrint) {
             return $nodeBluePrint.output_socket_order.map((socketId: string, idx: number) => {
-                const socketBluePrint = $nodeBluePrint.output_sockets[idx];
+                const socketBluePrint = $nodeBluePrint.output_sockets[socketId];
                 return {
                     label: socketBluePrint.label,
                     id: socketId,
@@ -58,9 +58,6 @@
 {#if $nodeBluePrint}
 
     <!--{JSON.stringify($inputConnections, null, 2)}-->
-
-
-
     <NodeWrapper
             label={$nodeBluePrint.title}
             documentation={$nodeBluePrint.documentation}

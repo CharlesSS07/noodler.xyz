@@ -1,5 +1,14 @@
 /**
- * Unit tests for BigData system
+ * This comprehensive test suite validates the BigData system, which provides intelligent data storage management for large objects using IndexedDB with memory fallbacks and automatic cleanup mechanisms. The system automatically determines when to use BigData storage based on size thresholds and provides seamless integration for handling large text, files, images, and Jimp instances with automatic compression and retrieval optimization.
+ * 
+ * Test categories:
+ * • BigData Core Functions - Tests type guards for BigDataRef identification, size threshold determination, store/retrieve operations for various data types, and auto-conversion based on size limits
+ * • Error Handling - Validates graceful handling of IndexedDB failures with memory fallbacks, missing data retrieval, and non-browser environment compatibility
+ * • Memory Caching - Tests memory cache utilization for frequently accessed data and performance optimization
+ * • Cleanup Operations - Verifies automatic cleanup of old data entries, cleanup failure handling, and storage maintenance
+ * • Delete Operations - Tests data deletion functionality and graceful error handling during deletion failures
+ * • BigData Size Calculations - Validates accurate size calculations for different data types and proper storage decisions
+ * • BigData Integration - Tests complex nested data structures, data integrity through store/retrieve cycles, and end-to-end functionality
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';

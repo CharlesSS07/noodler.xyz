@@ -5,8 +5,12 @@ import { getAuth, signInAnonymously } from 'firebase/auth';
 import { getFunctions, connectFunctionsEmulator } from 'firebase/functions';
 
 /**
- * Environment-specific tests for NodeSearchService
- * Tests the service against both emulator and production environments
+ * This environment-specific test suite validates the NodeSearchService across both Firebase emulator and production environments, ensuring consistent functionality, performance, and reliability in different deployment contexts. The tests verify cross-environment compatibility, response time requirements, and proper environment detection while maintaining result structure consistency regardless of the underlying infrastructure.
+ * 
+ * Test categories:
+ * • Emulator Environment - Tests basic text search, category handling, popular node retrieval, socket type search, suggestion generation, tag-based search, empty search handling, specific search terms, error case handling, and response time validation in emulator environment
+ * • Production Environment - Validates identical functionality in production environment with real Firebase services and production data
+ * • Cross-Environment Consistency - Verifies consistent result structures, property validation, type checking, and behavior across different environments regardless of underlying data differences
  */
 
 const firebaseConfig = {

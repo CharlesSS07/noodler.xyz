@@ -4,7 +4,7 @@
     import EmailSignup from "../components/EmailSignup.svelte";
     import BugReportButton from "../components/BugReportButton.svelte";
     import {goto} from "$app/navigation";
-    import StemNode from "$lib/components/StemNodeComponent.svelte";
+    import StemNode from "$lib/components/nodeComponents/StemNodeComponent.svelte";
 
     let heroTitle: HTMLElement | undefined = undefined;
 

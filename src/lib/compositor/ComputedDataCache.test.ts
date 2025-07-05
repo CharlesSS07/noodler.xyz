@@ -1,3 +1,19 @@
+/**
+ * This extensive test suite validates the ComputedDataCache system, which provides reactive state management for node execution data, error handling, and execution status tracking with Svelte store integration. The cache manages socket data, node-level error states, execution lifecycle tracking, and provides reactive interfaces for UI components to monitor computation progress and results in real-time.
+ * 
+ * Test categories:
+ * • Error Handling Reactivity (useNodeErrorStore) - Tests reactive error message tracking, error handling via OutputSocketAsyncReturner, multi-node error isolation, error persistence during execution lifecycle, and various error data types
+ * • Execution Status Functions - Validates execution lifecycle tracking with start/finish timestamps, reactive status updates, error handling for invalid state transitions, multiple execution cycles, and cross-node execution independence
+ * • Integration: Error Handling + Execution Status - Tests coordinated error and execution state management, status persistence during errors, and cleanup behavior during node dumping
+ * • Basic Operations - Validates core cache functionality including data storage/retrieval, existence checking, data updates, removal operations, and cache clearing
+ * • Node Operations - Tests node-specific operations like dumping all node caches and proper cleanup
+ * • Reactive Stores - Verifies reactive socket stores, hasSocketData stores, node-specific data stores, and global data store functionality
+ * • Store Reactivity - Tests reactive updates during data changes, proper subscriber notifications, and real-time state synchronization
+ * • Edge Cases - Validates handling of null/undefined values, complex object data, special characters in IDs, and boundary conditions
+ * • Performance - Tests efficient handling of large data sets, concurrent operations, and response time requirements
+ * • Memory Management - Verifies proper cleanup during cache clearing and store update efficiency
+ */
+
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { get } from 'svelte/store';
 import { ComputedDataCache, type ExecutionStatus } from './ComputedDataCache';

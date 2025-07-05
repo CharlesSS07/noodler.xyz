@@ -1,7 +1,7 @@
 <script lang="ts">
     import {type NodeProps} from '@xyflow/svelte';
     import {createNodeStore, type NodeStoreType} from '$lib/components/nodes/NodeInstanceStore';
-    import {STANDARD_DATATYPES} from "$lib/compositor/DataTypes";
+    import {STANDARD_DATATYPES} from "$shared/DataTypes";
     import NodeWrapper from "$lib/components/nodeComponents/NodeWrapper.svelte";
     import TargetSocket from "$lib/components/nodeComponents/sockets/TargetSocket.svelte";
     import NodeErrorDisplay from "$lib/components/nodeComponents/NodeErrorDisplay.svelte";

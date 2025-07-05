@@ -1,3 +1,15 @@
+/**
+ * This unit test suite validates the NodeSearchService with mocked Firebase Functions, ensuring proper search functionality, input validation, and error handling for node discovery operations. The service provides multiple search methods including text search, category filtering, socket type matching, tag-based search, and suggestion generation, with comprehensive mocking to isolate functionality testing from external dependencies.
+ * 
+ * Test categories:
+ * • searchByText - Tests text-based node search with result formatting, popular node fallback for empty queries, and graceful error handling
+ * • searchByCategory - Validates trust level filtering and proper query construction for category-based searches
+ * • searchBySocketType - Tests input/output socket type matching with appropriate query formatting and result handling
+ * • getSuggestedNodes - Verifies project-based node suggestions with fallback to popular nodes on error scenarios
+ * • searchByTags - Tests tag-based filtering with proper query construction and tag parameter handling
+ * • inferCategoryFromTitle - Validates automatic category inference from node titles with default fallback handling
+ */
+
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NodeSearchService } from './NodeSearchService';
 import { httpsCallable } from 'firebase/functions';

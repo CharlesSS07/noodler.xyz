@@ -1,3 +1,13 @@
+/**
+ * This integration test suite validates the FirestoreNodeBluePrint system, which provides a comprehensive interface for managing node blueprints in Firestore with real-time synchronization and collaborative editing capabilities. The tests verify node creation, property management, permission systems, socket management, and lifecycle operations using Firebase emulators for safe testing environments.
+ * 
+ * Test categories:
+ * • FirestoreNodeBluePrintControllerFactoryInterface - Tests creation of official nodes, new custom nodes with default/custom titles, and node forking functionality with proper ownership transfer
+ * • NodeBluePrintInFirestore Basic Functionality - Validates basic getters, property retrieval, timestamps, frozen state, searchability, socket orders, and proper destruction
+ * • Setters - Tests property modification with validation, ownership restrictions, trust level limitations, and successful updates to various node properties
+ * • Management Functions - Verifies editor/viewer management, socket creation and management, searchability controls, and freeze functionality with modification restrictions
+ */
+
 // Load environment variables from .env file
 import * as dotenv from "dotenv";
 import * as path from "path";
