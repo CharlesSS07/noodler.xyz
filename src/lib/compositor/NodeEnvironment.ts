@@ -9,9 +9,19 @@ export const utils = {
     aiServices: aiServiceInstance,
     unpdf: unpdf,
     d3: d3,
+    proxyFetch: async (url: string) => {
+        const proxyBaseUrl = "https://us-central1-chuck-65c6e.cloudfunctions.net";
+        const proxyUrl = proxyBaseUrl + "/proxy?url=" + encodeURIComponent(url);
+        const response = await fetch(proxyUrl);
+        if (!response.ok) {
+            throw new Error("HTTP error! status: " + response.status);
+        }
+        return response;
+    },
 };
 
-async function executeNode(
+export async function executeNode(
+    nid: string,
     code: string,
     inputs: Record<string, unknown>,
     outputs: OutputSocketAsyncReturner
@@ -19,10 +29,11 @@ async function executeNode(
     try {
 
         if (!code || code.trim() === '') {
-            throw new Error(`Code not defined, cannot execute.`);
+            throw new Error(`No code defined for node: ${nid}`);
         }
 
-        // Create execution context
+        console.log(`[DEBUG] Executing code for ${nid}:`, code);
+
         const executionContext = {
             inputs,
             outputs,
@@ -30,7 +41,6 @@ async function executeNode(
             console: console,
         };
 
-        // Create async function from the code
         const asyncFunction = new Function(
             'inputs',
             'outputs',
@@ -41,7 +51,7 @@ async function executeNode(
 })();`
         );
 
-        // Execute the code with the context
+// Execute the code with the context
         await asyncFunction(
             executionContext.inputs,
             executionContext.outputs,
@@ -49,6 +59,7 @@ async function executeNode(
             executionContext.console
         );
     } catch (error) {
-        throw new Error(`Error during execution of node code: ${error}`);
+        console.error(`Error executing node ${nid}:`, error);
+        throw new Error(`Error during execution of ${nid}: ${error}`);
     }
 }

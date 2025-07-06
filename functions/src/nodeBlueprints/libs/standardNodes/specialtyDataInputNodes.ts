@@ -169,11 +169,15 @@ outputs.set("text", filledIn);
   imageLoader.code = `
 const imageOrFileOrString = inputs.imageOrFileOrString;
 
-if (typeof imageOrFileOrString === 'string') {
-    // assume this is a base64 string
-    // const buffer = Uint8Array.fromBase64(imageOrFileOrString);
+if (typeof imageOrFileOrString === 'string' ||
+    imageOrFileOrString instanceof Buffer ||
+    imageOrFileOrString instanceof ArrayBuffer
+) {
     outputs.set('image', await utils.Jimp.read(imageOrFileOrString));
-} else if (imageOrFileOrString instanceof File) {
+} else if (
+    imageOrFileOrString instanceof Blob ||
+    imageOrFileOrString instanceof Response ||
+) {
     const arrayBuffer = await imageOrFileOrString.arrayBuffer();
     outputs.set('image', await utils.Jimp.read(arrayBuffer));
 } else {

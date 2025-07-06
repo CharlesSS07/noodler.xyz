@@ -54,6 +54,7 @@
 <div
         class="node-container"
         class:selected={isSelected}
+        class:executing={executionStatus && executionStatus.startedAt && !executionStatus.stoppedAt}
 >
     <!-- Node Header -->
     <div class="node-header" role="button" tabindex="0">
@@ -131,6 +132,20 @@
 
     .error {
         text-color: #ff0000;
+    }
+
+    .node-container.executing {
+        box-shadow: 0 0 15px 5px rgba(255, 165, 0, 0.7);
+        animation: glow 1.5s infinite alternate;
+    }
+
+    @keyframes glow {
+        from {
+            box-shadow: 0 0 15px 5px rgba(255, 165, 0, 0.7);
+        }
+        to {
+            box-shadow: 0 0 25px 10px rgba(255, 165, 0, 1);
+        }
     }
 
 </style>

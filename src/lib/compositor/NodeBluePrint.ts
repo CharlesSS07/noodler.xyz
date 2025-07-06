@@ -1,7 +1,7 @@
 import {readable, type Readable} from "svelte/store";
 import {firestore} from "../../firebase";
 import {collection, doc, onSnapshot, getDoc} from "firebase/firestore";
-import type {FirestoreNodeBluePrintModel} from "../../../functions/src/shared/NodeBluePrintModel";
+import type {FirestoreNodeBluePrintModel} from "$shared/NodeBluePrintModel";
 
 export async function getNodeBluePrintModel(nid: string): Promise<FirestoreNodeBluePrintModel> {
     return await getDoc(

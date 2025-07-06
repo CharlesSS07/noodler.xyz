@@ -466,6 +466,7 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
                 {colorMode}
                 oninit={() => {}}
                 oninput={() => {console.log('input')}}
+                minZoom="0.1"
                 fitView
         >
             <Background variant={BackgroundVariant.Dots}/>

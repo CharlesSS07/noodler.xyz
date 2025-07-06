@@ -30,7 +30,8 @@
     "genkit": "^1.13.0",
     "llm-chunk": "^0.0.1",
     "together-ai": "^0.16.0",
-    "uuid": "^11.1.0"
+    "uuid": "^11.1.0",
+    "jimp": "^1.6.0"
   },
   "devDependencies": {
     "@types/chai": "^5.2.2",

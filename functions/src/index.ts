@@ -26,3 +26,9 @@ export {
   generateStandardNodeSuite,
 } from "./nodeBlueprints";
 
+// TogetherAI Functions
+export {textToImage} from "./togetherai";
+
+// Data Functions
+export {proxy} from "./data/proxy";
+

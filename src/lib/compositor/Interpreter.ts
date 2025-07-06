@@ -3,52 +3,7 @@ import {ComputedDataCache} from './ComputedDataCache';
 import {projectComputedDataCache} from '$lib/stores/ProjectState';
 import {getBigData, type BigDataRef} from './BigData';
 import {createNodeBluePrintStore, getNodeBluePrintModel} from "$lib/compositor/NodeBluePrint";
-import {get} from "svelte/store";
-import {utils} from "$lib/compositor/NodeEnvironment";
-
-async function callNodeBlueprint(
-    nid: string,
-    code: string,
-    inputs: Record<string, unknown>,
-    outputs: OutputSocketAsyncReturner
-): Promise<void> {
-    try {
-
-        if (!code || code.trim() === '') {
-            throw new Error(`No code defined for node: ${nid}`);
-        }
-
-        console.log(`[DEBUG] Executing code for ${nid}:`, code);
-
-        const executionContext = {
-            inputs,
-            outputs,
-            utils: utils,
-            console: console,
-        };
-
-        const asyncFunction = new Function(
-            'inputs',
-            'outputs',
-            'utils',
-            'console',
-            `return (async function() {
-    ${code}
-})();`
-        );
-
-// Execute the code with the context
-        await asyncFunction(
-            executionContext.inputs,
-            executionContext.outputs,
-            executionContext.utils,
-            executionContext.console
-        );
-    } catch (error) {
-        console.error(`Error executing node ${nid}:`, error);
-        throw new Error(`Error during execution of ${nid}: ${error}`);
-    }
-}
+import {executeNode} from "$lib/compositor/NodeEnvironment";
 
 export class OutputSocketAsyncReturner {
     /**
@@ -133,7 +88,7 @@ export async function executeFlowGraph(
     };
 
     // Function to execute a single node
-    const executeNode = async (nodeId: string): Promise<void> => {
+    const prepareAndExecuteNode = async (nodeId: string): Promise<void> => {
         if (executedNodes.has(nodeId) || executingNodes.has(nodeId)) {
             return;
         }
@@ -211,7 +166,7 @@ export async function executeFlowGraph(
 
                 // Execute the node
                 projectComputedDataCache.nodeExecutionStarted(nodeId);
-                await callNodeBlueprint(
+                await executeNode(
                     nid,
                     $nodeBlueprint.user_defined_code,
                     inputData,
@@ -247,7 +202,7 @@ export async function executeFlowGraph(
 
                 try {
                     // Execute ready libs concurrently
-                    await Promise.all(readyNodes.map(executeNode));
+                    await Promise.all(readyNodes.map(prepareAndExecuteNode));
                 } catch (error) {
                     // console.error(error);
                     // do not throw; this is the error of another node.
@@ -282,7 +237,7 @@ export async function executeFlowGraph(
     };
 
     // Start execution with sink libs
-    await Promise.all(sinkNodes.map(executeNode));
+    await Promise.all(sinkNodes.map(prepareAndExecuteNode));
     return Promise.resolve();
 }
 

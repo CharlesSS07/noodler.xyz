@@ -242,7 +242,7 @@ export default {
         {
             id: 'xy-edge__node_1750472673916_yyzglsnodtext-image_1750473207103_iqe1dac9simageOrFileOrString',
             source: 'node_1750472673916_yyzglsnod',
-            sourceHandle: 'text',
+            sourceHandle: 'response',
             target: 'image_1750473207103_iqe1dac9s',
             targetHandle: 'imageOrFileOrString',
         },
