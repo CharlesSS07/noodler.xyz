@@ -586,6 +586,7 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
                         {/if}
                     </div>
                 </div>
+                <slot></slot>
             </Panel>
 
         </SvelteFlow>

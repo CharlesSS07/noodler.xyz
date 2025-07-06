@@ -12,7 +12,7 @@ import BooleanInput from './BooleanInput.svelte';
 import FileInput from './FileInput.svelte';
 import EnumInput from './EnumInput.svelte';
 import ImageInput from './ImageInput.svelte';
-import {STANDARD_DATATYPES} from "$shared/DataTypes";
+import {STANDARD_DATATYPES} from "$shared/SocketDataTypes";
 
 export interface SocketInputMapping {
     dataType: string;

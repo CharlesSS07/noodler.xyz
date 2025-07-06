@@ -1,6 +1,6 @@
 <script lang="ts">
 
-    import {fetchSocketDataTypeByName} from "$shared/DataTypes";
+    import {fetchSocketDataTypeByName} from "$shared/SocketDataTypes";
 
     interface Props {
         id: string;

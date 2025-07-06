@@ -356,9 +356,10 @@
 	<!-- Email Signup -->
 	<div class="email-signup-container">
 		<EmailSignup
-				title="Get Early Access"
-				subtitle="Be the first to access our prompt design tools"
-				buttonText="Join Waitlist"
+				title="Build Smarter Websites!"
+				subtitle="Get exclusive access to our AI-powered web development tools and code generation features."
+				buttonText="Join Developer Beta"
+				successMessage="Perfect! We'll notify you when new web development features are ready."
 		/>
 	</div>
 </div>

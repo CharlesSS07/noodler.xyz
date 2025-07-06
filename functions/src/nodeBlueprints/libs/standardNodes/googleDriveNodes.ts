@@ -4,7 +4,7 @@ import {
   FirestoreNodeBluePrintControllerFactoryInterface,
 } from "../FirestoreNodeBluePrint.js";
 import {StringSocketParamsBuilder} from "../SocketParamBuilders.js";
-import {STANDARD_DATATYPES} from "$shared/DataTypes";
+import {STANDARD_DATATYPES} from "$shared/SocketDataTypes";
 
 const nodeBluePrintController: NodeBluePrintControllerFactoryInterface =
     new FirestoreNodeBluePrintControllerFactoryInterface();
@@ -34,6 +34,11 @@ export async function googleDriveNodes() {
     "authentication",
     "gsuite",
     "workspace",
+  ];
+  googleDrive.categories = [
+    "/cloud/google-drive",
+    "/file/storage",
+    "/data/remote",
   ];
 
   await googleDrive.newInputSocket("account", {
@@ -79,6 +84,11 @@ outputs.set('img', inputs.img);
     "oauth",
     "mail",
     "correspondence",
+  ];
+  sendEmail.categories = [
+    "/communication/email",
+    "/google/gmail",
+    "/notification/email",
   ];
 
   await sendEmail.newInputSocket("account", {

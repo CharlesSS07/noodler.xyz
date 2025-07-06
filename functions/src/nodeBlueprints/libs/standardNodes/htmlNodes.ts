@@ -7,7 +7,7 @@ import {
   StringSocketParamsBuilder,
   GenericSocketParamsBuilder,
 } from "../SocketParamBuilders.js";
-import {STANDARD_DATATYPES} from "$shared/DataTypes";
+import {STANDARD_DATATYPES} from "$shared/SocketDataTypes";
 
 const nodeBluePrintController: NodeBluePrintControllerFactoryInterface =
     new FirestoreNodeBluePrintControllerFactoryInterface();
@@ -34,6 +34,11 @@ export async function htmlNodes() {
     "ui",
     "presentation",
     "visual",
+  ];
+  htmlViewer.categories = [
+    "/html/rendering",
+    "/web/display",
+    "/ui/presentation",
   ];
 
   await htmlViewer.newInputSocket("html", {
@@ -64,6 +69,11 @@ export async function htmlNodes() {
     "templating",
     "structure",
     "attributes",
+  ];
+  htmlElement.categories = [
+    "/html/generation",
+    "/web/templating",
+    "/html/elements",
   ];
 
   await htmlElement.newInputSocket("tag", {
@@ -133,6 +143,7 @@ outputs.set('html', d);
     "internet",
     "external",
   ];
+  fetchURL.categories = ["/web/http", "/network/fetch", "/data/remote"];
 
   await fetchURL.newInputSocket("url", {
     label: "URL",

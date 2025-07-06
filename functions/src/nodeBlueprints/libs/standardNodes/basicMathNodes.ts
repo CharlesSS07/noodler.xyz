@@ -4,7 +4,7 @@ import {
   FirestoreNodeBluePrintControllerFactoryInterface,
 } from "../FirestoreNodeBluePrint.js";
 import {NumberSocketParamsBuilder} from "../SocketParamBuilders.js";
-import {STANDARD_DATATYPES} from "$shared/DataTypes";
+import {STANDARD_DATATYPES} from "$shared/SocketDataTypes";
 
 const nodeBluePrintController: NodeBluePrintControllerFactoryInterface =
     new FirestoreNodeBluePrintControllerFactoryInterface();
@@ -30,6 +30,11 @@ export async function basicMathNodes() {
     "binary-operation",
     "fundamental",
     "elementary",
+  ];
+  addNode.categories = [
+    "/math/arithmetic",
+    "/math/basic",
+    "/computation/binary-operation",
   ];
 
   await addNode.newInputSocket("a", {
@@ -72,6 +77,11 @@ export async function basicMathNodes() {
     "binary-operation",
     "fundamental",
     "elementary",
+  ];
+  subtractNode.categories = [
+    "/math/arithmetic",
+    "/math/basic",
+    "/computation/binary-operation",
   ];
 
   await subtractNode.newInputSocket("a", {
@@ -116,6 +126,11 @@ export async function basicMathNodes() {
     "elementary",
     "scaling",
   ];
+  multiplyNode.categories = [
+    "/math/arithmetic",
+    "/math/basic",
+    "/computation/binary-operation",
+  ];
 
   await multiplyNode.newInputSocket("a", {
     label: "Number A",
@@ -159,6 +174,11 @@ export async function basicMathNodes() {
     "elementary",
     "ratio",
     "quotient",
+  ];
+  divideNode.categories = [
+    "/math/arithmetic",
+    "/math/basic",
+    "/computation/binary-operation",
   ];
 
   await divideNode.newInputSocket("a", {

@@ -24,11 +24,6 @@
          */
         async addEmailSignup(email: string, consent: boolean): Promise<string> {
             try {
-                // Check if email already exists
-                const emailExists = await this.checkEmailExists(email);
-                if (emailExists) {
-                    throw new Error('This email is already registered');
-                }
 
                 // Add the email to Firestore
                 const docRef = await addDoc(collection(firestore, 'emailSignups'), {
@@ -44,16 +39,6 @@
             }
         },
 
-        /**
-         * Check if an email already exists in the database
-         * @param email - The email to check
-         * @returns Promise resolving to boolean indicating if email exists
-         */
-        async checkEmailExists(email: string): Promise<boolean> {
-            const q = query(collection(firestore, 'emailSignups'), where('email', '==', email));
-            const querySnapshot = await getDocs(q);
-            return !querySnapshot.empty;
-        }
     };
 
 

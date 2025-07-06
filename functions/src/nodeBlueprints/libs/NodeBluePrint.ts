@@ -129,8 +129,20 @@ export abstract class NodeBluePrint {
     abstract notSearchable(): void;
     abstract isSearchable(): void;
 
+    /**
+     * Tags are individual words.
+     */
     abstract get tags(): string[];
     abstract set tags(tags: string[]);
+
+    /**
+     * Categories are hierarchical. One node can fit into multiple categories
+     * Example: [/math/gain/, /image-adjustments/gain]
+     *  -> if the node fits into both use cases
+     * Example 2: [/math/add, /utils/add]
+     */
+    abstract get categories(): string[];
+    abstract set categories(categories: string[]);
 
     /**
      * Converts the NodeBluePrint to a text description for embedding
@@ -147,6 +159,11 @@ export abstract class NodeBluePrint {
       // Add documentation/description
       if (this.documentation) {
         parts.push(`Description: ${this.documentation}`);
+      }
+
+      // Add title
+      if (this.categories) {
+        parts.push(`Categories: ${this.categories.join(", ")}`);
       }
 
       // Add tags

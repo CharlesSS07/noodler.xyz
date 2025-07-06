@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 import { textToImage } from './images';
 import { Jimp } from 'jimp';
+import { Buffer } from 'buffer';
 
 describe('textToImage', () => {
 
@@ -15,16 +16,15 @@ describe('textToImage', () => {
 
         try {
             const result = await textToImage(params);
-            expect(result.data[0]).to.have.property('url');
-            expect(result.data[0].url).to.be.a('string').and.not.empty;
+            expect(result.data[0]).to.have.property('b64_json');
+            expect(result.data[0].b64_json).to.be.a('string').and.not.empty;
 
-            // Fetch the image and check dimensions
-            const imageUrl = result.data[0].url;
-            const image = await Jimp.read(imageUrl);
+            // Decode the base64 image and check dimensions
+            const imageBuffer = Buffer.from(result.data[0].b64_json, 'base64');
+            const image = await Jimp.read(imageBuffer);
             expect(image.bitmap.width).to.equal(params.width);
             expect(image.bitmap.height).to.equal(params.height);
             console.log(image.width, image.height);
-            console.log(imageUrl);
 
         } catch (error) {
             console.error("API call or image verification failed:", error);

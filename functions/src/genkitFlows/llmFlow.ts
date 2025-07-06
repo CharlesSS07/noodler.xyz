@@ -2,7 +2,7 @@
 import {gemini15Flash, googleAI} from "@genkit-ai/googleai";
 import {genkit, z} from "genkit";
 
-import {onCall} from "firebase-functions/https";
+import {onCall, HttpsError} from "firebase-functions/v2/https";
 // import config from "../config";
 
 // Configure Genkit instance
@@ -62,8 +62,17 @@ export const callLLM = onCall(
   async (request) => {
     // Check authentication - allow authenticated users for testing
     if (!request.auth?.uid) {
-      throw new Error("Authentication required");
+      throw new HttpsError("unauthenticated", "Authentication required");
     }
-    return await llmFlow(request.data);
+
+    try {
+      return await llmFlow(request.data);
+    } catch (error) {
+      // Convert regular errors to HttpsError to preserve error messages
+      if (error instanceof Error) {
+        throw new HttpsError("invalid-argument", error.message);
+      }
+      throw error;
+    }
   }
 );

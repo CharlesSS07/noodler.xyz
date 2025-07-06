@@ -2,7 +2,7 @@
 import {gemini15Flash, googleAI} from "@genkit-ai/googleai";
 import {genkit, z} from "genkit";
 
-import {onCall} from "firebase-functions/https";
+import {onCall, HttpsError} from "firebase-functions/v2/https";
 // import config from "../config";
 // import {defineSecret} from "firebase-functions/params";
 // const googleAIapiKey = defineSecret("GEMINI_API_KEY");
@@ -79,6 +79,19 @@ export const contentSummarizationFlow = ai.defineFlow(
 // Export the function wrapped with onCallGenkit for Firebase Functions
 export const summarizeContent = onCall(
   async (request) => {
-    return await contentSummarizationFlow(request.data);
+    // Check authentication
+    if (!request.auth?.uid) {
+      throw new HttpsError("unauthenticated", "Authentication required");
+    }
+
+    try {
+      return await contentSummarizationFlow(request.data);
+    } catch (error) {
+      // Convert regular errors to HttpsError to preserve error messages
+      if (error instanceof Error) {
+        throw new HttpsError("invalid-argument", error.message);
+      }
+      throw error;
+    }
   }
 );

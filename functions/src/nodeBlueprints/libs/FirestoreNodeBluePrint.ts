@@ -4,13 +4,13 @@ import {
 } from "./NodeBluePrint";
 import {v4 as uuidv4} from "uuid";
 import * as admin from "firebase-admin";
-import {FirestoreNodeBluePrintModel} from "../../shared/NodeBluePrintModel";
+import {FirestoreNodeBluePrintModel} from "$shared/NodeBluePrintModel";
 import {
   InputSocketModel,
   InputSocketParams,
   OutputSocketModel,
   SocketID,
-} from "../../shared/SocketModels";
+} from "$shared/SocketModels";
 const firestore = admin.firestore();
 
 const NODE_BLUEPRINTS_REF = firestore.collection("nodes");
@@ -737,6 +737,24 @@ export class NodeBluePrintInFirestore extends NodeBluePrint {
   set input_spec_strict(value: boolean) {
     this.updateFirestoreDoc({
       input_spec_strict: value,
+    });
+  }
+
+  /**
+   * Gets the categories for this node.
+   * @return {string[]} The categories
+   */
+  get categories(): string[] {
+    return this.current.categories;
+  }
+
+  /**
+   * Sets the categories for this node.
+   * @param {string[]} categories - The new categories
+   */
+  set categories(categories: string[]) {
+    this.updateFirestoreDoc({
+      categories: categories,
     });
   }
 }

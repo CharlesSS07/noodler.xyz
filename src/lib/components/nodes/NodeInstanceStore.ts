@@ -114,9 +114,9 @@ export class NodeInstanceStore {
             projectComputedDataCache.useNodeExecutionStatusStore(this.nodeId);
 
         // Initialize blueprint if nid is provided
-        this.nodeBluePrint = derived(this.nodeStore, ($nodeStore, set) => {
-            if ($nodeStore) {
-                return createNodeBluePrintStore($nodeStore.data.nid as string).subscribe((blueprint) => {
+        this.nodeBluePrint = derived(this.nid, ($nid, set) => {
+            if ($nid) {
+                return createNodeBluePrintStore($nid).subscribe((blueprint) => {
                     set(blueprint);
                 });
             }

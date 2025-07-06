@@ -75,7 +75,11 @@
         ></StemNodeComponent>
 
         {#if $executionStatus}
-            <NodeErrorDisplay errorMessage={$executionStatus.logs.map((log) => log[1]).join('\n')}></NodeErrorDisplay>
+            <NodeErrorDisplay 
+                errorMessage={$executionStatus.logs.map((log) => log[1]).join('\n')}
+                nodeBlueprint={$nodeBluePrint}
+                nodeInputData={$nodeInputDataStore}
+            ></NodeErrorDisplay>
         {/if}
     </NodeWrapper>
 

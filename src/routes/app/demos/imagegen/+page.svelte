@@ -435,9 +435,10 @@ Each step uses state-of-the-art AI models for professional-quality results.
     <!-- Email Signup -->
     <div class="email-signup-container">
         <EmailSignup 
-            title="Get Early Access"
-            subtitle="Be the first to access our advanced AI image tools"
-            buttonText="Join Waitlist"
+            title="Create Amazing Images!"
+            subtitle="Get exclusive access to our most advanced AI image generation tools and techniques."
+            buttonText="Join Beta"
+            successMessage="Fantastic! We'll notify you when new AI image features are available."
         />
     </div>
 </div>
@@ -609,10 +610,13 @@ Each step uses state-of-the-art AI models for professional-quality results.
     .email-signup-container {
         position: fixed;
         bottom: 20px;
-        right: 20px;
+        left: 0px;
+        width: 30vh;
+        height: 30vh;
+        transform: scale(0.7);
+        transform-origin: top right;
         z-index: 1000;
-        transform: scale(0.8);
-        transform-origin: bottom right;
+        pointer-events: auto;
     }
 
     @media (max-width: 768px) {

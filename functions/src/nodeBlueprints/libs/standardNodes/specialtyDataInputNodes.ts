@@ -6,7 +6,7 @@ import {
 import {
   JIMPImageSocketParamsBuilder,
   StringSocketParamsBuilder} from "../SocketParamBuilders.js";
-import {STANDARD_DATATYPES} from "$shared/DataTypes";
+import {STANDARD_DATATYPES} from "$shared/SocketDataTypes";
 
 const nodeBluePrintController: NodeBluePrintControllerFactoryInterface =
     new FirestoreNodeBluePrintControllerFactoryInterface();
@@ -36,6 +36,7 @@ export async function specialtyDataInputDataNodes() {
     "manual",
     "fundamental",
   ];
+  rawTextEditor.categories = ["/text/input", "/data/input", "/ui/text-editor"];
   rawTextEditor.notSearchable();
 
   rawTextEditor.newInputSocket("inputText", {
@@ -72,6 +73,11 @@ export async function specialtyDataInputDataNodes() {
     "headers",
     "links",
   ];
+  mdTextEditor.categories = [
+    "/text/markdown",
+    "/text/input",
+    "/ui/text-editor",
+  ];
   mdTextEditor.notSearchable();
 
   mdTextEditor.newInputSocket("text", {
@@ -106,6 +112,11 @@ export async function specialtyDataInputDataNodes() {
     "generation",
     "incomplete",
     "parametric",
+  ];
+  textTemplateFillin.categories = [
+    "/text/templating",
+    "/text/generation",
+    "/data/templating",
   ];
   textTemplateFillin.notSearchable();
 
@@ -153,6 +164,7 @@ outputs.set("text", filledIn);
     "conversion",
     "reader",
   ];
+  imageLoader.categories = ["/image/input", "/file/loading", "/data/input"];
   imageLoader.notSearchable();
 
   imageLoader.newInputSocket("imageOrFileOrString", {
@@ -169,14 +181,22 @@ outputs.set("text", filledIn);
   imageLoader.code = `
 const imageOrFileOrString = inputs.imageOrFileOrString;
 
+console.log(
+    typeof imageOrFileOrString,
+    typeof imageOrFileOrString === 'string',
+    imageOrFileOrString instanceof ArrayBuffer,
+    imageOrFileOrString instanceof Blob,
+    imageOrFileOrString instanceof Response,
+    imageOrFileOrString
+);
+
 if (typeof imageOrFileOrString === 'string' ||
-    imageOrFileOrString instanceof Buffer ||
     imageOrFileOrString instanceof ArrayBuffer
 ) {
     outputs.set('image', await utils.Jimp.read(imageOrFileOrString));
 } else if (
     imageOrFileOrString instanceof Blob ||
-    imageOrFileOrString instanceof Response ||
+    imageOrFileOrString instanceof Response
 ) {
     const arrayBuffer = await imageOrFileOrString.arrayBuffer();
     outputs.set('image', await utils.Jimp.read(arrayBuffer));
@@ -206,6 +226,7 @@ if (typeof imageOrFileOrString === 'string' ||
     "ui",
     "viewer",
   ];
+  htmlRenderer.categories = ["/html/rendering", "/web/display", "/ui/viewer"];
   htmlRenderer.notSearchable();
 
   htmlRenderer.newInputSocket("html", {
@@ -233,6 +254,11 @@ if (typeof imageOrFileOrString === 'string' ||
     "logic",
     "computation",
     "flexible",
+  ];
+  jsNode.categories = [
+    "/code/javascript",
+    "/computation/scripting",
+    "/development/custom",
   ];
   jsNode.notSearchable();
 

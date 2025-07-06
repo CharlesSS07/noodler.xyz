@@ -10,7 +10,7 @@ import {
   JIMPImageSocketParamsBuilder,
   GenericSocketParamsBuilder,
 } from "../SocketParamBuilders.js";
-import {STANDARD_DATATYPES} from "$shared/DataTypes";
+import {STANDARD_DATATYPES} from "$shared/SocketDataTypes";
 
 const factory: NodeBluePrintControllerFactoryInterface =
     new FirestoreNodeBluePrintControllerFactoryInterface();
@@ -31,6 +31,11 @@ export async function aiInferenceNodes() {
     "remote", // for libs that do operations using the cloud, not fully locally
     "text", // for libs that handle text
   ];
+  textToImage.categories = [
+    "/ai/image-generation",
+    "/ai/text-to-image",
+    "/image/generation",
+  ];
 
   textToImage.newInputSocket("prompt", {
     label: "Prompt",
@@ -47,7 +52,7 @@ export async function aiInferenceNodes() {
     documentation: "AI model to use for generation.",
     type: STANDARD_DATATYPES.STRING,
     params: new StringSocketParamsBuilder(
-      "runwayml/stable-diffusion-v1-5"
+      "black-forest-labs/FLUX.1-schnell-Free"
     ).build()});
 
   textToImage.newInputSocket("num_inference_steps", {
@@ -55,7 +60,7 @@ export async function aiInferenceNodes() {
     documentation:
       "Number of denoising steps (higher = better quality, slower).",
     type: STANDARD_DATATYPES.NUMBER,
-    params: new NumberSocketParamsBuilder(50).setMin(1).setMax(100).build()});
+    params: new NumberSocketParamsBuilder(20).setMin(1).setMax(100).build()});
 
   textToImage.newInputSocket("guidance_scale", {
     label: "Guidance Scale",
@@ -76,21 +81,21 @@ export async function aiInferenceNodes() {
       .asParagraph()
       .build()});
 
-  textToImage.newInputSocket("height", {
-    label: "Height",
-    documentation: "Image height in pixels.",
+  textToImage.newInputSocket("width", {
+    label: "Width",
+    documentation: "Image width in pixels.",
     type: STANDARD_DATATYPES.NUMBER,
-    params: new NumberSocketParamsBuilder(512)
+    params: new NumberSocketParamsBuilder(128)
       .setMin(64)
       .setMax(1024)
       .setStep(64)
       .build()});
 
-  textToImage.newInputSocket("width", {
-    label: "Width",
-    documentation: "Image width in pixels.",
+  textToImage.newInputSocket("height", {
+    label: "Height",
+    documentation: "Image height in pixels.",
     type: STANDARD_DATATYPES.NUMBER,
-    params: new NumberSocketParamsBuilder(512)
+    params: new NumberSocketParamsBuilder(128)
       .setMin(64)
       .setMax(1024)
       .setStep(64)
@@ -102,17 +107,14 @@ export async function aiInferenceNodes() {
     type: STANDARD_DATATYPES.IMAGE_JIMP});
 
   textToImage.code = `
-        const aiService = await utils.APIConnectionManager
-          .getConnector("ai_inference").getAPI();
-        const result = await aiService.textToImage({
-            inputs: inputs.prompt,
+        const result = await utils.aiServices.textToImage({
+            prompt: inputs.prompt,
             model: inputs.model,
-            parameters: {
-                num_inference_steps: inputs.num_inference_steps,
-                guidance_scale: inputs.guidance_scale,
-                negative_prompt: inputs.negative_prompt,
-                height: inputs.height,
-                width: inputs.width}
+            steps: inputs.num_inference_steps,
+            guidance: inputs.guidance_scale,
+            negative_prompt: inputs.negative_prompt,
+            height: inputs.height,
+            width: inputs.width
         });
         outputs.set('image', result);
     `;
@@ -125,6 +127,11 @@ export async function aiInferenceNodes() {
   objectDetection.documentation =
     "Detects objects in images with bounding boxes.";
   objectDetection.tags = ["ai", "image", "remote", "detection"];
+  objectDetection.categories = [
+    "/ai/computer-vision",
+    "/ai/object-detection",
+    "/image/analysis",
+  ];
 
   objectDetection.newInputSocket("image", {
     label: "Image",
@@ -176,6 +183,11 @@ export async function aiInferenceNodes() {
   textGeneration.documentation =
     "Generates text completions using language models.";
   textGeneration.tags = ["ai", "text", "remote", "generation"];
+  textGeneration.categories = [
+    "/ai/text-generation",
+    "/ai/language-models",
+    "/text/generation",
+  ];
 
   textGeneration.newInputSocket("prompt", {
     label: "Text Prompt",
@@ -262,6 +274,11 @@ export async function aiInferenceNodes() {
   textClassification.documentation =
     "Classifies text into categories (sentiment, topic, etc.).";
   textClassification.tags = ["ai", "text", "remote", "classification"];
+  textClassification.categories = [
+    "/ai/text-classification",
+    "/ai/nlp",
+    "/text/analysis",
+  ];
 
   textClassification.newInputSocket("text", {
     label: "Text",
@@ -305,6 +322,11 @@ export async function aiInferenceNodes() {
   questionAnswering.documentation =
         "Answers questions based on provided context.";
   questionAnswering.tags = ["ai", "text", "remote", "qa"];
+  questionAnswering.categories = [
+    "/ai/question-answering",
+    "/ai/nlp",
+    "/text/qa",
+  ];
 
   questionAnswering.newInputSocket("question", {
     label: "Question",
@@ -363,6 +385,11 @@ export async function aiInferenceNodes() {
   summarization.title = "AI Text Summarization";
   summarization.documentation = "Summarizes long text into shorter versions.";
   summarization.tags = ["ai", "text", "remote", "summarization"];
+  summarization.categories = [
+    "/ai/text-summarization",
+    "/ai/nlp",
+    "/text/summarization",
+  ];
 
   summarization.newInputSocket("text", {
     label: "Text to Summarize",
@@ -419,6 +446,7 @@ export async function aiInferenceNodes() {
   translation.title = "AI Language Translation";
   translation.documentation = "Translates text between languages.";
   translation.tags = ["ai", "text", "remote", "translation"];
+  translation.categories = ["/ai/translation", "/ai/nlp", "/text/translation"];
 
   translation.newInputSocket("text", {
     label: "Text to Translate",
@@ -458,6 +486,7 @@ export async function aiInferenceNodes() {
   fillMask.title = "AI Fill Mask";
   fillMask.documentation = "Predicts masked words in text.";
   fillMask.tags = ["ai", "text", "remote", "prediction"];
+  fillMask.categories = ["/ai/fill-mask", "/ai/nlp", "/text/prediction"];
 
   fillMask.newInputSocket("text", {
     label: "Text with Mask",
@@ -505,6 +534,11 @@ export async function aiInferenceNodes() {
   sentenceSimilarity.documentation =
         "Computes semantic similarity between sentences.";
   sentenceSimilarity.tags = ["ai", "text", "remote", "similarity"];
+  sentenceSimilarity.categories = [
+    "/ai/sentence-similarity",
+    "/ai/nlp",
+    "/text/similarity",
+  ];
 
   sentenceSimilarity.newInputSocket("source_sentence", {
     label: "Source Sentence",
@@ -558,6 +592,11 @@ export async function aiInferenceNodes() {
   featureExtraction.title = "AI Feature Extraction";
   featureExtraction.documentation = "Extracts feature embeddings from text.";
   featureExtraction.tags = ["ai", "text", "remote", "embedding"];
+  featureExtraction.categories = [
+    "/ai/feature-extraction",
+    "/ai/embeddings",
+    "/text/embeddings",
+  ];
 
   featureExtraction.newInputSocket("text", {
     label: "Text",
@@ -606,6 +645,11 @@ export async function aiInferenceNodes() {
     "remote",
     "recognition",
   ];
+  automaticSpeechRecognition.categories = [
+    "/ai/speech-recognition",
+    "/ai/audio",
+    "/audio/transcription",
+  ];
 
   automaticSpeechRecognition.newInputSocket("audio_data", {
     label: "Audio Data",
@@ -641,6 +685,11 @@ export async function aiInferenceNodes() {
   tableQuestionAnswering.documentation =
         "Answers questions about tabular data.";
   tableQuestionAnswering.tags = ["ai", "text", "data", "remote", "qa"];
+  tableQuestionAnswering.categories = [
+    "/ai/table-qa",
+    "/ai/nlp",
+    "/data/analysis",
+  ];
 
   tableQuestionAnswering.newInputSocket("question", {
     label: "Question",
@@ -698,6 +747,11 @@ export async function aiInferenceNodes() {
   imageEditor.documentation =
         "Applies AI-guided modifications to images based on text instructions.";
   imageEditor.tags = ["ai", "image", "text", "remote", "editing"];
+  imageEditor.categories = [
+    "/ai/image-editing",
+    "/ai/image-to-image",
+    "/image/editing",
+  ];
 
   imageEditor.newInputSocket("image", {
     label: "Source Image",
@@ -774,6 +828,7 @@ export async function aiInferenceNodes() {
         "General-purpose large language model for text generation and " +
           "completion using Google Gemini.";
   callLLM.tags = ["ai", "text", "remote", "llm", "genkit"];
+  callLLM.categories = ["/ai/llm", "/ai/text-generation", "/text/generation"];
 
   callLLM.newInputSocket("prompt", {
     label: "Prompt",

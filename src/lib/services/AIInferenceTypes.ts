@@ -14,14 +14,14 @@ export interface AIInferenceResponse<T = any> {
 
 // Text-to-Image specific interfaces
 export interface TextToImageRequest extends AIInferenceRequest {
-    inputs: string; // text prompt
-    parameters?: {
-        num_inference_steps?: number;
-        guidance_scale?: number;
-        negative_prompt?: string;
-        height?: number;
-        width?: number;
-    };
+    prompt: string;
+    model?: string;
+    negative_prompt?: string;
+    guidance?: number;
+    height?: number;
+    width?: number;
+    seed?: number;
+    steps?: number;
 }
 
 export interface TextToImageResponse {

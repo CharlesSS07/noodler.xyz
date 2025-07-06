@@ -1,5 +1,7 @@
 import * as admin from "firebase-admin";
+import * as dotenv from "dotenv";
 
+dotenv.config();
 admin.initializeApp();
 
 // Genkit-based Content Summarization Flow

@@ -1,6 +1,7 @@
 <script lang="ts">
     import Logo from '../../../components/Logo.svelte';
     import BugReportButton from '../../../components/BugReportButton.svelte';
+    import EmailSignup from '../../../components/EmailSignup.svelte';
     import { Play, Image, MessageSquare, Wand2, Sparkles, Globe } from 'lucide-svelte';
 
     interface Demo {

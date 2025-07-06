@@ -7,7 +7,7 @@ import {
   StringSocketParamsBuilder,
   NumberSocketParamsBuilder,
 } from "../SocketParamBuilders.js";
-import {STANDARD_DATATYPES} from "$shared/DataTypes";
+import {STANDARD_DATATYPES} from "$shared/SocketDataTypes";
 
 const factory: NodeBluePrintControllerFactoryInterface =
     new FirestoreNodeBluePrintControllerFactoryInterface();
@@ -31,6 +31,11 @@ export async function nlpNodes() {
     "summarization",
     "genkit",
     "gemini",
+  ];
+  genkitSummarization.categories = [
+    "/ai/summarization",
+    "/ai/genkit",
+    "/text/summarization",
   ];
 
   genkitSummarization.newInputSocket("content", {
@@ -109,6 +114,11 @@ export async function nlpNodes() {
     "formatting",
     "llm",
     "style",
+  ];
+  textFormatterLLM.categories = [
+    "/ai/text-formatting",
+    "/ai/llm",
+    "/text/formatting",
   ];
 
   textFormatterLLM.newInputSocket("content", {

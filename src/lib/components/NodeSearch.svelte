@@ -13,13 +13,13 @@
 
     let searchTerm: string = '';
     let searchResults: NodeSearchResult[] = [];
-    let selectedCategory: string = 'all';
+    let selectedTrustLevel: string = 'all';
     let isLoading: boolean = false;
     let searchInput: HTMLInputElement;
 
     const nodeSearchService = new NodeSearchService();
 
-    const categories = [
+    const trustLevels = [
         { value: 'all', label: 'All Nodes' },
         { value: 'Official', label: 'Official' },
         { value: 'Trusted', label: 'Trusted' },
@@ -37,7 +37,7 @@
     }
 
     // Search when category changes
-    $: if (selectedCategory !== undefined) {
+    $: if (selectedTrustLevel !== undefined) {
         performSearch();
     }
 
@@ -64,19 +64,19 @@
         try {
             if (!searchTerm.trim()) {
                 // No search term - show by category or popular
-                if (selectedCategory === 'all') {
+                if (selectedTrustLevel === 'all') {
                     searchResults = await nodeSearchService.getPopularNodes(15);
                 } else {
-                    searchResults = await nodeSearchService.searchByCategory(selectedCategory, 15);
+                    searchResults = await nodeSearchService.getPopularNodes(15, selectedTrustLevel);
                 }
             } else {
                 // Search by text
-                searchResults = await nodeSearchService.searchByText(searchTerm, 20);
+                searchResults = await nodeSearchService.searchByText({query: searchTerm, limit: 20});
                 
                 // Filter by category if not 'all'
-                if (selectedCategory !== 'all') {
+                if (selectedTrustLevel !== 'all') {
                     searchResults = searchResults.filter(node => 
-                        node.trust_level === selectedCategory
+                        node.trust_level === selectedTrustLevel
                     );
                 }
             }
@@ -168,16 +168,16 @@
 
             <!-- Category Filter -->
             <div class="flex gap-1 mt-3">
-                {#each categories as category}
+                {#each trustLevels as trustLevel}
                     <button
-                        onclick={() => selectedCategory = category.value}
+                        onclick={() => selectedTrustLevel = trustLevel.value}
                         class="px-3 py-1 text-xs rounded-full transition-colors {
-                            selectedCategory === category.value
+                            selectedTrustLevel === trustLevel.value
                                 ? 'bg-blue-500 text-white'
                                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                         }"
                     >
-                        {category.label}
+                        {trustLevel.label}
                     </button>
                 {/each}
             </div>

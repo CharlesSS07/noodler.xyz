@@ -44,9 +44,10 @@ export class AIInferenceService {
             /^data:image\/[a-z]+;base64,/,
             ''
         );
-        const buffer = Buffer.from(base64Data, 'base64');
+        // const buffer = ArrayBuffer.from(, 'base64');
+        console.log(`data:image/base64String;base64,${base64String}`);
         // @ts-ignore
-        return await Jimp.read(buffer);
+        return await Jimp.read(`data:image/base64String;base64,${base64String}`);
     }
 
     private async callFirebaseFunction<T>(
@@ -82,11 +83,19 @@ export class AIInferenceService {
 
     // Text-to-Image Generation
     async textToImage(request: TextToImageRequest): Promise<JimpInstance> {
-        const response = await this.callFirebaseFunction<TextToImageResponse>(
+        const response = await this.callFirebaseFunction<any>(
             'textToImage',
             request
         );
-        return await this.base64ToJimp(response.image);
+        
+        // Handle TogetherAI response format
+        if (response.data && response.data.length > 0) {
+            const base64Image = response.data[0].b64_json;
+            // Convert base64 to JIMP
+            return await this.base64ToJimp(base64Image);
+        }
+        
+        throw new Error('No image data received from textToImage function');
     }
 
     // Image Processing Endpoints
@@ -151,15 +160,6 @@ export class AIInferenceService {
         );
     }
 
-    async tokenClassification(
-        request: TokenClassificationRequest
-    ): Promise<any[]> {
-        return await this.callFirebaseFunction<any[]>(
-            'tokenClassification',
-            request
-        );
-    }
-
     async questionAnswering(
         request: QuestionAnsweringRequest
     ): Promise<QuestionAnsweringResult> {
@@ -196,15 +196,6 @@ export class AIInferenceService {
     ): Promise<{ generated_text: string }> {
         return await this.callFirebaseFunction<{ generated_text: string }>(
             'conversational',
-            request
-        );
-    }
-
-    async featureExtraction(
-        request: FeatureExtractionRequest
-    ): Promise<number[][]> {
-        return await this.callFirebaseFunction<number[][]>(
-            'featureExtraction',
             request
         );
     }

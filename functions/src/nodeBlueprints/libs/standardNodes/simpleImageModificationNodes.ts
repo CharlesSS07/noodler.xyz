@@ -7,7 +7,7 @@ import {
   JIMPImageSocketParamsBuilder,
   NumberSocketParamsBuilder,
 } from "../SocketParamBuilders.js";
-import {STANDARD_DATATYPES} from "$shared/DataTypes";
+import {STANDARD_DATATYPES} from "$shared/SocketDataTypes";
 
 const nodeBluePrintController: NodeBluePrintControllerFactoryInterface =
     new FirestoreNodeBluePrintControllerFactoryInterface();
@@ -34,6 +34,11 @@ export async function simpleImageModificationNodes() {
     "artistic",
     "processing",
     "desaturation",
+  ];
+  grayscale.categories = [
+    "/image/filters",
+    "/image/jimp",
+    "/graphics/color-effects",
   ];
 
   await grayscale.newInputSocket("img", {
@@ -71,6 +76,7 @@ outputs.set('img', img);
     "enhancement",
     "artistic",
   ];
+  hsv.categories = ["/image/color-adjustment", "/image/jimp", "/graphics/hsv"];
 
   hsv.newInputSocket("img", {
     label: "Input Image",

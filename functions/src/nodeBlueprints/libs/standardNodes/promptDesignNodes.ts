@@ -4,7 +4,7 @@ import {
   FirestoreNodeBluePrintControllerFactoryInterface,
 } from "../FirestoreNodeBluePrint.js";
 import {StringSocketParamsBuilder} from "../SocketParamBuilders.js";
-import {STANDARD_DATATYPES} from "$shared/DataTypes";
+import {STANDARD_DATATYPES} from "$shared/SocketDataTypes";
 
 const nodeBluePrintController: NodeBluePrintControllerFactoryInterface =
     new FirestoreNodeBluePrintControllerFactoryInterface();
@@ -32,6 +32,7 @@ export async function promptDesignNodes() {
     "building",
     "utility",
   ];
+  joinText.categories = ["/text/manipulation", "/text/joining", "/utils/text"];
 
   await joinText.newInputSocket("text1", {
     label: "Text",
@@ -81,6 +82,7 @@ export async function promptDesignNodes() {
     "extraction",
     "utility",
   ];
+  splitText.categories = ["/text/manipulation", "/text/parsing", "/utils/text"];
 
   await splitText.newInputSocket("text", {
     label: "Text",

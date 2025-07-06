@@ -1,5 +1,9 @@
 import { functions } from '../../firebase';
 import { httpsCallable } from 'firebase/functions';
+import {getNodeBluePrintModel} from "$lib/compositor/NodeBluePrint";
+import {projectState} from "$lib/stores/ProjectState";
+import {get} from "svelte/store";
+import type {SearchOptions} from "$shared/types/Search";
 
 export interface NodeSearchResult {
     id: string;
@@ -7,7 +11,6 @@ export interface NodeSearchResult {
     documentation: string;
     author_uid: string;
     trust_level: string;
-    category?: string;
     input_socket_count: number;
     output_socket_count: number;
     similarity?: number;
@@ -16,8 +19,6 @@ export interface NodeSearchResult {
 interface SearchResponse {
     results: Array<{
         nid: string;
-        title: string;
-        description: string;
         similarity?: number;
     }>;
     totalFound: number;
@@ -37,125 +38,24 @@ export class NodeSearchService {
     /**
      * Search libs by text matching using vector search
      */
-    async searchByText(
-        searchTerm: string,
-        maxResults: number = 20
-    ): Promise<NodeSearchResult[]> {
-        const searchTermTrimmed = searchTerm.trim();
+    async searchByText(options: SearchOptions, category?: string): Promise<NodeSearchResult[]> {
+        const searchTermTrimmed = options.query.trim();
 
         if (!searchTermTrimmed) {
-            return this.getPopularNodes(maxResults);
+            return this.getPopularNodes(options.limit || 10);
         }
 
         try {
             const result = await this.searchNodeBluePrints({
-                query: searchTermTrimmed,
-                limit: maxResults,
+                query: category!==undefined ? `${searchTermTrimmed}\n\ncategory=${category}` : searchTermTrimmed,
+                trustLevelFilter: options.trustLevelFilter,
+                limit: options.limit,
             });
 
-            return this.processSearchResults(result.data.results);
+            return await this.processSearchResults(result.data.results);
         } catch (error) {
             console.error('Error searching libs:', error);
             return [];
-        }
-    }
-
-    /**
-     * Search libs by category/trust level
-     */
-    async searchByCategory(
-        trustLevel?: string,
-        maxResults: number = 20
-    ): Promise<NodeSearchResult[]> {
-        try {
-            // Use a general search query with trust level filter
-            const result = await this.searchNodeBluePrints({
-                query: trustLevel ? `trust level ${trustLevel}` : 'nodes',
-                limit: maxResults,
-                trustLevelFilter: trustLevel,
-            });
-
-            return this.processSearchResults(result.data.results);
-        } catch (error) {
-            console.error('Error searching libs by category:', error);
-            return [];
-        }
-    }
-
-    /**
-     * Get popular/recommended libs (Official and Trusted)
-     */
-    async getPopularNodes(
-        maxResults: number = 10
-    ): Promise<NodeSearchResult[]> {
-        try {
-            const result = await this.searchNodeBluePrints({
-                query: 'popular recommended libs',
-                limit: maxResults,
-                trustLevelFilter: 'Official',
-            });
-
-            // If no official libs, try trusted
-            if (result.data.results.length === 0) {
-                const trustedResult = await this.searchNodeBluePrints({
-                    query: 'popular recommended libs',
-                    limit: maxResults,
-                    trustLevelFilter: 'Trusted',
-                });
-                return this.processSearchResults(trustedResult.data.results);
-            }
-
-            return this.processSearchResults(result.data.results);
-        } catch (error) {
-            console.error('Error getting popular libs:', error);
-            return [];
-        }
-    }
-
-    /**
-     * Search libs by socket compatibility
-     */
-    async searchBySocketType(
-        socketType: string,
-        isInput: boolean = true,
-        maxResults: number = 15
-    ): Promise<NodeSearchResult[]> {
-        try {
-            const socketDirection = isInput ? 'input' : 'output';
-            const result = await this.searchNodeBluePrints({
-                query: `${socketDirection} socket ${socketType}`,
-                limit: maxResults,
-            });
-
-            return this.processSearchResults(result.data.results);
-        } catch (error) {
-            console.error('Error searching libs by socket type:', error);
-            return [];
-        }
-    }
-
-    /**
-     * Get suggested libs based on current project context
-     */
-    async getSuggestedNodes(
-        projectDescription?: string,
-        maxResults: number = 8
-    ): Promise<NodeSearchResult[]> {
-        try {
-            const query = projectDescription 
-                ? `suggested nodes for ${projectDescription}`
-                : 'suggested recommended libs';
-            
-            const result = await this.searchNodeBluePrints({
-                query,
-                limit: maxResults,
-            });
-
-            return this.processSearchResults(result.data.results);
-        } catch (error) {
-            console.error('Error getting suggested libs:', error);
-            // Fallback to popular libs
-            return this.getPopularNodes(maxResults);
         }
     }
 
@@ -173,7 +73,7 @@ export class NodeSearchService {
                 tagFilter: tags,
             });
 
-            return this.processSearchResults(result.data.results);
+            return await this.processSearchResults(result.data.results);
         } catch (error) {
             console.error('Error searching libs by tags:', error);
             return [];
@@ -183,49 +83,45 @@ export class NodeSearchService {
     /**
      * Process function response into NodeSearchResult objects
      */
-    private processSearchResults(
+    private async processSearchResults(
         results: Array<{
             nid: string;
-            title: string;
-            description: string;
             similarity?: number;
         }>
-    ): NodeSearchResult[] {
-        return results.map((result) => ({
-            id: result.nid,
-            title: result.title || 'Untitled Node',
-            documentation: result.description || '',
-            author_uid: '', // Not available in search results
-            trust_level: 'Unknown', // Would need separate query to get this
-            input_socket_count: 0, // Would need separate query to get this
-            output_socket_count: 0, // Would need separate query to get this
-            category: this.inferCategoryFromTitle(result.title),
-            similarity: result.similarity,
-        }));
+    ): Promise<NodeSearchResult[]> {
+        return await Promise.all(results.map(async (result) => {
+            const nbp = await getNodeBluePrintModel(result.nid)
+            return {
+                    id: result.nid,
+                        title: nbp.title || 'Untitled Node',
+                    documentation: nbp.documentation || '',
+                    author_uid: nbp.owner,
+                    trust_level: nbp.trust_level, // Would need separate query to get this
+                    input_socket_count: 0, // Would need separate query to get this
+                    output_socket_count: 0, // Would need separate query to get this
+                    similarity: result.similarity,
+                }
+            }
+        ));
     }
 
-    /**
-     * Infer category from node title (simple heuristic)
-     */
-    private inferCategoryFromTitle(title: string): string {
-        const titleLower = title.toLowerCase();
-        
-        if (titleLower.includes('text') || titleLower.includes('string')) {
-            return 'text';
+    async getPopularNodes(maxResults: number, trustLevelFilter?: string): Promise<NodeSearchResult[]> {
+
+        const projectData = get(projectState);
+
+        const projectContext = projectData.title+'\n\n'+projectData.description;
+
+        try {
+            const result = await this.searchNodeBluePrints({
+                query: projectContext,
+                limit: maxResults,
+                trustLevelFilter: trustLevelFilter,
+            });
+
+            return await this.processSearchResults(result.data.results);
+        } catch (error) {
+            console.error('Error searching libs:', error);
+            return [];
         }
-        if (titleLower.includes('image') || titleLower.includes('photo')) {
-            return 'image';
-        }
-        if (titleLower.includes('data') || titleLower.includes('json')) {
-            return 'data';
-        }
-        if (titleLower.includes('ai') || titleLower.includes('ml')) {
-            return 'ai';
-        }
-        if (titleLower.includes('web') || titleLower.includes('http')) {
-            return 'web';
-        }
-        
-        return 'general';
     }
 }

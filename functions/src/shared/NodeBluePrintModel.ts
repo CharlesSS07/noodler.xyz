@@ -24,4 +24,5 @@ export interface FirestoreNodeBluePrintModel {
     official_note: string;
     searchable: boolean;
     tags: string[];
+    categories: string[];
 }

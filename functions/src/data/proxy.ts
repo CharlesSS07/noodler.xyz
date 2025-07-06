@@ -1,10 +1,26 @@
 import {onRequest} from "firebase-functions/v2/https";
 import cors from "cors";
+import * as admin from "firebase-admin";
 
 const corsHandler = cors({origin: true});
 
 export const proxy = onRequest(async (req, res) => {
   corsHandler(req, res, async () => {
+    // Check authentication for onRequest functions
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      res.status(401).send("Authentication required");
+      return;
+    }
+
+    try {
+      const token = authHeader.split("Bearer ")[1];
+      await admin.auth().verifyIdToken(token);
+    } catch (authError) {
+      res.status(401).send("Invalid authentication token");
+      return;
+    }
+
     const url = req.query.url;
     if (!url) {
       res.status(400).send("Missing URL parameter");
@@ -35,7 +51,7 @@ export const proxy = onRequest(async (req, res) => {
     } catch (error) {
       console.error("Proxy error:", error);
       res.status(500).send(
-        "Proxy error: " + error.message
+        `Proxy error: ${error instanceof Error ? error.message : String(error)}`
       );
     }
   });

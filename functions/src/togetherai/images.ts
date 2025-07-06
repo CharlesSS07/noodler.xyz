@@ -1,11 +1,15 @@
 import Together from "together-ai";
 
-const together = new Together();
+const together = new Together({
+  apiKey: process.env.TOGETHER_API_KEY,
+});
 
 // this is most of the inputs to together.images.create
 // ImageCreateParams
 // {
-//     model: "black-forest-labs/FLUX.1-schnell-Free" | "black-forest-labs/FLUX.1-schnell" | "black-forest-labs/FLUX.1.1-pro" | string
+//     model: "black-forest-labs/FLUX.1-schnell-Free" |
+//            "black-forest-labs/FLUX.1-schnell" |
+//            "black-forest-labs/FLUX.1.1-pro" | string
 //     prompt: string
 //     guidance ? : number
 //     height ? : number
@@ -41,57 +45,81 @@ interface TextToImageParams {
     steps?: number;
 }
 
-export async function textToImage(params: TextToImageParams) {
-    // Validate prompt
-    if (!params.prompt || params.prompt.trim() === '') {
-        throw new Error('Prompt cannot be empty.');
+/**
+ * Generates an image from text using the Together AI API.
+ * @param {TextToImageParams} params - Parameters for image generation.
+ * @return {Promise<{b64_json: string}[]>} Resolves to an array of
+ * objects containing base64 encoded images.
+ */
+export async function textToImage(
+  params: TextToImageParams
+) {
+  // Validate prompt
+  if (!params.prompt || params.prompt.trim() === "") {
+    throw new Error("Prompt cannot be empty.");
+  }
+
+  // Validate steps
+  if (params.steps !== undefined && params.steps <= 0) {
+    throw new Error("Steps must be a positive number.");
+  }
+
+  // Validate height and width
+  const minDimension = 128;
+  const maxDimension = 1024;
+  const minAspectRatio = 0.5;
+  const maxAspectRatio = 2.0;
+
+  if (params.height !== undefined && params.width !== undefined) {
+    if (params.height < minDimension || params.width < minDimension) {
+      throw new Error(
+        `Height and width must be at least ${minDimension}px.`
+      );
     }
-
-    // Validate steps
-    if (params.steps !== undefined && params.steps <= 0) {
-        throw new Error('Steps must be a positive number.');
+    if (params.height > maxDimension || params.width > maxDimension) {
+      throw new Error(
+        `Height and width cannot exceed ${maxDimension}px.`
+      );
     }
-
-    // Validate height and width
-    const minDimension = 128;
-    const maxDimension = 1024;
-    const minAspectRatio = 0.5;
-    const maxAspectRatio = 2.0;
-
-    if (params.height !== undefined && params.width !== undefined) {
-        if (params.height < minDimension || params.width < minDimension) {
-            throw new Error(`Height and width must be at least ${minDimension}px.`);
-        }
-        if (params.height > maxDimension || params.width > maxDimension) {
-            throw new Error(`Height and width cannot exceed ${maxDimension}px.`);
-        }
-        const aspectRatio = params.width / params.height;
-        if (aspectRatio < minAspectRatio || aspectRatio > maxAspectRatio) {
-            throw new Error(`Aspect ratio (width/height) must be between ${minAspectRatio} and ${maxAspectRatio}.`);
-        }
-    } else if (params.height !== undefined || params.width !== undefined) {
-        throw new Error('Both height and width must be provided if either is specified.');
+    const aspectRatio = params.width / params.height;
+    if (aspectRatio < minAspectRatio ||
+        aspectRatio > maxAspectRatio) {
+      throw new Error(
+        `Aspect ratio (width/height) must be between ${minAspectRatio} ` +
+        `and ${maxAspectRatio}.`
+      );
     }
+  } else if (params.height !== undefined ||
+             params.width !== undefined) {
+    throw new Error(
+      "Both height and width must be provided if either is specified."
+    );
+  }
 
-    // Validate guidance
-    const minGuidance = 1;
-    const maxGuidance = 20;
-    if (params.guidance !== undefined && (params.guidance < minGuidance || params.guidance > maxGuidance)) {
-        throw new Error(`Guidance must be between ${minGuidance} and ${maxGuidance}.`);
-    }
+  // Validate guidance
+  const minGuidance = 1;
+  const maxGuidance = 20;
+  if (params.guidance !== undefined &&
+      (params.guidance < minGuidance ||
+       params.guidance > maxGuidance)) {
+    throw new Error(
+      `Guidance must be between ${minGuidance} and ${maxGuidance}.`
+    );
+  }
 
-    const response = await together.images.create({
-        model: params.model || "black-forest-labs/FLUX.1-schnell-Free",
-        prompt: params.prompt,
-        negative_prompt: params.negative_prompt || '',
-        guidance: params.guidance,
-        width: params.width,
-        height: params.height,
-        seed: params.seed || 0,
-        steps: params.steps,
-        n: 1, // Default to 1 image
-        response_format: 'url',
-        output_format: 'png'
-    });
-    return response;
+  const response = await together.images.create({
+    model: params.model ||
+           "black-forest-labs/FLUX.1-schnell-Free",
+    prompt: params.prompt,
+    negative_prompt: params.negative_prompt || "",
+    guidance: params.guidance,
+    width: params.width,
+    height: params.height,
+    seed: params.seed || 0,
+    steps: params.steps,
+    n: 1, // Default to 1 image
+    response_format: "base64",
+    output_format: "png",
+  });
+  return response;
 }

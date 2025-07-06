@@ -4,7 +4,7 @@ import {
   FirestoreNodeBluePrintControllerFactoryInterface,
 } from "../FirestoreNodeBluePrint.js";
 import {GenericSocketParamsBuilder} from "../SocketParamBuilders.js";
-import {STANDARD_DATATYPES} from "$shared/DataTypes";
+import {STANDARD_DATATYPES} from "$shared/SocketDataTypes";
 
 const nodeBluePrintController: NodeBluePrintControllerFactoryInterface =
     new FirestoreNodeBluePrintControllerFactoryInterface();
@@ -32,6 +32,11 @@ export async function jsonNodes() {
     "configuration",
     "api-data",
     "interchange",
+  ];
+  jsonEditorAndViewer.categories = [
+    "/data/json",
+    "/data/parsing",
+    "/data/editing",
   ];
 
   await jsonEditorAndViewer.newInputSocket("jsonObject", {
@@ -70,6 +75,11 @@ export async function jsonNodes() {
     "transform",
     "encoding",
     "api-ready",
+  ];
+  jsonToString.categories = [
+    "/data/json",
+    "/data/serialization",
+    "/data/conversion",
   ];
 
   await jsonToString.newInputSocket("jsonObject", {

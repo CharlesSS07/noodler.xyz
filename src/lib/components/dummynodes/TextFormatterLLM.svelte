@@ -15,7 +15,7 @@
 <script lang="ts">
     import NodeWrapper from "$lib/components/nodeComponents/NodeWrapper.svelte";
     import {Handle, type NodeProps, Position} from "@xyflow/svelte";
-    import {fetchSocketDataTypeByName, STANDARD_DATATYPES} from "$shared/DataTypes";
+    import {fetchSocketDataTypeByName, STANDARD_DATATYPES} from "$shared/SocketDataTypes";
     import {Tooltip} from "flowbite-svelte";
 
     let { id, data, selected }: NodeProps<MagicTextTransformNodeType> = $props();

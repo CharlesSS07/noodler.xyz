@@ -270,7 +270,7 @@ This document provides a comprehensive map of the entire repository structure, d
 - **Greatest Strength**: Robust multi-user project management with access control
 - **Greatest Weakness**: Tight coupling to Firebase Realtime Database
 
-#### `src/lib/compositor/DataTypes.ts`
+#### `src/lib/compositor/SocketDataTypes.ts`
 **Core Data Type Definitions**
 - Type definitions for data flowing through nodes
 - Socket data type specifications

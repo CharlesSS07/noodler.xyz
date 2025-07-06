@@ -8,7 +8,7 @@ import {
   StringSocketParamsBuilder,
   NumberSocketParamsBuilder,
 } from "../SocketParamBuilders.js";
-import {STANDARD_DATATYPES} from "$shared/DataTypes";
+import {STANDARD_DATATYPES} from "$shared/SocketDataTypes";
 
 const nodeBluePrintController: NodeBluePrintControllerFactoryInterface =
     new FirestoreNodeBluePrintControllerFactoryInterface();
@@ -37,6 +37,11 @@ export async function jimpNodes() {
     "background",
     "dimensions",
     "graphics",
+  ];
+  newBlankImage.categories = [
+    "/image/creation",
+    "/image/jimp",
+    "/graphics/generation",
   ];
 
   await newBlankImage.newInputSocket("color", {
@@ -86,6 +91,11 @@ export async function jimpNodes() {
     "optimization",
     "graphics",
     "modification",
+  ];
+  resize.categories = [
+    "/image/transformation",
+    "/image/jimp",
+    "/graphics/resize",
   ];
 
   await resize.newInputSocket("image", {

@@ -1,15 +1,10 @@
 import {genkit} from "genkit";
-import {
-  gemini15Flash,
-  googleAI,
-  textEmbedding004,
-} from "@genkit-ai/googleai";
+import {gemini15Flash, googleAI, textEmbedding004} from "@genkit-ai/googleai";
 import {defineFirestoreRetriever} from "@genkit-ai/firebase";
-import {
-  FieldValue,
-} from "firebase-admin/firestore";
+import {FieldValue} from "firebase-admin/firestore";
 import * as admin from "firebase-admin";
 import {NodeBluePrintInFirestore} from "./libs/FirestoreNodeBluePrint";
+import {SearchOptions, SearchResult} from "$shared/types/Search";
 
 // Configure Genkit instance
 const ai = genkit({
@@ -43,13 +38,6 @@ const retriever = defineFirestoreRetriever(ai, {
   distanceMeasure: "COSINE",
 });
 
-
-interface SearchResult {
-  nid: string;
-  title: string;
-  description: string;
-  similarity?: number;
-}
 
 /**
  * Converts a NodeBluePrint to a text description for embedding
@@ -358,13 +346,6 @@ export async function embedAllUnembeddedNodeBluePrints(): Promise<{
   }
 }
 
-interface SearchOptions {
-  query: string;
-  limit?: number;
-  trustLevelFilter?: string;
-  tagFilter?: string[];
-}
-
 /**
  * Performs vector search on NodeBluePrints
  * @param {SearchOptions} options - Search parameters
@@ -417,10 +398,9 @@ export async function searchNodeBluePrints(
       .filter((doc) => doc.metadata?.nid !== undefined)
       .map((doc) => ({
         nid: doc.metadata?.nid || "",
-        title: doc.metadata?.title || "Untitled",
-        description: doc.metadata?.description || "No description available",
         similarity: doc.metadata?.similarity,
-      }));
+      })
+      );
 
     return {
       results,

@@ -6,7 +6,7 @@ import {
 import {
   FileSocketParamsBuilder,
 } from "../SocketParamBuilders.js";
-import {STANDARD_DATATYPES} from "$shared/DataTypes";
+import {STANDARD_DATATYPES} from "$shared/SocketDataTypes";
 
 const nodeBluePrintController: NodeBluePrintControllerFactoryInterface =
     new FirestoreNodeBluePrintControllerFactoryInterface();
@@ -35,6 +35,7 @@ export async function fileLoadingNodes() {
     "business",
     "not-implemented",
   ];
+  loadExcel.categories = ["/file/loading", "/data/spreadsheet", "/data/excel"];
 
   loadExcel.newInputSocket("xlsx_file", {
     label: ".xlsx",
@@ -65,6 +66,7 @@ export async function fileLoadingNodes() {
     "content",
     "portable",
   ];
+  loadPDF.categories = ["/file/loading", "/data/document", "/text/extraction"];
 
   loadPDF.newInputSocket("pdf_file", {
     label: ".pdf",

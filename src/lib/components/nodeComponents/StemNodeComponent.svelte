@@ -25,7 +25,7 @@
     import {getInputComponentForDataType} from "$lib/components/nodeComponents/sockets/socket-inputs/SocketInputMapping";
     import TargetSocketLabelled from "$lib/components/nodeComponents/sockets/TargetSocketLabelled.svelte";
     import SourceSocketLabelled from "$lib/components/nodeComponents/sockets/SourceSocketLabelled.svelte";
-    import {STANDARD_DATATYPES} from "$shared/DataTypes";
+    import {STANDARD_DATATYPES} from "$shared/SocketDataTypes";
 
 </script>
 
