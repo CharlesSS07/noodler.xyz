@@ -23,7 +23,7 @@
     import BugReportButton from "../../components/BugReportButton.svelte";
     import {Plus, Play, X, ChevronDown, Download, RotateCcw} from "lucide-svelte";
     import {projectState, projectActions, projectSync} from "$lib/stores/ProjectState";
-    import {executeFlowGraph} from "$lib/compositor/Interpreter";
+    import {executeFlowGraph} from "$lib/compositor/FlowExecution";
 
     // Import the existing libs
 

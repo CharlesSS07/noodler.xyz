@@ -10,7 +10,7 @@
  */
 
 import { beforeEach, describe, expect, test } from 'vitest';
-import { executeFlowGraph } from '$lib/compositor/Interpreter';
+import { executeFlowGraph } from '$lib/compositor/FlowExecution';
 import type { Node, Edge } from '@xyflow/svelte';
 import { projectComputedDataCache } from '$lib/stores/ProjectState';
 

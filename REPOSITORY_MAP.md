@@ -285,7 +285,7 @@ This document provides a comprehensive map of the entire repository structure, d
 - **Greatest Strength**: Type-safe data flow throughout the entire system
 - **Greatest Weakness**: Limited runtime type checking for dynamic data
 
-#### `src/lib/compositor/Interpreter.ts` & `src/lib/compositor/Interpreter.test.ts`
+#### `src/lib/compositor/FlowExecution.ts` & `src/lib/compositor/FlowExecution.test.ts`
 **Flow Execution Engine**
 - Node graph execution logic
 - Data flow processing between connected nodes

@@ -14,7 +14,7 @@
 // Test environment automatically connects to emulators via NODE_ENV=test check in firebase/index.ts
 
 import { beforeEach, describe, expect, test } from 'vitest';
-import { executeFlowGraph } from './Interpreter';
+import { executeFlowGraph } from './FlowExecution';
 import type { Node, Edge } from '@xyflow/svelte';
 import { projectComputedDataCache } from '$lib/stores/ProjectState';
 import { FirestoreNodeBluePrintControllerFactoryInterface } from './libs/firestore/FirestoreNodeBluePrint';

@@ -2,8 +2,9 @@ import { Jimp } from 'jimp';
 import { aiServiceInstance } from '$lib/services/AIInferenceService';
 import * as d3 from 'd3';
 import * as unpdf from 'unpdf';
-import type {OutputSocketAsyncReturner} from "$lib/compositor/Interpreter";
 import { auth, isUsingEmulators } from '../../firebase';
+import {ComputedDataCache} from "$lib/compositor/ComputedDataCache";
+import {autoConvertToBigData} from "$lib/compositor/BigData";
 
 // Determine the base URL for cloud functions based on the environment
 const functionsBaseUrl = isUsingEmulators
@@ -37,6 +38,35 @@ export const utils = {
         return response;
     },
 };
+
+export class OutputSocketAsyncReturner {
+    /**
+     * This is part of the input to a node.
+     */
+    dataCache: ComputedDataCache;
+    node_id: string;
+    outputKeys: Set<string>;
+
+    constructor(
+        dataCache: ComputedDataCache,
+        node_id: string,
+        outputs: Set<string>
+    ) {
+        this.dataCache = dataCache;
+        this.node_id = node_id;
+        this.outputKeys = outputs;
+    }
+
+    async set(socket_id: string, data: unknown): Promise<void> {
+        if (this.outputKeys.has(socket_id)) {
+            await this.dataCache.cache(this.node_id, socket_id, await autoConvertToBigData(data));
+        } else {
+            throw new Error(
+                `Unable to resolve unregistered socket: ${socket_id}`
+            );
+        }
+    }
+}
 
 export async function executeNode(
     nid: string,
