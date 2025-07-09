@@ -1,7 +1,7 @@
 import {type Node, type Edge} from '@xyflow/svelte';
 import {ComputedDataCache} from './ComputedDataCache';
 import {projectComputedDataCache} from '$lib/stores/ProjectState';
-import {getBigData, type BigDataRef} from './BigData';
+import {getBigData, type BigDataRef, isBigDataRef, autoConvertToBigData, autoConvertFromBigData} from './BigData';
 import {createNodeBluePrintStore, getNodeBluePrintModel} from "$lib/compositor/NodeBluePrint";
 import {executeNode} from "$lib/compositor/NodeEnvironment";
 
@@ -25,7 +25,7 @@ export class OutputSocketAsyncReturner {
 
     async set(socket_id: string, data: unknown): Promise<void> {
         if (this.outputKeys.has(socket_id)) {
-            this.dataCache.cache(this.node_id, socket_id, data);
+            await this.dataCache.cache(this.node_id, socket_id, await autoConvertToBigData(data));
         } else {
             throw new Error(
                 `Unable to resolve unregistered socket: ${socket_id}`
@@ -173,7 +173,7 @@ export async function executeFlowGraph(
                     outputReturner
                 )
                     .then(() => {
-                        console.log(`${nodeId} ✅`, outputReturner);
+                        console.log(`${nodeId} ✅`, JSON.stringify(outputReturner.dataCache));
                     })
                     .catch((err) => {
                         console.error(`${nodeId} ❌`);
@@ -323,15 +323,17 @@ async function getNodeInputData(
 
     // Temporary. This replaces every BigDataRef with the value in the database
     for (const key in inputData) {
-        if (
-            inputData[key] &&
-            // @ts-ignore
-            inputData[key].hasOwnProperty('_type') &&
-            // @ts-ignore
-            inputData[key]._type == 'bigdata_ref'
-        ) {
-            inputData[key] = await getBigData(inputData[key] as BigDataRef);
-        }
+        // if (
+        //     inputData[key] &&
+        //     isBigDataRef(inputData[key])
+        //     // // @ts-ignore
+        //     // inputData[key].hasOwnProperty('_type') &&
+        //     // // @ts-ignore
+        //     // inputData[key]._type == 'bigdata_ref'
+        // ) {
+        //     inputData[key] = await getBigData(inputData[key] as BigDataRef);
+        // }
+        inputData[key] = await autoConvertFromBigData(inputData[key]);
     }
 
     return inputData;

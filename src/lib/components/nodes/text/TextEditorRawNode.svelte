@@ -6,6 +6,7 @@
     import SourceSocket from "$lib/components/nodeComponents/sockets/SourceSocket.svelte";
     import TargetSocket from "$lib/components/nodeComponents/sockets/TargetSocket.svelte";
     import NodeErrorDisplay from "$lib/components/nodeComponents/NodeErrorDisplay.svelte";
+    import type {Readable} from "svelte/store";
 
     let {id, selected}: NodeProps<NodeStoreType> = $props();
 
@@ -22,7 +23,6 @@
 
     function handleInput(value: string) {
         console.log(value)
-        // nodeStore.updateData({input: {inputText: value}});
         $inputTextSocket.update(value);
         if (textarea) autoResize(textarea);
     }
@@ -32,6 +32,19 @@
         textarea.style.height = 'auto';
         textarea.style.height = textarea.scrollHeight + 'px';
     }
+
+    function computeDisplayValue(socketValue: unknown, isConnected: boolean) {
+        if (isConnected) {
+            if (typeof socketValue === 'string') {
+                return socketValue;
+            }
+            // console.log(socketValue)
+            return typeof socketValue + ': ' + JSON.stringify(socketValue);
+        }
+        return "Socket Not Connected";
+    }
+
+    let displayValue = $derived(computeDisplayValue($inputTextSocket.value, $inputTextSocket.isConnected));
 
 </script>
 
@@ -56,7 +69,7 @@
             {#if $inputTextSocket.isConnected}
                 <textarea
                         bind:this={textarea}
-                        value={$inputTextSocket.value}
+                        value={displayValue}
                         class="w-fit p-3 border-0 outline-none font-mono text-sm resize-none overflow-hidden"
                         placeholder='No data supplied by link.'
                         disabled

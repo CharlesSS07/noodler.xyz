@@ -199,6 +199,7 @@ if (typeof imageOrFileOrString === 'string' ||
     imageOrFileOrString instanceof Response
 ) {
     const arrayBuffer = await imageOrFileOrString.arrayBuffer();
+    console.log(arrayBuffer);
     outputs.set('image', await utils.Jimp.read(arrayBuffer));
 } else {
     // assume this is a jimp already

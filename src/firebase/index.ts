@@ -8,6 +8,7 @@ import {
 import { connectDatabaseEmulator, getDatabase } from 'firebase/database';
 import { connectFirestoreEmulator, getFirestore } from 'firebase/firestore';
 import { connectFunctionsEmulator, getFunctions } from 'firebase/functions';
+import { connectStorageEmulator, getStorage } from 'firebase/storage';
 import { browser } from '$app/environment';
 
 const firebaseConfig = {
@@ -26,6 +27,7 @@ export const auth = getAuth(app);
 export const rtdb = getDatabase(app);
 export const firestore = getFirestore(app);
 export const functions = getFunctions(app);
+export const storage = getStorage(app);
 
 // Connect to emulators if in test environment or browser localhost
 let isUsingEmulators = false;
@@ -38,6 +40,7 @@ if (
     connectFirestoreEmulator(firestore, '127.0.0.1', 8080);
     connectDatabaseEmulator(rtdb, '127.0.0.1', 9000);
     connectFunctionsEmulator(functions, '127.0.0.1', 5001);
+    connectStorageEmulator(storage, '127.0.0.1', 9199);
     isUsingEmulators = true;
     console.log('[DEBUG] Connected to emulators');
 }

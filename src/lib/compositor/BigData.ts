@@ -3,14 +3,13 @@
  * Uses IndexedDB for persistent storage with automatic cleanup
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import { browser } from '$app/environment';
 
 // Configuration
 const DB_NAME = 'noodler_bigdata';
 const DB_VERSION = 1;
 const STORE_NAME = 'data_chunks';
-const SIZE_THRESHOLD = 100 * 1024; // 100KB threshold for automatic BigData usage
+const SIZE_THRESHOLD = 1 * 1024; // 100KB threshold for automatic BigData usage
 
 // BigData reference that gets stored in Firestore
 export interface BigDataRef {
@@ -130,12 +129,14 @@ class BigDataManager {
         dataType: string,
         metadata?: Record<string, any>
     ): Promise<BigDataRef> {
-        const id = `bigdata_${Date.now()}_${uuidv4()}`;
+        const id = await this.generateHashId(data);
         const size = this.calculateSize(data);
         const now = new Date();
 
         // Cache in memory
         this.memoryCache.set(id, { data, lastAccessed: Date.now() });
+
+        console.log('storing data', data);
 
         // Store in IndexedDB if available
         try {
@@ -339,6 +340,33 @@ class BigDataManager {
             return 0;
         }
     }
+
+    private async generateHashId(data: any): Promise<string> {
+        try {
+            let dataToHash: ArrayBuffer;
+            
+            if (data instanceof File) {
+                dataToHash = await data.arrayBuffer();
+            } else if (data instanceof Blob) {
+                dataToHash = await data.arrayBuffer();
+            } else if (data instanceof ArrayBuffer) {
+                dataToHash = data;
+            } else if (typeof data === 'string') {
+                dataToHash = new TextEncoder().encode(data);
+            } else {
+                dataToHash = new TextEncoder().encode(JSON.stringify(data));
+            }
+
+            const hashBuffer = await crypto.subtle.digest('SHA-256', dataToHash);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            
+            return `bigdata_${hashHex}`;
+        } catch (error) {
+            console.warn('Hash generation failed, falling back to timestamp:', error);
+            return `bigdata_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        }
+    }
 }
 
 // Singleton instance
@@ -378,7 +406,7 @@ export async function storeJimpImage(jimpInstance: any): Promise<BigDataRef> {
 }
 
 // Automatic conversion helpers
-export async function autoConvertToBigData(data: any): Promise<any> {
+export async function autoConvertToBigData(data: any): Promise<BigDataRef> {
     if (shouldUseBigData(data)) {
         if (data instanceof File) {
             return storeImage(data);
@@ -389,6 +417,13 @@ export async function autoConvertToBigData(data: any): Promise<any> {
         }
     }
     return data;
+}
+
+export async function autoConvertFromBigData(ref: any): Promise<any> {
+    if (isBigDataRef(ref)) {
+        return getBigData(ref);
+    }
+    return ref;
 }
 
 export function shouldUseBigData(data: any): boolean {

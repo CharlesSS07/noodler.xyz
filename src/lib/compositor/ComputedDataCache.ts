@@ -37,7 +37,7 @@ export class ComputedDataCache {
     // Store for tracking which sockets have data
     private socketKeysStore: Writable<Set<string>> = writable(new Set());
 
-    constructor() {
+    constructor(project_key: string) {
         // Keep the stores in sync with the internal data
         this.updateStores();
     }
