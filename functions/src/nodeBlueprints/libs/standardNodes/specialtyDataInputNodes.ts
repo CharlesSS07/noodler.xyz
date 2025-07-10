@@ -51,6 +51,7 @@ export async function specialtyDataInputDataNodes() {
     type: STANDARD_DATATYPES.STRING});
 
   rawTextEditor.code = "outputs.set(\"outputText\", inputs.inputText);";
+  rawTextEditor.$_per_run = 0; // Local text processing only
 
   const mdTextEditor =
         await nodeBluePrintController.initOfficialNodeBluePrint(
@@ -92,6 +93,7 @@ export async function specialtyDataInputDataNodes() {
     type: STANDARD_DATATYPES.STRING});
 
   mdTextEditor.code = "outputs.set(\"text\", inputs.text);";
+  mdTextEditor.$_per_run = 0; // Local text processing only
 
   const textTemplateFillin =
         await nodeBluePrintController.initOfficialNodeBluePrint("template");
@@ -145,6 +147,7 @@ for (const key in inputs) {
 }
 outputs.set("text", filledIn);
 `;
+  textTemplateFillin.$_per_run = 0; // Local text templating only
 
   const imageLoader =
         await nodeBluePrintController.initOfficialNodeBluePrint("image_loader");
@@ -206,6 +209,7 @@ if (typeof imageOrFileOrString === 'string' ||
     outputs.set('image', imageOrFileOrString);
 }
 `;
+  imageLoader.$_per_run = 0; // Local image processing only
 
   const htmlRenderer =
         await nodeBluePrintController.initOfficialNodeBluePrint(
@@ -237,6 +241,7 @@ if (typeof imageOrFileOrString === 'string' ||
     params: new StringSocketParamsBuilder("").build()});
 
   htmlRenderer.code = "console.log('html rendered', inputs.html)";
+  htmlRenderer.$_per_run = 0; // Local HTML rendering only
 
   const jsNode =
         await nodeBluePrintController.initOfficialNodeBluePrint("js");
@@ -275,4 +280,5 @@ if (typeof imageOrFileOrString === 'string' ||
     type: "unknown"});
 
   jsNode.code = "outputs.set(\"outputText\", inputs.inputText);";
+  jsNode.$_per_run = 0; // Local JS execution only
 }

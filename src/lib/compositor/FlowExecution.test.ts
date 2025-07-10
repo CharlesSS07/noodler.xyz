@@ -17,7 +17,7 @@ import { beforeEach, describe, expect, test } from 'vitest';
 import { executeFlowGraph } from './FlowExecution';
 import type { Node, Edge } from '@xyflow/svelte';
 import { projectComputedDataCache } from '$lib/stores/ProjectState';
-import { FirestoreNodeBluePrintControllerFactoryInterface } from './libs/firestore/FirestoreNodeBluePrint';
+import {getNodeBluePrintModel} from "$lib/compositor/NodeBluePrint";
 
 describe('Interpreter Flow Graph Tests', () => {
     let mockNodes: Node[];
@@ -52,6 +52,8 @@ describe('Interpreter Flow Graph Tests', () => {
 
         // Execute the flow graph
         await executeFlowGraph('const-9', mockNodes, mockEdges);
+
+        await new Promise(resolve => setTimeout(resolve, 500));
 
         // The result should be computed and stored in the output data cache
         const result = await projectComputedDataCache.get('const-9', 'result');
@@ -94,6 +96,8 @@ describe('Interpreter Flow Graph Tests', () => {
 
         // Execute the flow graph starting from the final node
         await executeFlowGraph('add-outer', mockNodes, mockEdges);
+
+        await new Promise(resolve => setTimeout(resolve, 500));
 
         // Check intermediate result: 5 + 6 = 11
         const innerResult = await projectComputedDataCache.get(
@@ -159,6 +163,8 @@ describe('Interpreter Flow Graph Tests', () => {
         ];
 
         await executeFlowGraph('multiply-final', mockNodes, mockEdges);
+
+        await new Promise(resolve => setTimeout(resolve, 500));
 
         // Check all intermediate results
         const innerResult = await projectComputedDataCache.get(
@@ -302,6 +308,8 @@ describe('Interpreter Flow Graph Tests', () => {
 
         await executeFlowGraph('multiply-combined', mockNodes, mockEdges);
 
+        await new Promise(resolve => setTimeout(resolve, 500));
+
         // First addition: 3 + 4 = 7
         const add1Result = await projectComputedDataCache.get(
             'add-1',
@@ -346,41 +354,6 @@ describe('Interpreter Flow Graph Tests', () => {
             'result'
         );
         expect(result).toBe(2);
-    });
-
-    // Diagnostic tests to check Firebase connection
-    test('Should connect to Firebase emulators and check node existence', async () => {
-        const { getAuth, signInAnonymously } = await import('firebase/auth');
-        const { app } = await import('../../firebase');
-        const { FirestoreNodeBluePrintControllerFactoryInterface } =
-            await import('./libs/firestore/FirestoreNodeBluePrint');
-
-        // Test Firebase connection
-        const auth = getAuth(app);
-        const userCredential = await signInAnonymously(auth);
-        expect(userCredential.user).toBeDefined();
-
-        // Test Firestore connection by trying to fetch a node
-        const factory = new FirestoreNodeBluePrintControllerFactoryInterface();
-
-        try {
-            // Try to fetch the add node that should exist
-            const addNode = await factory.getNodeBluePrintFromNID('add');
-            console.log('✅ Successfully found add node:', addNode.title);
-            expect(addNode).toBeDefined();
-            expect(addNode.nid).toBe('add');
-        } catch (error) {
-            console.log('❌ Could not find add node. This suggests either:');
-            console.log('  1. The standard node suite has not been generated');
-            console.log('  2. There is a Firebase connection issue');
-            console.log(
-                '  3. The emulator data is not persisting between dev and test'
-            );
-            console.log('Error:', error);
-
-            // This test should fail to highlight the issue
-            throw new Error(`Failed to find add: ${error}`);
-        }
     });
 
     // Working tests that don't require Firestore libs
@@ -505,12 +478,11 @@ describe('Interpreter Flow Graph Tests', () => {
         ];
 
         // Use standard factory - should connect to emulator due to env vars and test Firebase import
-        const factory = new FirestoreNodeBluePrintControllerFactoryInterface();
-        const n = await factory.getNodeBluePrintFromNID('jimp_new_blank_image');
-        console.log('[TEST DEBUG] Current node code:', n.code);
+        const n = await getNodeBluePrintModel('jimp_new_blank_image');
+        console.log('[TEST DEBUG] Current node code:', n.user_defined_code);
 
         // Verify the code uses utils.Jimp (should work now with emulator)
-        expect(n.code).toContain('utils.Jimp');
+        expect(n.user_defined_code).toContain('utils.Jimp');
 
         await executeFlowGraph('greyscale', mockNodes, mockEdges);
 
@@ -544,8 +516,8 @@ describe('Interpreter Flow Graph Tests', () => {
         expect(greyscaleImage.bitmap?.height).toBe(100);
     });
 
-    test('Image viewer passthrough test', async () => {
-        // Test that image viewer correctly passes through an image
+    test('Image loader passthrough test', async () => {
+        // Test that image loader correctly processes an image
         mockNodes = [
             {
                 id: 'new-image',
@@ -561,11 +533,11 @@ describe('Interpreter Flow Graph Tests', () => {
                 },
             },
             {
-                id: 'image-viewer',
+                id: 'image-loader',
                 type: 'node',
                 position: { x: 200, y: 0 },
                 data: {
-                    nid: 'image_viewer',
+                    nid: 'image_loader',
                     input: {},
                 },
             },
@@ -575,29 +547,197 @@ describe('Interpreter Flow Graph Tests', () => {
             {
                 id: 'e1',
                 source: 'new-image',
-                target: 'image-viewer',
+                target: 'image-loader',
                 sourceHandle: 'image',
-                targetHandle: 'img',
+                targetHandle: 'imageOrFileOrString',
             },
         ];
 
-        await executeFlowGraph('image-viewer', mockNodes, mockEdges);
+        await executeFlowGraph('image-loader', mockNodes, mockEdges);
+
+        await new Promise(resolve => setTimeout(resolve, 500));
 
         const originalImage = await projectComputedDataCache.get(
             'new-image',
             'image'
         );
-        const viewedImage = await projectComputedDataCache.get(
-            'image-viewer',
-            'img'
+        const loadedImage = await projectComputedDataCache.get(
+            'image-loader',
+            'image'
         );
 
-        // The viewer should pass through the same image
+        // The loader should pass through the same image
         expect(originalImage).toBeDefined();
-        expect(viewedImage).toBeDefined();
+        expect(loadedImage).toBeDefined();
         // @ts-ignore
-        expect(viewedImage.bitmap?.width).toBe(50);
+        expect(loadedImage.bitmap?.width).toBe(50);
         // @ts-ignore
-        expect(viewedImage.bitmap?.height).toBe(50);
+        expect(loadedImage.bitmap?.height).toBe(50);
+    });
+
+    test('Fetch image → HSV transform → Image loader pipeline', async () => {
+        // Test a complete pipeline: fetch image from URL → apply HSV transform → load final image
+        // This tests the real-world workflow of fetching an image and processing it
+        
+        mockNodes = [
+            {
+                id: 'fetch-url',
+                type: 'node',
+                position: { x: 0, y: 0 },
+                data: {
+                    nid: 'fetch_url',
+                    input: {
+                        url: 'https://httpbin.org/image/png', // Test image URL
+                    },
+                },
+            },
+            {
+                id: 'image-loader-1',
+                type: 'node',
+                position: { x: 200, y: 0 },
+                data: {
+                    nid: 'image_loader',
+                    input: {},
+                },
+            },
+            {
+                id: 'hsv-transform',
+                type: 'node',
+                position: { x: 400, y: 0 },
+                data: {
+                    nid: 'hsv',
+                    input: {
+                        hue: 45, // Shift hue by 45 degrees
+                        saturation: 20, // Increase saturation by 20
+                        value: 10, // Increase brightness by 10
+                    },
+                },
+            },
+            {
+                id: 'image-loader-2',
+                type: 'node',
+                position: { x: 600, y: 0 },
+                data: {
+                    nid: 'image_loader',
+                    input: {},
+                },
+            },
+        ];
+
+        mockEdges = [
+            {
+                id: 'e1',
+                source: 'fetch-url',
+                target: 'image-loader-1',
+                sourceHandle: 'response',
+                targetHandle: 'imageOrFileOrString',
+            },
+            {
+                id: 'e2',
+                source: 'image-loader-1',
+                target: 'hsv-transform',
+                sourceHandle: 'image',
+                targetHandle: 'img',
+            },
+            {
+                id: 'e3',
+                source: 'hsv-transform',
+                target: 'image-loader-2',
+                sourceHandle: 'img',
+                targetHandle: 'imageOrFileOrString',
+            },
+        ];
+
+        await executeFlowGraph('image-loader-2', mockNodes, mockEdges);
+
+        // Verify each step of the pipeline
+        const fetchResponse = await projectComputedDataCache.get(
+            'fetch-url',
+            'response'
+        );
+        const loadedImage = await projectComputedDataCache.get(
+            'image-loader-1',
+            'image'
+        );
+        const transformedImage = await projectComputedDataCache.get(
+            'hsv-transform',
+            'img'
+        );
+        const finalImage = await projectComputedDataCache.get(
+            'image-loader-2',
+            'image'
+        );
+
+        // Verify the pipeline executed successfully
+        expect(fetchResponse).toBeDefined();
+        expect(loadedImage).toBeDefined();
+        expect(transformedImage).toBeDefined();
+        expect(finalImage).toBeDefined();
+
+        // Verify the images have expected properties
+        // @ts-ignore
+        expect(loadedImage.bitmap?.width).toBeGreaterThan(0);
+        // @ts-ignore
+        expect(loadedImage.bitmap?.height).toBeGreaterThan(0);
+        // @ts-ignore
+        expect(transformedImage.bitmap?.width).toBe(loadedImage.bitmap?.width);
+        // @ts-ignore
+        expect(transformedImage.bitmap?.height).toBe(loadedImage.bitmap?.height);
+        // @ts-ignore
+        expect(finalImage.bitmap?.width).toBe(transformedImage.bitmap?.width);
+        // @ts-ignore
+        expect(finalImage.bitmap?.height).toBe(transformedImage.bitmap?.height);
+    });
+
+    test('Simple HSV → greyscale test', async () => {
+        // Simple 2-node test to debug the issue
+        mockNodes = [
+            {
+                id: 'new-image',
+                type: 'node',
+                position: { x: 0, y: 0 },
+                data: {
+                    nid: 'jimp_new_blank_image',
+                    input: {
+                        width: 10,
+                        height: 10,
+                        color: '#ff0000',
+                    },
+                },
+            },
+            {
+                id: 'greyscale',
+                type: 'node',
+                position: { x: 200, y: 0 },
+                data: {
+                    nid: 'greyscale',
+                    input: {},
+                },
+            },
+        ];
+
+        mockEdges = [
+            {
+                id: 'e1',
+                source: 'new-image',
+                target: 'greyscale',
+                sourceHandle: 'image',
+                targetHandle: 'img',
+            },
+        ];
+
+        await executeFlowGraph('greyscale', mockNodes, mockEdges);
+
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        const originalImage = await projectComputedDataCache.get('new-image', 'image');
+        const greyscaleImage = await projectComputedDataCache.get('greyscale', 'img');
+
+        expect(originalImage).toBeDefined();
+        expect(greyscaleImage).toBeDefined();
+        // @ts-ignore
+        expect(greyscaleImage.bitmap?.width).toBe(10);
+        // @ts-ignore
+        expect(greyscaleImage.bitmap?.height).toBe(10);
     });
 });

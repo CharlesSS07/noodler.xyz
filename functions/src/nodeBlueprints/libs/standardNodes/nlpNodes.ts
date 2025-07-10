@@ -99,6 +99,7 @@ export async function nlpNodes() {
         outputs.set('summaryLength', result.summaryLength);
         outputs.set('compressionRatio', result.compressionRatio);
     `;
+  genkitSummarization.$_per_run = 15; // AI summarization service call
 
   // TEXT FORMATTER LLM NODE
   const textFormatterLLM =
@@ -193,4 +194,5 @@ export async function nlpNodes() {
         outputs.set('originalLength', result.originalLength);
         outputs.set('formattedLength', result.formattedLength);
     `;
+  textFormatterLLM.$_per_run = 10; // AI text formatting service call
 }

@@ -49,6 +49,7 @@ export async function fileLoadingNodes() {
     type: "json"});
 
   loadExcel.code = "console.error('Not Implemented');";
+  loadExcel.$_per_run = 0; // Local file processing only
 
   const loadPDF =
         await nodeBluePrintController.initOfficialNodeBluePrint("load_pdf");
@@ -118,4 +119,5 @@ const pdfMetadata = {
 outputs.set("text", text);
 outputs.set("metadata", pdfMetadata);
 `;
+  loadPDF.$_per_run = 0; // Local file processing only
 }

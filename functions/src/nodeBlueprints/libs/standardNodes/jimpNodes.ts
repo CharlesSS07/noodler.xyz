@@ -71,6 +71,7 @@ export async function jimpNodes() {
         "outputs.set('image', new utils.Jimp({ " +
           "width: inputs.width, height: inputs.height, color: inputs.color " +
           "}));";
+  newBlankImage.$_per_run = 0; // Local image generation only
 
   const resize =
         await nodeBluePrintController.initOfficialNodeBluePrint(
@@ -133,4 +134,5 @@ img2.resize({
   'h': Math.floor(inputs.height)
 });
 outputs.set('image', img2);`;
+  resize.$_per_run = 0; // Local image processing only
 }

@@ -59,6 +59,9 @@ implements NodeBluePrintControllerFactoryInterface {
       official_note: "",
       searchable: true,
       tags: ["official"],
+
+      updates_on_downstream_change: true,
+      $_per_run: 0
     });
 
     const instance = new NodeBluePrintInFirestore(nid);
@@ -99,6 +102,9 @@ implements NodeBluePrintControllerFactoryInterface {
       official_note: "",
       searchable: true,
       tags: [],
+
+      updates_on_downstream_change: true,
+      $_per_run: 0
     });
 
     const instance = new NodeBluePrintInFirestore(nid);
@@ -755,6 +761,19 @@ export class NodeBluePrintInFirestore extends NodeBluePrint {
   set categories(categories: string[]) {
     this.updateFirestoreDoc({
       categories: categories,
+    });
+  }
+
+  get $_per_run(): number {
+    return this.current.tokens_per_run;
+  }
+
+  set $_per_run(value) {
+    if (value < 0) {
+      throw new Error("$_per_run cannot be negative");
+    }
+    this.updateFirestoreDoc({
+      tokens_per_run: value,
     });
   }
 }

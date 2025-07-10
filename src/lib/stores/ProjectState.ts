@@ -80,11 +80,18 @@ export const projectActions = {
         projectState.update((state) => {
             // Don't set dirty flag if we're setting the same data (prevents blocking Firebase loads)
             const isSameData =
+                state.nodes.length === nodes.length &&
                 JSON.stringify(state.nodes) === JSON.stringify(nodes);
+            
+            // Only mark dirty if initial load is complete AND data actually changed
+            const shouldMarkDirty = !isSameData && 
+                                  projectSync.isInitialLoadComplete() && 
+                                  state.projectId !== null;
+            
             return {
                 ...state,
                 nodes,
-                isDirty: !isSameData && projectSync.isInitialLoadComplete(),
+                isDirty: shouldMarkDirty,
             };
         });
     },
@@ -93,11 +100,18 @@ export const projectActions = {
         projectState.update((state) => {
             // Don't set dirty flag if we're setting the same data (prevents blocking Firebase loads)
             const isSameData =
+                state.edges.length === edges.length &&
                 JSON.stringify(state.edges) === JSON.stringify(edges);
+            
+            // Only mark dirty if initial load is complete AND data actually changed
+            const shouldMarkDirty = !isSameData && 
+                                  projectSync.isInitialLoadComplete() && 
+                                  state.projectId !== null;
+            
             return {
                 ...state,
                 edges,
-                isDirty: !isSameData && projectSync.isInitialLoadComplete(),
+                isDirty: shouldMarkDirty,
             };
         });
     },
@@ -383,8 +397,8 @@ projectState.subscribe((state) => {
             clearTimeout(saveTimeout);
         }
 
-        // Use shorter timeout for critical changes
-        const debounceTime = 50;
+        // Use longer timeout to prevent conflicts with reactive effects
+        const debounceTime = 1000;
 
         // Set new timeout for auto-save
         saveTimeout = setTimeout(() => {

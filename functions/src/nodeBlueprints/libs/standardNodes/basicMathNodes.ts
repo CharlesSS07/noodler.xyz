@@ -3,7 +3,10 @@ import type {
 import {
   FirestoreNodeBluePrintControllerFactoryInterface,
 } from "../FirestoreNodeBluePrint.js";
-import {NumberSocketParamsBuilder} from "../SocketParamBuilders.js";
+import {
+  NumberSocketParamsBuilder,
+  GenericSocketParamsBuilder,
+} from "../SocketParamBuilders.js";
 import {STANDARD_DATATYPES} from "$shared/SocketDataTypes";
 
 const nodeBluePrintController: NodeBluePrintControllerFactoryInterface =
@@ -60,6 +63,7 @@ export async function basicMathNodes() {
         const result = a + b;
         outputs.set('result', result);
     `;
+  addNode.$_per_run = 0; // Local computation only
 
   // Subtract node
   const subtractNode =
@@ -107,6 +111,7 @@ export async function basicMathNodes() {
         const result = a - b;
         outputs.set('result', result);
     `;
+  subtractNode.$_per_run = 0; // Local computation only
 
   // Multiply node
   const multiplyNode =
@@ -155,6 +160,7 @@ export async function basicMathNodes() {
         const result = a * b;
         outputs.set('result', result);
     `;
+  multiplyNode.$_per_run = 0; // Local computation only
 
   // Divide node
   const divideNode =
@@ -207,4 +213,90 @@ export async function basicMathNodes() {
         const result = a / b;
         outputs.set('result', result);
     `;
+  divideNode.$_per_run = 0; // Local computation only
+
+  // Countdown Passthrough node
+  const countdownNode =
+        await nodeBluePrintController.initOfficialNodeBluePrint(
+          "countdown-passthrough"
+        );
+  countdownNode.title = "Wait Seconds then Execute";
+  countdownNode.documentation = "Waits for a specified number of seconds " +
+    "before passing the input value to the output";
+  countdownNode.tags = [
+    "timing",
+    "delay",
+    "wait",
+    "countdown",
+    "passthrough",
+    "flow-control",
+    "utility",
+    "async",
+    "time",
+    "duration",
+  ];
+  countdownNode.categories = [
+    "/utility/timing",
+    "/flow-control/delay",
+    "/async/timing",
+  ];
+
+  await countdownNode.newInputSocket("input", {
+    label: "Input",
+    documentation: "The value to pass through after the countdown",
+    type: STANDARD_DATATYPES.UNKNOWN,
+    params: new GenericSocketParamsBuilder(null).build(),
+  });
+
+  await countdownNode.newInputSocket("seconds", {
+    label: "Countdown Seconds",
+    documentation: "Number of seconds to wait before passing through input",
+    type: STANDARD_DATATYPES.NUMBER,
+    params: new NumberSocketParamsBuilder(3).build(),
+  });
+
+  await countdownNode.newOutputSocket("output", {
+    label: "Output",
+    documentation: "The input value after the countdown completes",
+    type: STANDARD_DATATYPES.UNKNOWN,
+  });
+
+  countdownNode.code = `
+        const inputValue = inputs.input;
+        const seconds = inputs.seconds ?? 3;
+        
+        if (seconds < 0) {
+            throw new Error('Countdown seconds must be non-negative');
+        }
+        
+        // Create a promise that resolves after the specified seconds
+        await new Promise(resolve => {
+            let remainingSeconds = Math.ceil(seconds);
+            
+            console.log(\`Countdown starting: \${remainingSeconds} seconds\`);
+            
+            const countdownInterval = setInterval(() => {
+                remainingSeconds--;
+                if (remainingSeconds > 0) {
+                    console.log(\`Countdown: \${remainingSeconds}s left\`);
+                } else {
+                    console.log('Countdown complete!');
+                    clearInterval(countdownInterval);
+                    resolve();
+                }
+            }, 1000);
+            
+            // Handle case where seconds is less than 1
+            if (seconds < 1) {
+                setTimeout(() => {
+                    clearInterval(countdownInterval);
+                    resolve();
+                }, seconds * 1000);
+            }
+        });
+        
+        // Pass through the input value after countdown completes
+        outputs.set('output', inputValue);
+    `;
+  countdownNode.$_per_run = 0; // Local computation only (timer)
 }

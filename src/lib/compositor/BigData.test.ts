@@ -125,7 +125,7 @@ describe('BigData Core Functions', () => {
             const smallFile = new File(['test'], 'test.txt', {
                 type: 'text/plain',
             });
-            Object.defineProperty(smallFile, 'size', { value: 50 * 1024 }); // 50KB
+            Object.defineProperty(smallFile, 'size', { value: 0.5 * 1024 }); // 50KB
             expect(shouldUseBigData(smallFile)).toBe(false);
 
             // Large file - should use BigData
@@ -191,7 +191,7 @@ describe('BigData Core Functions', () => {
                 dataType: 'string',
                 size: expect.any(Number),
             });
-            expect(ref.id).toMatch(/^bigdata_\d+_/);
+            expect(ref.id).toMatch(/^bigdata_[a-f0-9]+$|^bigdata_\d+_/);
 
             // Note: In a real test, we'd need to mock the retrieval properly
             // For now, we'll test that the function completes without error

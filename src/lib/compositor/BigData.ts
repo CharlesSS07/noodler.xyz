@@ -9,7 +9,7 @@ import { browser } from '$app/environment';
 const DB_NAME = 'noodler_bigdata';
 const DB_VERSION = 1;
 const STORE_NAME = 'data_chunks';
-const SIZE_THRESHOLD = 1 * 1024; // 100KB threshold for automatic BigData usage
+const SIZE_THRESHOLD = 1 * 1024; // 1KB threshold for automatic BigData usage
 
 // BigData reference that gets stored in Firestore
 export interface BigDataRef {

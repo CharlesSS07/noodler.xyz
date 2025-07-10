@@ -82,7 +82,8 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
 
         if (onProjectReadyCallback) {
             onProjectReadyCallback({
-                executeFromNode: executeFromNode
+                executeFromNode: executeFromNode,
+                addNode: addNode
             });
         }
     }
@@ -108,13 +109,13 @@ A project by Charles Strauss (c-shelby-07@proton.me <-- reach out for support)
 
     // Sync local libs/edges with ProjectState
     $effect(() => {
-        if (isInitialized) {
+        if (isInitialized && hasLoadedFromFirebase) {
             projectActions.setNodes(nodes);
         }
     });
 
     $effect(() => {
-        if (isInitialized) {
+        if (isInitialized && hasLoadedFromFirebase) {
             projectActions.setEdges(edges);
         }
     });

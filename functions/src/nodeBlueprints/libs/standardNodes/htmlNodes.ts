@@ -48,6 +48,7 @@ export async function htmlNodes() {
     params: new StringSocketParamsBuilder("").asParagraph().build()});
 
   htmlViewer.code = "console.log('Rendered HTML');";
+  htmlViewer.$_per_run = 0; // Local HTML rendering only
 
   const htmlElement =
         await nodeBluePrintController.initOfficialNodeBluePrint(
@@ -122,6 +123,7 @@ if (inputs.attributes) {
 d += '>'+inputs.innerHTML+'</'+inputs.tag+'>'
 outputs.set('html', d);
 `;
+  htmlElement.$_per_run = 0; // Local HTML generation only
 
   const fetchURL =
         await nodeBluePrintController.initOfficialNodeBluePrint("fetch_url");
@@ -171,4 +173,5 @@ if (res.status !== 200) {
 
 outputs.set('response', res);
 `;
+  fetchURL.$_per_run = 1; // HTTP request via proxy (minimal cost)
 }

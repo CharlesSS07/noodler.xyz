@@ -118,6 +118,7 @@ export async function aiInferenceNodes() {
         });
         outputs.set('image', result);
     `;
+  textToImage.$_per_run = 50; // AI image generation is expensive
 
   // OBJECT DETECTION NODE
   const objectDetection = await factory.initOfficialNodeBluePrint(
@@ -175,6 +176,7 @@ export async function aiInferenceNodes() {
         });
         outputs.set('detections', detections);
     `;
+  objectDetection.$_per_run = 20; // AI computer vision service
 
   // TEXT GENERATION NODE
   const textGeneration =
@@ -265,6 +267,7 @@ export async function aiInferenceNodes() {
         });
         outputs.set('generated_text', results[0]?.generated_text || '');
     `;
+  textGeneration.$_per_run = 25; // AI text generation service
 
   // TEXT CLASSIFICATION NODE
   const textClassification = await factory.initOfficialNodeBluePrint(
@@ -313,6 +316,7 @@ export async function aiInferenceNodes() {
         });
         outputs.set('results', results[0] || []);
     `;
+  textClassification.$_per_run = 15; // AI text classification service
 
   // QUESTION ANSWERING NODE
   const questionAnswering = await factory.initOfficialNodeBluePrint(
@@ -378,6 +382,7 @@ export async function aiInferenceNodes() {
         outputs.set('answer', result.answer);
         outputs.set('score', result.score);
     `;
+  questionAnswering.$_per_run = 20; // AI question answering service
 
   // SUMMARIZATION NODE
   const summarization =
@@ -439,6 +444,7 @@ export async function aiInferenceNodes() {
         });
         outputs.set('summary', results?.summary_text || '');
     `;
+  summarization.$_per_run = 20; // AI summarization service
 
   // TRANSLATION NODE
   const translation =
@@ -480,6 +486,7 @@ export async function aiInferenceNodes() {
         });
         outputs.set('translated_text', results[0]?.translation_text || '');
     `;
+  translation.$_per_run = 15; // AI translation service
 
   // FILL MASK NODE
   const fillMask = await factory.initOfficialNodeBluePrint("ai_fill_mask");
@@ -525,6 +532,7 @@ export async function aiInferenceNodes() {
         });
         outputs.set('predictions', results);
     `;
+  fillMask.$_per_run = 15; // AI fill mask service
 
   // SENTENCE SIMILARITY NODE
   const sentenceSimilarity = await factory.initOfficialNodeBluePrint(
@@ -584,6 +592,7 @@ export async function aiInferenceNodes() {
         });
         outputs.set('similarities', results);
     `;
+  sentenceSimilarity.$_per_run = 15; // AI sentence similarity service
 
   // FEATURE EXTRACTION NODE
   const featureExtraction = await factory.initOfficialNodeBluePrint(
@@ -630,6 +639,7 @@ export async function aiInferenceNodes() {
         });
         outputs.set('features', results);
     `;
+  featureExtraction.$_per_run = 15; // AI feature extraction service
 
   // AUTOMATIC SPEECH RECOGNITION NODE
   const automaticSpeechRecognition = await factory.initOfficialNodeBluePrint(
@@ -677,6 +687,7 @@ export async function aiInferenceNodes() {
         });
         outputs.set('text', result.text);
     `;
+  automaticSpeechRecognition.$_per_run = 30; // AI speech recognition service
 
   // TABLE QUESTION ANSWERING NODE
   const tableQuestionAnswering =
@@ -739,6 +750,7 @@ export async function aiInferenceNodes() {
         outputs.set('answer', result.answer);
         outputs.set('coordinates', result.coordinates);
     `;
+  tableQuestionAnswering.$_per_run = 20; // AI table QA service
 
   // AI IMAGE EDITOR NODE
   const imageEditor =
@@ -820,6 +832,7 @@ export async function aiInferenceNodes() {
           'use image-to-image models like InstructPix2Pix to apply ' +
           'text-based modifications to images.');
     `;
+  imageEditor.$_per_run = 40; // AI image editing service (when implemented)
 
   // Prompt LLM NODE (GenKit-based)
   const callLLM = await factory.initOfficialNodeBluePrint("ai_llm");
@@ -886,4 +899,5 @@ export async function aiInferenceNodes() {
         outputs.set('promptLength', result.promptLength);
         outputs.set('responseLength', result.responseLength);
     `;
+  callLLM.$_per_run = 30; // AI LLM service call
 }

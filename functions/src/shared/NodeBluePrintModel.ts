@@ -25,4 +25,14 @@ export interface FirestoreNodeBluePrintModel {
     searchable: boolean;
     tags: string[];
     categories: string[];
+
+    /**
+     * Determines whether to refresh immediately after downstream changes, or refresh upon user request.
+     */
+    updates_on_downstream_change: boolean;
+
+    /**
+     * How much the nodes costs per run.
+     */
+    tokens_per_run: number;
 }

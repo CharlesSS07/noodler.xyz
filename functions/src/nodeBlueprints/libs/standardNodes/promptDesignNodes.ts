@@ -63,6 +63,7 @@ export async function promptDesignNodes() {
   joinText.code =
         "outputs.set('text', inputs.text1+inputs.text2+inputs.text3+" +
           "inputs.text4);";
+  joinText.$_per_run = 0; // Local text manipulation only
 
   const splitText =
         await nodeBluePrintController.initOfficialNodeBluePrint("split_text");
@@ -101,4 +102,5 @@ export async function promptDesignNodes() {
     type: "unknown[]"});
 
   splitText.code = "outputs.set('splitText', inputs.text.split(inputs.sep));";
+  splitText.$_per_run = 0; // Local text manipulation only
 }

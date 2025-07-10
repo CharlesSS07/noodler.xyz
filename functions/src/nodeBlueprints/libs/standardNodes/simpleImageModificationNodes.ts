@@ -57,6 +57,7 @@ const img = inputs.img.clone();
 img.greyscale();
 outputs.set('img', img);
 `;
+  grayscale.$_per_run = 0; // Local image processing only
 
   const hsv = await nodeBluePrintController.initOfficialNodeBluePrint("hsv");
   hsv.title = "HSV Shift Change";
@@ -134,4 +135,5 @@ outputs.set('img', img);
           "params: [value.valueOf()] }]);\n" +
         "\n" +
         "outputs.set('img', img);\n";
+  hsv.$_per_run = 0; // Local image processing only
 }

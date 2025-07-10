@@ -62,6 +62,7 @@ export async function googleDriveNodes() {
 inputs.img.greyscale();
 outputs.set('img', inputs.img);
 `;
+  googleDrive.$_per_run = 0; // Uses user's own Google account, essentially free
 
   const sendEmail =
         await nodeBluePrintController.initOfficialNodeBluePrint(
@@ -131,4 +132,5 @@ outputs.set('img', inputs.img);
 inputs.img.greyscale();
 outputs.set('img', inputs.img);
 `;
+  sendEmail.$_per_run = 0; // Uses user's own Gmail account, essentially free
 }

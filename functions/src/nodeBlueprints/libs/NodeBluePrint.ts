@@ -144,6 +144,13 @@ export abstract class NodeBluePrint {
     abstract get categories(): string[];
     abstract set categories(categories: string[]);
 
+    get updates_on_downstream_change(): boolean {
+        return this.$_per_run <= 0.10; // 10 cents
+    };
+
+    abstract get $_per_run(): number;
+    abstract set $_per_run(value: number);
+
     /**
      * Converts the NodeBluePrint to a text description for embedding
      * @return {string} Text description of the NodeBluePrint

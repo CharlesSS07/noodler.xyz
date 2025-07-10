@@ -1,4 +1,5 @@
 import { writable, derived, type Writable, type Readable } from 'svelte/store';
+import {autoConvertFromBigData, autoConvertToBigData} from "$lib/compositor/BigData";
 // Types for better TypeScript support
 type NodeKey = string;
 type SocketId = string;
@@ -37,7 +38,10 @@ export class ComputedDataCache {
     // Store for tracking which sockets have data
     private socketKeysStore: Writable<Set<string>> = writable(new Set());
 
-    constructor(project_key: string) {
+    // Cache for socket stores to avoid recreating them
+    private socketStores: Map<string, Writable<unknown | null>> = new Map();
+
+    constructor() {
         // Keep the stores in sync with the internal data
         this.updateStores();
     }
@@ -45,6 +49,29 @@ export class ComputedDataCache {
     private updateStores(): void {
         this.dataStore.set(new Map(this.data));
         this.socketKeysStore.set(new Set(this.data.keys()));
+        
+        // Update all socket stores
+        for (const key of this.socketStores.keys()) {
+            this.updateSocketStore(key);
+        }
+    }
+
+    private async updateSocketStore(key: string): Promise<void> {
+        const store = this.socketStores.get(key);
+        if (!store) return;
+
+        if (this.data.has(key)) {
+            try {
+                const rawData = this.data.get(key);
+                const convertedData = await autoConvertFromBigData(rawData);
+                store.set(convertedData);
+            } catch (error) {
+                console.error('Error converting data for socket store:', key, error);
+                store.set(null);
+            }
+        } else {
+            store.set(null);
+        }
     }
 
     /**
@@ -56,9 +83,19 @@ export class ComputedDataCache {
     ): Readable<unknown | null> {
         const key = socketInstanceKey(node_key, socket_id);
 
-        return derived(this.dataStore, ($data) => {
-            return $data.has(key) ? $data.get(key) : null;
-        });
+        // Return existing store if it exists
+        if (this.socketStores.has(key)) {
+            return this.socketStores.get(key)!;
+        }
+
+        // Create new store
+        const store = writable<unknown | null>(null);
+        this.socketStores.set(key, store);
+
+        // Update the store whenever data changes
+        this.updateSocketStore(key);
+
+        return store;
     }
 
     /**
@@ -179,7 +216,7 @@ export class ComputedDataCache {
         //     throw new Error(`Socket ${key} already cached. This would overwrite the socket data. The whole node should have been dumped first.`);
         // }
 
-        this.data.set(key, data);
+        this.data.set(key, await autoConvertToBigData(data));
         this.updateStores();
     }
 
@@ -210,7 +247,7 @@ export class ComputedDataCache {
         const key = socketInstanceKey(node_key, socket_id);
 
         if (this.data.has(key)) {
-            return this.data.get(key);
+            return await autoConvertFromBigData(this.data.get(key));
         }
         throw new Error(`Socket ${key} not found`);
     }

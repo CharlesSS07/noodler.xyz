@@ -55,6 +55,7 @@ export async function jsonNodes() {
     outputs.set('jsonObject', jsonObject);
     console.log('jsonObject', jsonObject, typeof jsonObject);
     `;
+  jsonEditorAndViewer.$_per_run = 0; // Local JSON parsing only
 
   const jsonToString =
         await nodeBluePrintController.initOfficialNodeBluePrint(
@@ -95,4 +96,5 @@ export async function jsonNodes() {
 
   jsonToString.code =
         "outputs.set('jsonString', JSON.stringify(inputs.jsonObject));";
+  jsonToString.$_per_run = 0; // Local JSON stringification only
 }

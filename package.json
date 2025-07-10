@@ -48,7 +48,6 @@
         "prettier": "^3.4.2",
         "prettier-plugin-svelte": "^3.3.3",
         "prettier-plugin-tailwindcss": "^0.6.11",
-        "svelte": "^5.0.0",
         "svelte-adapter-firebase": "^0.15.0",
         "svelte-check": "^4.0.0",
         "tailwindcss": "^4.0.0",
@@ -72,6 +71,7 @@
         "lucide-svelte": "^0.511.0",
         "magica": "^0.2.17",
         "marked": "^15.0.12",
+        "svelte": "^5.35.5",
         "sveltefire": "^0.4.5",
         "uuid": "^11.1.0"
     },
